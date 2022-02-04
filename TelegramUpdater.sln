@@ -5,7 +5,12 @@ VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelegramUpdater", "TelegramUpdater\TelegramUpdater.csproj", "{035C52FE-7687-474A-8B7D-A0CFB9B3246F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdaterProduction", "UpdaterProduction\UpdaterProduction.csproj", "{1FBAF7E7-B553-43E5-9456-18A67BD76D80}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UpdaterProduction", "UpdaterProduction\UpdaterProduction.csproj", "{1FBAF7E7-B553-43E5-9456-18A67BD76D80}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6800D424-9ED3-4118-9B88-DFD846FE30F3}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

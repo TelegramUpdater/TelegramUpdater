@@ -6,11 +6,42 @@ using Telegram.Bot.Types.ReplyMarkups;
 using TelegramUpdater.Helpers;
 using TelegramUpdater.UpdateChannels.SealedChannels;
 using TelegramUpdater.UpdateContainer;
+using TelegramUpdater.UpdateContainer.UpdateContainers;
 
 namespace TelegramUpdater
 {
     public static class CommonExtensions
     {
+        internal static MessageContainer RebaseContainer<T>(
+            this UpdateContainerAbs<T> containerAbs, Message message) where T : class
+            => new(
+                containerAbs.Updater,
+                new Update { Message = message },
+                containerAbs.BotClient);
+
+        internal static MessageContainer Wrap<T>(this Message message,
+                                            UpdateContainerAbs<T> containerAbs) where T : class
+            => containerAbs.RebaseContainer(message);
+
+        internal static async Task<MessageContainer> WrapAsync<T>(this Task<Message> message,
+                                            UpdateContainerAbs<T> containerAbs) where T : class
+            => containerAbs.RebaseContainer(await message);
+
+        internal static CallbackQueryContainer RebaseContainer<T>(
+            this UpdateContainerAbs<T> containerAbs, CallbackQuery callbackQuery) where T : class
+            => new(
+                containerAbs.Updater,
+                new Update { CallbackQuery = callbackQuery },
+                containerAbs.BotClient);
+
+        internal static CallbackQueryContainer Wrap<T>(this CallbackQuery message,
+                                            UpdateContainerAbs<T> containerAbs) where T : class
+            => containerAbs.RebaseContainer(message);
+
+        internal static async Task<CallbackQueryContainer> WrapAsync<T>(this Task<CallbackQuery> message,
+                                            UpdateContainerAbs<T> containerAbs) where T : class
+            => containerAbs.RebaseContainer(await message);
+
         public static object GetInnerUpdate(this Update update)
         {
             if (update.Type == UpdateType.Unknown)
@@ -94,10 +125,16 @@ namespace TelegramUpdater
         /// <param name="updateContainer">The update container</param>
         /// <param name="timeOut">Maximum allowed time to wait for the update.</param>
         /// <param name="filter">Filter updates to get the right one.</param>
-        public static async Task<Message?> ChannelMessage(this UpdateContainerAbs<Message> updateContainer,
+        public static async Task<UpdateContainerAbs<Message>?> ChannelMessage(this UpdateContainerAbs<Message> updateContainer,
                                                           Filter<Message>? filter,
-                                                          TimeSpan? timeOut = default) => await updateContainer.OpenChannel(
-                new MessageChannel(filter), timeOut ?? TimeSpan.FromSeconds(30));
+                                                          TimeSpan? timeOut = default)
+        {
+            var message = await updateContainer.OpenChannel(
+                  new MessageChannel(filter), timeOut ?? TimeSpan.FromSeconds(30));
+            if (message is not null)
+                return message.Wrap(updateContainer);
+            return null;
+        }
 
 
         /// <summary>
@@ -106,7 +143,7 @@ namespace TelegramUpdater
         /// <param name="updateContainer">The update container</param>
         /// <param name="timeOut">Maximum allowed time to wait for the update.</param>
         /// <param name="filter">Filter updates to get the right one.</param>
-        public static async Task<Message?> ChannelUserResponse(this UpdateContainerAbs<Message> updateContainer,
+        public static async Task<UpdateContainerAbs<Message>?> ChannelUserResponse(this UpdateContainerAbs<Message> updateContainer,
                                                           Filter<Message>? filter = default,
                                                           TimeSpan? timeOut = default)
         {
@@ -122,12 +159,59 @@ namespace TelegramUpdater
             }
             else
             {
-                throw new InvalidOperationException("Sender is null!");
+                throw new InvalidOperationException("Sender can't be null!");
             }
+        }
+
+        public static async Task<UpdateContainerAbs<CallbackQuery>?> ChannelUserClick<T>(this UpdateContainerAbs<T> updateContainer,
+                                                                     Func<T, long?> senderIdResolver,
+                                                                     TimeSpan timeOut,
+                                                                     string pattern,
+                                                                     RegexOptions? regexOptions = default) where T : class
+        {
+            var senderId = senderIdResolver(updateContainer.Update);
+            if (senderId is not null)
+            {
+                var result = await updateContainer.Updater.OpenChannel(
+                    new CallbackQueryChannel(
+                        FilterCutify.CbqOfUsers(senderId.Value) &
+                        FilterCutify.DataMatches(pattern, regexOptions)),
+                    timeOut);
+
+                if (result != null)
+                    return result.Wrap(updateContainer);
+                return null;
+            }
+            else
+            {
+                throw new InvalidOperationException("Sender can't be null!");
+            }
+        }
+
+        public static async Task<UpdateContainerAbs<CallbackQuery>?> ChannelUserClick(this UpdateContainerAbs<Message> updateContainer,
+                                                                  TimeSpan timeOut,
+                                                                  string pattern,
+                                                                  RegexOptions? regexOptions = default)
+        {
+            return await updateContainer.ChannelUserClick(x => x.From?.Id ?? x.SenderChat?.Id ?? null,
+                                                          timeOut,
+                                                          pattern,
+                                                          regexOptions);
+        }
+
+        public static async Task<UpdateContainerAbs<CallbackQuery>?> ChannelUserClick(this UpdateContainerAbs<CallbackQuery> updateContainer,
+                                                                  TimeSpan timeOut,
+                                                                  string pattern,
+                                                                  RegexOptions? regexOptions = default)
+        {
+            return await updateContainer.ChannelUserClick(x => x.From.Id,
+                                                          timeOut,
+                                                          pattern,
+                                                          regexOptions);
         }
     }
 
-    public static class SimpleCallbackQueryContextExtensions
+    public static class CallbackQueryContextExtensions
     {
         public static long SenderId(this UpdateContainerAbs<CallbackQuery> simpleContext)
             => simpleContext.Update.From.Id;
@@ -135,7 +219,7 @@ namespace TelegramUpdater
         public static User Sender(this UpdateContainerAbs<CallbackQuery> simpleContext)
             => simpleContext.Update.From;
 
-        public static async Task<Message> Send(this UpdateContainerAbs<CallbackQuery> simpleContext,
+        public static async Task<UpdateContainerAbs<Message>> Send(this UpdateContainerAbs<CallbackQuery> simpleContext,
                                                 string text,
                                                 bool sendAsReply = true,
                                                 ParseMode? parseMode = default,
@@ -146,6 +230,7 @@ namespace TelegramUpdater
         {
             if (simpleContext.Update.Message is not null)
             {
+
                 return await simpleContext.BotClient.SendTextMessageAsync(simpleContext.Update.Message.Chat.Id,
                                                                        text,
                                                                        parseMode,
@@ -154,7 +239,8 @@ namespace TelegramUpdater
                                                                        disableNotification,
                                                                        replyToMessageId: sendAsReply ? simpleContext.Update.Message.MessageId : 0,
                                                                        allowSendingWithoutReply: true,
-                                                                       replyMarkup: replyMarkup);
+                                                                       replyMarkup: replyMarkup)
+                    .WrapAsync(simpleContext);
             }
             else
             {
@@ -176,7 +262,7 @@ namespace TelegramUpdater
         /// Edits a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<Message?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
+        public static async Task<UpdateContainerAbs<Message>?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
                                                 string text,
                                                 ParseMode? parseMode = default,
                                                 IEnumerable<MessageEntity>? messageEntities = default,
@@ -204,7 +290,8 @@ namespace TelegramUpdater
                                                                 messageEntities,
                                                                 disableWebpagePreview,
                                                                 inlineKeyboardMarkup,
-                                                                cancellationToken);
+                                                                cancellationToken)
+                    .WrapAsync(simpleContext);
             }
 
             throw new InvalidOperationException("InlineMessageId and Message are both null!");
@@ -214,7 +301,7 @@ namespace TelegramUpdater
         /// Edits live location of a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<Message?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
+        public static async Task<UpdateContainerAbs<Message>?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
                                                 double latitude,
                                                 double longitude,
                                                 float? horizontalAccuracy = default,
@@ -245,7 +332,8 @@ namespace TelegramUpdater
                                                                                heading,
                                                                                proximityAlertRadius,
                                                                                inlineKeyboardMarkup,
-                                                                               cancellationToken);
+                                                                               cancellationToken)
+                    .WrapAsync(simpleContext);
             }
 
             throw new InvalidOperationException("InlineMessageId and Message are both null!");
@@ -255,7 +343,7 @@ namespace TelegramUpdater
         /// Edits media of a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<Message?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
+        public static async Task<UpdateContainerAbs<Message>?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
                                                 string text,
                                                 InputMediaBase inputMediaBase,
                                                 InlineKeyboardMarkup? inlineKeyboardMarkup = default,
@@ -275,7 +363,8 @@ namespace TelegramUpdater
                                                                 simpleContext.Update.Message.MessageId,
                                                                 inputMediaBase,
                                                                 inlineKeyboardMarkup,
-                                                                cancellationToken);
+                                                                cancellationToken)
+                    .WrapAsync(simpleContext);
             }
 
             throw new InvalidOperationException("InlineMessageId and Message are both null!");
@@ -285,7 +374,7 @@ namespace TelegramUpdater
         /// Edits caption of a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<Message?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
+        public static async Task<UpdateContainerAbs<Message>?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
                                                 string caption,
                                                 ParseMode? parseMode = default,
                                                 IEnumerable<MessageEntity>? messageEntities = default,
@@ -310,7 +399,8 @@ namespace TelegramUpdater
                                                                 parseMode,
                                                                 messageEntities,
                                                                 inlineKeyboardMarkup,
-                                                                cancellationToken);
+                                                                cancellationToken)
+                    .WrapAsync(simpleContext);
             }
 
             throw new InvalidOperationException("InlineMessageId and Message are both null!");
@@ -320,7 +410,7 @@ namespace TelegramUpdater
         /// Edits reply markup of a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<Message?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
+        public static async Task<UpdateContainerAbs<Message>?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
                                                 InlineKeyboardMarkup? inlineKeyboardMarkup = default,
                                                 CancellationToken cancellationToken = default)
         {
@@ -336,14 +426,15 @@ namespace TelegramUpdater
                 return await simpleContext.BotClient.EditMessageReplyMarkupAsync(simpleContext.Update.Message.Chat.Id,
                                                                               simpleContext.Update.Message.MessageId,
                                                                               inlineKeyboardMarkup,
-                                                                              cancellationToken);
+                                                                              cancellationToken)
+                    .WrapAsync(simpleContext);
             }
 
             throw new InvalidOperationException("InlineMessageId and Message are both null!");
         }
     }
 
-    public static class SimpleMessageContextExtensions
+    public static class MessageContextExtensions
     {
         /// <summary>
         /// Deletes a message
@@ -357,7 +448,7 @@ namespace TelegramUpdater
         /// <summary>
         /// Updates a <see cref="Message"/> of your own with removing it and sending a new message.
         /// </summary>
-        public static async Task<Message?> ForceUpdate(this UpdateContainerAbs<Message> simpleContext,
+        public static async Task<UpdateContainerAbs<Message>> ForceUpdate(this UpdateContainerAbs<Message> simpleContext,
                                                                      string text,
                                                                      bool sendAsReply = true,
                                                                      ParseMode? parseMode = default,
@@ -378,7 +469,8 @@ namespace TelegramUpdater
                                                                    disableNotification,
                                                                    replyToMessageId: sendAsReply ? simpleContext.Update.MessageId : 0,
                                                                    allowSendingWithoutReply: true,
-                                                                   replyMarkup: replyMarkup);
+                                                                   replyMarkup: replyMarkup)
+                    .WrapAsync(simpleContext);
         }
 
         /// <summary>
@@ -388,7 +480,7 @@ namespace TelegramUpdater
         /// <param name="text">Text to response</param>
         /// <param name="sendAsReply">To send it as a replied message if possible.</param>
         /// <returns></returns>
-        public static async Task<Message?> Response(this UpdateContainerAbs<Message> simpleContext,
+        public static async Task<UpdateContainerAbs<Message>> Response(this UpdateContainerAbs<Message> simpleContext,
                                                                   string text,
                                                                   bool sendAsReply = true,
                                                                   ParseMode? parseMode = default,
@@ -404,7 +496,31 @@ namespace TelegramUpdater
                                                                disableNotification,
                                                                replyToMessageId: sendAsReply ? simpleContext.Update.MessageId : 0,
                                                                allowSendingWithoutReply: true,
-                                                               replyMarkup: replyMarkup);
+                                                               replyMarkup: replyMarkup)
+                    .WrapAsync(simpleContext);
+
+        /// <summary>
+        /// Edits a message
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static async Task<UpdateContainerAbs<Message>?> Edit(this UpdateContainerAbs<Message> simpleContext,
+                                                string text,
+                                                ParseMode? parseMode = default,
+                                                IEnumerable<MessageEntity>? messageEntities = default,
+                                                bool? disableWebpagePreview = default,
+                                                InlineKeyboardMarkup? inlineKeyboardMarkup = default,
+                                                CancellationToken cancellationToken = default)
+        {
+            return await simpleContext.BotClient.EditMessageTextAsync(simpleContext.Update.Chat.Id,
+                                                            simpleContext.Update.MessageId,
+                                                            text,
+                                                            parseMode,
+                                                            messageEntities,
+                                                            disableWebpagePreview,
+                                                            inlineKeyboardMarkup,
+                                                            cancellationToken)
+                .WrapAsync(simpleContext);
+        }
 
         /// <summary>
         /// Message is sent to private chat.
@@ -420,7 +536,7 @@ namespace TelegramUpdater
                 simpleContext.Update.Chat.Type == ChatType.Group;
     }
 
-    public static class UpdateContainerAbsConditionalExtensions
+    public static class ConditionalExtensions
     {
         #region Sync
 
@@ -528,6 +644,15 @@ namespace TelegramUpdater
             }
 
             return default;
+        }
+
+        public static void IfNotNull<T>(this T everything, Action<T> action)
+            where T : class
+        {
+            if (everything is not null)
+            {
+                action(everything);
+            }
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Telegram.Bot;
+using Telegram.Bot.Types.ReplyMarkups;
 using TelegramUpdater;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.UpdateHandlers.SealedHandlers;
@@ -24,25 +25,27 @@ updater.AddExceptionHandler(new ExceptionHandler<Exception>(
 
 updater.AddUpdateHandler(new MessageHandler(async container =>
 {
-    await container.Response($"A job that takes 30 secs to be done");
+    var msg = await container.Response($"Are you ok? answer quick!",
+        replyMarkup: new InlineKeyboardMarkup(
+            InlineKeyboardButton.WithCallbackData("Yes i'm OK!", "ok")));
 
-    var response = await container.ChannelUserResponse();
-
-    if (response != null)
-    {
-        await container.Response("You said " + response.Text!);
-    }
-    else
-    {
-        await container.Response("Timed Out!");
-    }
-
-    container.StopPropagation(); // Do not go any further
+    await container.ChannelUserClick(TimeSpan.FromSeconds(5), "ok")
+        .IfNotNull(async answer =>
+        {
+            await answer.Edit(text: "Well ...");
+        })
+        .Else(async _ =>
+        {
+            await msg.Edit("Slow");
+        });
 },
 FilterCutify.OnCommand("start")));
 
-updater.AddUpdateHandler(new MessageHandler(
-    async container =>  await container.Response($"Next one!"),
-    FilterCutify.OnCommand("start")));
+
+var myStartHandler = new MessageHandler(
+    async container => await container.Response($"Next one!"),
+    FilterCutify.OnCommand("start"));
+
+updater.AddUpdateHandler(myStartHandler);
 
 await updater.Start();
