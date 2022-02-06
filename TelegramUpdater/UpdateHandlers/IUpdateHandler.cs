@@ -5,8 +5,6 @@ namespace TelegramUpdater.UpdateHandlers
 {
     public interface IUpdateHandler
     {
-        public bool ShouldHandle(Update update);
-
         public Task HandleAsync(Updater updater, ITelegramBotClient botClient, Update update);
     }
 }

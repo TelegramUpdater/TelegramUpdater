@@ -2,14 +2,10 @@
 using Telegram.Bot.Types;
 using TelegramUpdater.UpdateContainer;
 
-namespace TelegramUpdater.UpdateHandlers
+namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
 {
-    public abstract class AbstractHandler<T> : ISingletonUpdateHandler where T : class
+    public abstract class AbstractScopedHandler<T> : IScopedUpdateHandler where T : class
     {
-        // TODO: implement filter here.
-
-        protected abstract bool ShouldHandle(T t);
-
         protected abstract Task HandleAsync(UpdateContainerAbs<T> updateContainer);
 
         protected abstract T? GetT(Update update);
@@ -20,14 +16,5 @@ namespace TelegramUpdater.UpdateHandlers
         public async Task HandleAsync(Updater updater, ITelegramBotClient botClient, Update update)
             => await HandleAsync(
                 ContainerBuilder(updater, botClient, update));
-
-        public bool ShouldHandle(Update update)
-        {
-            var insider = GetT(update);
-
-            if (insider == null) return false;
-
-            return ShouldHandle(insider);
-        }
     }
 }

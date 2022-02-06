@@ -2,10 +2,12 @@
 using System.Threading.Channels;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.TrafficLights;
 using TelegramUpdater.UpdateChannels;
 using TelegramUpdater.UpdateHandlers;
+using TelegramUpdater.UpdateHandlers.ScopedHandlers;
 
 namespace TelegramUpdater
 {
@@ -15,7 +17,8 @@ namespace TelegramUpdater
     public class Updater
     {
         private readonly ITelegramBotClient _botClient;
-        private readonly List<IUpdateHandler> _updateHandlers;
+        private readonly List<ISingletonUpdateHandler> _updateHandlers;
+        private readonly List<IScopedHandlerContainer> _scopedHandlerContainers;
         private readonly List<IExceptionHandler> _exceptionHandlers;
         private readonly ConcurrentDictionary<string, IUpdateChannel> _updateChannels;
         private readonly Channel<Update> _updatesChannel; // i guess this is useless
@@ -38,6 +41,7 @@ namespace TelegramUpdater
             _updateChannels = new();
             _updateHandlers = new();
             _exceptionHandlers = new();
+            _scopedHandlerContainers = new();
             _trafficLight = new(x=> x.GetSenderId() ?? 0, maxDegreeOfParallelism);
             _perUserOneByOneProcess= perUserOneByOneProcess;
 
@@ -64,9 +68,44 @@ namespace TelegramUpdater
         /// Add your handler to this updater.
         /// </summary>
         /// <param name="updateHandler"></param>
-        public void AddUpdateHandler(IUpdateHandler updateHandler)
+        public void AddUpdateHandler(ISingletonUpdateHandler updateHandler)
         {
             _updateHandlers.Add(updateHandler);
+        }
+
+        /// <summary>
+        /// Adds an scoped handler to the updater.
+        /// </summary>
+        /// <typeparam name="THandler">Handler type.</typeparam>
+        /// <typeparam name="TUpdate">Update type.</typeparam>
+        /// <param name="updateType">Update type again.</param>
+        /// <param name="filter">A filter to choose the right update.</param>
+        /// <param name="getT">
+        /// A function to choose real update from <see cref="Update"/>
+        /// <para>Don't touch it if you don't know.</para>
+        /// </param>
+        public void AddScopedHandler<THandler, TUpdate>(
+            Filter<TUpdate>? filter = default,
+            UpdateType? updateType = default,
+            Func<Update, TUpdate>? getT = default)
+            where THandler : IScopedUpdateHandler where TUpdate : class
+        {
+            if (updateType == null)
+            {
+                var _t = typeof(TUpdate);
+                if (Enum.TryParse(_t.Name, out UpdateType ut))
+                {
+                    updateType = ut;
+                }
+                else
+                {
+                    throw new InvalidCastException($"{_t} is not an Update, Should Message, CallbackQuery, ...");
+                }
+            }
+
+            _scopedHandlerContainers.Add(
+                new UpdateContainerBuilder<THandler, TUpdate>(
+                    updateType.Value, filter, getT));
         }
 
         /// <summary>
@@ -163,6 +202,7 @@ namespace TelegramUpdater
 
                 foreach (var channel in _updateChannels)
                 {
+                    // TODO: use UpdateType to choose wisely
                     if (channel.Value.ShouldChannel(update))
                     {
                         updateChannel = channel.Value;
@@ -184,9 +224,14 @@ namespace TelegramUpdater
                 }
             }
 
+            // TODO: use UpdateType to choose wisely
             var handlers = _updateHandlers.Where(x => x.ShouldHandle(update));
 
-            if (handlers.Any())
+            var scopedHandlers = _scopedHandlerContainers
+                .Where(x => x.UpdateType == update.Type)
+                .Where(x => x.ShouldHandle(update));
+
+            if (handlers.Any() || scopedHandlers.Any())
             {
                 if (_perUserOneByOneProcess)
                 {
@@ -199,6 +244,27 @@ namespace TelegramUpdater
                 return;
             }
 
+            // Scoped handlers are handled sooner
+            foreach (var scopedHandler in scopedHandlers)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                var handler = scopedHandler.CreateInstance();
+
+                if (handler == null)
+                {
+                    continue;
+                }
+
+                if (!await HandleHandler(update, handler, cancellationToken))
+                {
+                    break;
+                }
+            }
+
             // valid handlers for an update should process one by one
             // This change can be cut off when throwing an specified exception
             // Other exceptions are redirected to ExceptionHandler.
@@ -209,41 +275,62 @@ namespace TelegramUpdater
                     break;
                 }
 
-                try
-                {
-                    if (_perUserOneByOneProcess)
-                    {
-                        await _trafficLight.CreateCrossingTask(
-                            update, handler.HandleAsync(this, _botClient, update));
-                    }
-                    else
-                    {
-                        await _trafficLight.CreateCrossingTask(
-                            handler.HandleAsync(this, _botClient, update));
-                    }
-                }
-                // Cut handlers chain.
-                catch (StopPropagation)
+                if (!await HandleHandler(update, handler, cancellationToken))
                 {
                     break;
                 }
-                catch (ContinuePropagation)
-                {
-                    continue;
-                }
-                catch (Exception ex)
-                {
-                    // Do exception handlers
-                    var exHandlers = _exceptionHandlers
-                        .Where(x => x.ExceptionType == ex.GetType())
-                        .Where(x=> x.MessageMatched(ex.Message));
+            }
+        }
+    
+        /// <summary>
+        /// Returns false to break.
+        /// </summary>
+        private async Task<bool> HandleHandler(
+            Update update,
+            IUpdateHandler handler,
+            CancellationToken cancellationToken)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return false;
+            }
 
-                    foreach (var exHandler in exHandlers)
-                    {
-                        await exHandler.Callback(ex);
-                    }
+            try
+            {
+                if (_perUserOneByOneProcess)
+                {
+                    await _trafficLight.CreateCrossingTask(
+                        update, handler.HandleAsync(this, _botClient, update));
+                }
+                else
+                {
+                    await _trafficLight.CreateCrossingTask(
+                        handler.HandleAsync(this, _botClient, update));
                 }
             }
+            // Cut handlers chain.
+            catch (StopPropagation)
+            {
+                return false;
+            }
+            catch (ContinuePropagation)
+            {
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Do exception handlers
+                var exHandlers = _exceptionHandlers
+                    .Where(x => x.ExceptionType == ex.GetType())
+                    .Where(x => x.MessageMatched(ex.Message));
+
+                foreach (var exHandler in exHandlers)
+                {
+                    await exHandler.Callback(ex);
+                }
+            }
+
+            return true;
         }
     }
 }
