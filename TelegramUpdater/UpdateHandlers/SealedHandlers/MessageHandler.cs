@@ -11,7 +11,8 @@ namespace TelegramUpdater.UpdateHandlers.SealedHandlers
 
         public MessageHandler(
             Func<UpdateContainerAbs<Message>, Task> handleAsync,
-            Filter<Message>? filter = default)
+            Filter<Message>? filter = default,
+            int group = 0): base(group)
         {
             _filter = filter;
             _handleAsync = handleAsync;

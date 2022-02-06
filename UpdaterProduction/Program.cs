@@ -55,6 +55,5 @@ updater.AddScopedHandler<MyScopedMessageHandler, Message>(
                                       // In every request, a new isntance of MyScopedMessageHandler is created.
                                       // These are useful in DI senarios or when you'r using any Scoped object
                                       // Like DbContexts.
-                                      // Scoped handlers are handled sooner.
 
 await updater.Start();

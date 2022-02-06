@@ -8,6 +8,10 @@ namespace TelegramUpdater.UpdateHandlers.AbstractHandlers
 {
     public abstract class MessageHandlerAbs : AbstractHandler<Message>
     {
+        protected MessageHandlerAbs(int group) : base(group)
+        {
+        }
+
         protected override UpdateContainerAbs<Message> ContainerBuilder(
             Updater updater, ITelegramBotClient botClient, Update update)
                 => new MessageContainer(updater, update, botClient);

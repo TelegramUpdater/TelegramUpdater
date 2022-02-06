@@ -7,7 +7,14 @@ namespace TelegramUpdater.UpdateHandlers
 {
     public abstract class AbstractHandler<T> : ISingletonUpdateHandler where T : class
     {
+        protected AbstractHandler(int group)
+        {
+            Group = group;
+        }
+
         public abstract UpdateType UpdateType { get; }
+
+        public int Group { get; }
 
         // TODO: implement filter here.
 

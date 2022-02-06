@@ -6,6 +6,13 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
 {
     public abstract class AbstractScopedHandler<T> : IScopedUpdateHandler where T : class
     {
+        protected AbstractScopedHandler(int group)
+        {
+            Group = group;
+        }
+
+        public int Group { get; }
+
         protected abstract Task HandleAsync(UpdateContainerAbs<T> updateContainer);
 
         protected abstract T? GetT(Update update);

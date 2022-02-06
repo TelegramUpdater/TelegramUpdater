@@ -225,13 +225,21 @@ namespace TelegramUpdater
                 }
             }
 
-            var handlers = _updateHandlers
+            var singletonhandlers = _updateHandlers
                 .Where(x => x.UpdateType == update.Type)
-                .Where(x => x.ShouldHandle(update));
+                .Where(x => x.ShouldHandle(update))
+                .Select(x => (IUpdateHandler)x);
 
             var scopedHandlers = _scopedHandlerContainers
                 .Where(x => x.UpdateType == update.Type)
-                .Where(x => x.ShouldHandle(update));
+                .Where(x => x.ShouldHandle(update))
+                .Select(x=> x.CreateInstance())
+                .Where(x=> x is not null)
+                .Cast<IScopedUpdateHandler>()
+                .Select(x=> (IUpdateHandler)x);
+
+            var handlers = singletonhandlers.Concat(scopedHandlers)
+                .OrderBy(x=> x.Group);
 
             if (handlers.Any() || scopedHandlers.Any())
             {
@@ -244,27 +252,6 @@ namespace TelegramUpdater
             else
             {
                 return;
-            }
-
-            // Scoped handlers are handled sooner
-            foreach (var scopedHandler in scopedHandlers)
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    break;
-                }
-
-                var handler = scopedHandler.CreateInstance();
-
-                if (handler == null)
-                {
-                    continue;
-                }
-
-                if (!await HandleHandler(update, handler, cancellationToken))
-                {
-                    break;
-                }
             }
 
             // valid handlers for an update should process one by one
