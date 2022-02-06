@@ -1,5 +1,6 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
 
@@ -12,5 +13,7 @@ namespace TelegramUpdater.UpdateHandlers.AbstractHandlers
                 => new MessageContainer(updater, update, botClient);
 
         protected override Message? GetT(Update update) => update.Message;
+
+        public override UpdateType UpdateType => UpdateType.Message;
     }
 }

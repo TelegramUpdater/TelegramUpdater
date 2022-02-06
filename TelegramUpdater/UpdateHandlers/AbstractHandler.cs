@@ -1,11 +1,14 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateHandlers
 {
     public abstract class AbstractHandler<T> : ISingletonUpdateHandler where T : class
     {
+        public abstract UpdateType UpdateType { get; }
+
         // TODO: implement filter here.
 
         protected abstract bool ShouldHandle(T t);

@@ -1,5 +1,6 @@
 ﻿using System.Threading.Channels;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace TelegramUpdater.UpdateChannels
 {
@@ -38,6 +39,8 @@ namespace TelegramUpdater.UpdateChannels
         public Update? Update { get; private set; }
 
         public bool Cancelled => _tokenSource.IsCancellationRequested;
+
+        public abstract UpdateType UpdateType { get; }
 
         public bool ShouldChannel(Update update)
         {

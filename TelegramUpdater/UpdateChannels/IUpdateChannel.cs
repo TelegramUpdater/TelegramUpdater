@@ -1,9 +1,12 @@
 ﻿using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace TelegramUpdater.UpdateChannels
 {
     public interface IUpdateChannel: IDisposable
     {
+        public UpdateType UpdateType { get; }
+
         public Update? Update { get; }
 
         public bool ShouldChannel(Update update);

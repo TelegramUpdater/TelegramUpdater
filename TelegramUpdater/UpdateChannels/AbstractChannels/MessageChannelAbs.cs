@@ -1,4 +1,5 @@
 ﻿using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace TelegramUpdater.UpdateChannels.AbstractChannels
 {
@@ -8,5 +9,7 @@ namespace TelegramUpdater.UpdateChannels.AbstractChannels
         { }
 
         public override Message? GetT(Update? update) => update?.Message;
+
+        public override UpdateType UpdateType => UpdateType.Message;
     }
 }

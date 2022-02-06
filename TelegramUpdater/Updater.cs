@@ -200,7 +200,8 @@ namespace TelegramUpdater
                 IUpdateChannel? updateChannel = null;
                 string? key = null;
 
-                foreach (var channel in _updateChannels)
+                foreach (var channel in _updateChannels
+                    .Where(x=> x.Value.UpdateType == update.Type))
                 {
                     // TODO: use UpdateType to choose wisely
                     if (channel.Value.ShouldChannel(update))
@@ -224,8 +225,9 @@ namespace TelegramUpdater
                 }
             }
 
-            // TODO: use UpdateType to choose wisely
-            var handlers = _updateHandlers.Where(x => x.ShouldHandle(update));
+            var handlers = _updateHandlers
+                .Where(x => x.UpdateType == update.Type)
+                .Where(x => x.ShouldHandle(update));
 
             var scopedHandlers = _scopedHandlerContainers
                 .Where(x => x.UpdateType == update.Type)
