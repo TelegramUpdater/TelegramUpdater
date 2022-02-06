@@ -1,4 +1,8 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -14,7 +18,7 @@ namespace TelegramUpdater
     {
         internal static MessageContainer RebaseContainer<T>(
             this UpdateContainerAbs<T> containerAbs, Message message) where T : class
-            => new(
+            => new MessageContainer(
                 containerAbs.Updater,
                 new Update { Message = message },
                 containerAbs.BotClient);
@@ -29,7 +33,7 @@ namespace TelegramUpdater
 
         internal static CallbackQueryContainer RebaseContainer<T>(
             this UpdateContainerAbs<T> containerAbs, CallbackQuery callbackQuery) where T : class
-            => new(
+            => new CallbackQueryContainer(
                 containerAbs.Updater,
                 new Update { CallbackQuery = callbackQuery },
                 containerAbs.BotClient);
@@ -131,7 +135,7 @@ namespace TelegramUpdater
         {
             var message = await updateContainer.OpenChannel(
                   new MessageChannel(filter), timeOut ?? TimeSpan.FromSeconds(30));
-            if (message is not null)
+            if (message != null)
                 return message.Wrap(updateContainer);
             return null;
         }
@@ -147,7 +151,7 @@ namespace TelegramUpdater
                                                           Filter<Message>? filter = default,
                                                           TimeSpan? timeOut = default)
         {
-            if (updateContainer.Update.From is not null)
+            if (updateContainer.Update.From != null)
             {
                 var realFilter = FilterCutify.MsgOfUsers(updateContainer.Update.From.Id);
                 if (filter != null)
@@ -170,7 +174,7 @@ namespace TelegramUpdater
                                                                      RegexOptions? regexOptions = default) where T : class
         {
             var senderId = senderIdResolver(updateContainer.Update);
-            if (senderId is not null)
+            if (senderId != null)
             {
                 var result = await updateContainer.Updater.OpenChannel(
                     new CallbackQueryChannel(
@@ -228,7 +232,7 @@ namespace TelegramUpdater
                                                 bool? disableNotification = default,
                                                 IReplyMarkup? replyMarkup = default)
         {
-            if (simpleContext.Update.Message is not null)
+            if (simpleContext.Update.Message != null)
             {
 
                 return await simpleContext.BotClient.SendTextMessageAsync(simpleContext.Update.Message.Chat.Id,
@@ -344,7 +348,6 @@ namespace TelegramUpdater
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
         public static async Task<UpdateContainerAbs<Message>?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
-                                                string text,
                                                 InputMediaBase inputMediaBase,
                                                 InlineKeyboardMarkup? inlineKeyboardMarkup = default,
                                                 CancellationToken cancellationToken = default)
@@ -625,7 +628,7 @@ namespace TelegramUpdater
                 if (predict(matchContext.SimpleContext))
                 {
                     func(matchContext.SimpleContext);
-                    return new(matchContext.SimpleContext, true);
+                    return new MatchContext<T>(matchContext.SimpleContext, true);
                 }
 
                 return default;
@@ -637,7 +640,7 @@ namespace TelegramUpdater
         public static MatchContext<T> IfNotNull<T>(this UpdateContainerAbs<T>? simpleContext,
                                                    Action<UpdateContainerAbs<T>> func) where T : class
         {
-            if (simpleContext is not null)
+            if (simpleContext != null)
             {
                 func(simpleContext);
                 return new MatchContext<T>(simpleContext, true);
@@ -649,7 +652,7 @@ namespace TelegramUpdater
         public static void IfNotNull<T>(this T everything, Action<T> action)
             where T : class
         {
-            if (everything is not null)
+            if (everything != null)
             {
                 action(everything);
             }
@@ -742,7 +745,7 @@ namespace TelegramUpdater
         public static async Task<MatchContext<T>> IfNotNull<T>(this UpdateContainerAbs<T>? simpleContext,
                                                                Func<UpdateContainerAbs<T>, Task> func) where T : class
         {
-            if (simpleContext is not null)
+            if (simpleContext != null)
             {
                 await func(simpleContext);
                 return new MatchContext<T>(simpleContext, true);
@@ -759,7 +762,7 @@ namespace TelegramUpdater
         {
             var gottenContext = await simpleContext;
 
-            if (gottenContext is not null)
+            if (gottenContext != null)
             {
                 await func(gottenContext);
                 return new MatchContext<T>(gottenContext, true);
@@ -819,7 +822,7 @@ namespace TelegramUpdater
                 if (predict(prevMatch.SimpleContext))
                 {
                     await func(prevMatch.SimpleContext);
-                    return new(prevMatch.SimpleContext, true);
+                    return new MatchContext<T>(prevMatch.SimpleContext, true);
                 }
 
                 return default;

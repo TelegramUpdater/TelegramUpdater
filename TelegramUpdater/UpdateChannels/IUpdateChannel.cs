@@ -1,4 +1,6 @@
-﻿using Telegram.Bot.Types;
+﻿using System;
+using System.Threading.Tasks;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace TelegramUpdater.UpdateChannels

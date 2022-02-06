@@ -1,4 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace TelegramUpdater.TrafficLights
 {
@@ -11,8 +13,8 @@ namespace TelegramUpdater.TrafficLights
 
         public TrafficLight(Func<T, K> getRequester, int? maxDegreeOfParallelism = default)
         {
-            _crossingCars = new();
-            _requesterMap = new();
+            _crossingCars = new ConcurrentDictionary<string, Task>();
+            _requesterMap = new ConcurrentDictionary<K, string>();
             _getRequester = getRequester;
             _maxDegreeOfParallelism = maxDegreeOfParallelism?? Environment.ProcessorCount;
         }

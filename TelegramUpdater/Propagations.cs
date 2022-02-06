@@ -1,4 +1,6 @@
-﻿namespace TelegramUpdater
+﻿using System;
+
+namespace TelegramUpdater
 {
     /// <summary>
     /// All pending handlers for this update will be ignored after throwing this.

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TelegramUpdater
 {
@@ -17,7 +18,7 @@ namespace TelegramUpdater
         public Filter(Func<T, bool> filter) => _filter = filter;
 
         public virtual bool TheyShellPass([NotNullWhen(true)]T input)
-            => input is not null && _filter(input);
+            => input != null && _filter(input);
 
         public static implicit operator Func<T, bool>(Filter<T> filter)
             => filter.TheyShellPass;
@@ -31,7 +32,7 @@ namespace TelegramUpdater
         public Filter<T> Reverse() => new ReverseFilter<T>(this);
 
 
-        public static implicit operator Filter<T>(Func<T, bool> filter) => new(filter);
+        public static implicit operator Filter<T>(Func<T, bool> filter) => new Filter<T>(filter);
 
         public static Filter<T> operator &(Filter<T> a, Filter<T> b)
             => new AndFilter<T>(a, b);

@@ -1,4 +1,5 @@
-﻿using Telegram.Bot.Types;
+﻿using System;
+using Telegram.Bot.Types;
 
 namespace TelegramUpdater.Filters
 {
@@ -11,7 +12,7 @@ namespace TelegramUpdater.Filters
         /// A filter on <see cref="Message.Text"/>
         /// </summary>
         public MessageTextFilter(Func<string, bool> filter)
-            : base((x) => x.Text is not null && filter(x.Text))
+            : base((x) => x.Text != null && filter(x.Text))
         { }
     }
 }

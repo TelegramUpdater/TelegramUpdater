@@ -1,4 +1,7 @@
-﻿namespace TelegramUpdater.ExceptionHandlers
+﻿using System;
+using System.Threading.Tasks;
+
+namespace TelegramUpdater.ExceptionHandlers
 {
     public class ExceptionHandler<T> : IExceptionHandler where T : Exception
     {

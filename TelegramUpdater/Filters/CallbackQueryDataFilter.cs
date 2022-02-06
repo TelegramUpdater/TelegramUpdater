@@ -1,4 +1,5 @@
-﻿using Telegram.Bot.Types;
+﻿using System;
+using Telegram.Bot.Types;
 
 namespace TelegramUpdater.Filters
 {
@@ -11,7 +12,7 @@ namespace TelegramUpdater.Filters
         /// A filter on <see cref="CallbackQuery.Data"/>
         /// </summary>
         public CallbackQueryDataFilter(Func<string, bool> filter)
-            : base((x) => x.Data is not null && filter(x.Data))
+            : base((x) => x.Data != null && filter(x.Data))
         { }
     }
 }

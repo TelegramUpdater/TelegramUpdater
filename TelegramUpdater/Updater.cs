@@ -1,5 +1,10 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Channels;
+using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -38,11 +43,11 @@ namespace TelegramUpdater
             bool perUserOneByOneProcess = true)
         {
             _botClient = botClient;
-            _updateChannels = new();
-            _updateHandlers = new();
-            _exceptionHandlers = new();
-            _scopedHandlerContainers = new();
-            _trafficLight = new(x=> x.GetSenderId() ?? 0, maxDegreeOfParallelism);
+            _updateChannels = new ConcurrentDictionary<string, IUpdateChannel>();
+            _updateHandlers = new List<ISingletonUpdateHandler>();
+            _exceptionHandlers = new List<IExceptionHandler>();
+            _scopedHandlerContainers = new List<IScopedHandlerContainer>();
+            _trafficLight = new TrafficLight<Update, long>(x=> x.GetSenderId() ?? 0, maxDegreeOfParallelism);
             _perUserOneByOneProcess= perUserOneByOneProcess;
 
             _updatesChannel = Channel.CreateBounded<Update>(
@@ -203,7 +208,6 @@ namespace TelegramUpdater
                 foreach (var channel in _updateChannels
                     .Where(x=> x.Value.UpdateType == update.Type))
                 {
-                    // TODO: use UpdateType to choose wisely
                     if (channel.Value.ShouldChannel(update))
                     {
                         updateChannel = channel.Value;
@@ -234,7 +238,7 @@ namespace TelegramUpdater
                 .Where(x => x.UpdateType == update.Type)
                 .Where(x => x.ShouldHandle(update))
                 .Select(x=> x.CreateInstance())
-                .Where(x=> x is not null)
+                .Where(x=> x != null)
                 .Cast<IScopedUpdateHandler>()
                 .Select(x=> (IUpdateHandler)x);
 

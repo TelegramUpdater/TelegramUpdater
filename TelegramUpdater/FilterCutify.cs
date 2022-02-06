@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 using Telegram.Bot.Types;
 using TelegramUpdater.Filters;
 
@@ -12,13 +13,13 @@ namespace TelegramUpdater
         /// <summary>
         /// The handler will always be triggered on specified update type of <typeparamref name="T"/>
         /// </summary>
-        public static Filter<T> Always<T>() => new((_) => true);
+        public static Filter<T> Always<T>() => new Filter<T>((_) => true);
 
         /// <summary>
         /// The handler will be triggered when <paramref name="func"/> returns true
         /// on specified update type of <typeparamref name="T"/>
         /// </summary>
-        public static Filter<T> When<T>(Func<T, bool> func) => new(func);
+        public static Filter<T> When<T>(Func<T, bool> func) => new Filter<T>(func);
 
         /// <summary>
         /// The handler will be triggered when <paramref name="func"/> passes
@@ -80,7 +81,8 @@ namespace TelegramUpdater
         /// <param name="selector">Function to select a property out of <typeparamref name="T"/></param>
         /// <returns></returns>
         public static Filter<K> NotNullFilter<K, T>(Func<K, T?> selector)
-            => new(x => selector(x) is not null);
+            where T : class
+            => new Filter<K>(x => selector(x) != null);
 
         /// <summary>
         /// Filters text messages.

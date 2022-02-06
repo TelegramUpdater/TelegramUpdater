@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.Helpers
@@ -17,9 +18,9 @@ namespace TelegramUpdater.Helpers
             MatchCollection = matchCollection;
         }
 
-        public bool IsMatched { get; } = default;
+        public bool IsMatched { get; }
 
-        public MatchCollection? MatchCollection { get; } = default;
+        public MatchCollection? MatchCollection { get; }
 
         public UpdateContainerAbs<TUpdate> SimpleContext { get; }
 
@@ -31,17 +32,17 @@ namespace TelegramUpdater.Helpers
         {
             var text = getText(simpleContext.Update);
 
-            if (string.IsNullOrEmpty(text)) return new(simpleContext);
+            if (string.IsNullOrEmpty(text)) return new MatchContext<T>(simpleContext);
 
             var matches = Regex.Matches(
                 text, pattern, regexOptions ?? RegexOptions.None, TimeSpan.FromSeconds(3));
 
             if (matches.Count > 0)
             {
-                return new(simpleContext, true, matches);
+                return new MatchContext<T>(simpleContext, true, matches);
             }
 
-            return new(simpleContext);
+            return new MatchContext<T>(simpleContext);
         }
 
         public static implicit operator bool(MatchContext<TUpdate> matchContext)
