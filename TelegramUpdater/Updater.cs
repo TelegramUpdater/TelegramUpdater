@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,7 @@ namespace TelegramUpdater
         private Thread? _updaterThread;
         private readonly TrafficLight<Update, long> _trafficLight;
         private readonly bool _perUserOneByOneProcess;
+        private readonly ILogger<Updater> _logger;
 
         /// <summary>
         /// Creates an instance of updater to fetch updates from telegram and handle them.
@@ -40,7 +42,8 @@ namespace TelegramUpdater
         public Updater(
             ITelegramBotClient botClient,
             int? maxDegreeOfParallelism = default,
-            bool perUserOneByOneProcess = true)
+            bool perUserOneByOneProcess = true,
+            ILoggerFactory? loggerFactory = default)
         {
             _botClient = botClient;
             _updateChannels = new ConcurrentDictionary<string, IUpdateChannel>();
@@ -57,6 +60,18 @@ namespace TelegramUpdater
                     AllowSynchronousContinuations = true,
                     FullMode = BoundedChannelFullMode.Wait
                 });
+
+            using var _loggerFactory = loggerFactory?? LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)
+                    .AddFilter("LoggingConsoleApp.Program", LogLevel.Debug)
+                    .AddConsole();
+            });
+
+            _logger = _loggerFactory.CreateLogger<Updater>();
+            _logger.LogInformation("Logger initialized.");
         }
 
         /// <summary>
@@ -76,6 +91,7 @@ namespace TelegramUpdater
         public void AddUpdateHandler(ISingletonUpdateHandler updateHandler)
         {
             _updateHandlers.Add(updateHandler);
+            _logger.LogInformation($"Added new singleton handler.");
         }
 
         /// <summary>
@@ -108,9 +124,35 @@ namespace TelegramUpdater
                 }
             }
 
+            var _h = typeof(THandler);
+
+            if (filter == null)
+            {
+                // If no filter passed as method args the look at attributes
+                // Attribute filters are all combined using & operator.
+
+                var applied = _h.GetCustomAttributes(typeof(ApplyFilterAttribute), false);
+                foreach (ApplyFilterAttribute item in applied)
+                {
+                    var f = (Filter<TUpdate>?)Activator.CreateInstance(item.FilterType);
+                    if (f != null)
+                    {
+                        if(filter == null)
+                        {
+                            filter = f;
+                        }
+                        else
+                        {
+                            filter &= f;
+                        }
+                    }
+                }
+            }
+
             _scopedHandlerContainers.Add(
                 new UpdateContainerBuilder<THandler, TUpdate>(
                     updateType.Value, filter, getT));
+            _logger.LogInformation($"Added new scoped {updateType} handler :: {_h.Name}.");
         }
 
         /// <summary>
@@ -120,6 +162,7 @@ namespace TelegramUpdater
         public void AddExceptionHandler(IExceptionHandler exceptionHandler)
         {
             _exceptionHandlers.Add(exceptionHandler);
+            _logger.LogInformation($"Added exception handler for {exceptionHandler.ExceptionType}");
         }
 
         /// <summary>
@@ -175,7 +218,7 @@ namespace TelegramUpdater
 
         private async Task UpdateReceiver(CancellationToken cancellationToken = default)
         {
-            Console.WriteLine("Started update receiver.");
+            _logger.LogInformation("Started update receiver thread.");
 
             var offset = 0;
             var timeOut = 1000;
@@ -320,6 +363,13 @@ namespace TelegramUpdater
                 foreach (var exHandler in exHandlers)
                 {
                     await exHandler.Callback(ex);
+                }
+            }
+            finally
+            {
+                if (handler is IDisposable disposable)
+                {
+                    disposable.Dispose();
                 }
             }
 
