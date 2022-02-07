@@ -5,11 +5,8 @@ namespace TelegramUpdater.UpdateChannels.AbstractChannels
 {
     public abstract class MessageChannelAbs : AbstractChannel<Message>
     {
-        protected MessageChannelAbs() : base()
+        protected MessageChannelAbs(Filter<Message>? filter)
+            : base(UpdateType.Message, x => x.Message, filter)
         { }
-
-        public override Message? GetT(Update? update) => update?.Message;
-
-        public override UpdateType UpdateType => UpdateType.Message;
     }
 }

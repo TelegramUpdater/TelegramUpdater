@@ -9,7 +9,7 @@ namespace TelegramUpdater
     /// The filter should have a parameterless constructor.
     /// </remarks>
     [AttributeUsage(AttributeTargets.Class)]
-    public class ApplyFilterAttribute : Attribute
+    public sealed class ApplyFilterAttribute : Attribute
     {
         public Type FilterType { get; }
 

@@ -12,10 +12,10 @@ namespace TelegramUpdater.UpdateContainer
     /// <typeparam name="T">Update type.</typeparam>
     public abstract class UpdateContainerAbs<T> : IUpdateContainer where T : class
     {
-        private readonly Func<Update, T> _insiderResovler;
+        private readonly Func<Update, T?> _insiderResovler;
 
         protected UpdateContainerAbs(
-            Func<Update, T> insiderResovler,
+            Func<Update, T?> insiderResovler,
             Updater updater,
             Update insider,
             ITelegramBotClient botClient)

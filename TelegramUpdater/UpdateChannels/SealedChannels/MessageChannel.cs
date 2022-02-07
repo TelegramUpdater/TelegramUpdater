@@ -5,19 +5,8 @@ namespace TelegramUpdater.UpdateChannels.SealedChannels
 {
     public sealed class MessageChannel : MessageChannelAbs
     {
-        private readonly Filter<Message>? _filter;
-
-        public MessageChannel(Filter<Message>? filter = default)
-            : base()
+        public MessageChannel(Filter<Message>? filter) : base(filter)
         {
-            _filter = filter;
-        }
-
-        protected override bool ShouldChannel(Message t)
-        {
-            if (_filter is null) return true;
-
-            return _filter.TheyShellPass(t);
         }
     }
 }

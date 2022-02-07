@@ -11,10 +11,18 @@ namespace TelegramUpdater.UpdateChannels
     {
         private readonly Channel<Update> _channel;
         private readonly CancellationTokenSource _tokenSource;
+        private readonly Func<Update, T?> _getT;
+        private readonly Filter<T>? _filter;
         private bool disposedValue;
 
-        protected AbstractChannel()
+        protected AbstractChannel(
+            UpdateType updateType,
+            Func<Update, T?> getT,
+            Filter<T>? filter)
         {
+            _filter = filter;
+            UpdateType = updateType;
+            _getT = getT ?? throw new ArgumentNullException(nameof(getT));
             _channel = Channel.CreateBounded<Update>(new BoundedChannelOptions(1)
             {
                 AllowSynchronousContinuations = true,
@@ -25,9 +33,13 @@ namespace TelegramUpdater.UpdateChannels
             _tokenSource = new CancellationTokenSource();
         }
 
-        protected abstract bool ShouldChannel(T t);
+        public UpdateType UpdateType { get; }
 
-        public abstract T? GetT(Update? update);
+        public T? GetT(Update update) => _getT(update);
+
+        public Update? Update { get; private set; }
+
+        public bool Cancelled => _tokenSource.IsCancellationRequested;
 
         public async Task<Update> ReadAsync(TimeSpan timeOut)
         {
@@ -39,11 +51,12 @@ namespace TelegramUpdater.UpdateChannels
         public async Task WriteAsync(Update update)
             => await _channel.Writer.WriteAsync(update, _tokenSource.Token);
 
-        public Update? Update { get; private set; }
+        protected bool ShouldChannel(T t)
+        {
+            if (_filter is null) return true;
 
-        public bool Cancelled => _tokenSource.IsCancellationRequested;
-
-        public abstract UpdateType UpdateType { get; }
+            return _filter.TheyShellPass(t);
+        }
 
         public bool ShouldChannel(Update update)
         {

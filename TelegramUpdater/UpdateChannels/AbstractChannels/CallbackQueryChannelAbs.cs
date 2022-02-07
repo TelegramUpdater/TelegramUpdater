@@ -5,8 +5,8 @@ namespace TelegramUpdater.UpdateChannels.AbstractChannels
 {
     public abstract class CallbackQueryChannelAbs : AbstractChannel<CallbackQuery>
     {
-        public override CallbackQuery? GetT(Update? update) => update?.CallbackQuery;
-
-        public override UpdateType UpdateType => UpdateType.CallbackQuery;
+        protected CallbackQueryChannelAbs(Filter<CallbackQuery>? filter)
+            : base(UpdateType.CallbackQuery, x => x.CallbackQuery, filter)
+        { }
     }
 }
