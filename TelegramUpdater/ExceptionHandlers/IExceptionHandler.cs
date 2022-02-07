@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TelegramUpdater.UpdateHandlers;
 
 namespace TelegramUpdater.ExceptionHandlers
 {
@@ -13,7 +14,8 @@ namespace TelegramUpdater.ExceptionHandlers
         /// <summary>
         /// Handle only when the <see cref="Exception"/> occured in specified <see cref="IUpdateHandler"/>s
         /// </summary>
-        public IEnumerable<Type> AllowedHandlers { get; }
+        /// <remarks>If it's null, mean all!</remarks>
+        public IEnumerable<Type>? AllowedHandlers { get; }
 
         /// <summary>
         /// Your <see cref="Exception"/> type.
@@ -48,6 +50,29 @@ namespace TelegramUpdater.ExceptionHandlers
         /// <param name="handlerType">Type of handler.</param>
         /// <returns></returns>
         public bool IsAllowedHandler(Type handlerType)
-            => AllowedHandlers.Any(x => x == handlerType);
+        {
+            if (handlerType == null)
+                throw new ArgumentNullException(nameof(handlerType));
+
+            if (AllowedHandlers == null) return true;
+
+            return AllowedHandlers.Any(x => x == handlerType);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="ExceptionHandler{T}"/>
+        /// where <typeparamref name="T"/> is a <see cref="Exception"/>
+        /// </summary>
+        /// <typeparam name="TException">Your <see cref="Exception"/> type.</typeparam>
+        /// <typeparam name="THandler">Your <see cref="IUpdateHandler"/></typeparam>
+        /// <param name="callback">A callback function that will be called when the error catched.</param>
+        /// <param name="messageMatch">Handle only when <see cref="Exception.Message"/> matches a text.</param>
+        /// <returns></returns>
+        public static ExceptionHandler<TException> ExceptionsInHandler<TException, THandler>(
+            Func<Exception, Task> callback,
+            Filter<string>? messageMatch = default)
+            where TException : Exception where THandler : IUpdateHandler
+                => new ExceptionHandler<TException>(
+                    callback, messageMatch, new[] { typeof(THandler) });
     }
 }

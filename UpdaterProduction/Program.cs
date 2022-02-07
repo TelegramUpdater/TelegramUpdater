@@ -4,7 +4,6 @@ using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types.Enums;
 using TelegramUpdater;
-using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.UpdateHandlers.SealedHandlers;
 using UpdaterProduction;
 
@@ -27,22 +26,24 @@ var updater = new Updater(
 var mainLogger = loggerFactory.CreateLogger<Program>();
 loggerFactory.Dispose(); // not required anymore
 
-updater.AddExceptionHandler(new ExceptionHandler<Exception>(
+// All 'Exception's are handled. hmmm i'm not so sure
+updater.AddExceptionHandler<Exception>(
     x =>
     {
         mainLogger.LogError(exception: x, "Exception in handler.");
         return Task.CompletedTask;
-    }));
+    });
 
-updater.AddExceptionHandler(new ExceptionHandler<ApiRequestException>(
+// Only 'ApiRequestException's occured in 'MyScopedMessageHandler' will be handled.
+updater.AddExceptionHandler<ApiRequestException, MyScopedMessageHandler>(
     x =>
     {
         mainLogger.LogWarning(exception: x, "Api Exception in handler.");
         return Task.CompletedTask;
-    }));
+    });
 
 var myStartHandler = new MessageHandler(
-    async container => await container.Response($"Next era!"),
+    async container => await container.Response($"Are you ok? answer quick!"),
     FilterCutify.OnCommand("start"));
 
 updater.AddUpdateHandler(myStartHandler);

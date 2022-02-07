@@ -383,18 +383,23 @@ namespace TelegramUpdater
                 return false;
             }
 
+            // Create and setup handling task stuff
+            CrossingInfo<long> crossingInfo;
+            if (_updaterOptions.PerUserOneByOneProcess)
+            {
+                crossingInfo = _trafficLight.StartCrossingTask(
+                    update, handler.HandleAsync(this, _botClient, update));
+            }
+            else
+            {
+                crossingInfo = _trafficLight.StartCrossingTask(
+                    handler.HandleAsync(this, _botClient, update));
+            }
+
+            // Handle the shit.
             try
             {
-                if (_updaterOptions.PerUserOneByOneProcess)
-                {
-                    await _trafficLight.CreateCrossingTask(
-                        update, handler.HandleAsync(this, _botClient, update));
-                }
-                else
-                {
-                    await _trafficLight.CreateCrossingTask(
-                        handler.HandleAsync(this, _botClient, update));
-                }
+                await crossingInfo.UnderlyingTask;
             }
             // Cut handlers chain.
             catch (StopPropagation)
@@ -420,6 +425,9 @@ namespace TelegramUpdater
             }
             finally
             {
+                // Cleanup handling information.
+                _trafficLight.FinishCrossing(crossingInfo);
+
                 if (handler is IDisposable disposable)
                 {
                     disposable.Dispose();

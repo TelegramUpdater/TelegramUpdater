@@ -47,48 +47,31 @@ namespace TelegramUpdater.TrafficLights
             }
         }
 
-        public async Task<R> CreateCrossingTask<R>(Task<R> crossWrap)
+        public CrossingInfo<K> StartCrossingTask(Task crossWrap)
         {
             var jobId = crossWrap.Id.ToString();
 
             _crossingCars.TryAdd(jobId, crossWrap);
-            var result = await crossWrap;
-            _crossingCars.TryRemove(jobId, out _);
-            return result;
+            return new CrossingInfo<K>(crossWrap, null, jobId);
         }
 
-        public async Task CreateCrossingTask(Task crossWrap)
-        {
-            var jobId = crossWrap.Id.ToString();
-
-            _crossingCars.TryAdd(jobId, crossWrap);
-            await crossWrap;
-            _crossingCars.TryRemove(jobId, out _);
-        }
-
-        public async Task CreateCrossingTask(T obj, Task crossWrap)
+        public CrossingInfo<K> StartCrossingTask(T obj, Task crossWrap)
         {
             var jobId = crossWrap.Id.ToString();
             K requesterId = _getRequester(obj);
 
             _crossingCars.TryAdd(jobId, crossWrap);
             _requesterMap.TryAdd(requesterId, jobId);
-            await crossWrap;
-            _crossingCars.TryRemove(jobId, out _);
-            _requesterMap.TryRemove(requesterId, out _);
+            return new CrossingInfo<K>(crossWrap, requesterId, jobId);
         }
 
-        public async Task<R> CreateCrossingTask<R>(T obj, Task<R> crossWrap)
+        public void FinishCrossing(CrossingInfo<K> crossingInfo)
         {
-            var jobId = crossWrap.Id.ToString();
-            K requesterId = _getRequester(obj);
-
-            _crossingCars.TryAdd(jobId, crossWrap);
-            _requesterMap.TryAdd(requesterId, jobId);
-            var result = await crossWrap;
-            _crossingCars.TryRemove(jobId, out _);
-            _requesterMap.TryRemove(requesterId, out _);
-            return result;
+            _crossingCars.TryRemove(crossingInfo.JobId, out _);
+            if (crossingInfo.RequesterId != null)
+            {
+                _requesterMap.TryRemove(crossingInfo.RequesterId.Value, out _);
+            }
         }
     }
 }
