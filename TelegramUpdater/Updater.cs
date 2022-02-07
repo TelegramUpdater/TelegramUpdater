@@ -28,30 +28,27 @@ namespace TelegramUpdater
         private readonly List<IExceptionHandler> _exceptionHandlers;
         private readonly ConcurrentDictionary<string, IUpdateChannel> _updateChannels;
         private readonly Channel<Update> _updatesChannel; // i guess this is useless
-        private Thread? _updaterThread;
         private readonly TrafficLight<Update, long> _trafficLight;
-        private readonly bool _perUserOneByOneProcess;
         private readonly ILogger<Updater> _logger;
+        private readonly UpdaterOptions _updaterOptions;
 
         /// <summary>
         /// Creates an instance of updater to fetch updates from telegram and handle them.
         /// </summary>
         /// <param name="botClient">Telegram bot client</param>
-        /// <param name="maxDegreeOfParallelism">The maximum number of concurrent update handling tasks</param>
-        /// <param name="perUserOneByOneProcess">If updates should process one by one per user.</param>
+        /// <param name="updaterOptions">Options for this updater.</param>
         public Updater(
             ITelegramBotClient botClient,
-            int? maxDegreeOfParallelism = default,
-            bool perUserOneByOneProcess = true,
-            ILoggerFactory? loggerFactory = default)
+            UpdaterOptions updaterOptions = default)
         {
-            _botClient = botClient;
+            _botClient = botClient?? throw new ArgumentNullException(nameof(botClient));
+            _updaterOptions = updaterOptions;
+
             _updateChannels = new ConcurrentDictionary<string, IUpdateChannel>();
             _updateHandlers = new List<ISingletonUpdateHandler>();
             _exceptionHandlers = new List<IExceptionHandler>();
             _scopedHandlerContainers = new List<IScopedHandlerContainer>();
-            _trafficLight = new TrafficLight<Update, long>(x=> x.GetSenderId() ?? 0, maxDegreeOfParallelism);
-            _perUserOneByOneProcess= perUserOneByOneProcess;
+            _trafficLight = new TrafficLight<Update, long>(x=> x.GetSenderId() ?? 0, updaterOptions.MaxDegreeOfParallelism);
 
             _updatesChannel = Channel.CreateBounded<Update>(
                 new BoundedChannelOptions(100)
@@ -61,16 +58,23 @@ namespace TelegramUpdater
                     FullMode = BoundedChannelFullMode.Wait
                 });
 
-            using var _loggerFactory = loggerFactory?? LoggerFactory.Create(builder =>
+            if (_updaterOptions.Logger == null)
             {
-                builder
-                    .AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("LoggingConsoleApp.Program", LogLevel.Debug)
-                    .AddConsole();
-            });
+                using var _loggerFactory = LoggerFactory.Create(builder =>
+                {
+                    builder
+                        .AddFilter("Microsoft", LogLevel.Warning)
+                        .AddFilter("System", LogLevel.Warning)
+                        .AddConsole();
+                });
 
-            _logger = _loggerFactory.CreateLogger<Updater>();
+                _logger = _loggerFactory.CreateLogger<Updater>();
+            }
+            else
+            {
+                _logger = _updaterOptions.Logger;
+            }
+
             _logger.LogInformation("Logger initialized.");
         }
 
@@ -83,6 +87,11 @@ namespace TelegramUpdater
         /// You can read updates from here.
         /// </summary>
         public ChannelReader<Update> ChannelReader => _updatesChannel.Reader;
+
+        /// <summary>
+        /// You can read updates from here.
+        /// </summary>
+        public ChannelWriter<Update> ChannelWriter => _updatesChannel.Writer;
 
         /// <summary>
         /// Add your handler to this updater.
@@ -120,7 +129,7 @@ namespace TelegramUpdater
                 }
                 else
                 {
-                    throw new InvalidCastException($"{_t} is not an Update, Should Message, CallbackQuery, ...");
+                    throw new InvalidCastException($"{_t} is not an Update! Should be Message, CallbackQuery, ...");
                 }
             }
 
@@ -198,34 +207,77 @@ namespace TelegramUpdater
         /// <summary>
         /// Start handling updates.
         /// </summary>
+        /// <param name="block">If this method should block the thread.</param>
+        /// <param name="manualWriting">If you gonna write updates manually and no polling required.</param>
         /// <param name="cancellationToken">Use this to cancel the task.</param>
-        public async ValueTask Start(
+        public async Task Start(
+            bool block = true,
+            bool manualWriting = false,
             CancellationToken cancellationToken = default)
         {
-            _updaterThread = new Thread(async () => await UpdateReceiver());
-            _updaterThread.Start();
-
-            while (true)
+            if (cancellationToken == default)
             {
-                var update = await _updatesChannel.Reader.ReadAsync(cancellationToken);
+                _logger.LogInformation("Start's CancellationToken set to CancellationToken in UpdaterOptions");
+                cancellationToken = _updaterOptions.CancellationToken;
+            }
 
-                // This is an overall wait
-                await _trafficLight.AwaitGreenLight();
+            if (manualWriting)
+            {
+                _logger.LogWarning("Manual writing is enabled! You should write updates yourself.");
+            }
+            else
+            {
+                _logger.LogInformation("Auto writing updates enabled!");
+                var updaterTask = Task.Run(() => UpdateReceiver(cancellationToken), cancellationToken);
+            }
 
-                _ = ProcessUpdate(update, cancellationToken);
+            var readerTask = Task.Run(async () =>
+            {
+                while (true)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        _logger.LogWarning("Reading updates cancelled!");
+                        break;
+                    }
+
+                    var update = await _updatesChannel.Reader.ReadAsync(cancellationToken);
+
+                    // This is an overall wait
+                    await _trafficLight.AwaitGreenLight();
+
+                    _ = ProcessUpdate(update, cancellationToken);
+                }
+            }, cancellationToken);
+
+            if (block)
+            {
+                _logger.LogInformation("Blocking the current thread to read updates!");
+                await readerTask;
+            }
+            else
+            {
+                _logger.LogInformation("Reading updates is done in background.");
             }
         }
 
         private async Task UpdateReceiver(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Started update receiver thread.");
+            if (_updaterOptions.FlushUpdatesQueue)
+            {
+                _logger.LogInformation("Flushing updates.");
+                await _botClient.GetUpdatesAsync(-1, 1, 0, cancellationToken: cancellationToken);
+            }
 
             var offset = 0;
             var timeOut = 1000;
 
+            _logger.LogInformation("Started Polling.");
+
             while (true)
             {
                 var updates = await _botClient.GetUpdatesAsync(offset, 100, timeOut,
+                                                               allowedUpdates: _updaterOptions.AllowedUpdates,
                                                                cancellationToken: cancellationToken);
 
                 foreach (var update in updates)
@@ -290,7 +342,7 @@ namespace TelegramUpdater
 
             if (handlers.Any() || scopedHandlers.Any())
             {
-                if (_perUserOneByOneProcess)
+                if (_updaterOptions.PerUserOneByOneProcess)
                 {
                     // This is a per container wait ( eg: per user )
                     await _trafficLight.AwaitYellowLight(update);
@@ -333,7 +385,7 @@ namespace TelegramUpdater
 
             try
             {
-                if (_perUserOneByOneProcess)
+                if (_updaterOptions.PerUserOneByOneProcess)
                 {
                     await _trafficLight.CreateCrossingTask(
                         update, handler.HandleAsync(this, _botClient, update));

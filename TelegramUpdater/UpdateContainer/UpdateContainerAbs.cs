@@ -6,6 +6,10 @@ using TelegramUpdater.UpdateChannels;
 
 namespace TelegramUpdater.UpdateContainer
 {
+    /// <summary>
+    /// A container for incoming updates, which contains <typeparamref name="T"/> as your update.
+    /// </summary>
+    /// <typeparam name="T">Update type.</typeparam>
     public abstract class UpdateContainerAbs<T> : IUpdateContainer where T : class
     {
         private readonly Func<Update, T> _insiderResovler;
