@@ -48,11 +48,12 @@ var myStartHandler = new MessageHandler(
 
 updater.AddUpdateHandler(myStartHandler);
 
+// This type of handlers are Scoped!
+// In every request, a new instance of MyScopedMessageHandler is created.
+// These are useful in DI senarios or when you'r using any Scoped object
+// Like DbContexts.
+// Filters for such a handlers can applied using ApplyFilterAttribute
 updater.AddScopedMessage<MyScopedMessageHandler>();
-    // This type of handlers are Scoped!
-    // In every request, a new instance of MyScopedMessageHandler is created.
-    // These are useful in DI senarios or when you'r using any Scoped object
-    // Like DbContexts.
-    // Filters for such a handlers can applied using ApplyFilterAttribute
+
 
 await updater.Start(true); // 🔥 Fire up and block!
