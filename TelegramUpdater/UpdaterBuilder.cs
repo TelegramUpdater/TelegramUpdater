@@ -8,6 +8,8 @@ using Telegram.Bot.Types.Enums;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers;
+using TelegramUpdater.UpdateHandlers.ScopedHandlers;
+using TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse;
 using TelegramUpdater.UpdateHandlers.SealedHandlers;
 
 namespace TelegramUpdater
@@ -194,6 +196,49 @@ namespace TelegramUpdater
         /// update handler you'll add next.
         /// </para>
         /// </summary>
+        /// <typeparam name="TException">Type of <see cref="Exception"/> you wanna handle.</typeparam>
+        /// <typeparam name="THandler">Type of your handler.</typeparam>
+        /// <param name="callback">
+        /// A callback function that is called when error occured.
+        /// </param>
+        /// <param name="messageMatch">
+        /// An <see cref="string"/> filter on <see cref="Exception.Message"/>.
+        /// Use this if you target the Exceptions with an specified message.
+        /// <para>
+        /// You can use <see cref="Filters.StringRegex"/> to create your filter.
+        /// </para>
+        /// </param>
+        /// Leave empty to catch all update handlers.
+        /// </para>
+        /// </param>
+        /// <remarks>
+        /// Go for <see cref="StepThree"/> if you're done here too.
+        /// </remarks>
+        public UpdaterBuilder StepTwo<TException, THandler>(
+            Func<Updater, Exception, Task> callback,
+            Filter<string>? messageMatch = default)
+            where TException : Exception where THandler: IUpdateHandler
+        {
+            if (_updater == null)
+                throw new InvalidOperationException("Please go step by step, you missed StepOne ?");
+
+            _updater.AddExceptionHandler<TException, THandler>(callback, messageMatch);
+            return this;
+        }
+
+        /// <summary>
+        /// - <b>Step two</b>: Add an <see cref="ExceptionHandler{T}"/>
+        /// <para>
+        /// This is how you can be aware of exceptions occured when handling the updates.
+        /// Add an <see cref="ExceptionHandler{T}"/> here and you can add more
+        /// later using <see cref="Updater.AddExceptionHandler(IExceptionHandler)"/>
+        /// </para>
+        /// <para>
+        /// If you're not sure for now, just leave it empty and i'll add a default
+        /// <see cref="ExceptionHandler{T}"/> which handle exceptions in every
+        /// update handler you'll add next.
+        /// </para>
+        /// </summary>
         /// <remarks>
         /// Go for <see cref="StepThree"/> if you're done here too.
         /// </remarks>
@@ -321,6 +366,64 @@ namespace TelegramUpdater
                 throw new InvalidOperationException("Please go step by step, you missed StepTwo ?");
 
             _updater.AddUpdateHandler(singletonUpdateHandler);
+            return this._updater;
+        }
+
+        /// <summary>
+        /// - <b>Step three</b>: Add an <see cref="IUpdateHandler"/>
+        /// <para>
+        /// This is the main part! update handler are where you do what you actually excpect from this lib.
+        /// Like answering user message and etc.
+        /// </para>
+        /// <para>
+        /// There're two core things you need to create for an <see cref="IUpdateHandler"/>
+        /// <list type="number">
+        /// <item>
+        /// <term><see cref="Filter{T}"/>s</term>
+        /// <description>
+        /// Filters are used to let <see cref="Updater"/> know what kind of updates you excpect for your handler.
+        /// </description>
+        /// </item>
+        /// <item>
+        /// <term>Callback functions</term>
+        /// <description>
+        /// After an update verified and passed the filters, it's time to handle it.
+        /// Handling updates are done in callback functions.
+        /// <para>
+        /// Callback function gives you an instance of <see cref="UpdateContainerAbs{T}"/>
+        /// as argument. and this is all you need! with a large set of Extension methods.
+        /// </para>
+        /// </description>
+        /// </item>
+        /// </list>
+        /// </para>
+        /// <para>
+        /// You can use <see cref="FilterCutify"/> class to create your filter.
+        /// </para>
+        /// <para>
+        /// <see cref="FilterCutify.OnCommand(string[])"/> is a good start to handle commands like
+        /// <c>/start</c>.
+        /// </para>
+        /// <para>
+        /// <b>For now</b>, pass a callback function and filter here to handle a <see cref="Message"/>.
+        /// </para>
+        /// </summary>
+        /// <param name="scopedHandlerContainer">
+        /// Use classes like <see cref="ScopedMessageHandler"/> to create an
+        /// scoped message handler and such. Scoped handlers create a new instance of
+        /// their underlying handler per each request.
+        /// </param>
+        /// <remarks>
+        /// You can use <see cref="Updater.AddUpdateHandler(ISingletonUpdateHandler)"/>
+        /// or <see cref="Updater.AddScopedHandler(UpdateHandlers.ScopedHandlers.IScopedHandlerContainer)"/>
+        /// later to add more update handler.
+        /// </remarks>
+        public Updater StepThree(IScopedHandlerContainer scopedHandlerContainer)
+        {
+            if (_updater == null)
+                throw new InvalidOperationException("Please go step by step, you missed StepTwo ?");
+
+            _updater.AddScopedHandler(scopedHandlerContainer);
             return this._updater;
         }
     }

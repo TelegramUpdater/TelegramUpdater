@@ -19,16 +19,16 @@ var updater = new UpdaterBuilder(
 
     .StepTwo()
 
-    .StepThree(
-        async container => await container.Response("Started!"),
-        FilterCutify.OnCommand("start"))
-
-    .AddExceptionHandler<ApiRequestException, MyScopedMessageHandler>(
+    .StepTwo<ApiRequestException, MyScopedMessageHandler>(
         (updater, ex) =>
         {
             updater.Logger.LogWarning(exception: ex, "Api Exception in handler.");
             return Task.CompletedTask;
         })
+
+    .StepThree(
+        async container => await container.Response("Started!"),
+        FilterCutify.OnCommand("start"))
 
     .AddScopedMessage<MyScopedMessageHandler>()
     
