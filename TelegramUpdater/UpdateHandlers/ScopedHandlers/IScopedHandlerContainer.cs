@@ -4,7 +4,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
 {
-    internal interface IScopedHandlerContainer
+    public interface IScopedHandlerContainer
     {
         public Type ScopedHandlerType { get; }
 

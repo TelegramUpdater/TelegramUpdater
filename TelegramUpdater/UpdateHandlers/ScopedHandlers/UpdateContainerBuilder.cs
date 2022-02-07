@@ -4,7 +4,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
 {
-    internal sealed class UpdateContainerBuilder<THandler, TUpdate>
+    public sealed class UpdateContainerBuilder<THandler, TUpdate>
         : AbstractUpdateContainer<THandler, TUpdate>
         where THandler : IScopedUpdateHandler where TUpdate : class
     {

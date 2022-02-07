@@ -8,7 +8,6 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.TrafficLights;
 using TelegramUpdater.UpdateChannels;
@@ -78,6 +77,8 @@ namespace TelegramUpdater
             _logger.LogInformation("Logger initialized.");
         }
 
+        public ILogger<Updater> Logger => _logger;
+
         /// <summary>
         /// A dict of tasks for in process updates
         /// </summary>
@@ -106,62 +107,15 @@ namespace TelegramUpdater
         /// <summary>
         /// Adds an scoped handler to the updater.
         /// </summary>
-        /// <typeparam name="THandler">Handler type.</typeparam>
-        /// <typeparam name="TUpdate">Update type.</typeparam>
-        /// <param name="updateType">Update type again.</param>
-        /// <param name="filter">A filter to choose the right update.</param>
-        /// <param name="getT">
-        /// A function to choose real update from <see cref="Update"/>
-        /// <para>Don't touch it if you don't know.</para>
+        /// <param name="scopedHandlerContainer">
+        /// Use <see cref="UpdateContainerBuilder{THandler, TUpdate}"/>
+        /// To Create a new <see cref="IScopedHandlerContainer"/>
         /// </param>
-        public void AddScopedHandler<THandler, TUpdate>(
-            Filter<TUpdate>? filter = default,
-            UpdateType? updateType = default,
-            Func<Update, TUpdate>? getT = default)
-            where THandler : IScopedUpdateHandler where TUpdate : class
+        public void AddScopedHandler(IScopedHandlerContainer scopedHandlerContainer)
         {
-            if (updateType == null)
-            {
-                var _t = typeof(TUpdate);
-                if (Enum.TryParse(_t.Name, out UpdateType ut))
-                {
-                    updateType = ut;
-                }
-                else
-                {
-                    throw new InvalidCastException($"{_t} is not an Update! Should be Message, CallbackQuery, ...");
-                }
-            }
-
-            var _h = typeof(THandler);
-
-            if (filter == null)
-            {
-                // If no filter passed as method args the look at attributes
-                // Attribute filters are all combined using & operator.
-
-                var applied = _h.GetCustomAttributes(typeof(ApplyFilterAttribute), false);
-                foreach (ApplyFilterAttribute item in applied)
-                {
-                    var f = (Filter<TUpdate>?)Activator.CreateInstance(item.FilterType);
-                    if (f != null)
-                    {
-                        if(filter == null)
-                        {
-                            filter = f;
-                        }
-                        else
-                        {
-                            filter &= f;
-                        }
-                    }
-                }
-            }
-
-            _scopedHandlerContainers.Add(
-                new UpdateContainerBuilder<THandler, TUpdate>(
-                    updateType.Value, filter, getT));
-            _logger.LogInformation($"Added new scoped {updateType} handler :: {_h.Name}.");
+            var _h = scopedHandlerContainer.GetType();
+            _scopedHandlerContainers.Add(scopedHandlerContainer);
+            _logger.LogInformation($"Added new scoped handler :: {_h.Name}.");
         }
 
         /// <summary>

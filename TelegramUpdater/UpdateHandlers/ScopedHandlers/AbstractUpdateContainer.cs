@@ -4,7 +4,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
 {
-    internal abstract class AbstractUpdateContainer<THandler, TUpdate> : IScopedHandlerContainer
+    public abstract class AbstractUpdateContainer<THandler, TUpdate> : IScopedHandlerContainer
         where THandler : IScopedUpdateHandler where TUpdate : class
     {
         private readonly Filter<TUpdate>? _filter;

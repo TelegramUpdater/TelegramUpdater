@@ -2,10 +2,14 @@
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TelegramUpdater;
 using TelegramUpdater.UpdateHandlers.SealedHandlers;
 using UpdaterProduction;
+
+
+// 1. ---------- Set things up ----------
 
 // Do logging stuff.
 using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
@@ -26,6 +30,9 @@ var updater = new Updater(
 var mainLogger = loggerFactory.CreateLogger<Program>();
 loggerFactory.Dispose(); // not required anymore
 
+
+// 2. ---------- Add Exception Handlers ----------
+
 // All 'Exception's are handled. hmmm i'm not so sure
 updater.AddExceptionHandler<Exception>(
     x =>
@@ -42,6 +49,9 @@ updater.AddExceptionHandler<ApiRequestException, MyScopedMessageHandler>(
         return Task.CompletedTask;
     });
 
+
+// 3. ---------- Add Update Handlers ----------
+
 var myStartHandler = new MessageHandler(
     async container => await container.Response($"Are you ok? answer quick!"),
     FilterCutify.OnCommand("start"));
@@ -55,5 +65,9 @@ updater.AddUpdateHandler(myStartHandler);
 // Filters for such a handlers can applied using ApplyFilterAttribute
 updater.AddScopedMessage<MyScopedMessageHandler>();
 
+updater.AddScopedHandler<Message>(typeof(AboutMessageHandler)); // Other way
+
+
+// 4. ---------- Start! ----------
 
 await updater.Start(true); // 🔥 Fire up and block!
