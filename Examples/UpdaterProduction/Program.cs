@@ -66,7 +66,7 @@ updater.AddUpdateHandler(myStartHandler);
 updater.AddScopedMessage<MyScopedMessageHandler>();
 
 updater.AddScopedHandler<Message>(typeof(AboutMessageHandler)); // Other way
-
+// Can be done with: updater.AddScopedMessage<AboutMessageHandler>();
 
 // 4. ---------- Start! ----------
 
