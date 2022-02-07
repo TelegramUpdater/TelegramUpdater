@@ -30,6 +30,7 @@ namespace TelegramUpdater
         private readonly TrafficLight<Update, long> _trafficLight;
         private readonly ILogger<Updater> _logger;
         private readonly UpdaterOptions _updaterOptions;
+        private User? _me = null;
 
         /// <summary>
         /// Creates an instance of updater to fetch updates from telegram and handle them.
@@ -218,6 +219,22 @@ namespace TelegramUpdater
             {
                 _logger.LogInformation("Reading updates is done in background.");
             }
+        }
+
+        /// <summary>
+        /// Get current <see cref="TelegramBotClient"/>'s user information.
+        /// </summary>
+        /// <remarks>
+        /// This method will cache! call freely.
+        /// </remarks>
+        public async Task<User> GetMeAsync()
+        {
+            if (_me == null)
+            {
+                _me = await _botClient.GetMeAsync();
+            }
+
+            return _me;
         }
 
         private async Task UpdateReceiver(CancellationToken cancellationToken = default)

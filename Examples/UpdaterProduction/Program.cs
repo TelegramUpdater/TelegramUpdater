@@ -33,9 +33,12 @@ var updater = new UpdaterBuilder(
     .AddScopedMessage<MyScopedMessageHandler>()
     
     .AddScopedHandler<Message>(typeof(AboutMessageHandler)); // Other way
-    // Can be done with: updater.AddScopedMessage<AboutMessageHandler>();
+                                                             // Can be done with: updater.AddScopedMessage<AboutMessageHandler>();
 
 
 // ---------- Start! ----------
+
+var me = await updater.GetMeAsync();
+updater.Logger.LogInformation("Start listening to {username}", me.Username);
 
 await updater.Start(true); // 🔥 Fire up and block!
