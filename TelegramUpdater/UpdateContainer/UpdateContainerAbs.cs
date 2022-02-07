@@ -26,7 +26,7 @@ namespace TelegramUpdater.UpdateContainer
             _insiderResovler = insiderResovler;
         }
 
-        public T Update
+        public T? Update
         {
             get
             {
