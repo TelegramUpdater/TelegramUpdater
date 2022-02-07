@@ -77,6 +77,8 @@ namespace TelegramUpdater
             _logger.LogInformation("Logger initialized.");
         }
 
+        public ITelegramBotClient BotClient => _botClient;
+
         public ILogger<Updater> Logger => _logger;
 
         /// <summary>
@@ -98,10 +100,11 @@ namespace TelegramUpdater
         /// Add your handler to this updater.
         /// </summary>
         /// <param name="updateHandler"></param>
-        public void AddUpdateHandler(ISingletonUpdateHandler updateHandler)
+        public Updater AddUpdateHandler(ISingletonUpdateHandler updateHandler)
         {
             _updateHandlers.Add(updateHandler);
             _logger.LogInformation($"Added new singleton handler.");
+            return this;
         }
 
         /// <summary>
@@ -111,21 +114,23 @@ namespace TelegramUpdater
         /// Use <see cref="UpdateContainerBuilder{THandler, TUpdate}"/>
         /// To Create a new <see cref="IScopedHandlerContainer"/>
         /// </param>
-        public void AddScopedHandler(IScopedHandlerContainer scopedHandlerContainer)
+        public Updater AddScopedHandler(IScopedHandlerContainer scopedHandlerContainer)
         {
             var _h = scopedHandlerContainer.GetType();
             _scopedHandlerContainers.Add(scopedHandlerContainer);
             _logger.LogInformation($"Added new scoped handler :: {_h.Name}.");
+            return this;
         }
 
         /// <summary>
         /// Add your exception handler to this updater.
         /// </summary>
         /// <param name="exceptionHandler"></param>
-        public void AddExceptionHandler(IExceptionHandler exceptionHandler)
+        public Updater AddExceptionHandler(IExceptionHandler exceptionHandler)
         {
             _exceptionHandlers.Add(exceptionHandler);
             _logger.LogInformation($"Added exception handler for {exceptionHandler.ExceptionType}");
+            return this;
         }
 
         /// <summary>
@@ -374,7 +379,7 @@ namespace TelegramUpdater
 
                 foreach (var exHandler in exHandlers)
                 {
-                    await exHandler.Callback(ex);
+                    await exHandler.Callback(this, ex);
                 }
             }
             finally

@@ -28,7 +28,16 @@ namespace TelegramUpdater.Filters
                 })
         { }
     }
-    public class CallbackQueryRegex : BasicRegexFilter<CallbackQuery>
+
+    public sealed class StringRegex : BasicRegexFilter<string>
+    {
+        public StringRegex(string pattern, RegexOptions? regexOptions = null)
+            : base(x=> x, pattern, regexOptions)
+        {
+        }
+    }
+
+    public sealed class CallbackQueryRegex : BasicRegexFilter<CallbackQuery>
     {
         public CallbackQueryRegex(
             string pattern,
@@ -38,7 +47,7 @@ namespace TelegramUpdater.Filters
         }
     }
 
-    public class MessageTextRegex : BasicRegexFilter<Message>
+    public sealed class MessageTextRegex : BasicRegexFilter<Message>
     {
         public MessageTextRegex(
             string pattern,

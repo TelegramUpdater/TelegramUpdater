@@ -17,13 +17,13 @@ namespace TelegramUpdater
         /// <see cref="IUpdateHandler"/>s
         /// <para>Leave null to handle all.</para>
         /// </param>
-        public static void AddExceptionHandler<TException>(
+        public static Updater AddExceptionHandler<TException>(
             this Updater updater,
-            Func<Exception, Task> callback,
+            Func<Updater, Exception, Task> callback,
             Filter<string>? messageMatch = default,
             Type[]? allowedHandlers = null) where TException : Exception
         {
-            updater.AddExceptionHandler(
+            return updater.AddExceptionHandler(
                 new ExceptionHandler<TException>(callback, messageMatch, allowedHandlers));
         }
 
@@ -32,13 +32,13 @@ namespace TelegramUpdater
         /// </summary>
         /// <param name="callback">A callback function that will be called when the error catched.</param>
         /// <param name="messageMatch">Handle only when <see cref="Exception.Message"/> matches a text.</param>
-        public static void AddExceptionHandler<TException, THandler>(
+        public static Updater AddExceptionHandler<TException, THandler>(
             this Updater updater,
-            Func<Exception, Task> callback,
+            Func<Updater, Exception, Task> callback,
             Filter<string>? messageMatch = default)
             where TException: Exception where THandler: IUpdateHandler
         {
-            updater.AddExceptionHandler<TException>(
+            return updater.AddExceptionHandler<TException>(
                 callback, messageMatch, new[] { typeof(THandler) });
         }
     }

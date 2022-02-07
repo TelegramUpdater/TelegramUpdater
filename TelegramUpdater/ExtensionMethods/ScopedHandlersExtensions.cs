@@ -19,7 +19,7 @@ namespace TelegramUpdater
         /// A function to choose real update from <see cref="Update"/>
         /// <para>Don't touch it if you don't know.</para>
         /// </param>
-        public static void AddScopedHandler<THandler, TUpdate>(
+        public static Updater AddScopedHandler<THandler, TUpdate>(
             this Updater updater,
             Filter<TUpdate>? filter = default,
             UpdateType? updateType = default,
@@ -64,7 +64,7 @@ namespace TelegramUpdater
                 }
             }
 
-            updater.AddScopedHandler(new UpdateContainerBuilder<THandler, TUpdate>(
+            return updater.AddScopedHandler(new UpdateContainerBuilder<THandler, TUpdate>(
                     updateType.Value, filter, getT));
         }
 
@@ -79,7 +79,7 @@ namespace TelegramUpdater
         /// A function to choose real update from <see cref="Update"/>
         /// <para>Don't touch it if you don't know.</para>
         /// </param>
-        public static void AddScopedHandler<TUpdate>(
+        public static Updater AddScopedHandler<TUpdate>(
             this Updater updater,
             Type typeOfScopedHandler,
             Filter<TUpdate>? filter = default,
@@ -135,13 +135,15 @@ namespace TelegramUpdater
 
             if (container != null)
             {
-                updater.AddScopedHandler(container);
+                return updater.AddScopedHandler(container);
             }
             else
             {
                 updater.Logger.LogWarning(
                     "{type} not added to the Scoped Handlers! The instance of it is null.",
                     typeOfScopedHandler);
+                throw new InvalidOperationException(
+                    "Handler not added to the Scoped Handlers! The instance of it is null.");
             }
         }
 
@@ -156,7 +158,7 @@ namespace TelegramUpdater
         /// Leave empty if you applied your fillter using <see cref="ApplyFilterAttribute"/> before.
         /// </para>
         /// </param>
-        public static void AddScopedMessage<THandler>(this Updater updater,
+        public static Updater AddScopedMessage<THandler>(this Updater updater,
                                                       Filter<Message>? filter = default)
             where THandler : IScopedUpdateHandler
             => updater.AddScopedHandler<THandler, Message>(
@@ -173,7 +175,7 @@ namespace TelegramUpdater
         /// Leave empty if you applied your fillter using <see cref="ApplyFilterAttribute"/> before.
         /// </para>
         /// </param>
-        public static void AddScopedCallbackQuery<THandler>(this Updater updater,
+        public static Updater AddScopedCallbackQuery<THandler>(this Updater updater,
                                                             Filter<CallbackQuery>? filter = default)
             where THandler : IScopedUpdateHandler
             => updater.AddScopedHandler<THandler, CallbackQuery>(
