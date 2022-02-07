@@ -21,10 +21,11 @@ namespace TelegramUpdater
             this Updater updater,
             Func<Updater, Exception, Task> callback,
             Filter<string>? messageMatch = default,
-            Type[]? allowedHandlers = null) where TException : Exception
+            Type[]? allowedHandlers = null,
+            bool inherit = false) where TException : Exception
         {
             return updater.AddExceptionHandler(
-                new ExceptionHandler<TException>(callback, messageMatch, allowedHandlers));
+                new ExceptionHandler<TException>(callback, messageMatch, allowedHandlers, inherit));
         }
 
         /// <summary>
@@ -35,11 +36,12 @@ namespace TelegramUpdater
         public static Updater AddExceptionHandler<TException, THandler>(
             this Updater updater,
             Func<Updater, Exception, Task> callback,
-            Filter<string>? messageMatch = default)
+            Filter<string>? messageMatch = default,
+            bool inherit = false)
             where TException: Exception where THandler: IUpdateHandler
         {
             return updater.AddExceptionHandler<TException>(
-                callback, messageMatch, new[] { typeof(THandler) });
+                callback, messageMatch, new[] { typeof(THandler) }, inherit);
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Microsoft.Extensions.Logging;
-using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TelegramUpdater;
+using TelegramUpdater.ExceptionHandlers;
 using UpdaterProduction;
 
 
@@ -17,14 +17,19 @@ var updater = new UpdaterBuilder(
         perUserOneByOneProcess: true, // a user should finish a request to go to next one.
         allowedUpdates: new[] { UpdateType.Message, UpdateType.CallbackQuery })
 
-    .StepTwo()
+    .StepTwo(inherit: false)
 
-    .StepTwo<ApiRequestException, MyScopedMessageHandler>(
+    .StepTwo(CommonExceptions.ParsingException(
         (updater, ex) =>
         {
-            updater.Logger.LogWarning(exception: ex, "Api Exception in handler.");
+            updater.Logger.LogWarning(exception: ex, "Handler has entity parsing error!");
             return Task.CompletedTask;
-        })
+        },
+        allowedHandlers: new[]
+        {
+            typeof(AboutMessageHandler),
+            typeof(MyScopedMessageHandler)
+        }))
 
     .StepThree(
         async container => await container.Response("Started!"),

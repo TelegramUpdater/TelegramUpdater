@@ -208,9 +208,6 @@ namespace TelegramUpdater
         /// You can use <see cref="Filters.StringRegex"/> to create your filter.
         /// </para>
         /// </param>
-        /// Leave empty to catch all update handlers.
-        /// </para>
-        /// </param>
         /// <remarks>
         /// Go for <see cref="StepThree"/> if you're done here too.
         /// </remarks>
@@ -239,10 +236,17 @@ namespace TelegramUpdater
         /// update handler you'll add next.
         /// </para>
         /// </summary>
+        /// <param name="inherit">
+        /// If it's <see cref="true"/>, every object that inherits from <see cref="Exception"/>
+        /// Will catched! meaning all exceptions.
+        /// <para>
+        /// If you have exception handlers for specified exceptions, you better turn this off.
+        /// </para>
+        /// </param>
         /// <remarks>
         /// Go for <see cref="StepThree"/> if you're done here too.
         /// </remarks>
-        public UpdaterBuilder StepTwo()
+        public UpdaterBuilder StepTwo(bool inherit = true)
         {
             if (_updater == null)
                 throw new InvalidOperationException("Please go step by step, you missed StepOne ?");
@@ -252,7 +256,35 @@ namespace TelegramUpdater
                 {
                     updater.Logger.LogError(exception: ex, message: "Error in handlers!");
                     return Task.CompletedTask;
-                });
+                }, inherit: inherit);
+            return this;
+        }
+
+        /// <summary>
+        /// - <b>Step two</b>: Add an <see cref="ExceptionHandler{T}"/>
+        /// <para>
+        /// This is how you can be aware of exceptions occured when handling the updates.
+        /// Add an <see cref="ExceptionHandler{T}"/> here and you can add more
+        /// later using <see cref="Updater.AddExceptionHandler(IExceptionHandler)"/>
+        /// </para>
+        /// <para>
+        /// If you're not sure for now, just leave it empty and i'll add a default
+        /// <see cref="ExceptionHandler{T}"/> which handle exceptions in every
+        /// update handler you'll add next.
+        /// </para>
+        /// </summary>
+        /// <param name="exceptionHandler">
+        /// Your <see cref="ExceptionHandler{T}"/>.
+        /// </param>
+        /// <remarks>
+        /// Go for <see cref="StepThree"/> if you're done here too.
+        /// </remarks>
+        public UpdaterBuilder StepTwo(IExceptionHandler exceptionHandler)
+        {
+            if (_updater == null)
+                throw new InvalidOperationException("Please go step by step, you missed StepOne ?");
+
+            _updater.AddExceptionHandler(exceptionHandler);
             return this;
         }
 

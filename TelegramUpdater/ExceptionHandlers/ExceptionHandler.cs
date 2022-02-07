@@ -26,11 +26,13 @@ namespace TelegramUpdater.ExceptionHandlers
         public ExceptionHandler(
             Func<Updater, Exception, Task>  callback,
             Filter<string>? messageMatch = default,
-            Type[]? allowedHandlers = null)
+            Type[]? allowedHandlers = null,
+            bool inherit = false)
         {
             MessageMatch = messageMatch;
             ExceptionType = typeof(T);
             Callback = callback;
+            Inherit = inherit;
 
             if (allowedHandlers != null)
             {
@@ -53,5 +55,7 @@ namespace TelegramUpdater.ExceptionHandlers
         public Filter<string>? MessageMatch { get; }
 
         public Func<Updater, Exception, Task> Callback { get; }
+
+        public bool Inherit { get; }
     }
 }

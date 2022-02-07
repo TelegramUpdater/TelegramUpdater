@@ -390,7 +390,7 @@ namespace TelegramUpdater
             {
                 // Do exception handlers
                 var exHandlers = _exceptionHandlers
-                    .Where(x => x.ExceptionType == ex.GetType())
+                    .Where(x => x.TypeIsMatched(ex.GetType()))
                     .Where(x => x.IsAllowedHandler(handler.GetType()))
                     .Where(x => x.MessageMatched(ex.Message));
 

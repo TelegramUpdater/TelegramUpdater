@@ -33,9 +33,26 @@ namespace TelegramUpdater.ExceptionHandlers
         public Func<Updater, Exception, Task> Callback { get; }
 
         /// <summary>
+        /// Allow inherit and not only exact type.
+        /// </summary>
+        public bool Inherit { get; }
+
+        internal bool TypeIsMatched(Type typeOfException)
+        {
+            if (!Inherit)
+            {
+                return ExceptionType == typeOfException;
+            }
+            else
+            {
+                return ExceptionType.IsAssignableFrom(typeOfException);
+            }
+        }
+
+        /// <summary>
         /// Checks if a message is matched.
         /// </summary>
-        public bool MessageMatched(string message)
+        internal bool MessageMatched(string message)
         {
             if (MessageMatch == null) return true;
 
@@ -49,7 +66,7 @@ namespace TelegramUpdater.ExceptionHandlers
         /// </summary>
         /// <param name="handlerType">Type of handler.</param>
         /// <returns></returns>
-        public bool IsAllowedHandler(Type handlerType)
+        internal bool IsAllowedHandler(Type handlerType)
         {
             if (handlerType == null)
                 throw new ArgumentNullException(nameof(handlerType));

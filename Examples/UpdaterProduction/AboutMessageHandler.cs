@@ -1,4 +1,5 @@
 ﻿using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using TelegramUpdater;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse;
@@ -10,7 +11,7 @@ namespace UpdaterProduction
     {
         protected override async Task HandleAsync(UpdateContainerAbs<Message> container)
         {
-            await container.Response($"How about you?");
+            await container.Response($"*How about you?", parseMode: ParseMode.Markdown);
         }
     }
 
