@@ -38,7 +38,7 @@ var updater = new UpdaterBuilder(
     .AddScopedMessage<MyScopedMessageHandler>()
     
     .AddScopedHandler<Message>(typeof(AboutMessageHandler)); // Other way
-                                                             // Can be done with: updater.AddScopedMessage<AboutMessageHandler>();
+    // Can be done with: updater.AddScopedMessage<AboutMessageHandler>();
 
 
 // ---------- Start! ----------

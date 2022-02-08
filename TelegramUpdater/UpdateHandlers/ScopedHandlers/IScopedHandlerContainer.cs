@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -21,9 +22,17 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
 
         public bool ShouldHandle(Update update);
 
-        public IScopedUpdateHandler? CreateInstance()
+        public IScopedUpdateHandler? CreateInstance(IServiceScope? scope = default)
         {
-            return (IScopedUpdateHandler?)Activator.CreateInstance(ScopedHandlerType);
+            if (scope != null)
+            {
+                return (IScopedUpdateHandler?)scope.ServiceProvider.GetRequiredService(
+                    ScopedHandlerType);
+            }
+            else
+            {
+                return (IScopedUpdateHandler?)Activator.CreateInstance(ScopedHandlerType);
+            }
         }
     }
 }

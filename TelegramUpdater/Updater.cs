@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -30,6 +31,8 @@ namespace TelegramUpdater
         private readonly TrafficLight<Update, long> _trafficLight;
         private readonly ILogger<Updater> _logger;
         private readonly UpdaterOptions _updaterOptions;
+        private readonly IServiceProvider? _serviceDescriptors;
+        private readonly CancellationTokenSource _emergencyCts;
         private User? _me = null;
 
         /// <summary>
@@ -39,10 +42,13 @@ namespace TelegramUpdater
         /// <param name="updaterOptions">Options for this updater.</param>
         public Updater(
             ITelegramBotClient botClient,
-            UpdaterOptions updaterOptions = default)
+            UpdaterOptions updaterOptions = default,
+            IServiceProvider? serviceDescriptors = default)
         {
             _botClient = botClient?? throw new ArgumentNullException(nameof(botClient));
             _updaterOptions = updaterOptions;
+            _serviceDescriptors = serviceDescriptors;
+            _emergencyCts = new CancellationTokenSource();
 
             _updateChannels = new ConcurrentDictionary<string, IUpdateChannel>();
             _updateHandlers = new List<ISingletonUpdateHandler>();
@@ -173,6 +179,7 @@ namespace TelegramUpdater
         public async Task Start(
             bool block = true,
             bool manualWriting = false,
+            bool fromServices = false,
             CancellationToken cancellationToken = default)
         {
             if (cancellationToken == default)
@@ -201,12 +208,28 @@ namespace TelegramUpdater
                         break;
                     }
 
-                    var update = await _updatesChannel.Reader.ReadAsync(cancellationToken);
+                    if (_emergencyCts.IsCancellationRequested)
+                    {
+                        _logger.LogCritical("Update reader stopped due to emergency cancel request.");
+                        break;
+                    }
+
+                    var update = await _updatesChannel.Reader.ReadAsync(_emergencyCts.Token);
+
+                    if (update == null)
+                        continue;
 
                     // This is an overall wait
                     await _trafficLight.AwaitGreenLight();
 
-                    _ = ProcessUpdate(update, cancellationToken);
+                    if (fromServices)
+                    {
+                        _ = ProcessUpdateFromServices(update, cancellationToken);
+                    }
+                    else
+                    {
+                        _ = ProcessUpdate(update, cancellationToken);
+                    }
                 }
             }, cancellationToken);
 
@@ -252,97 +275,203 @@ namespace TelegramUpdater
 
             while (true)
             {
-                var updates = await _botClient.GetUpdatesAsync(offset, 100, timeOut,
-                                                               allowedUpdates: _updaterOptions.AllowedUpdates,
-                                                               cancellationToken: cancellationToken);
-
-                foreach (var update in updates)
+                try
                 {
-                    await _updatesChannel.Writer.WriteAsync(update, cancellationToken);
-                    offset = update.Id + 1;
+                    var updates = await _botClient.GetUpdatesAsync(offset, 100, timeOut,
+                                                                    allowedUpdates: _updaterOptions.AllowedUpdates,
+                                                                    cancellationToken: cancellationToken);
+
+                    foreach (var update in updates)
+                    {
+                        await _updatesChannel.Writer.WriteAsync(update, cancellationToken);
+                        offset = update.Id + 1;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.LogCritical(exception: e, "Auto update writer stopped due to an ecxeption.");
+                    _emergencyCts.Cancel();
+                    break;
                 }
             }
         }
 
-        private async Task ProcessUpdate(Update update, CancellationToken cancellationToken)
+        private async Task ProcessUpdateFromServices(
+            Update update, CancellationToken cancellationToken)
         {
-            if (cancellationToken.IsCancellationRequested)
+            try
             {
-                return;
-            }
 
-            if (!_updateChannels.IsEmpty)
-            {
-                IUpdateChannel? updateChannel = null;
-                string? key = null;
+                if (_serviceDescriptors == null)
+                    throw new InvalidOperationException("Can't ProcessUpdateFromServices when there is no ServiceProvider.");
 
-                foreach (var channel in _updateChannels
-                    .Where(x=> x.Value.UpdateType == update.Type))
+                if (cancellationToken.IsCancellationRequested)
                 {
-                    if (channel.Value.ShouldChannel(update))
-                    {
-                        updateChannel = channel.Value;
-                        key = channel.Key;
-                        break;
-                    }
-                }
-
-                if (updateChannel != null)
-                {
-                    if (!updateChannel.Cancelled)
-                    {
-                        await updateChannel.WriteAsync(update);
-                    }
-
-                    _updateChannels.Remove(key!, out _);
-                    updateChannel.Dispose();
                     return;
                 }
-            }
 
-            var singletonhandlers = _updateHandlers
-                .Where(x => x.UpdateType == update.Type)
-                .Where(x => x.ShouldHandle(update))
-                .Select(x => (IUpdateHandler)x);
-
-            var scopedHandlers = _scopedHandlerContainers
-                .Where(x => x.UpdateType == update.Type)
-                .Where(x => x.ShouldHandle(update))
-                .Select(x=> x.CreateInstance())
-                .Where(x=> x != null)
-                .Cast<IScopedUpdateHandler>()
-                .Select(x=> (IUpdateHandler)x);
-
-            var handlers = singletonhandlers.Concat(scopedHandlers)
-                .OrderBy(x=> x.Group);
-
-            if (handlers.Any() || scopedHandlers.Any())
-            {
-                if (_updaterOptions.PerUserOneByOneProcess)
+                if (!_updateChannels.IsEmpty)
                 {
-                    // This is a per container wait ( eg: per user )
-                    await _trafficLight.AwaitYellowLight(update);
+                    IUpdateChannel? updateChannel = null;
+                    string? key = null;
+
+                    foreach (var channel in _updateChannels
+                        .Where(x => x.Value.UpdateType == update.Type))
+                    {
+                        if (channel.Value.ShouldChannel(update))
+                        {
+                            updateChannel = channel.Value;
+                            key = channel.Key;
+                            break;
+                        }
+                    }
+
+                    if (updateChannel != null)
+                    {
+                        if (!updateChannel.Cancelled)
+                        {
+                            await updateChannel.WriteAsync(update);
+                        }
+
+                        _updateChannels.Remove(key!, out _);
+                        updateChannel.Dispose();
+                        return;
+                    }
+                }
+
+                var scopedHandlers = _scopedHandlerContainers
+                    .Where(x => x.UpdateType == update.Type)
+                    .Where(x => x.ShouldHandle(update));
+
+                if (scopedHandlers.Any())
+                {
+                    if (_updaterOptions.PerUserOneByOneProcess)
+                    {
+                        // This is a per container wait ( eg: per user )
+                        await _trafficLight.AwaitYellowLight(update);
+                    }
+                }
+                else
+                {
+                    return;
+                }
+
+                // valid handlers for an update should process one by one
+                // This change can be cut off when throwing an specified exception
+                // Other exceptions are redirected to ExceptionHandler.
+                foreach (var container in scopedHandlers)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    using var scope = _serviceDescriptors.CreateScope();
+
+                    var handler = container.CreateInstance(scope);
+
+                    if (handler != null)
+                    {
+                        if (!await HandleHandler(update, handler, cancellationToken))
+                        {
+                            break;
+                        }
+                    }
                 }
             }
-            else
+            catch(Exception e)
             {
-                return;
+                _logger.LogError(exception: e, "Error in ProcessUpdateFromServices.");
             }
+        }
 
-            // valid handlers for an update should process one by one
-            // This change can be cut off when throwing an specified exception
-            // Other exceptions are redirected to ExceptionHandler.
-            foreach (var handler in handlers)
+        private async Task ProcessUpdate(
+            Update update, CancellationToken cancellationToken)
+        {
+            try
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    break;
+                    return;
                 }
 
-                if (!await HandleHandler(update, handler, cancellationToken))
+                if (!_updateChannels.IsEmpty)
                 {
-                    break;
+                    IUpdateChannel? updateChannel = null;
+                    string? key = null;
+
+                    foreach (var channel in _updateChannels
+                        .Where(x => x.Value.UpdateType == update.Type))
+                    {
+                        if (channel.Value.ShouldChannel(update))
+                        {
+                            updateChannel = channel.Value;
+                            key = channel.Key;
+                            break;
+                        }
+                    }
+
+                    if (updateChannel != null)
+                    {
+                        if (!updateChannel.Cancelled)
+                        {
+                            await updateChannel.WriteAsync(update);
+                        }
+
+                        _updateChannels.Remove(key!, out _);
+                        updateChannel.Dispose();
+                        return;
+                    }
                 }
+
+                var singletonhandlers = _updateHandlers
+                    .Where(x => x.UpdateType == update.Type)
+                    .Where(x => x.ShouldHandle(update))
+                    .Select(x => (IUpdateHandler)x);
+
+                var scopedHandlers = _scopedHandlerContainers
+                    .Where(x => x.UpdateType == update.Type)
+                    .Where(x => x.ShouldHandle(update))
+                    .Select(x => x.CreateInstance())
+                    .Where(x => x != null)
+                    .Cast<IScopedUpdateHandler>()
+                    .Select(x => (IUpdateHandler)x);
+
+                var handlers = singletonhandlers.Concat(scopedHandlers)
+                    .OrderBy(x => x.Group);
+
+                if (handlers.Any() || scopedHandlers.Any())
+                {
+                    if (_updaterOptions.PerUserOneByOneProcess)
+                    {
+                        // This is a per container wait ( eg: per user )
+                        await _trafficLight.AwaitYellowLight(update);
+                    }
+                }
+                else
+                {
+                    return;
+                }
+
+                // valid handlers for an update should process one by one
+                // This change can be cut off when throwing an specified exception
+                // Other exceptions are redirected to ExceptionHandler.
+                foreach (var handler in handlers)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    if (!await HandleHandler(update, handler, cancellationToken))
+                    {
+                        break;
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(exception: ex, "Error in ProcessUpdate.");
             }
         }
     
