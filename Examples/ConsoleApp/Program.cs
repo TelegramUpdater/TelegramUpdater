@@ -1,11 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using ConsoleApp;
 using Microsoft.Extensions.Logging;
-using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TelegramUpdater;
 using TelegramUpdater.ExceptionHandlers;
-using UpdaterProduction;
-
 
 var updater = new UpdaterBuilder(
     "2015323878:AAEBfa-pTNt4fC9O1_Gw3FD9ZnreySiWhc8")
@@ -17,9 +15,9 @@ var updater = new UpdaterBuilder(
         perUserOneByOneProcess: true, // a user should finish a request to go to next one.
         allowedUpdates: new[] { UpdateType.Message, UpdateType.CallbackQuery })
 
-    .StepTwo(inherit: false)
+    .StepTwo(inherit: false) // Add default exception handler
 
-    .StepTwo(CommonExceptions.ParsingException(
+    .StepTwo(CommonExceptions.ParsingException( // Add custom exception handler
         (updater, ex) =>
         {
             updater.Logger.LogWarning(exception: ex, "Handler has entity parsing error!");
@@ -27,18 +25,14 @@ var updater = new UpdaterBuilder(
         },
         allowedHandlers: new[]
         {
-            typeof(AboutMessageHandler),
             typeof(MyScopedMessageHandler)
         }))
 
-    .StepThree(
+    .StepThree( // Quick handler
         async container => await container.Response("Started!"),
         FilterCutify.OnCommand("start"))
 
-    .AddScopedMessage<MyScopedMessageHandler>()
-    
-    .AddScopedHandler<Message>(typeof(AboutMessageHandler)); // Other way
-    // Can be done with: updater.AddScopedMessage<AboutMessageHandler>();
+    .AddScopedMessage<MyScopedMessageHandler>(); // Scoped handler
 
 
 // ---------- Start! ----------
