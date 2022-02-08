@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace TelegramUpdater.Asp.Services
+namespace TelegramUpdater.Hosting
 {
     public class UpdaterService : BackgroundService
     {
@@ -20,10 +20,18 @@ namespace TelegramUpdater.Asp.Services
             _updater = scope.ServiceProvider.GetRequiredService<Updater>();
         }
 
+        /// <summary>
+        /// Indicates if the service should or should not write updates automatically
+        /// </summary>
+        /// <remarks>
+        /// In webhook apps this is possibly true.
+        /// </remarks>
+        protected virtual bool ManualWriting => false;
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _updater.Logger.LogInformation("Executing updater start.");
-            await _updater.Start(true, true, true, stoppingToken);
+            await _updater.Start(true, ManualWriting, true, stoppingToken);
         }
     }
 }

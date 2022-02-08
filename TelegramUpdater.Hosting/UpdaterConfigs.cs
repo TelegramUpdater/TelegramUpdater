@@ -1,4 +1,4 @@
-﻿namespace TelegramUpdater.Asp
+﻿namespace TelegramUpdater.Hosting
 {
     public class UpdaterConfigs
     {

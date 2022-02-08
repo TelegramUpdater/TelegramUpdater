@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using System.Collections.Generic;
 using TelegramUpdater.UpdateHandlers.ScopedHandlers;
 
-namespace TelegramUpdater.Asp
+namespace TelegramUpdater.Hosting
 {
     public class UpdaterServiceBuilder
     {
@@ -45,7 +45,6 @@ namespace TelegramUpdater.Asp
         /// </param>
         public UpdaterServiceBuilder AddHandler(IScopedHandlerContainer scopedHandlerContainer)
         {
-            var _h = scopedHandlerContainer.GetType();
             _scopedHandlerContainers.Add(scopedHandlerContainer);
             return this;
         }

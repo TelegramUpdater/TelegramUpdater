@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var updaterConfigs = builder.Configuration.GetUpdaterConfigs();
 
-builder.Services.AddTelegramUpdater(
+builder.Services.AddTelegramManualUpdater(
     updaterConfigs, (builder) =>
         builder.AddMessageHandler<SimpleMessageHandler>()
 );

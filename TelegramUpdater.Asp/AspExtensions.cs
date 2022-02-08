@@ -2,13 +2,30 @@
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Telegram.Bot;
+using System;
+using System.Threading.Tasks;
+using Telegram.Bot.Types;
 using TelegramUpdater.Asp.Services;
+using TelegramUpdater.Hosting;
 
 namespace TelegramUpdater.Asp
 {
     public static class AspExtensions
     {
+        /// <summary>
+        /// Use this in you webhook app if you wanna write updates from webhook controller,
+        /// Using <see cref="WriteUpdateAsync(Updater, Update)"/>
+        /// </summary>
+        /// <param name="serviceDescriptors"></param>
+        /// <param name="configs"></param>
+        /// <param name="builder"></param>
+        public static void AddTelegramManualUpdater(this IServiceCollection serviceDescriptors,
+                                                    UpdaterConfigs configs,
+                                                    Action<UpdaterServiceBuilder> builder)
+        {
+            serviceDescriptors.AddTelegramUpdater<ManualWritingUpdaterService>(configs, builder);
+        }
+
         /// <summary>
         /// Gets updater configs from appsettings and <paramref name="sectionName"/> section.
         /// <para>- Example of that section:</para>
@@ -55,22 +72,6 @@ namespace TelegramUpdater.Asp
         }
 
         /// <summary>
-        /// Adds an <see cref="ITelegramBotClient"/> to the service collection.
-        /// </summary>
-        public static void AddTelegramBotClient(this IServiceCollection services,
-                                                UpdaterConfigs botConfigs)
-        {
-            // Register named HttpClient to get benefits of IHttpClientFactory
-            // and consume it with ITelegramBotClient typed client.
-            // More read:
-            //  https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-5.0#typed-clients
-            //  https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
-            services.AddHttpClient("tgwebhook")
-                    .AddTypedClient<ITelegramBotClient>(httpClient
-                        => new TelegramBotClient(botConfigs.BotToken, httpClient));
-        }
-
-        /// <summary>
         /// Creates a route map for webhook updates from telegram
         /// <para>
         /// It's $"bot/{<see cref="UpdaterConfigs.BotToken"/>} by default, which is mapped to
@@ -111,5 +112,9 @@ namespace TelegramUpdater.Asp
                                          pattern: pattern,
                                          new { controller = controllerName, action = "Post" });
         }
+
+        public static async Task WriteUpdateAsync(this Updater updater,
+                                                  Update update)
+            => await updater.ChannelWriter.WriteAsync(update);
     }
 }
