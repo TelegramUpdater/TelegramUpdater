@@ -183,5 +183,33 @@ namespace TelegramUpdater.Asp
                     "Handler not added to the Scoped Handlers! The instance of it is null.");
             }
         }
+
+        /// <summary>
+        /// Adds an scoped <see cref="Message"/> handler to the <paramref name="updater"/>.
+        /// </summary>
+        /// <typeparam name="THandler">Your <see cref="Message"/> handler type.</typeparam>
+        /// <param name="filter">
+        /// The filter to choose the right updates to handle.
+        /// <para>
+        /// Leave empty if you applied your fillter using <see cref="ApplyFilterAttribute"/> before.
+        /// </para>
+        /// </param>
+        public UpdaterServiceBuilder AddMessageHandler<THandler>(Filter<Message>? filter = default)
+            where THandler : IScopedUpdateHandler
+            => AddHandler<THandler, Message>(filter, UpdateType.Message, x => x.Message!);
+
+        /// <summary>
+        /// Adds an scoped <see cref="CallbackQuery"/> handler to the <paramref name="updater"/>.
+        /// </summary>
+        /// <typeparam name="THandler">Your <see cref="CallbackQuery"/> handler type.</typeparam>
+        /// <param name="filter">
+        /// The filter to choose the right updates to handle.
+        /// <para>
+        /// Leave empty if you applied your fillter using <see cref="ApplyFilterAttribute"/> before.
+        /// </para>
+        /// </param>
+        public UpdaterServiceBuilder AddCallbackQueryHandler<THandler>(Filter<CallbackQuery>? filter = default)
+            where THandler : IScopedUpdateHandler
+            => AddHandler<THandler, CallbackQuery>(filter, UpdateType.Message, x => x.CallbackQuery!);
     }
 }

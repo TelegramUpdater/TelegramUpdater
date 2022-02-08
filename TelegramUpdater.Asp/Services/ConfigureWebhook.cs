@@ -14,7 +14,7 @@ namespace TelegramUpdater.Asp.Services
     {
         private readonly ILogger<ConfigureWebhook> _logger;
         private readonly IServiceProvider _services;
-        private readonly UpdaterConfigs _botConfig;
+        protected readonly UpdaterConfigs _botConfig;
 
         public ConfigureWebhook(ILogger<ConfigureWebhook> logger,
                                 IServiceProvider serviceProvider,
@@ -22,8 +22,24 @@ namespace TelegramUpdater.Asp.Services
         {
             _logger = logger;
             _services = serviceProvider;
-            _botConfig = configuration.ReadUpdaterConfigs();
+            _botConfig = configuration.GetUpdaterConfigs();
         }
+
+        protected UpdaterConfigs UpdaterConfigs => _botConfig;
+
+        /// <summary>
+        /// Defaults to <c>$"{<see cref="UpdaterConfigs.HostAddress"/>}/bot/{<see cref="UpdaterConfigs.BotToken"/>}"</c>
+        /// <para>
+        /// See <see href="https://core.telegram.org/bots/api#setwebhook"/>
+        /// </para>
+        /// </summary>
+        protected virtual string WebhookAddress
+            => @$"{_botConfig.HostAddress}/bot/{_botConfig.BotToken}";
+
+        /// <summary>
+        /// Updates you want to receive. Defaults to <c>Array.Empty()</c>
+        /// </summary>
+        protected virtual UpdateType[]? AllowedUpdates => Array.Empty<UpdateType>();
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
@@ -35,11 +51,10 @@ namespace TelegramUpdater.Asp.Services
             // If you'd like to make sure that the Webhook request comes from Telegram, we recommend
             // using a secret path in the URL, e.g. https://www.example.com/<token>.
             // Since nobody else knows your bot's token, you can be pretty sure it's us.
-            var webhookAddress = @$"{_botConfig.HostAddress}/bot/{_botConfig.BotToken}";
-            _logger.LogInformation("Setting webhook: {webhookAddress}", webhookAddress);
+            _logger.LogInformation("Setting webhook: {webhookAddress}", WebhookAddress);
             await botClient.SetWebhookAsync(
-                url: webhookAddress,
-                allowedUpdates: Array.Empty<UpdateType>(),
+                url: WebhookAddress,
+                allowedUpdates: AllowedUpdates,
                 cancellationToken: cancellationToken);
         }
 

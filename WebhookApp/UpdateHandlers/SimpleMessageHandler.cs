@@ -1,4 +1,5 @@
 ﻿using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 using TelegramUpdater;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse;
@@ -8,9 +9,21 @@ namespace WebhookApp.UpdateHandlers
     [ApplyFilter(typeof(PrivateHelloCommand))]
     public class SimpleMessageHandler : ScopedMessageHandler
     {
-        protected override async Task HandleAsync(UpdateContainerAbs<Message> updateContainer)
+        protected override async Task HandleAsync(UpdateContainerAbs<Message> container)
         {
-            await updateContainer.Response("Hello World");
+            var msg = await container.Response($"Are you ok? answer quick!",
+                replyMarkup: new InlineKeyboardMarkup(
+                    InlineKeyboardButton.WithCallbackData("Yes i'm OK!", "ok")));
+
+            await container.ChannelUserClick(TimeSpan.FromSeconds(5), "ok")
+                .IfNotNull(async answer =>
+                {
+                    await answer.Edit(text: "Well ...");
+                })
+                .Else(async _ =>
+                {
+                    await msg.Edit("Slow");
+                });
         }
     }
 

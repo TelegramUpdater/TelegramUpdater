@@ -1,20 +1,19 @@
-using Telegram.Bot.Types;
 using TelegramUpdater.Asp;
+using WebhookApp.Services;
 using WebhookApp.UpdateHandlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-var botConfigs = builder.Configuration.ReadUpdaterConfigs();
+var updaterConfigs = builder.Configuration.GetUpdaterConfigs();
 
 builder.Services.AddTelegramUpdater(
-    botConfigs, (builder) =>
-        builder.AddHandler<SimpleMessageHandler, Message>()
+    updaterConfigs, (builder) =>
+        builder.AddMessageHandler<SimpleMessageHandler>()
 );
 
-
-builder.Services.AddWebhookConfigs();
+builder.Services.AddWebhookConfigs<WebhookConfigs>();
 
 builder.Services.AddControllers()
     .AddNewtonsoftJson();
@@ -29,7 +28,7 @@ app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapWebhook("tgbotwebhook", botConfigs);
+    endpoints.MapWebhook("tgbotwebhook", pattern: @$"updates/{updaterConfigs.BotToken}");
     endpoints.MapControllers();
 });
 

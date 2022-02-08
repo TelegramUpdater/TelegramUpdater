@@ -9,13 +9,29 @@ namespace TelegramUpdater.Asp
 {
     public static class AspExtensions
     {
-        public static UpdaterConfigs ReadUpdaterConfigs(
+        /// <summary>
+        /// Gets updater configs from appsettings and <paramref name="sectionName"/> section.
+        /// <para>- Example of that section:</para>
+        /// <code>
+        /// "UpdaterConfigs": {
+        ///     "MaxDegreeOfParallelism": null,
+        ///     "PerUserOneByOneProcess": true,
+        ///     "BotToken": "BOT-TOKEN",
+        ///     "HostAddress": "yourdomin.com"
+        /// }
+        /// </code>
+        /// </summary>
+        public static UpdaterConfigs GetUpdaterConfigs(
             this IConfiguration configuration,
             string sectionName = "UpdaterConfigs")
         {
             return configuration.GetSection(sectionName).Get<UpdaterConfigs>();
         }
 
+        /// <summary>
+        /// Configure webhook. Defaults to <b><c>hostAddress/bot/botToken</c></b> and all updates.
+        /// </summary>
+        /// <param name="services"></param>
         public static void AddWebhookConfigs(this IServiceCollection services)
         {
             // There are several strategies for completing asynchronous tasks during startup.
@@ -24,6 +40,23 @@ namespace TelegramUpdater.Asp
             services.AddHostedService<ConfigureWebhook>();
         }
 
+        /// <summary>
+        /// Configure your custom webhook, Create a sub-class of <see cref="ConfigureWebhook"/>,
+        /// And pass as <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">Custom webhook configure class</typeparam>
+        public static void AddWebhookConfigs<T>(this IServiceCollection services)
+            where T: ConfigureWebhook
+        {
+            // There are several strategies for completing asynchronous tasks during startup.
+            // Some of them could be found in this article https://andrewlock.net/running-async-tasks-on-app-startup-in-asp-net-core-part-1/
+            // We are going to use IHostedService to add and later remove Webhook
+            services.AddHostedService<T>();
+        }
+
+        /// <summary>
+        /// Adds an <see cref="ITelegramBotClient"/> to the service collection.
+        /// </summary>
         public static void AddTelegramBotClient(this IServiceCollection services,
                                                 UpdaterConfigs botConfigs)
         {
@@ -37,15 +70,33 @@ namespace TelegramUpdater.Asp
                         => new TelegramBotClient(botConfigs.BotToken, httpClient));
         }
 
+        /// <summary>
+        /// Creates a route map for webhook updates from telegram
+        /// <para>
+        /// It's $"bot/{<see cref="UpdaterConfigs.BotToken"/>} by default, which is mapped to
+        /// <c>Webhook</c> Controller.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// <para><b>NOTE:</b></para>
+        /// You can use suitable <see cref="RouteAttribute"/> on your webhook controller
+        /// and don't use this method at all.
+        /// </remarks>
+        /// <param name="name">Name of route mapping.</param>
+        /// <param name="updaterConfigs">Updater configs.
+        /// <para>Should not be null for default mapping.</para></param>
+        /// <param name="pattern">Use this if you want a custom pattern</param>
+        /// <param name="controllerName">You controller name to receive updates.</param>
+        /// <exception cref="System.ArgumentNullException"></exception>
         public static void MapWebhook(this IEndpointRouteBuilder endpoints,
                                       string name,
-                                      UpdaterConfigs? botConfigs = default,
+                                      UpdaterConfigs? updaterConfigs = default,
                                       string? pattern = default,
                                       string controllerName = "Webhook")
         {
-            if (botConfigs != null)
+            if (updaterConfigs != null)
             {
-                pattern = $"bot/{botConfigs.BotToken}";
+                pattern = $"bot/{updaterConfigs.BotToken}";
             }
 
             if (string.IsNullOrEmpty(pattern))

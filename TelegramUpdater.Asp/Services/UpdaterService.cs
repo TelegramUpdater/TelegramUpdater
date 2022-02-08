@@ -1,16 +1,16 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace TelegramUpdater.Asp.Services
 {
-    public class UpdaterService : IHostedService
+    public class UpdaterService : BackgroundService
     {
         private readonly IServiceProvider _services;
         private readonly Updater _updater;
-        private readonly CancellationTokenSource _cts;
 
         public UpdaterService(IServiceProvider services)
         {
@@ -18,18 +18,12 @@ namespace TelegramUpdater.Asp.Services
 
             using var scope = _services.CreateScope();
             _updater = scope.ServiceProvider.GetRequiredService<Updater>();
-            _cts = new CancellationTokenSource();
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _updater.Start(false, true, true, _cts.Token);
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            _cts.Cancel();
-            return Task.CompletedTask;
+            _updater.Logger.LogInformation("Executing updater start.");
+            await _updater.Start(true, true, true, stoppingToken);
         }
     }
 }
