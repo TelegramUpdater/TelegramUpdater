@@ -27,6 +27,8 @@ namespace TelegramUpdater.Hosting
             _updater = updater;
         }
 
+        public Updater Updater { get { return _updater; } }
+
         /// <summary>
         /// Here you should implement code to getUpdates.
         /// <para>
@@ -39,9 +41,9 @@ namespace TelegramUpdater.Hosting
         /// <summary>
         /// Write update.
         /// </summary>
-        protected async Task Write(Update update)
+        protected async Task Write(Update update, CancellationToken cancellationToken = default)
         {
-            await _updater.WriteUpdateAsync(update);
+            await _updater.WriteUpdateAsync(update, cancellationToken);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

@@ -84,6 +84,8 @@ namespace TelegramUpdater
             _logger.LogInformation("Logger initialized.");
         }
 
+        public CancellationToken EmergencyToken => _emergencyCts.Token;
+
         public ITelegramBotClient BotClient => _botClient;
 
         public ILogger<Updater> Logger => _logger;
@@ -259,6 +261,8 @@ namespace TelegramUpdater
 
             return _me;
         }
+
+        public void Cancel() => _emergencyCts.Cancel();
 
         private async Task UpdateReceiver(CancellationToken cancellationToken = default)
         {

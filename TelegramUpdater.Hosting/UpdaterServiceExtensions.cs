@@ -4,7 +4,7 @@ using Telegram.Bot.Types;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using TelegramUpdater.UpdateHandlers.ScopedHandlers;
+using System.Threading;
 
 namespace TelegramUpdater.Hosting
 {
@@ -42,10 +42,7 @@ namespace TelegramUpdater.Hosting
             var updaterBuilder = new UpdaterServiceBuilder();
             builder(updaterBuilder);
 
-            foreach (var container in updaterBuilder.IterScopedContainers())
-            {
-                serviceDescriptors.AddScoped(container.ScopedHandlerType);
-            }
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
             serviceDescriptors.AddSingleton(
                 services =>
@@ -71,6 +68,7 @@ namespace TelegramUpdater.Hosting
         /// You can use <see cref="AspExtensions.GetUpdaterConfigs(Microsoft.Extensions.Configuration.IConfiguration, string)"/>
         /// to read configs from appsettings.json
         /// </param>
+        /// <typeparam name="T">Type of your custom updater service. a child class of <see cref="UpdaterService"/></typeparam>
         public static void AddTelegramUpdater<T>(this IServiceCollection serviceDescriptors,
                                                  UpdaterConfigs configs,
                                                  Action<UpdaterServiceBuilder> builder)
@@ -81,10 +79,7 @@ namespace TelegramUpdater.Hosting
             var updaterBuilder = new UpdaterServiceBuilder();
             builder(updaterBuilder);
 
-            foreach (var container in updaterBuilder.IterScopedContainers())
-            {
-                serviceDescriptors.AddScoped(container.ScopedHandlerType);
-            }
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
             serviceDescriptors.AddSingleton(
                 services =>
@@ -106,6 +101,45 @@ namespace TelegramUpdater.Hosting
         /// <summary>
         /// Add telegram updater to the <see cref="IServiceCollection"/>.
         /// </summary>
+        /// <param name="configs">
+        /// You can use <see cref="AspExtensions.GetUpdaterConfigs(Microsoft.Extensions.Configuration.IConfiguration, string)"/>
+        /// to read configs from appsettings.json
+        /// </param>
+        /// <typeparam name="TUpdater">Type of your custom updater service. a child class of <see cref="UpdaterService"/></typeparam>
+        /// <typeparam name="TWriter">This is your writer background service. a child class of <see cref="UpdateWriterServiceAbs"/></typeparam>
+        public static void AddTelegramUpdater<TUpdater, TWriter>(this IServiceCollection serviceDescriptors,
+                                                                 UpdaterConfigs configs,
+                                                                 Action<UpdaterServiceBuilder> builder)
+            where TUpdater : UpdaterService where TWriter: UpdateWriterServiceAbs
+        {
+            serviceDescriptors.AddTelegramBotClient(configs.BotToken);
+
+            var updaterBuilder = new UpdaterServiceBuilder();
+            builder(updaterBuilder);
+
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
+
+            serviceDescriptors.AddSingleton(
+                services =>
+                {
+                    var botClient = services.GetRequiredService<ITelegramBotClient>();
+                    var updater = new Updater(botClient, new UpdaterOptions(
+                        configs.MaxDegreeOfParallelism,
+                        configs.PerUserOneByOneProcess,
+                        logger: services.GetRequiredService<ILogger<Updater>>()
+                     ), services);
+
+                    updaterBuilder.AddToUpdater(updater);
+                    return updater;
+                });
+
+            serviceDescriptors.AddHostedService<TUpdater>();
+            serviceDescriptors.AddHostedService<TWriter>();
+        }
+
+        /// <summary>
+        /// Add telegram updater to the <see cref="IServiceCollection"/>.
+        /// </summary>
         /// <remarks>
         /// This method will also adds <see cref="ITelegramBotClient"/> to the service collection as Singleton.
         /// If you already did that, Pass an instance of <see cref="ITelegramBotClient"/> instead of <paramref name="botToken"/>.
@@ -121,10 +155,7 @@ namespace TelegramUpdater.Hosting
             var updaterBuilder = new UpdaterServiceBuilder();
             builder(updaterBuilder);
 
-            foreach (var container in updaterBuilder.IterScopedContainers())
-            {
-                serviceDescriptors.AddScoped(container.ScopedHandlerType);
-            }
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
             serviceDescriptors.AddSingleton(
                 services =>
@@ -154,6 +185,7 @@ namespace TelegramUpdater.Hosting
         /// If you already did that, Pass an instance of <see cref="ITelegramBotClient"/> instead of <paramref name="botToken"/>.
         /// </remarks>
         /// <param name="botToken">Your bot api token.</param>
+        /// <typeparam name="T">Type of your custom updater service. a child class of <see cref="UpdaterService"/></typeparam>
         public static void AddTelegramUpdater<T>(this IServiceCollection serviceDescriptors,
                                                  string botToken,
                                                  UpdaterOptions updaterOptions,
@@ -165,10 +197,7 @@ namespace TelegramUpdater.Hosting
             var updaterBuilder = new UpdaterServiceBuilder();
             builder(updaterBuilder);
 
-            foreach (var container in updaterBuilder.IterScopedContainers())
-            {
-                serviceDescriptors.AddScoped(container.ScopedHandlerType);
-            }
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
             serviceDescriptors.AddSingleton(
                 services =>
@@ -194,6 +223,49 @@ namespace TelegramUpdater.Hosting
         /// Add telegram updater to the <see cref="IServiceCollection"/>.
         /// </summary>
         /// <remarks>
+        /// This method will also adds <see cref="ITelegramBotClient"/> to the service collection as Singleton.
+        /// If you already did that, Pass an instance of <see cref="ITelegramBotClient"/> instead of <paramref name="botToken"/>.
+        /// </remarks>
+        /// <param name="botToken">Your bot api token.</param>
+        /// <typeparam name="TWriter">This is your writer background service. a child class of <see cref="UpdateWriterServiceAbs"/></typeparam>
+        public static void AddTelegramManualUpdater<TWriter>(this IServiceCollection serviceDescriptors,
+                                                             string botToken,
+                                                             UpdaterOptions updaterOptions,
+                                                             Action<UpdaterServiceBuilder> builder)
+            where TWriter : UpdateWriterServiceAbs
+        {
+            serviceDescriptors.AddTelegramBotClient(botToken);
+
+            var updaterBuilder = new UpdaterServiceBuilder();
+            builder(updaterBuilder);
+
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
+
+            serviceDescriptors.AddSingleton(
+                services =>
+                {
+                    var botClient = services.GetRequiredService<ITelegramBotClient>();
+                    var updater = new Updater(botClient, new UpdaterOptions(
+                        updaterOptions.MaxDegreeOfParallelism,
+                        updaterOptions.PerUserOneByOneProcess,
+                        logger: services.GetRequiredService<ILogger<Updater>>(),
+                        updaterOptions.CancellationToken,
+                        updaterOptions.FlushUpdatesQueue,
+                        updaterOptions.AllowedUpdates
+                     ), services);
+
+                    updaterBuilder.AddToUpdater(updater);
+                    return updater;
+                });
+
+            serviceDescriptors.AddHostedService<ManualWritingUpdaterService>();
+            serviceDescriptors.AddHostedService<TWriter>();
+        }
+
+        /// <summary>
+        /// Add telegram updater to the <see cref="IServiceCollection"/>.
+        /// </summary>
+        /// <remarks>
         /// This method adds updater and handlers to the <see cref="IServiceCollection"/>,
         /// But not <paramref name="telegramBot"/>! and you should do it yourself.
         /// <para>You better pass botToken as <see cref="string"/></para>
@@ -207,10 +279,7 @@ namespace TelegramUpdater.Hosting
             var updaterBuilder = new UpdaterServiceBuilder();
             builder(updaterBuilder);
 
-            foreach (var container in updaterBuilder.IterScopedContainers())
-            {
-                serviceDescriptors.AddScoped(container.ScopedHandlerType);
-            }
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
             serviceDescriptors.AddSingleton(
                 services =>
@@ -240,19 +309,17 @@ namespace TelegramUpdater.Hosting
         /// <para>You better pass botToken as <see cref="string"/></para>
         /// </remarks>
         /// <param name="telegramBot"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
+        /// <typeparam name="T">Type of your custom updater service. a child class of <see cref="UpdaterService"/></typeparam>
         public static void AddTelegramUpdater<T>(this IServiceCollection serviceDescriptors,
-                                              ITelegramBotClient telegramBot,
-                                              UpdaterOptions updaterOptions,
-                                              Action<UpdaterServiceBuilder> builder)
+                                                 ITelegramBotClient telegramBot,
+                                                 UpdaterOptions updaterOptions,
+                                                 Action<UpdaterServiceBuilder> builder)
             where T : UpdaterService
         {
             var updaterBuilder = new UpdaterServiceBuilder();
             builder(updaterBuilder);
 
-            foreach (var container in updaterBuilder.IterScopedContainers())
-            {
-                serviceDescriptors.AddScoped(container.ScopedHandlerType);
-            }
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
             serviceDescriptors.AddSingleton(
                 services =>
@@ -273,20 +340,54 @@ namespace TelegramUpdater.Hosting
             serviceDescriptors.AddHostedService<T>();
         }
 
-        public static Updater RegisterUpdateHandler<THandler, TUpdate>(
-            this Updater updater,
-            Filter<TUpdate>? filter = default)
-            where THandler : class, IScopedUpdateHandler where TUpdate : class
+        /// <summary>
+        /// Add telegram updater to the <see cref="IServiceCollection"/>.
+        /// <b>Which the auto update writer is disabled!.</b>
+        /// </summary>
+        /// <remarks>
+        /// This method adds updater and handlers to the <see cref="IServiceCollection"/>,
+        /// But not <paramref name="telegramBot"/>! and you should do it yourself.
+        /// <para>You better pass botToken as <see cref="string"/></para>
+        /// </remarks>
+        /// <typeparam name="TWriter">This is your writer background service. a child class of <see cref="UpdateWriterServiceAbs"/></typeparam>
+        /// <param name="telegramBot"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
+        public static void AddTelegramManualUpdater<TWriter>(this IServiceCollection serviceDescriptors,
+                                                             ITelegramBotClient telegramBot,
+                                                             UpdaterOptions updaterOptions,
+                                                             Action<UpdaterServiceBuilder> builder)
+            where TWriter : UpdateWriterServiceAbs
         {
-            updater.AddScopedHandler<THandler, TUpdate>(filter);
-            return updater;
+            var updaterBuilder = new UpdaterServiceBuilder();
+            builder(updaterBuilder);
+
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
+
+            serviceDescriptors.AddSingleton(
+                services =>
+                {
+                    var updater = new Updater(telegramBot, new UpdaterOptions(
+                        updaterOptions.MaxDegreeOfParallelism,
+                        updaterOptions.PerUserOneByOneProcess,
+                        logger: services.GetRequiredService<ILogger<Updater>>(),
+                        updaterOptions.CancellationToken,
+                        updaterOptions.FlushUpdatesQueue,
+                        updaterOptions.AllowedUpdates
+                     ), services);
+
+                    updaterBuilder.AddToUpdater(updater);
+                    return updater;
+                });
+
+            serviceDescriptors.AddHostedService<ManualWritingUpdaterService>();
+            serviceDescriptors.AddHostedService<TWriter>();
         }
 
         /// <summary>
         /// Use this method to write updates when manual writing in enabled.
         /// </summary>
         public static async Task WriteUpdateAsync(this Updater updater,
-                                                  Update update)
-            => await updater.ChannelWriter.WriteAsync(update);
+                                                  Update update,
+                                                  CancellationToken cancellationToken = default)
+            => await updater.ChannelWriter.WriteAsync(update, cancellationToken);
     }
 }

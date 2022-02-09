@@ -3,16 +3,22 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using System.Collections.Generic;
 using TelegramUpdater.UpdateHandlers.ScopedHandlers;
+using TelegramUpdater.ExceptionHandlers;
+using System.Threading.Tasks;
+using TelegramUpdater.UpdateHandlers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TelegramUpdater.Hosting
 {
     public class UpdaterServiceBuilder
     {
         private readonly List<IScopedHandlerContainer> _scopedHandlerContainers;
+        private readonly List<IExceptionHandler> _exceptionHandlers;
 
         public UpdaterServiceBuilder()
         {
             _scopedHandlerContainers = new List<IScopedHandlerContainer>();
+            _exceptionHandlers = new List<IExceptionHandler>();
         }
 
         /// <summary>
@@ -25,14 +31,27 @@ namespace TelegramUpdater.Hosting
                 updater.AddScopedHandler(container);
             }
 
+            foreach (var exceptionHandler in _exceptionHandlers)
+            {
+                updater.AddExceptionHandler(exceptionHandler);
+            }
+
             _scopedHandlerContainers.Clear();
         }
 
-        public IEnumerable<IScopedHandlerContainer> IterScopedContainers()
+        internal IEnumerable<IScopedHandlerContainer> IterScopedContainers()
         {
             foreach (var container in _scopedHandlerContainers)
             {
                 yield return container;
+            }
+        }
+
+        internal void AddToServiceCollection(IServiceCollection serviceDescriptors)
+        {
+            foreach (var container in IterScopedContainers())
+            {
+                serviceDescriptors.AddScoped(container.ScopedHandlerType);
             }
         }
 
@@ -46,6 +65,16 @@ namespace TelegramUpdater.Hosting
         public UpdaterServiceBuilder AddHandler(IScopedHandlerContainer scopedHandlerContainer)
         {
             _scopedHandlerContainers.Add(scopedHandlerContainer);
+            return this;
+        }
+
+        /// <summary>
+        /// Add your exception handler to this updater.
+        /// </summary>
+        /// <param name="exceptionHandler"></param>
+        public UpdaterServiceBuilder AddExceptionHandler(IExceptionHandler exceptionHandler)
+        {
+            _exceptionHandlers.Add(exceptionHandler);
             return this;
         }
 
@@ -210,5 +239,40 @@ namespace TelegramUpdater.Hosting
         public UpdaterServiceBuilder AddCallbackQueryHandler<THandler>(Filter<CallbackQuery>? filter = default)
             where THandler : IScopedUpdateHandler
             => AddHandler<THandler, CallbackQuery>(filter, UpdateType.Message, x => x.CallbackQuery!);
+
+        /// <summary>
+        /// Add your exception handler to this updater.
+        /// </summary>
+        /// <param name="callback">A callback function that will be called when the error catched.</param>
+        /// <param name="messageMatch">Handle only when <see cref="Exception.Message"/> matches a text.</param>
+        /// <param name="allowedHandlers">
+        /// Handle only when the <see cref="Exception"/> occured in specified
+        /// <see cref="IUpdateHandler"/>s
+        /// <para>Leave null to handle all.</para>
+        /// </param>
+        public UpdaterServiceBuilder AddExceptionHandler<TException>(
+            Func<Updater, Exception, Task> callback,
+            Filter<string>? messageMatch = default,
+            Type[]? allowedHandlers = null,
+            bool inherit = false) where TException : Exception
+        {
+            return AddExceptionHandler(
+                new ExceptionHandler<TException>(callback, messageMatch, allowedHandlers, inherit));
+        }
+
+        /// <summary>
+        /// Add your exception handler to this updater.
+        /// </summary>
+        /// <param name="callback">A callback function that will be called when the error catched.</param>
+        /// <param name="messageMatch">Handle only when <see cref="Exception.Message"/> matches a text.</param>
+        public UpdaterServiceBuilder AddExceptionHandler<TException, THandler>(
+            Func<Updater, Exception, Task> callback,
+            Filter<string>? messageMatch = default,
+            bool inherit = false)
+            where TException : Exception where THandler : IUpdateHandler
+        {
+            return AddExceptionHandler<TException>(
+                callback, messageMatch, new[] { typeof(THandler) }, inherit);
+        }
     }
 }
