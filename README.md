@@ -188,4 +188,4 @@ And take a look at this [webhook example](https://github.com/TelegramUpdater/Tel
 
 ## Next?!
 
-Find documents under https://telegramupdater.github.io/ ( Yet Working on it ... )
+Find documents under https://telegramupdater.github.io/Docs/ ( Yet Working on it ... )
