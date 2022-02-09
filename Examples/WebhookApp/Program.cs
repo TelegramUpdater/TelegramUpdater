@@ -9,8 +9,16 @@ var builder = WebApplication.CreateBuilder(args);
 var updaterConfigs = builder.Configuration.GetUpdaterConfigs();
 
 builder.Services.AddTelegramManualUpdater(
-    updaterConfigs, (builder) =>
-        builder.AddMessageHandler<SimpleMessageHandler>()
+    updaterConfigs,
+    (builder) => builder
+        .AddMessageHandler<SimpleMessageHandler>()
+        .AddExceptionHandler<Exception>(
+            (u, e) =>
+            {
+                u.Logger.LogWarning(exception: e, message: "Error while handlig ...");
+                return Task.CompletedTask;
+            }, inherit: true)
+        );
 );
 
 builder.Services.AddWebhookConfigs<WebhookConfigs>();

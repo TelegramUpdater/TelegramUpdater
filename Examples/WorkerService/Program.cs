@@ -16,8 +16,15 @@ IHost host = Host.CreateDefaultBuilder(args)
                 perUserOneByOneProcess: true, // a user should finish a request to go to next one.
                 allowedUpdates: new[] { UpdateType.Message, UpdateType.CallbackQuery }),
 
-            (builder) =>
-                builder.AddMessageHandler<SimpleMessageHandler>());
+            (builder) => builder
+                .AddMessageHandler<SimpleMessageHandler>()
+                .AddExceptionHandler<Exception>(
+                    (u, e) =>
+                    {
+                        u.Logger.LogWarning(exception: e, message: "Error while handlig ...");
+                        return Task.CompletedTask;
+                    }, inherit: true)
+                );
     })
     .Build();
 
