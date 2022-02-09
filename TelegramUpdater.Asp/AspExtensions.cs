@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +15,7 @@ namespace TelegramUpdater.Asp
     {
         /// <summary>
         /// Use this in you webhook app if you wanna write updates from webhook controller,
-        /// Using <see cref="WriteUpdateAsync(Updater, Update)"/>
+        /// Using <see cref="WriteUpdateFromWebhook(Updater, Update)"/>
         /// </summary>
         /// <param name="serviceDescriptors"></param>
         /// <param name="configs"></param>
@@ -113,8 +114,11 @@ namespace TelegramUpdater.Asp
                                          new { controller = controllerName, action = "Post" });
         }
 
-        public static async Task WriteUpdateAsync(this Updater updater,
-                                                  Update update)
-            => await updater.ChannelWriter.WriteAsync(update);
+        public static async Task<ActionResult> WriteUpdateFromWebhook(this Updater updater,
+                                                                      Update update)
+        { 
+            await updater.ChannelWriter.WriteAsync(update);
+            return new OkResult();
+        }
     }
 }

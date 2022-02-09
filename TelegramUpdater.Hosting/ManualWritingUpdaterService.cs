@@ -1,7 +1,6 @@
 ﻿using System;
-using TelegramUpdater.Hosting;
 
-namespace TelegramUpdater.Asp.Services
+namespace TelegramUpdater.Hosting
 {
     public class ManualWritingUpdaterService : UpdaterService
     {

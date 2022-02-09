@@ -10,9 +10,6 @@ namespace WebhookApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromServices] Updater updater,
                                               [FromBody] Update update)
-        {
-            await updater.WriteUpdateAsync(update);
-            return Ok();
-        }
+            => await updater.WriteUpdateFromWebhook(update);
     }
 }

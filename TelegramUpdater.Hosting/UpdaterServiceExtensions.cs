@@ -281,5 +281,12 @@ namespace TelegramUpdater.Hosting
             updater.AddScopedHandler<THandler, TUpdate>(filter);
             return updater;
         }
+
+        /// <summary>
+        /// Use this method to write updates when manual writing in enabled.
+        /// </summary>
+        public static async Task WriteUpdateAsync(this Updater updater,
+                                                  Update update)
+            => await updater.ChannelWriter.WriteAsync(update);
     }
 }
