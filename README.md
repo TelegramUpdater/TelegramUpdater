@@ -41,6 +41,23 @@ internal class PrivateTestCommand : Filter<Message>
 }
 ```
 
+- Simple setup
+- Useful options
+```cs
+updater = new Updater(new TelegramBotClient("BotToken"),
+    new UpdaterOptions(
+        maxDegreeOfParallelism: 10, // maximum update process tasks count at the same time
+                                    // Eg: first 10 updates are answers quickly, but others should wait
+                                    // for any of that 10 to be done.
+
+        perUserOneByOneProcess: true, // a user should finish a request to go to next one.
+        allowedUpdates: new[] { UpdateType.Message, UpdateType.CallbackQuery }))
+
+    .AddScopedMessage<MyScopedMessageHandler>(); // Scoped handler;
+
+await updater.Start(true); // 🔥 Fire up and block!
+```
+
 - `OpenChannel` Method! You can use this to wait for a user response.
 - Batch of extension methods to incease speed and make cleaner code.
 
