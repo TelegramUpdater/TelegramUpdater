@@ -19,7 +19,6 @@ builder.Services.AddTelegramManualUpdater(
                 return Task.CompletedTask;
             }, inherit: true)
         );
-);
 
 builder.Services.AddWebhookConfigs<WebhookConfigs>();
 

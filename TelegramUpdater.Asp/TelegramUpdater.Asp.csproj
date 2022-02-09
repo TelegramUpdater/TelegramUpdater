@@ -3,8 +3,31 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
 	  <Nullable>enable</Nullable>
+	  <Authors>immmdreza</Authors>
+	  <Company>TelegramUpdater</Company>
+	  <Version>1.0.1</Version>
+	  <Description>Asp extension package for TelegramUpdater</Description>
+	  <Copyright>TelegramUpdater by immmdreza</Copyright>
+	  <PackageProjectUrl>https://telegramupdater.github.io/</PackageProjectUrl>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <RepositoryUrl>https://github.com/TelegramUpdater/TelegramUpdater</RepositoryUrl>
+	  <PackageTags>telegram; telegram-bot; bot-api; csharp; framework</PackageTags>
+	  <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
+	  <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
+  <ItemGroup>
+	  <None Include=".\README.md">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+	  </None>
+	  
+	  <None Include="..\LICENSE">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+	  </None>
+  </ItemGroup>
+	
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
