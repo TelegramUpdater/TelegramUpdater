@@ -31,7 +31,7 @@ If you're looking for a quick basic example:
 using TelegramUpdater;
 
 var updater = new UpdaterBuilder(
-    "2015323878:AAEBfa-pTNt4fC9O1_Gw3FD9ZnreySiWhc8")
+    "BOT_TOKEN")
 
     .StepOne()
 
