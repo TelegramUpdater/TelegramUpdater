@@ -6,6 +6,82 @@ The updater is supposed to fetch and handle new updates coming from bot api serv
 
 The updater is written on top of [TelegramBots/Telegram.Bot: .NET Client for Telegram Bot API](https://github.com/TelegramBots/Telegram.Bot) package
 
+## Why use this?
+
+- Updater uses update handlers which are a great help to write clean, simple to write and read and more powerfull code base.
+- Updater provides `Filter<T>` class that helps you to easily choose the right handler for incoming updates.
+Take a look at code below describing a handler:
+
+```csharp
+using Telegram.Bot.Types;
+using TelegramUpdater;
+using TelegramUpdater.UpdateContainer;
+using TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse;
+
+namespace ConsoleApp;
+
+[ApplyFilter(typeof(PrivateTestCommand))]
+internal class MyScopedMessageHandler : ScopedMessageHandler
+{
+    public MyScopedMessageHandler() : base(group: 0)
+    { }
+
+    protected override async Task HandleAsync(UpdateContainerAbs<Message> container)
+    {
+        await container.Response("Tested!");
+    }
+}
+
+internal class PrivateTestCommand : Filter<Message>
+{
+    public PrivateTestCommand()
+        : base(FilterCutify.OnCommand("test") & FilterCutify.PM())
+    {
+    }
+}
+```
+
+- `OpenChannel` Method! You can use this to wait for a user response.
+- Batch of extension methods to incease speed and make cleaner code.
+
+As instance `ChannelUserClick` is an helper method for `OpenChannel` that waits for a user click.
+
+```cs
+var msg = await container.Response($"Are you ok? answer quick!",
+    replyMarkup: new InlineKeyboardMarkup(
+        InlineKeyboardButton.WithCallbackData("Yes i'm OK!", "ok")));
+
+await container.ChannelUserClick(TimeSpan.FromSeconds(5), "ok")
+    .IfNotNull(async answer =>
+    {
+        await answer.Edit(text: "Well ...");
+    })
+    .Else(async _ =>
+    {
+        await msg.Edit("Slow");
+    });
+```
+
+- `ExceptionHandler`s, handle exceptions like a pro with highly customizable exceptions handlers. you specify exception type, message match, handler type and ...
+
+```cs
+    .StepTwo(CommonExceptions.ParsingException(
+        (updater, ex) =>
+        {
+            updater.Logger.LogWarning(exception: ex, "Handler has entity parsing error!");
+            return Task.CompletedTask;
+        },
+        allowedHandlers: new[]
+        {
+            typeof(AboutMessageHandler),
+            typeof(MyScopedMessageHandler)
+        }))
+```
+
+- Supports DI and batch of extension methods for hosted or wenhook apps ( thanks to Telegram.Bot webhook example )
+- Updater has a lot of base classes, interfaces and generic types to make everything highly customizable.
+- More ...
+
 ## Getting Started
 
 Here are starting pack for common SDKs in .NET
@@ -86,6 +162,12 @@ Webhook app is similar to IHosting app where Update Writer is external! ( Update
 Use this [nuget package](https://www.nuget.org/packages/TelegramUpdater.Asp/1.0.1) for a full set of extensions for webhook aps.
 
 And take a look at this [webhook example](https://github.com/TelegramUpdater/TelegramUpdater/tree/master/Examples/WebhookApp).
+
+## Road Map
+
+- [ ] Add ready to use handlers for all updates
+- [ ] Tests
+- [ ] Add more filters
 
 ## Next?!
 
