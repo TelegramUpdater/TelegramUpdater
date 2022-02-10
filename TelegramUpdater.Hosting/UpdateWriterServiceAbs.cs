@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace TelegramUpdater.Hosting
@@ -27,7 +29,13 @@ namespace TelegramUpdater.Hosting
             _updater = updater;
         }
 
-        public Updater Updater { get { return _updater; } }
+        protected Updater Updater { get { return _updater; } }
+
+        protected UpdaterOptions Options => _updater.UpdaterOptions;
+
+        protected ITelegramBotClient BotClient => _updater.BotClient;
+
+        protected ILogger<Updater> Logger => _updater.Logger;
 
         /// <summary>
         /// Here you should implement code to getUpdates.

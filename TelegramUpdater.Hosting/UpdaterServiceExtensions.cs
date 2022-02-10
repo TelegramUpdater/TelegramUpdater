@@ -33,6 +33,11 @@ namespace TelegramUpdater.Hosting
         /// You can use <see cref="AspExtensions.GetUpdaterConfigs(Microsoft.Extensions.Configuration.IConfiguration, string)"/>
         /// to read configs from appsettings.json
         /// </param>
+        /// <remarks>
+        /// Use updater configs only in webhook apps! Since it miss
+        /// <see cref="UpdaterOptions.AllowedUpdates"/> and <see cref="UpdaterOptions.FlushUpdatesQueue"/>.
+        /// If you wanna specify these and update writer is not an external webhook use <see cref="UpdaterOptions"/>.
+        /// </remarks>
         public static void AddTelegramUpdater(this IServiceCollection serviceDescriptors,
                                               UpdaterConfigs configs,
                                               Action<UpdaterServiceBuilder> builder)
@@ -69,6 +74,11 @@ namespace TelegramUpdater.Hosting
         /// to read configs from appsettings.json
         /// </param>
         /// <typeparam name="T">Type of your custom updater service. a child class of <see cref="UpdaterService"/></typeparam>
+        /// <remarks>
+        /// Use updater configs only in webhook apps! Since it miss
+        /// <see cref="UpdaterOptions.AllowedUpdates"/> and <see cref="UpdaterOptions.FlushUpdatesQueue"/>.
+        /// If you wanna specify these and update writer is not an external webhook use <see cref="UpdaterOptions"/>.
+        /// </remarks>
         public static void AddTelegramUpdater<T>(this IServiceCollection serviceDescriptors,
                                                  UpdaterConfigs configs,
                                                  Action<UpdaterServiceBuilder> builder)
@@ -107,6 +117,11 @@ namespace TelegramUpdater.Hosting
         /// </param>
         /// <typeparam name="TUpdater">Type of your custom updater service. a child class of <see cref="UpdaterService"/></typeparam>
         /// <typeparam name="TWriter">This is your writer background service. a child class of <see cref="UpdateWriterServiceAbs"/></typeparam>
+        /// <remarks>
+        /// Use updater configs only in webhook apps! Since it miss
+        /// <see cref="UpdaterOptions.AllowedUpdates"/> and <see cref="UpdaterOptions.FlushUpdatesQueue"/>.
+        /// If you wanna specify these and update writer is not an external webhook use <see cref="UpdaterOptions"/>.
+        /// </remarks>
         public static void AddTelegramUpdater<TUpdater, TWriter>(this IServiceCollection serviceDescriptors,
                                                                  UpdaterConfigs configs,
                                                                  Action<UpdaterServiceBuilder> builder)
@@ -174,7 +189,8 @@ namespace TelegramUpdater.Hosting
                     return updater;
                 });
 
-            serviceDescriptors.AddHostedService<UpdaterService>();
+            serviceDescriptors.AddHostedService<ManualWritingUpdaterService>();
+            serviceDescriptors.AddHostedService<WriterService>();
         }
 
         /// <summary>
@@ -297,7 +313,8 @@ namespace TelegramUpdater.Hosting
                     return updater;
                 });
 
-            serviceDescriptors.AddHostedService<UpdaterService>();
+            serviceDescriptors.AddHostedService<ManualWritingUpdaterService>();
+            serviceDescriptors.AddHostedService<WriterService>();
         }
 
         /// <summary>

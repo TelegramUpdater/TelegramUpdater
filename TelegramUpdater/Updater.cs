@@ -84,11 +84,14 @@ namespace TelegramUpdater
             _logger.LogInformation("Logger initialized.");
         }
 
+        public UpdaterOptions UpdaterOptions => _updaterOptions;
+
         public CancellationToken EmergencyToken => _emergencyCts.Token;
 
         public ITelegramBotClient BotClient => _botClient;
 
         public ILogger<Updater> Logger => _logger;
+
 
         /// <summary>
         /// A dict of tasks for in process updates
