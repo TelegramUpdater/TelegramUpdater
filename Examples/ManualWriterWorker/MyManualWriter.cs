@@ -19,6 +19,8 @@ namespace ManualWriterWorker
 
         protected override async Task GetUpdatesProcess(CancellationToken stoppingToken)
         {
+            Logger.LogInformation("Getting updates from my manual writer using Polling extesion.");
+
             var receiverOptions = new ReceiverOptions
             {
                 AllowedUpdates = { } // receive all update types
