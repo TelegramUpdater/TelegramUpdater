@@ -1,6 +1,6 @@
 # Here is **Updater**
 
-This is your telegram updater package written in C# and
+This is your telegram updater package written in C# and dotnet core 3.1
 
 The updater is supposed to fetch and handle new updates coming from bot api server
 
@@ -188,4 +188,4 @@ And take a look at this [webhook example](https://github.com/TelegramUpdater/Tel
 
 ## Next?!
 
-Find documents under https://telegramupdater.github.io/ ( Yet Working on it ... )
+Find documents under https://telegramupdater.github.io/Docs/ ( Yet Working on it ... )
