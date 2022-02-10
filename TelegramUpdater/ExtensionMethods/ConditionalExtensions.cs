@@ -15,10 +15,10 @@ namespace TelegramUpdater
         /// <summary>
         /// Do something when a regex matched.
         /// </summary>
-        public static MatchContext<T> If<T>(this UpdateContainerAbs<T> simpleContext,
+        public static MatchContext<T> If<T>(this IContainer<T> simpleContext,
                                             Func<T, string?> getText,
                                             string pattern,
-                                            Action<UpdateContainerAbs<T>> func,
+                                            Action<IContainer<T>> func,
                                             RegexOptions? regexOptions = default) where T : class
         {
             var match = MatchContext<T>.Check(simpleContext, getText, pattern, regexOptions);
@@ -34,9 +34,9 @@ namespace TelegramUpdater
         /// <summary>
         /// Do something when a condition is true.
         /// </summary>
-        public static MatchContext<T> If<T>(this UpdateContainerAbs<T> simpleContext,
-                                            Func<UpdateContainerAbs<T>, bool> predict,
-                                            Action<UpdateContainerAbs<T>> func) where T : class
+        public static MatchContext<T> If<T>(this IContainer<T> simpleContext,
+                                            Func<IContainer<T>, bool> predict,
+                                            Action<IContainer<T>> func) where T : class
         {
             if (predict(simpleContext))
             {
@@ -51,7 +51,7 @@ namespace TelegramUpdater
         /// Do something when a regex not matched.
         /// </summary>
         public static void Else<T>(this MatchContext<T> matchContext,
-                                   Action<UpdateContainerAbs<T>> func) where T : class
+                                   Action<IContainer<T>> func) where T : class
         {
             var match = matchContext;
             if (!match)
@@ -66,7 +66,7 @@ namespace TelegramUpdater
         public static MatchContext<T> ElseIf<T>(this MatchContext<T> matchContext,
                                                 Func<T, string?> getText,
                                                 string pattern,
-                                                Action<UpdateContainerAbs<T>> func,
+                                                Action<IContainer<T>> func,
                                                 RegexOptions? regexOptions = default) where T : class
         {
             if (!matchContext)
@@ -88,8 +88,8 @@ namespace TelegramUpdater
         /// Do something when a regex not matched but something else matched.
         /// </summary>
         public static MatchContext<T> ElseIf<T>(this MatchContext<T> matchContext,
-                                                Func<UpdateContainerAbs<T>, bool> predict,
-                                                Action<UpdateContainerAbs<T>> func) where T : class
+                                                Func<IContainer<T>, bool> predict,
+                                                Action<IContainer<T>> func) where T : class
         {
             if (!matchContext)
             {
@@ -105,8 +105,8 @@ namespace TelegramUpdater
             return matchContext;
         }
 
-        public static MatchContext<T> IfNotNull<T>(this UpdateContainerAbs<T>? simpleContext,
-                                                   Action<UpdateContainerAbs<T>> func) where T : class
+        public static MatchContext<T> IfNotNull<T>(this IContainer<T>? simpleContext,
+                                                   Action<IContainer<T>> func) where T : class
         {
             if (simpleContext != null)
             {
@@ -136,10 +136,10 @@ namespace TelegramUpdater
         /// <summary>
         /// Do something when a regex matched.
         /// </summary>
-        public static async Task<MatchContext<T>> If<T>(this UpdateContainerAbs<T> simpleContext,
+        public static async Task<MatchContext<T>> If<T>(this IContainer<T> simpleContext,
                                                         Func<T, string?> getText,
                                                         string pattern,
-                                                        Func<UpdateContainerAbs<T>, Task> func,
+                                                        Func<IContainer<T>, Task> func,
                                                         RegexOptions? regexOptions = default) where T : class
         {
             var match = MatchContext<T>.Check(simpleContext, getText, pattern, regexOptions);
@@ -155,10 +155,10 @@ namespace TelegramUpdater
         /// <summary>
         /// Do something when a regex matched.
         /// </summary>
-        public static async Task<MatchContext<T>> If<T>(this Task<UpdateContainerAbs<T>> simpleContext,
+        public static async Task<MatchContext<T>> If<T>(this Task<IContainer<T>> simpleContext,
                                                         Func<T, string?> getText,
                                                         string pattern,
-                                                        Func<UpdateContainerAbs<T>, Task> func,
+                                                        Func<IContainer<T>, Task> func,
                                                         RegexOptions? regexOptions = default) where T : class
         {
             var gottenContext = await simpleContext;
@@ -176,9 +176,9 @@ namespace TelegramUpdater
         /// <summary>
         /// Do something when a condition is true.
         /// </summary>
-        public static async Task<MatchContext<T>> If<T>(this UpdateContainerAbs<T> simpleContext,
-                                                        Func<UpdateContainerAbs<T>, bool> predict,
-                                                        Func<UpdateContainerAbs<T>, Task> func) where T : class
+        public static async Task<MatchContext<T>> If<T>(this IContainer<T> simpleContext,
+                                                        Func<IContainer<T>, bool> predict,
+                                                        Func<IContainer<T>, Task> func) where T : class
         {
             if (predict(simpleContext))
             {
@@ -192,9 +192,9 @@ namespace TelegramUpdater
         /// <summary>
         /// Do something when a condition is true.
         /// </summary>
-        public static async Task<MatchContext<T>> If<T>(this Task<UpdateContainerAbs<T>> simpleContext,
-                                                        Func<UpdateContainerAbs<T>, bool> predict,
-                                                        Func<UpdateContainerAbs<T>, Task> func) where T : class
+        public static async Task<MatchContext<T>> If<T>(this Task<IContainer<T>> simpleContext,
+                                                        Func<IContainer<T>, bool> predict,
+                                                        Func<IContainer<T>, Task> func) where T : class
         {
             var gottenContext = await simpleContext;
 
@@ -210,8 +210,8 @@ namespace TelegramUpdater
         /// <summary>
         /// If this <see cref="UpdateContainerAbs{T}"/> is not null
         /// </summary>
-        public static async Task<MatchContext<T>> IfNotNull<T>(this UpdateContainerAbs<T>? simpleContext,
-                                                               Func<UpdateContainerAbs<T>, Task> func) where T : class
+        public static async Task<MatchContext<T>> IfNotNull<T>(this IContainer<T>? simpleContext,
+                                                               Func<IContainer<T>, Task> func) where T : class
         {
             if (simpleContext != null)
             {
@@ -225,8 +225,8 @@ namespace TelegramUpdater
         /// <summary>
         /// If this <see cref="UpdateContainerAbs{T}"/> is not null
         /// </summary>
-        public static async Task<MatchContext<T>> IfNotNull<T>(this Task<UpdateContainerAbs<T>?> simpleContext,
-                                                               Func<UpdateContainerAbs<T>, Task> func) where T : class
+        public static async Task<MatchContext<T>> IfNotNull<T>(this Task<IContainer<T>?> simpleContext,
+                                                               Func<IContainer<T>, Task> func) where T : class
         {
             var gottenContext = await simpleContext;
 
@@ -243,7 +243,7 @@ namespace TelegramUpdater
         /// Do something when a regex not matched.
         /// </summary>
         public static async Task Else<T>(this Task<MatchContext<T>> matchContext,
-                                         Func<UpdateContainerAbs<T>, Task> func) where T : class
+                                         Func<IContainer<T>, Task> func) where T : class
         {
             var match = await matchContext;
             if (!match)
@@ -258,7 +258,7 @@ namespace TelegramUpdater
         public static async Task<MatchContext<T>> ElseIf<T>(this Task<MatchContext<T>> matchContext,
                                                             Func<T, string?> getText,
                                                             string pattern,
-                                                            Func<UpdateContainerAbs<T>, Task> func,
+                                                            Func<IContainer<T>, Task> func,
                                                             RegexOptions? regexOptions = default) where T : class
         {
             var prevMatch = await matchContext;
@@ -281,8 +281,8 @@ namespace TelegramUpdater
         /// Do something when a regex not matched but something else matched.
         /// </summary>
         public static async Task<MatchContext<T>> ElseIf<T>(this Task<MatchContext<T>> matchContext,
-                                                            Func<UpdateContainerAbs<T>, bool> predict,
-                                                            Func<UpdateContainerAbs<T>, Task> func) where T : class
+                                                            Func<IContainer<T>, bool> predict,
+                                                            Func<IContainer<T>, Task> func) where T : class
         {
             var prevMatch = await matchContext;
             if (!prevMatch)
@@ -306,19 +306,19 @@ namespace TelegramUpdater
         /// <summary>
         /// Do something when a regex matched.
         /// </summary>
-        public static async Task<MatchContext<Message>> If(this UpdateContainerAbs<Message> simpleContext,
-                                                                  string pattern,
-                                                                  Func<UpdateContainerAbs<Message>, Task> func,
-                                                                  RegexOptions? regexOptions = default)
+        public static async Task<MatchContext<Message>> If(this IContainer<Message> simpleContext,
+                                                           string pattern,
+                                                           Func<IContainer<Message>, Task> func,
+                                                           RegexOptions? regexOptions = default)
             => await simpleContext.If(x => x.Text, pattern, func, regexOptions);
 
         /// <summary>
         /// Do something when a regex matched.
         /// </summary>
-        public static async Task<MatchContext<CallbackQuery>> If(this UpdateContainerAbs<CallbackQuery> simpleContext,
-                                                                        string pattern,
-                                                                        Func<UpdateContainerAbs<CallbackQuery>, Task> func,
-                                                                        RegexOptions? regexOptions = default)
+        public static async Task<MatchContext<CallbackQuery>> If(this IContainer<CallbackQuery> simpleContext,
+                                                                 string pattern,
+                                                                 Func<IContainer<CallbackQuery>, Task> func,
+                                                                 RegexOptions? regexOptions = default)
             => await simpleContext.If(x => x.Data, pattern, func, regexOptions);
 
         /// <summary>
@@ -326,7 +326,7 @@ namespace TelegramUpdater
         /// </summary>
         public static async Task<MatchContext<CallbackQuery>> ElseIf(this Task<MatchContext<CallbackQuery>> matchContext,
                                                                      string pattern,
-                                                                     Func<UpdateContainerAbs<CallbackQuery>, Task> func,
+                                                                     Func<IContainer<CallbackQuery>, Task> func,
                                                                      RegexOptions? regexOptions = default)
             => await matchContext.ElseIf(x => x.Data, pattern, func, regexOptions);
 
@@ -335,7 +335,7 @@ namespace TelegramUpdater
         /// </summary>
         public static async Task<MatchContext<Message>> ElseIf(this Task<MatchContext<Message>> matchContext,
                                                                string pattern,
-                                                               Func<UpdateContainerAbs<Message>, Task> func,
+                                                               Func<IContainer<Message>, Task> func,
                                                                RegexOptions? regexOptions = default)
             => await matchContext.ElseIf(x => x.Text, pattern, func, regexOptions);
 

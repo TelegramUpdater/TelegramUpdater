@@ -9,7 +9,7 @@ namespace UpdaterProduction
     [ApplyFilter(typeof(AboutCommand))]
     internal class AboutMessageHandler : ScopedMessageHandler
     {
-        protected override async Task HandleAsync(UpdateContainerAbs<Message> container)
+        protected override async Task HandleAsync(IContainer<Message> container)
         {
             await container.Response($"*How about you?", parseMode: ParseMode.Markdown);
         }

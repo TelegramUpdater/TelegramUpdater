@@ -13,7 +13,7 @@ namespace TelegramUpdater.UpdateContainer
         /// <summary>
         /// The received update.
         /// </summary>
-        public Update Insider { get; }
+        public Update Container { get; }
 
         /// <summary>
         /// <see cref="ITelegramBotClient"/> which is resposeable for this container.

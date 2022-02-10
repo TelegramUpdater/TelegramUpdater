@@ -51,9 +51,9 @@ namespace TelegramUpdater.UpdateHandlers
             return ShouldHandle(insider);
         }
 
-        protected abstract Task HandleAsync(UpdateContainerAbs<T> updateContainer);
+        protected abstract Task HandleAsync(IContainer<T> updateContainer);
 
-        protected abstract UpdateContainerAbs<T> ContainerBuilder(
+        protected abstract IContainer<T> ContainerBuilder(
             Updater updater, ITelegramBotClient botClient, Update update);
     }
 }

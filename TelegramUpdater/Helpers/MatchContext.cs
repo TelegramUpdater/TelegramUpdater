@@ -9,7 +9,7 @@ namespace TelegramUpdater.Helpers
     /// </summary>
     public readonly struct MatchContext<TUpdate> where TUpdate : class
     {
-        public MatchContext(UpdateContainerAbs<TUpdate> simpleContext,
+        public MatchContext(IContainer<TUpdate> simpleContext,
                             bool isMatched = default,
                             MatchCollection? matchCollection = default)
         {
@@ -22,10 +22,10 @@ namespace TelegramUpdater.Helpers
 
         public MatchCollection? MatchCollection { get; }
 
-        public UpdateContainerAbs<TUpdate> SimpleContext { get; }
+        public IContainer<TUpdate> SimpleContext { get; }
 
         public static MatchContext<T> Check<T>(
-            UpdateContainerAbs<T> simpleContext,
+            IContainer<T> simpleContext,
             Func<T, string?> getText,
             string pattern,
             RegexOptions? regexOptions = default) where T : class

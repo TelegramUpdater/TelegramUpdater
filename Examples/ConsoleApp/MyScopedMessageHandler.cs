@@ -11,7 +11,7 @@ internal class MyScopedMessageHandler : ScopedMessageHandler
     public MyScopedMessageHandler() : base(group: 0)
     { }
 
-    protected override async Task HandleAsync(UpdateContainerAbs<Message> container)
+    protected override async Task HandleAsync(IContainer<Message> container)
     {
         await container.Response("Tested!");
     }

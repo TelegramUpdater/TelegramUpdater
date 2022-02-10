@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\TelegramUpdater\TelegramUpdater.csproj" />
+    <PackageReference Include="TelegramUpdater" Version="1.0.4-alpha" />
   </ItemGroup>
 
 </Project>

@@ -12,20 +12,20 @@ namespace TelegramUpdater
 {
     public static class CallbackQueryContextExtensions
     {
-        public static long SenderId(this UpdateContainerAbs<CallbackQuery> simpleContext)
+        public static long SenderId(this IContainer<CallbackQuery> simpleContext)
             => simpleContext.Update.From.Id;
 
-        public static User Sender(this UpdateContainerAbs<CallbackQuery> simpleContext)
+        public static User Sender(this IContainer<CallbackQuery> simpleContext)
             => simpleContext.Update.From;
 
-        public static async Task<UpdateContainerAbs<Message>> Send(this UpdateContainerAbs<CallbackQuery> simpleContext,
-                                                string text,
-                                                bool sendAsReply = true,
-                                                ParseMode? parseMode = default,
-                                                IEnumerable<MessageEntity>? messageEntities = default,
-                                                bool? disableWebpagePreview = default,
-                                                bool? disableNotification = default,
-                                                IReplyMarkup? replyMarkup = default)
+        public static async Task<IContainer<Message>> Send(this IContainer<CallbackQuery> simpleContext,
+                                                           string text,
+                                                           bool sendAsReply = true,
+                                                           ParseMode? parseMode = default,
+                                                           IEnumerable<MessageEntity>? messageEntities = default,
+                                                           bool? disableWebpagePreview = default,
+                                                           bool? disableNotification = default,
+                                                           IReplyMarkup? replyMarkup = default)
         {
             if (simpleContext.Update.Message != null)
             {
@@ -51,7 +51,7 @@ namespace TelegramUpdater
         /// Answers a <see cref="CallbackQuery"/>.
         /// Shortcut for <c>AnswerCallbackQueryAsync</c>
         /// </summary>
-        public static async Task Answer(this UpdateContainerAbs<CallbackQuery> simpleContext, string? text = default,
+        public static async Task Answer(this IContainer<CallbackQuery> simpleContext, string? text = default,
                                         bool? showAlert = default, string? url = default, int? cacheTime = default,
                                         CancellationToken cancellationToken = default)
             => await simpleContext.BotClient.AnswerCallbackQueryAsync(simpleContext.Update.Id, text, showAlert, url,
@@ -61,13 +61,13 @@ namespace TelegramUpdater
         /// Edits a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<UpdateContainerAbs<Message>?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
-                                                string text,
-                                                ParseMode? parseMode = default,
-                                                IEnumerable<MessageEntity>? messageEntities = default,
-                                                bool? disableWebpagePreview = default,
-                                                InlineKeyboardMarkup? inlineKeyboardMarkup = default,
-                                                CancellationToken cancellationToken = default)
+        public static async Task<IContainer<Message>?> Edit(this IContainer<CallbackQuery> simpleContext,
+                                                            string text,
+                                                            ParseMode? parseMode = default,
+                                                            IEnumerable<MessageEntity>? messageEntities = default,
+                                                            bool? disableWebpagePreview = default,
+                                                            InlineKeyboardMarkup? inlineKeyboardMarkup = default,
+                                                            CancellationToken cancellationToken = default)
         {
             if (simpleContext.Update.InlineMessageId != null)
             {
@@ -100,7 +100,7 @@ namespace TelegramUpdater
         /// Edits live location of a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<UpdateContainerAbs<Message>?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
+        public static async Task<IContainer<Message>?> Edit(this IContainer<CallbackQuery> simpleContext,
                                                 double latitude,
                                                 double longitude,
                                                 float? horizontalAccuracy = default,
@@ -142,7 +142,7 @@ namespace TelegramUpdater
         /// Edits media of a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<UpdateContainerAbs<Message>?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
+        public static async Task<IContainer<Message>?> Edit(this IContainer<CallbackQuery> simpleContext,
                                                 InputMediaBase inputMediaBase,
                                                 InlineKeyboardMarkup? inlineKeyboardMarkup = default,
                                                 CancellationToken cancellationToken = default)
@@ -172,7 +172,7 @@ namespace TelegramUpdater
         /// Edits caption of a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<UpdateContainerAbs<Message>?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
+        public static async Task<IContainer<Message>?> Edit(this IContainer<CallbackQuery> simpleContext,
                                                 string caption,
                                                 ParseMode? parseMode = default,
                                                 IEnumerable<MessageEntity>? messageEntities = default,
@@ -208,7 +208,7 @@ namespace TelegramUpdater
         /// Edits reply markup of a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<UpdateContainerAbs<Message>?> Edit(this UpdateContainerAbs<CallbackQuery> simpleContext,
+        public static async Task<IContainer<Message>?> Edit(this IContainer<CallbackQuery> simpleContext,
                                                 InlineKeyboardMarkup? inlineKeyboardMarkup = default,
                                                 CancellationToken cancellationToken = default)
         {

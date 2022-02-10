@@ -18,9 +18,9 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
 
         public int Group { get; }
 
-        protected abstract Task HandleAsync(UpdateContainerAbs<T> updateContainer);
+        protected abstract Task HandleAsync(IContainer<T> updateContainer);
 
-        protected abstract UpdateContainerAbs<T> ContainerBuilder(
+        protected abstract IContainer<T> ContainerBuilder(
             Updater updater, ITelegramBotClient botClient, Update update);
 
         protected T? GetT(Update update) => _getT(update);

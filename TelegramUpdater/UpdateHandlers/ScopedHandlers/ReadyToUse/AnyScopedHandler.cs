@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramUpdater.UpdateContainer;
@@ -15,7 +12,7 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse
         {
         }
 
-        protected sealed override UpdateContainerAbs<T> ContainerBuilder(
+        protected sealed override IContainer<T> ContainerBuilder(
             Updater updater, ITelegramBotClient botClient, Update update)
         {
             return new AnyContainer<T>(GetT, updater, update, botClient);

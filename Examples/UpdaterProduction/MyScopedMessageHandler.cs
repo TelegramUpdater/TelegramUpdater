@@ -12,7 +12,7 @@ namespace UpdaterProduction
         public MyScopedMessageHandler(): base(group: -1)
         { }
 
-        protected override async Task HandleAsync(UpdateContainerAbs<Message> container)
+        protected override async Task HandleAsync(IContainer<Message> container)
         {
             var msg = await container.Response($"Are you ok? answer quick!",
                 replyMarkup: new InlineKeyboardMarkup(

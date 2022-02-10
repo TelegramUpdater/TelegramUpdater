@@ -331,11 +331,11 @@ namespace TelegramUpdater
         /// <param name="filter">Your filter.</param>
         /// <remarks>
         /// You can use <see cref="Updater.AddUpdateHandler(ISingletonUpdateHandler)"/>
-        /// or <see cref="Updater.AddScopedHandler(UpdateHandlers.ScopedHandlers.IScopedHandlerContainer)"/>
+        /// or <see cref="Updater.AddScopedHandler(IScopedHandlerContainer)"/>
         /// later to add more update handler.
         /// </remarks>
         public Updater StepThree(
-            Func<UpdateContainerAbs<Message>, Task> callbak,
+            Func<IContainer<Message>, Task> callbak,
             Filter<Message>? filter)
         {
             if (_updater == null)
@@ -389,7 +389,7 @@ namespace TelegramUpdater
         /// </param>
         /// <remarks>
         /// You can use <see cref="Updater.AddUpdateHandler(ISingletonUpdateHandler)"/>
-        /// or <see cref="Updater.AddScopedHandler(UpdateHandlers.ScopedHandlers.IScopedHandlerContainer)"/>
+        /// or <see cref="Updater.AddScopedHandler(IScopedHandlerContainer)"/>
         /// later to add more update handler.
         /// </remarks>
         public Updater StepThree(ISingletonUpdateHandler singletonUpdateHandler)
@@ -447,7 +447,7 @@ namespace TelegramUpdater
         /// </param>
         /// <remarks>
         /// You can use <see cref="Updater.AddUpdateHandler(ISingletonUpdateHandler)"/>
-        /// or <see cref="Updater.AddScopedHandler(UpdateHandlers.ScopedHandlers.IScopedHandlerContainer)"/>
+        /// or <see cref="Updater.AddScopedHandler(IScopedHandlerContainer)"/>
         /// later to add more update handler.
         /// </remarks>
         public Updater StepThree(IScopedHandlerContainer scopedHandlerContainer)

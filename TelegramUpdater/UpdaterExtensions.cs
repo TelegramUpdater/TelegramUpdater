@@ -10,33 +10,33 @@ namespace TelegramUpdater
     public static class CommonExtensions
     {
         internal static MessageContainer RebaseContainer<T>(
-            this UpdateContainerAbs<T> containerAbs, Message message) where T : class
+            this IContainer<T> containerAbs, Message message) where T : class
             => new MessageContainer(
                 containerAbs.Updater,
                 new Update { Message = message },
                 containerAbs.BotClient);
 
         internal static MessageContainer Wrap<T>(this Message message,
-                                            UpdateContainerAbs<T> containerAbs) where T : class
+                                            IContainer<T> containerAbs) where T : class
             => containerAbs.RebaseContainer(message);
 
         internal static async Task<MessageContainer> WrapAsync<T>(this Task<Message> message,
-                                            UpdateContainerAbs<T> containerAbs) where T : class
+                                            IContainer<T> containerAbs) where T : class
             => containerAbs.RebaseContainer(await message);
 
         internal static CallbackQueryContainer RebaseContainer<T>(
-            this UpdateContainerAbs<T> containerAbs, CallbackQuery callbackQuery) where T : class
+            this IContainer<T> containerAbs, CallbackQuery callbackQuery) where T : class
             => new CallbackQueryContainer(
                 containerAbs.Updater,
                 new Update { CallbackQuery = callbackQuery },
                 containerAbs.BotClient);
 
         internal static CallbackQueryContainer Wrap<T>(this CallbackQuery message,
-                                            UpdateContainerAbs<T> containerAbs) where T : class
+                                            IContainer<T> containerAbs) where T : class
             => containerAbs.RebaseContainer(message);
 
         internal static async Task<CallbackQueryContainer> WrapAsync<T>(this Task<CallbackQuery> message,
-                                            UpdateContainerAbs<T> containerAbs) where T : class
+                                            IContainer<T> containerAbs) where T : class
             => containerAbs.RebaseContainer(await message);
 
         public static object GetInnerUpdate(this Update update)

@@ -17,21 +17,21 @@ namespace TelegramUpdater
         /// </summary>
         /// <param name="simpleContext"></param>
         /// <returns></returns>
-        public static async Task Delete(this UpdateContainerAbs<Message> simpleContext)
+        public static async Task Delete(this IContainer<Message> simpleContext)
             => await simpleContext.BotClient.DeleteMessageAsync(
                 simpleContext.Update.Chat.Id, simpleContext.Update.MessageId);
 
         /// <summary>
         /// Updates a <see cref="Message"/> of your own with removing it and sending a new message.
         /// </summary>
-        public static async Task<UpdateContainerAbs<Message>> ForceUpdate(this UpdateContainerAbs<Message> simpleContext,
-                                                                     string text,
-                                                                     bool sendAsReply = true,
-                                                                     ParseMode? parseMode = default,
-                                                                     IEnumerable<MessageEntity>? messageEntities = default,
-                                                                     bool? disableWebpagePreview = default,
-                                                                     bool? disableNotification = default,
-                                                                     IReplyMarkup? replyMarkup = default)
+        public static async Task<IContainer<Message>> ForceUpdate(this IContainer<Message> simpleContext,
+                                                                  string text,
+                                                                  bool sendAsReply = true,
+                                                                  ParseMode? parseMode = default,
+                                                                  IEnumerable<MessageEntity>? messageEntities = default,
+                                                                  bool? disableWebpagePreview = default,
+                                                                  bool? disableNotification = default,
+                                                                  IReplyMarkup? replyMarkup = default)
         {
             if (simpleContext.Update.From?.Id != simpleContext.BotClient.BotId)
                 throw new InvalidOperationException("The message should be for the bot it self.");
@@ -56,14 +56,14 @@ namespace TelegramUpdater
         /// <param name="text">Text to response</param>
         /// <param name="sendAsReply">To send it as a replied message if possible.</param>
         /// <returns></returns>
-        public static async Task<UpdateContainerAbs<Message>> Response(this UpdateContainerAbs<Message> simpleContext,
-                                                                  string text,
-                                                                  bool sendAsReply = true,
-                                                                  ParseMode? parseMode = default,
-                                                                  IEnumerable<MessageEntity>? messageEntities = default,
-                                                                  bool? disableWebpagePreview = default,
-                                                                  bool? disableNotification = default,
-                                                                  IReplyMarkup? replyMarkup = default)
+        public static async Task<IContainer<Message>> Response(this IContainer<Message> simpleContext,
+                                                               string text,
+                                                               bool sendAsReply = true,
+                                                               ParseMode? parseMode = default,
+                                                               IEnumerable<MessageEntity>? messageEntities = default,
+                                                               bool? disableWebpagePreview = default,
+                                                               bool? disableNotification = default,
+                                                               IReplyMarkup? replyMarkup = default)
             => await simpleContext.BotClient.SendTextMessageAsync(simpleContext.Update.Chat.Id,
                                                                text,
                                                                parseMode,
@@ -79,13 +79,13 @@ namespace TelegramUpdater
         /// Edits a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<UpdateContainerAbs<Message>?> Edit(this UpdateContainerAbs<Message> simpleContext,
-                                                string text,
-                                                ParseMode? parseMode = default,
-                                                IEnumerable<MessageEntity>? messageEntities = default,
-                                                bool? disableWebpagePreview = default,
-                                                InlineKeyboardMarkup? inlineKeyboardMarkup = default,
-                                                CancellationToken cancellationToken = default)
+        public static async Task<IContainer<Message>?> Edit(this IContainer<Message> simpleContext,
+                                                            string text,
+                                                            ParseMode? parseMode = default,
+                                                            IEnumerable<MessageEntity>? messageEntities = default,
+                                                            bool? disableWebpagePreview = default,
+                                                            InlineKeyboardMarkup? inlineKeyboardMarkup = default,
+                                                            CancellationToken cancellationToken = default)
         {
             return await simpleContext.BotClient.EditMessageTextAsync(simpleContext.Update.Chat.Id,
                                                             simpleContext.Update.MessageId,
@@ -101,13 +101,13 @@ namespace TelegramUpdater
         /// <summary>
         /// Message is sent to private chat.
         /// </summary>
-        public static bool IsPrivate(this UpdateContainerAbs<Message> simpleContext)
+        public static bool IsPrivate(this IContainer<Message> simpleContext)
             => simpleContext.Update.Chat.Type == ChatType.Private;
 
         /// <summary>
         /// Message is sent to group chat.
         /// </summary>
-        public static bool IsGroup(this UpdateContainerAbs<Message> simpleContext)
+        public static bool IsGroup(this IContainer<Message> simpleContext)
             => simpleContext.Update.Chat.Type == ChatType.Supergroup ||
                 simpleContext.Update.Chat.Type == ChatType.Group;
     }

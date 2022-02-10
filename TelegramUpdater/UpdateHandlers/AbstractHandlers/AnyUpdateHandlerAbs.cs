@@ -15,7 +15,7 @@ namespace TelegramUpdater.UpdateHandlers.AbstractHandlers
         {
         }
 
-        protected override UpdateContainerAbs<T> ContainerBuilder(
+        protected override IContainer<T> ContainerBuilder(
             Updater updater, ITelegramBotClient botClient, Update update)
         {
             return new AnyContainer<T>(GetT, updater, update, botClient);

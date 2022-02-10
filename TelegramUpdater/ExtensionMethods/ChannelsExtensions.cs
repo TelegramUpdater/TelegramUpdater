@@ -15,7 +15,7 @@ namespace TelegramUpdater
         /// <param name="updateContainer">The update container</param>
         /// <param name="timeOut">Maximum allowed time to wait for the update.</param>
         /// <param name="filter">Filter updates to get the right one.</param>
-        public static async Task<UpdateContainerAbs<Message>?> ChannelMessage(this UpdateContainerAbs<Message> updateContainer,
+        public static async Task<IContainer<Message>?> ChannelMessage(this IContainer<Message> updateContainer,
                                                           Filter<Message>? filter,
                                                           TimeSpan? timeOut = default)
         {
@@ -33,7 +33,7 @@ namespace TelegramUpdater
         /// <param name="updateContainer">The update container</param>
         /// <param name="timeOut">Maximum allowed time to wait for the update.</param>
         /// <param name="filter">Filter updates to get the right one.</param>
-        public static async Task<UpdateContainerAbs<Message>?> ChannelUserResponse(this UpdateContainerAbs<Message> updateContainer,
+        public static async Task<IContainer<Message>?> ChannelUserResponse(this IContainer<Message> updateContainer,
                                                           Filter<Message>? filter = default,
                                                           TimeSpan? timeOut = default)
         {
@@ -53,11 +53,11 @@ namespace TelegramUpdater
             }
         }
 
-        public static async Task<UpdateContainerAbs<CallbackQuery>?> ChannelUserClick<T>(this UpdateContainerAbs<T> updateContainer,
-                                                                     Func<T, long?> senderIdResolver,
-                                                                     TimeSpan timeOut,
-                                                                     string pattern,
-                                                                     RegexOptions? regexOptions = default) where T : class
+        public static async Task<IContainer<CallbackQuery>?> ChannelUserClick<T>(this IContainer<T> updateContainer,
+                                                                                 Func<T, long?> senderIdResolver,
+                                                                                 TimeSpan timeOut,
+                                                                                 string pattern,
+                                                                                 RegexOptions? regexOptions = default) where T : class
         {
             var senderId = senderIdResolver(updateContainer.Update);
             if (senderId != null)
@@ -78,10 +78,10 @@ namespace TelegramUpdater
             }
         }
 
-        public static async Task<UpdateContainerAbs<CallbackQuery>?> ChannelUserClick(this UpdateContainerAbs<Message> updateContainer,
-                                                                  TimeSpan timeOut,
-                                                                  string pattern,
-                                                                  RegexOptions? regexOptions = default)
+        public static async Task<IContainer<CallbackQuery>?> ChannelUserClick(this IContainer<Message> updateContainer,
+                                                                              TimeSpan timeOut,
+                                                                              string pattern,
+                                                                              RegexOptions? regexOptions = default)
         {
             return await updateContainer.ChannelUserClick(x => x.From?.Id ?? x.SenderChat?.Id ?? null,
                                                           timeOut,
@@ -89,10 +89,10 @@ namespace TelegramUpdater
                                                           regexOptions);
         }
 
-        public static async Task<UpdateContainerAbs<CallbackQuery>?> ChannelUserClick(this UpdateContainerAbs<CallbackQuery> updateContainer,
-                                                                  TimeSpan timeOut,
-                                                                  string pattern,
-                                                                  RegexOptions? regexOptions = default)
+        public static async Task<IContainer<CallbackQuery>?> ChannelUserClick(this IContainer<CallbackQuery> updateContainer,
+                                                                              TimeSpan timeOut,
+                                                                              string pattern,
+                                                                              RegexOptions? regexOptions = default)
         {
             return await updateContainer.ChannelUserClick(x => x.From.Id,
                                                           timeOut,
