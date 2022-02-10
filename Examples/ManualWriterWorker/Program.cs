@@ -1,7 +1,7 @@
 using ManualWriterWorker;
 using Telegram.Bot.Types.Enums;
-using TelegramUpdater.Hosting;
 using TelegramUpdater;
+using TelegramUpdater.Hosting;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>

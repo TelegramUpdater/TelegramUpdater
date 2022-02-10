@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
-using System.Threading;
 
 namespace TelegramUpdater.Hosting
 {
@@ -82,7 +82,7 @@ namespace TelegramUpdater.Hosting
         public static void AddTelegramUpdater<T>(this IServiceCollection serviceDescriptors,
                                                  UpdaterConfigs configs,
                                                  Action<UpdaterServiceBuilder> builder)
-            where T: UpdaterService
+            where T : UpdaterService
         {
             serviceDescriptors.AddTelegramBotClient(configs.BotToken);
 
@@ -125,7 +125,7 @@ namespace TelegramUpdater.Hosting
         public static void AddTelegramUpdater<TUpdater, TWriter>(this IServiceCollection serviceDescriptors,
                                                                  UpdaterConfigs configs,
                                                                  Action<UpdaterServiceBuilder> builder)
-            where TUpdater : UpdaterService where TWriter: UpdateWriterServiceAbs
+            where TUpdater : UpdaterService where TWriter : UpdateWriterServiceAbs
         {
             serviceDescriptors.AddTelegramBotClient(configs.BotToken);
 

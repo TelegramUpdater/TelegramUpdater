@@ -24,7 +24,7 @@ namespace TelegramUpdater.ExceptionHandlers
         /// </param>
         /// <exception cref="InvalidCastException">If any of <paramref name="allowedHandlers"/> are not <see cref="IUpdateHandler"/></exception>
         public ExceptionHandler(
-            Func<Updater, Exception, Task>  callback,
+            Func<Updater, Exception, Task> callback,
             Filter<string>? messageMatch = default,
             Type[]? allowedHandlers = null,
             bool inherit = false)

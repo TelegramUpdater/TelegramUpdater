@@ -214,7 +214,7 @@ namespace TelegramUpdater
         public UpdaterBuilder StepTwo<TException, THandler>(
             Func<Updater, Exception, Task> callback,
             Filter<string>? messageMatch = default)
-            where TException : Exception where THandler: IUpdateHandler
+            where TException : Exception where THandler : IUpdateHandler
         {
             if (_updater == null)
                 throw new InvalidOperationException("Please go step by step, you missed StepOne ?");
@@ -252,7 +252,7 @@ namespace TelegramUpdater
                 throw new InvalidOperationException("Please go step by step, you missed StepOne ?");
 
             _updater.AddExceptionHandler<Exception>(
-                (updater, ex)=>
+                (updater, ex) =>
                 {
                     updater.Logger.LogError(exception: ex, message: "Error in handlers!");
                     return Task.CompletedTask;

@@ -32,7 +32,7 @@ namespace TelegramUpdater
             Logger = logger;
             CancellationToken = cancellationToken;
             FlushUpdatesQueue = flushUpdatesQueue;
-            AllowedUpdates = allowedUpdates?? Array.Empty<UpdateType>();
+            AllowedUpdates = allowedUpdates ?? Array.Empty<UpdateType>();
         }
 
         /// <summary>

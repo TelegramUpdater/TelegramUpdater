@@ -16,7 +16,7 @@ namespace TelegramUpdater.TrafficLights
             _crossingCars = new ConcurrentDictionary<string, Task>();
             _requesterMap = new ConcurrentDictionary<K, string>();
             _getRequester = getRequester;
-            _maxDegreeOfParallelism = maxDegreeOfParallelism?? Environment.ProcessorCount;
+            _maxDegreeOfParallelism = maxDegreeOfParallelism ?? Environment.ProcessorCount;
         }
 
         /// <summary>

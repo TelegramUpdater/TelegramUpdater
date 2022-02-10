@@ -5,7 +5,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace TelegramUpdater.UpdateChannels
 {
-    public interface IUpdateChannel: IDisposable
+    public interface IUpdateChannel : IDisposable
     {
         public UpdateType UpdateType { get; }
 

@@ -17,7 +17,7 @@ namespace TelegramUpdater
         /// <param name="filter">A function to check the input and return a boolean</param>
         public Filter(Func<T, bool> filter) => _filter = filter;
 
-        public virtual bool TheyShellPass([NotNullWhen(true)]T input)
+        public virtual bool TheyShellPass([NotNullWhen(true)] T input)
             => input != null && _filter(input);
 
         public static implicit operator Func<T, bool>(Filter<T> filter)

@@ -64,7 +64,7 @@ namespace TelegramUpdater.Asp
         /// </summary>
         /// <typeparam name="T">Custom webhook configure class</typeparam>
         public static void AddWebhookConfigs<T>(this IServiceCollection services)
-            where T: ConfigureWebhook
+            where T : ConfigureWebhook
         {
             // There are several strategies for completing asynchronous tasks during startup.
             // Some of them could be found in this article https://andrewlock.net/running-async-tasks-on-app-startup-in-asp-net-core-part-1/
@@ -116,7 +116,7 @@ namespace TelegramUpdater.Asp
 
         public static async Task<ActionResult> WriteUpdateFromWebhook(this Updater updater,
                                                                       Update update)
-        { 
+        {
             await updater.ChannelWriter.WriteAsync(update);
             return new OkResult();
         }

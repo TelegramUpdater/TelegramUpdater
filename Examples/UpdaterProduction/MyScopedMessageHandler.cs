@@ -9,7 +9,7 @@ namespace UpdaterProduction
     [ApplyFilter(typeof(PrivateTestCommand))]
     internal class MyScopedMessageHandler : ScopedMessageHandler
     {
-        public MyScopedMessageHandler(): base(group: -1)
+        public MyScopedMessageHandler() : base(group: -1)
         { }
 
         protected override async Task HandleAsync(IContainer<Message> container)

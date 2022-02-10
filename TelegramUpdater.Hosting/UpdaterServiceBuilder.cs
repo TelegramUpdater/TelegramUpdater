@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using System.Collections.Generic;
-using TelegramUpdater.UpdateHandlers.ScopedHandlers;
 using TelegramUpdater.ExceptionHandlers;
-using System.Threading.Tasks;
 using TelegramUpdater.UpdateHandlers;
-using Microsoft.Extensions.DependencyInjection;
+using TelegramUpdater.UpdateHandlers.ScopedHandlers;
 
 namespace TelegramUpdater.Hosting
 {

@@ -38,7 +38,7 @@ namespace TelegramUpdater
             Func<Updater, Exception, Task> callback,
             Filter<string>? messageMatch = default,
             bool inherit = false)
-            where TException: Exception where THandler: IUpdateHandler
+            where TException : Exception where THandler : IUpdateHandler
         {
             return updater.AddExceptionHandler<TException>(
                 callback, messageMatch, new[] { typeof(THandler) }, inherit);

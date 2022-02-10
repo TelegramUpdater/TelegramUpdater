@@ -10,7 +10,7 @@ namespace TelegramUpdater.UpdateHandlers.AbstractHandlers
     public abstract class AnyUpdateHandlerAbs<T> : AbstractHandler<T> where T : class
     {
         protected AnyUpdateHandlerAbs(
-            UpdateType updateType, Func<Update, T?> getT, Filter<T>? filter, int group) 
+            UpdateType updateType, Func<Update, T?> getT, Filter<T>? filter, int group)
             : base(updateType, getT, filter, group)
         {
         }

@@ -17,7 +17,7 @@ namespace TelegramUpdater.Filters
                     if (string.IsNullOrEmpty(text)) return false;
 
                     var matches = Regex.Matches(
-                        text, pattern, regexOptions?? RegexOptions.None, TimeSpan.FromSeconds(3));
+                        text, pattern, regexOptions ?? RegexOptions.None, TimeSpan.FromSeconds(3));
 
                     if (matches.Count > 0)
                     {
@@ -32,7 +32,7 @@ namespace TelegramUpdater.Filters
     public sealed class StringRegex : BasicRegexFilter<string>
     {
         public StringRegex(string pattern, RegexOptions? regexOptions = null)
-            : base(x=> x, pattern, regexOptions)
+            : base(x => x, pattern, regexOptions)
         {
         }
     }

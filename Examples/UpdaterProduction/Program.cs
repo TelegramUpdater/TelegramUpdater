@@ -36,9 +36,9 @@ var updater = new UpdaterBuilder(
         FilterCutify.OnCommand("start"))
 
     .AddScopedMessage<MyScopedMessageHandler>()
-    
+
     .AddScopedHandler<Message>(typeof(AboutMessageHandler)); // Other way
-    // Can be done with: updater.AddScopedMessage<AboutMessageHandler>();
+                                                             // Can be done with: updater.AddScopedMessage<AboutMessageHandler>();
 
 
 // ---------- Start! ----------

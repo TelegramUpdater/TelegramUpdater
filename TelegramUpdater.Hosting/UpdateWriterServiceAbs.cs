@@ -14,7 +14,7 @@ namespace TelegramUpdater.Hosting
     /// <remarks>
     /// <see cref="Updater"/> Should exsits in <see cref="IServiceProvider"/>
     /// </remarks>
-    public abstract class UpdateWriterServiceAbs: BackgroundService
+    public abstract class UpdateWriterServiceAbs : BackgroundService
     {
         private readonly Updater _updater;
 

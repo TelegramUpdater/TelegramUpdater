@@ -45,7 +45,7 @@ namespace TelegramUpdater
             UpdaterOptions updaterOptions = default,
             IServiceProvider? serviceDescriptors = default)
         {
-            _botClient = botClient?? throw new ArgumentNullException(nameof(botClient));
+            _botClient = botClient ?? throw new ArgumentNullException(nameof(botClient));
             _updaterOptions = updaterOptions;
             _serviceDescriptors = serviceDescriptors;
             _emergencyCts = new CancellationTokenSource();
@@ -54,7 +54,7 @@ namespace TelegramUpdater
             _updateHandlers = new List<ISingletonUpdateHandler>();
             _exceptionHandlers = new List<IExceptionHandler>();
             _scopedHandlerContainers = new List<IScopedHandlerContainer>();
-            _trafficLight = new TrafficLight<Update, long>(x=> x.GetSenderId() ?? 0, updaterOptions.MaxDegreeOfParallelism);
+            _trafficLight = new TrafficLight<Update, long>(x => x.GetSenderId() ?? 0, updaterOptions.MaxDegreeOfParallelism);
 
             _updatesChannel = Channel.CreateBounded<Update>(
                 new BoundedChannelOptions(100)
@@ -152,7 +152,7 @@ namespace TelegramUpdater
         /// <param name="updateChannel">An <see cref="IUpdateChannel"/></param>
         /// <param name="timeOut">Maximum allowed time to wait for that update.</param>
         public async Task<T?> OpenChannel<T>(AbstractChannel<T> updateChannel, TimeSpan timeOut)
-            where T: class
+            where T : class
         {
             var key = updateChannel.GetHashCode().ToString();
             if (_updateChannels.TryAdd(
@@ -386,7 +386,7 @@ namespace TelegramUpdater
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 _logger.LogError(exception: e, "Error in ProcessUpdateFromServices.");
             }
@@ -476,12 +476,12 @@ namespace TelegramUpdater
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(exception: ex, "Error in ProcessUpdate.");
             }
         }
-    
+
         /// <summary>
         /// Returns false to break.
         /// </summary>

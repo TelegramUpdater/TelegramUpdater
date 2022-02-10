@@ -21,7 +21,7 @@ namespace TelegramUpdater.Filters
     public class FromUsersMessageFilter : FromUsersFilter<Message>
     {
         public FromUsersMessageFilter(params long[] users)
-            : base(x=> x.From?.Id, users)
+            : base(x => x.From?.Id, users)
         {
         }
     }

@@ -7,7 +7,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace TelegramUpdater.UpdateChannels
 {
-    public abstract class AbstractChannel<T>: IUpdateChannel where T : class
+    public abstract class AbstractChannel<T> : IUpdateChannel where T : class
     {
         private readonly Channel<Update> _channel;
         private readonly CancellationTokenSource _tokenSource;

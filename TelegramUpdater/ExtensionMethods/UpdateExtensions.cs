@@ -21,7 +21,7 @@ namespace TelegramUpdater
                 { EditedChannelPost: { SenderChat: { } chat } } => chat.Id,
                 { CallbackQuery: { } call } => call.From.Id,
                 { InlineQuery: { From: { } from } } => from.Id,
-                { PollAnswer: { User : { } user } } => user.Id,
+                { PollAnswer: { User: { } user } } => user.Id,
                 { PreCheckoutQuery: { From: { } from } } => from.Id,
                 { ShippingQuery: { From: { } from } } => from.Id,
                 { ChosenInlineResult: { From: { } from } } => from.Id,
