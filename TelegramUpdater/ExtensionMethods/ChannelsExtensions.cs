@@ -19,11 +19,8 @@ namespace TelegramUpdater
                                                           Filter<Message>? filter,
                                                           TimeSpan? timeOut = default)
         {
-            var message = await updateContainer.OpenChannel(
+            return await updateContainer.OpenChannel(
                   new MessageChannel(filter), timeOut ?? TimeSpan.FromSeconds(30));
-            if (message != null)
-                return message.Wrap(updateContainer);
-            return null;
         }
 
 
@@ -62,15 +59,11 @@ namespace TelegramUpdater
             var senderId = senderIdResolver(updateContainer.Update);
             if (senderId != null)
             {
-                var result = await updateContainer.Updater.OpenChannel(
+                return await updateContainer.Updater.OpenChannel(
                     new CallbackQueryChannel(
                         FilterCutify.CbqOfUsers(senderId.Value) &
                         FilterCutify.DataMatches(pattern, regexOptions)),
                     timeOut);
-
-                if (result != null)
-                    return result.Wrap(updateContainer);
-                return null;
             }
             else
             {

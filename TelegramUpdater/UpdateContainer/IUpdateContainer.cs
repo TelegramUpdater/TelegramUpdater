@@ -8,7 +8,7 @@ namespace TelegramUpdater.UpdateContainer
         /// <summary>
         /// <see cref="TelegramUpdater.Updater"/> instance which is resposeable for this container.
         /// </summary>
-        public Updater Updater { get; }
+        public IUpdater Updater { get; }
 
         /// <summary>
         /// The received update.

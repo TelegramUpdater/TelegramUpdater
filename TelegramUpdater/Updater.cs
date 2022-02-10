@@ -12,6 +12,7 @@ using Telegram.Bot.Types;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.TrafficLights;
 using TelegramUpdater.UpdateChannels;
+using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers;
 using TelegramUpdater.UpdateHandlers.ScopedHandlers;
 
@@ -20,7 +21,7 @@ namespace TelegramUpdater
     /// <summary>
     /// Fetch updates from telegram and handle them.
     /// </summary>
-    public class Updater
+    public class Updater : IUpdater
     {
         private readonly ITelegramBotClient _botClient;
         private readonly List<ISingletonUpdateHandler> _updateHandlers;
@@ -29,7 +30,7 @@ namespace TelegramUpdater
         private readonly ConcurrentDictionary<string, IUpdateChannel> _updateChannels;
         private readonly Channel<Update> _updatesChannel; // i guess this is useless
         private readonly TrafficLight<Update, long> _trafficLight;
-        private readonly ILogger<Updater> _logger;
+        private readonly ILogger<IUpdater> _logger;
         private readonly UpdaterOptions _updaterOptions;
         private readonly IServiceProvider? _serviceDescriptors;
         private readonly CancellationTokenSource _emergencyCts;
@@ -40,6 +41,7 @@ namespace TelegramUpdater
         /// </summary>
         /// <param name="botClient">Telegram bot client</param>
         /// <param name="updaterOptions">Options for this updater.</param>
+        /// <param name="serviceDescriptors">Optional service provider.</param>
         public Updater(
             ITelegramBotClient botClient,
             UpdaterOptions updaterOptions = default,
@@ -84,34 +86,28 @@ namespace TelegramUpdater
             _logger.LogInformation("Logger initialized.");
         }
 
+        /// <inheritdoc/>
         public UpdaterOptions UpdaterOptions => _updaterOptions;
 
+        /// <inheritdoc/>
         public CancellationToken EmergencyToken => _emergencyCts.Token;
 
+        /// <inheritdoc/>
         public ITelegramBotClient BotClient => _botClient;
 
-        public ILogger<Updater> Logger => _logger;
+        /// <inheritdoc/>
+        public ILogger<IUpdater> Logger => _logger;
 
-
-        /// <summary>
-        /// A dict of tasks for in process updates
-        /// </summary>
+        /// <inheritdoc/>
         public TrafficLight<Update, long> TrafficLight => _trafficLight;
 
-        /// <summary>
-        /// You can read updates from here.
-        /// </summary>
+        /// <inheritdoc/>
         public ChannelReader<Update> ChannelReader => _updatesChannel.Reader;
 
-        /// <summary>
-        /// You can read updates from here.
-        /// </summary>
+        /// <inheritdoc/>
         public ChannelWriter<Update> ChannelWriter => _updatesChannel.Writer;
 
-        /// <summary>
-        /// Add your handler to this updater.
-        /// </summary>
-        /// <param name="updateHandler"></param>
+        /// <inheritdoc/>
         public Updater AddUpdateHandler(ISingletonUpdateHandler updateHandler)
         {
             _updateHandlers.Add(updateHandler);
@@ -119,13 +115,7 @@ namespace TelegramUpdater
             return this;
         }
 
-        /// <summary>
-        /// Adds an scoped handler to the updater.
-        /// </summary>
-        /// <param name="scopedHandlerContainer">
-        /// Use <see cref="UpdateContainerBuilder{THandler, TUpdate}"/>
-        /// To Create a new <see cref="IScopedHandlerContainer"/>
-        /// </param>
+        /// <inheritdoc/>
         public Updater AddScopedHandler(IScopedHandlerContainer scopedHandlerContainer)
         {
             var _h = scopedHandlerContainer.GetType();
@@ -134,10 +124,7 @@ namespace TelegramUpdater
             return this;
         }
 
-        /// <summary>
-        /// Add your exception handler to this updater.
-        /// </summary>
-        /// <param name="exceptionHandler"></param>
+        /// <inheritdoc/>
         public Updater AddExceptionHandler(IExceptionHandler exceptionHandler)
         {
             _exceptionHandlers.Add(exceptionHandler);
@@ -145,13 +132,8 @@ namespace TelegramUpdater
             return this;
         }
 
-        /// <summary>
-        /// Opens a channel through the update handler and reads specified update.
-        /// </summary>
-        /// <typeparam name="T">Type of update you're excepting.</typeparam>
-        /// <param name="updateChannel">An <see cref="IUpdateChannel"/></param>
-        /// <param name="timeOut">Maximum allowed time to wait for that update.</param>
-        public async Task<T?> OpenChannel<T>(AbstractChannel<T> updateChannel, TimeSpan timeOut)
+        /// <inheritdoc/>
+        public async Task<IContainer<T>?> OpenChannel<T>(AbstractChannel<T> updateChannel, TimeSpan timeOut)
             where T : class
         {
             var key = updateChannel.GetHashCode().ToString();
@@ -160,7 +142,7 @@ namespace TelegramUpdater
             {
                 try
                 {
-                    return updateChannel.GetT(await updateChannel.ReadAsync(timeOut));
+                    return await updateChannel.ReadAsync(timeOut);
                 }
                 catch (OperationCanceledException)
                 {
@@ -175,12 +157,7 @@ namespace TelegramUpdater
             }
         }
 
-        /// <summary>
-        /// Start handling updates.
-        /// </summary>
-        /// <param name="block">If this method should block the thread.</param>
-        /// <param name="manualWriting">If you gonna write updates manually and no polling required.</param>
-        /// <param name="cancellationToken">Use this to cancel the task.</param>
+        /// <inheritdoc/>
         public async Task Start(
             bool block = true,
             bool manualWriting = false,
@@ -249,12 +226,7 @@ namespace TelegramUpdater
             }
         }
 
-        /// <summary>
-        /// Get current <see cref="TelegramBotClient"/>'s user information.
-        /// </summary>
-        /// <remarks>
-        /// This method will cache! call freely.
-        /// </remarks>
+        /// <inheritdoc/>
         public async Task<User> GetMeAsync()
         {
             if (_me == null)
@@ -265,6 +237,7 @@ namespace TelegramUpdater
             return _me;
         }
 
+        /// <inheritdoc/>
         public void Cancel() => _emergencyCts.Cancel();
 
         private async Task UpdateReceiver(CancellationToken cancellationToken = default)
@@ -337,7 +310,7 @@ namespace TelegramUpdater
                     {
                         if (!updateChannel.Cancelled)
                         {
-                            await updateChannel.WriteAsync(update);
+                            await updateChannel.WriteAsync(this, update);
                         }
 
                         _updateChannels.Remove(key!, out _);
@@ -422,7 +395,7 @@ namespace TelegramUpdater
                     {
                         if (!updateChannel.Cancelled)
                         {
-                            await updateChannel.WriteAsync(update);
+                            await updateChannel.WriteAsync(this, update);
                         }
 
                         _updateChannels.Remove(key!, out _);
@@ -500,12 +473,12 @@ namespace TelegramUpdater
             if (_updaterOptions.PerUserOneByOneProcess)
             {
                 crossingInfo = _trafficLight.StartCrossingTask(
-                    update, handler.HandleAsync(this, _botClient, update));
+                    update, handler.HandleAsync(this, update));
             }
             else
             {
                 crossingInfo = _trafficLight.StartCrossingTask(
-                    handler.HandleAsync(this, _botClient, update));
+                    handler.HandleAsync(this, update));
             }
 
             // Handle the shit.

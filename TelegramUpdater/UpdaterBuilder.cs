@@ -20,13 +20,13 @@ namespace TelegramUpdater
     public sealed class UpdaterBuilder
     {
         private readonly ITelegramBotClient _botClient;
-        private Updater? _updater;
+        private IUpdater? _updater;
 
         /// <summary>
         /// - <b>Step zero</b>: Create and Add <see cref="ITelegramBotClient"/>.
         /// <para>
         /// <see cref="ITelegramBotClient"/> is the base! and it's needed for every bot request
-        /// that you gonna made, that <see cref="Updater"/> gonna made. so we need that.
+        /// that you gonna made, that <see cref="IUpdater"/> gonna made. so we need that.
         /// </para>
         /// <para>
         /// You'll need an <b>API TOKEN</b> to create <see cref="ITelegramBotClient"/>.
@@ -50,7 +50,7 @@ namespace TelegramUpdater
         /// - <b>Step zero</b>: Create and Add <see cref="ITelegramBotClient"/>.
         /// <para>
         /// <see cref="ITelegramBotClient"/> is the base! and it's needed for every bot request
-        /// that you gonna made, that <see cref="Updater"/> gonna made. so we need that.
+        /// that you gonna made, that <see cref="IUpdater"/> gonna made. so we need that.
         /// </para>
         /// <para>
         /// You'll need an <b>API TOKEN</b> to create <see cref="ITelegramBotClient"/>.
@@ -90,7 +90,7 @@ namespace TelegramUpdater
         /// Or just leave it empty and let us decide.
         /// </param>
         /// <param name="cancellationToken">
-        /// This is a token which you can use later to cancel <see cref="Updater.Start(bool, bool, CancellationToken)"/> method
+        /// This is a token which you can use later to cancel <see cref="IUpdater.Start(bool, bool, CancellationToken)"/> method
         /// and shut things down.
         /// </param>
         /// <param name="flushUpdatesQueue">
@@ -123,7 +123,7 @@ namespace TelegramUpdater
         /// <summary>
         /// - <b>Step one</b>: Setup updater options using <see cref="UpdaterOptions"/>
         /// <para>
-        /// There're several options that you can configure for <see cref="Updater"/>.
+        /// There're several options that you can configure for <see cref="IUpdater"/>.
         /// If you're not sure or you're not in mode just call it with no inputs.
         /// </para>
         /// </summary>
@@ -144,7 +144,7 @@ namespace TelegramUpdater
         /// <para>
         /// This is how you can be aware of exceptions occured when handling the updates.
         /// Add an <see cref="ExceptionHandler{T}"/> here and you can add more
-        /// later using <see cref="Updater.AddExceptionHandler(IExceptionHandler)"/>
+        /// later using <see cref="IUpdater.AddExceptionHandler(IExceptionHandler)"/>
         /// </para>
         /// <para>
         /// If you're not sure for now, just leave it empty and i'll add a default
@@ -172,7 +172,7 @@ namespace TelegramUpdater
         /// <remarks>
         /// Go for <see cref="StepThree"/> if you're done here too.
         /// </remarks>
-        public UpdaterBuilder StepTwo<T>(Func<Updater, Exception, Task> callback,
+        public UpdaterBuilder StepTwo<T>(Func<IUpdater, Exception, Task> callback,
                                          Filter<string>? messageMatch = default,
                                          Type[]? allowedHandlers = null) where T : Exception
         {
@@ -188,7 +188,7 @@ namespace TelegramUpdater
         /// <para>
         /// This is how you can be aware of exceptions occured when handling the updates.
         /// Add an <see cref="ExceptionHandler{T}"/> here and you can add more
-        /// later using <see cref="Updater.AddExceptionHandler(IExceptionHandler)"/>
+        /// later using <see cref="IUpdater.AddExceptionHandler(IExceptionHandler)"/>
         /// </para>
         /// <para>
         /// If you're not sure for now, just leave it empty and i'll add a default
@@ -212,7 +212,7 @@ namespace TelegramUpdater
         /// Go for <see cref="StepThree"/> if you're done here too.
         /// </remarks>
         public UpdaterBuilder StepTwo<TException, THandler>(
-            Func<Updater, Exception, Task> callback,
+            Func<IUpdater, Exception, Task> callback,
             Filter<string>? messageMatch = default)
             where TException : Exception where THandler : IUpdateHandler
         {
@@ -228,7 +228,7 @@ namespace TelegramUpdater
         /// <para>
         /// This is how you can be aware of exceptions occured when handling the updates.
         /// Add an <see cref="ExceptionHandler{T}"/> here and you can add more
-        /// later using <see cref="Updater.AddExceptionHandler(IExceptionHandler)"/>
+        /// later using <see cref="IUpdater.AddExceptionHandler(IExceptionHandler)"/>
         /// </para>
         /// <para>
         /// If you're not sure for now, just leave it empty and i'll add a default
@@ -265,7 +265,7 @@ namespace TelegramUpdater
         /// <para>
         /// This is how you can be aware of exceptions occured when handling the updates.
         /// Add an <see cref="ExceptionHandler{T}"/> here and you can add more
-        /// later using <see cref="Updater.AddExceptionHandler(IExceptionHandler)"/>
+        /// later using <see cref="IUpdater.AddExceptionHandler(IExceptionHandler)"/>
         /// </para>
         /// <para>
         /// If you're not sure for now, just leave it empty and i'll add a default
@@ -330,11 +330,11 @@ namespace TelegramUpdater
         /// <param name="callbak">Your callback function.</param>
         /// <param name="filter">Your filter.</param>
         /// <remarks>
-        /// You can use <see cref="Updater.AddUpdateHandler(ISingletonUpdateHandler)"/>
-        /// or <see cref="Updater.AddScopedHandler(IScopedHandlerContainer)"/>
+        /// You can use <see cref="IUpdater.AddUpdateHandler(ISingletonUpdateHandler)"/>
+        /// or <see cref="IUpdater.AddScopedHandler(IScopedHandlerContainer)"/>
         /// later to add more update handler.
         /// </remarks>
-        public Updater StepThree(
+        public IUpdater StepThree(
             Func<IContainer<Message>, Task> callbak,
             Filter<Message>? filter)
         {
@@ -388,11 +388,11 @@ namespace TelegramUpdater
         /// Use classes like <see cref="MessageHandler"/> to create a message handler and such.
         /// </param>
         /// <remarks>
-        /// You can use <see cref="Updater.AddUpdateHandler(ISingletonUpdateHandler)"/>
-        /// or <see cref="Updater.AddScopedHandler(IScopedHandlerContainer)"/>
+        /// You can use <see cref="IUpdater.AddUpdateHandler(ISingletonUpdateHandler)"/>
+        /// or <see cref="IUpdater.AddScopedHandler(IScopedHandlerContainer)"/>
         /// later to add more update handler.
         /// </remarks>
-        public Updater StepThree(ISingletonUpdateHandler singletonUpdateHandler)
+        public IUpdater StepThree(ISingletonUpdateHandler singletonUpdateHandler)
         {
             if (_updater == null)
                 throw new InvalidOperationException("Please go step by step, you missed StepTwo ?");
@@ -446,11 +446,11 @@ namespace TelegramUpdater
         /// their underlying handler per each request.
         /// </param>
         /// <remarks>
-        /// You can use <see cref="Updater.AddUpdateHandler(ISingletonUpdateHandler)"/>
-        /// or <see cref="Updater.AddScopedHandler(IScopedHandlerContainer)"/>
+        /// You can use <see cref="IUpdater.AddUpdateHandler(ISingletonUpdateHandler)"/>
+        /// or <see cref="IUpdater.AddScopedHandler(IScopedHandlerContainer)"/>
         /// later to add more update handler.
         /// </remarks>
-        public Updater StepThree(IScopedHandlerContainer scopedHandlerContainer)
+        public IUpdater StepThree(IScopedHandlerContainer scopedHandlerContainer)
         {
             if (_updater == null)
                 throw new InvalidOperationException("Please go step by step, you missed StepTwo ?");

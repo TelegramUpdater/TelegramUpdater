@@ -11,7 +11,7 @@ namespace TelegramUpdater.ExceptionHandlers
         /// Handle parse exception occures in api requests (Bad Request: can't parse entities)
         /// </summary>
         public static ExceptionHandler<ApiRequestException> ParsingException(
-            Func<Updater, Exception, Task> callback,
+            Func<IUpdater, Exception, Task> callback,
             Type[]? allowedHandlers = null)
         {
             return new ExceptionHandler<ApiRequestException>(

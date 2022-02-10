@@ -10,14 +10,14 @@ namespace TelegramUpdater.Hosting
     public class UpdaterService : BackgroundService
     {
         private readonly IServiceProvider _services;
-        private readonly Updater _updater;
+        private readonly IUpdater _updater;
 
         public UpdaterService(IServiceProvider services)
         {
             _services = services;
 
             using var scope = _services.CreateScope();
-            _updater = scope.ServiceProvider.GetRequiredService<Updater>();
+            _updater = scope.ServiceProvider.GetRequiredService<IUpdater>();
         }
 
         /// <summary>

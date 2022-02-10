@@ -1,5 +1,4 @@
 ﻿using System;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace TelegramUpdater.UpdateContainer.UpdateContainers
@@ -8,8 +7,7 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers
     {
         public AnyContainer(
             Func<Update, T?> insiderResovler,
-            Updater updater, Update insider,
-            ITelegramBotClient botClient) : base(insiderResovler, updater, insider, botClient)
+            IUpdater updater, Update insider) : base(insiderResovler, updater, insider)
         {
         }
     }

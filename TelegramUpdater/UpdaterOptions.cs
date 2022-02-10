@@ -6,12 +6,12 @@ using Telegram.Bot.Types.Enums;
 namespace TelegramUpdater
 {
     /// <summary>
-    /// Sets options for <see cref="Updater"/>.
+    /// Sets options for <see cref="IUpdater"/>.
     /// </summary>
     public readonly struct UpdaterOptions
     {
         /// <summary>
-        /// Sets options for <see cref="Updater"/>.
+        /// Sets options for <see cref="IUpdater"/>.
         /// </summary>
         /// <param name="maxDegreeOfParallelism">Maximum number of allowed concurent update handling tasks.</param>
         /// <param name="perUserOneByOneProcess">User should wait for a request to finish to start a new one.</param>
@@ -22,7 +22,7 @@ namespace TelegramUpdater
         public UpdaterOptions(
             int? maxDegreeOfParallelism = default,
             bool perUserOneByOneProcess = true,
-            ILogger<Updater>? logger = default,
+            ILogger<IUpdater>? logger = default,
             CancellationToken cancellationToken = default,
             bool flushUpdatesQueue = false,
             UpdateType[]? allowedUpdates = default)
@@ -48,7 +48,7 @@ namespace TelegramUpdater
         /// <summary>
         /// If you want to use your own logger.
         /// </summary>
-        public ILogger<Updater>? Logger { get; }
+        public ILogger<IUpdater>? Logger { get; }
 
         /// <summary>
         /// Default token to be used in Start method.

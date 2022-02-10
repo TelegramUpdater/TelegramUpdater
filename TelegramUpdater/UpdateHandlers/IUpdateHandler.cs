@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace TelegramUpdater.UpdateHandlers
@@ -8,6 +7,6 @@ namespace TelegramUpdater.UpdateHandlers
     {
         public int Group { get; }
 
-        public Task HandleAsync(Updater updater, ITelegramBotClient botClient, Update update);
+        public Task HandleAsync(IUpdater updater, Update update);
     }
 }

@@ -16,7 +16,7 @@ namespace TelegramUpdater.Hosting
     /// </remarks>
     public abstract class UpdateWriterServiceAbs : BackgroundService
     {
-        private readonly Updater _updater;
+        private readonly IUpdater _updater;
 
         /// <summary>
         /// Use this abstract class to build your custome update writer as a background service.
@@ -24,18 +24,18 @@ namespace TelegramUpdater.Hosting
         /// <remarks>
         /// <see cref="Updater"/> Should exsits in <see cref="IServiceProvider"/>
         /// </remarks>
-        protected UpdateWriterServiceAbs(Updater updater)
+        protected UpdateWriterServiceAbs(IUpdater updater)
         {
             _updater = updater;
         }
 
-        protected Updater Updater { get { return _updater; } }
+        protected IUpdater Updater { get { return _updater; } }
 
         protected UpdaterOptions Options => _updater.UpdaterOptions;
 
         protected ITelegramBotClient BotClient => _updater.BotClient;
 
-        protected ILogger<Updater> Logger => _updater.Logger;
+        protected ILogger<IUpdater> Logger => _updater.Logger;
 
         /// <summary>
         /// Here you should implement code to getUpdates.

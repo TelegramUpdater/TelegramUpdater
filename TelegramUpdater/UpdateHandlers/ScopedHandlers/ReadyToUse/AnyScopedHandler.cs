@@ -1,5 +1,4 @@
 ﻿using System;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
@@ -13,9 +12,9 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse
         }
 
         protected sealed override IContainer<T> ContainerBuilder(
-            Updater updater, ITelegramBotClient botClient, Update update)
+            IUpdater updater, Update update)
         {
-            return new AnyContainer<T>(GetT, updater, update, botClient);
+            return new AnyContainer<T>(GetT, updater, update);
         }
     }
 }

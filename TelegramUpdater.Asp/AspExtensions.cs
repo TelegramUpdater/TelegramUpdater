@@ -15,7 +15,7 @@ namespace TelegramUpdater.Asp
     {
         /// <summary>
         /// Use this in you webhook app if you wanna write updates from webhook controller,
-        /// Using <see cref="WriteUpdateFromWebhook(Updater, Update)"/>
+        /// Using <see cref="WriteUpdateFromWebhook(IUpdater, Update)"/>
         /// </summary>
         /// <param name="serviceDescriptors"></param>
         /// <param name="configs"></param>
@@ -89,7 +89,7 @@ namespace TelegramUpdater.Asp
         /// <para>Should not be null for default mapping.</para></param>
         /// <param name="pattern">Use this if you want a custom pattern</param>
         /// <param name="controllerName">You controller name to receive updates.</param>
-        /// <exception cref="System.ArgumentNullException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
         public static void MapWebhook(this IEndpointRouteBuilder endpoints,
                                       string name,
                                       UpdaterConfigs? updaterConfigs = default,
@@ -102,7 +102,7 @@ namespace TelegramUpdater.Asp
             }
 
             if (string.IsNullOrEmpty(pattern))
-                throw new System.ArgumentNullException(nameof(pattern));
+                throw new ArgumentNullException(nameof(pattern));
 
             // Configure custom endpoint per Telegram API recommendations:
             // https://core.telegram.org/bots/api#setwebhook
@@ -114,7 +114,7 @@ namespace TelegramUpdater.Asp
                                          new { controller = controllerName, action = "Post" });
         }
 
-        public static async Task<ActionResult> WriteUpdateFromWebhook(this Updater updater,
+        public static async Task<ActionResult> WriteUpdateFromWebhook(this IUpdater updater,
                                                                       Update update)
         {
             await updater.ChannelWriter.WriteAsync(update);

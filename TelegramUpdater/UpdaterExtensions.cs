@@ -13,8 +13,7 @@ namespace TelegramUpdater
             this IContainer<T> containerAbs, Message message) where T : class
             => new MessageContainer(
                 containerAbs.Updater,
-                new Update { Message = message },
-                containerAbs.BotClient);
+                new Update { Message = message });
 
         internal static MessageContainer Wrap<T>(this Message message,
                                             IContainer<T> containerAbs) where T : class
@@ -28,8 +27,7 @@ namespace TelegramUpdater
             this IContainer<T> containerAbs, CallbackQuery callbackQuery) where T : class
             => new CallbackQueryContainer(
                 containerAbs.Updater,
-                new Update { CallbackQuery = callbackQuery },
-                containerAbs.BotClient);
+                new Update { CallbackQuery = callbackQuery });
 
         internal static CallbackQueryContainer Wrap<T>(this CallbackQuery message,
                                             IContainer<T> containerAbs) where T : class

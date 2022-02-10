@@ -5,20 +5,34 @@ using Telegram.Bot.Types.Enums;
 
 namespace TelegramUpdater.UpdateChannels
 {
+    /// <summary>
+    /// Base interface for channels.
+    /// </summary>
     public interface IUpdateChannel : IDisposable
     {
+        /// <summary>
+        /// Update type.
+        /// </summary>
         public UpdateType UpdateType { get; }
 
-        public Update? Update { get; }
-
+        /// <summary>
+        /// If this update should be channeled.
+        /// </summary>
         public bool ShouldChannel(Update update);
 
-        public Task<Update> ReadAsync(TimeSpan timeOut);
+        /// <summary>
+        /// Write an update to channel.
+        /// </summary>
+        public Task WriteAsync(IUpdater updater, Update update);
 
-        public Task WriteAsync(Update update);
-
+        /// <summary>
+        /// Cancel the channel.
+        /// </summary>
         public void Cancel();
 
+        /// <summary>
+        /// If the channel is cancelled.
+        /// </summary>
         public bool Cancelled { get; }
     }
 }

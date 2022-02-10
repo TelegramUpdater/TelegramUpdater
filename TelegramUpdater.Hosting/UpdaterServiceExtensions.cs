@@ -49,7 +49,7 @@ namespace TelegramUpdater.Hosting
 
             updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
-            serviceDescriptors.AddSingleton(
+            serviceDescriptors.AddSingleton<IUpdater>(
                 services =>
                 {
                     var botClient = services.GetRequiredService<ITelegramBotClient>();
@@ -91,14 +91,14 @@ namespace TelegramUpdater.Hosting
 
             updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
-            serviceDescriptors.AddSingleton(
+            serviceDescriptors.AddSingleton<IUpdater>(
                 services =>
                 {
                     var botClient = services.GetRequiredService<ITelegramBotClient>();
                     var updater = new Updater(botClient, new UpdaterOptions(
                         configs.MaxDegreeOfParallelism,
                         configs.PerUserOneByOneProcess,
-                        logger: services.GetRequiredService<ILogger<Updater>>()
+                        logger: services.GetRequiredService<ILogger<IUpdater>>()
                      ), services);
 
                     updaterBuilder.AddToUpdater(updater);
@@ -134,14 +134,14 @@ namespace TelegramUpdater.Hosting
 
             updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
-            serviceDescriptors.AddSingleton(
+            serviceDescriptors.AddSingleton<IUpdater>(
                 services =>
                 {
                     var botClient = services.GetRequiredService<ITelegramBotClient>();
                     var updater = new Updater(botClient, new UpdaterOptions(
                         configs.MaxDegreeOfParallelism,
                         configs.PerUserOneByOneProcess,
-                        logger: services.GetRequiredService<ILogger<Updater>>()
+                        logger: services.GetRequiredService<ILogger<IUpdater>>()
                      ), services);
 
                     updaterBuilder.AddToUpdater(updater);
@@ -172,14 +172,14 @@ namespace TelegramUpdater.Hosting
 
             updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
-            serviceDescriptors.AddSingleton(
+            serviceDescriptors.AddSingleton<IUpdater>(
                 services =>
                 {
                     var botClient = services.GetRequiredService<ITelegramBotClient>();
                     var updater = new Updater(botClient, new UpdaterOptions(
                         updaterOptions.MaxDegreeOfParallelism,
                         updaterOptions.PerUserOneByOneProcess,
-                        logger: services.GetRequiredService<ILogger<Updater>>(),
+                        logger: services.GetRequiredService<ILogger<IUpdater>>(),
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
                         updaterOptions.AllowedUpdates
@@ -215,14 +215,14 @@ namespace TelegramUpdater.Hosting
 
             updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
-            serviceDescriptors.AddSingleton(
+            serviceDescriptors.AddSingleton<IUpdater>(
                 services =>
                 {
                     var botClient = services.GetRequiredService<ITelegramBotClient>();
                     var updater = new Updater(botClient, new UpdaterOptions(
                         updaterOptions.MaxDegreeOfParallelism,
                         updaterOptions.PerUserOneByOneProcess,
-                        logger: services.GetRequiredService<ILogger<Updater>>(),
+                        logger: services.GetRequiredService<ILogger<IUpdater>>(),
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
                         updaterOptions.AllowedUpdates
@@ -257,14 +257,14 @@ namespace TelegramUpdater.Hosting
 
             updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
-            serviceDescriptors.AddSingleton(
+            serviceDescriptors.AddSingleton<IUpdater>(
                 services =>
                 {
                     var botClient = services.GetRequiredService<ITelegramBotClient>();
                     var updater = new Updater(botClient, new UpdaterOptions(
                         updaterOptions.MaxDegreeOfParallelism,
                         updaterOptions.PerUserOneByOneProcess,
-                        logger: services.GetRequiredService<ILogger<Updater>>(),
+                        logger: services.GetRequiredService<ILogger<IUpdater>>(),
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
                         updaterOptions.AllowedUpdates
@@ -297,13 +297,13 @@ namespace TelegramUpdater.Hosting
 
             updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
-            serviceDescriptors.AddSingleton(
+            serviceDescriptors.AddSingleton<IUpdater>(
                 services =>
                 {
                     var updater = new Updater(telegramBot, new UpdaterOptions(
                         updaterOptions.MaxDegreeOfParallelism,
                         updaterOptions.PerUserOneByOneProcess,
-                        logger: services.GetRequiredService<ILogger<Updater>>(),
+                        logger: services.GetRequiredService<ILogger<IUpdater>>(),
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
                         updaterOptions.AllowedUpdates
@@ -338,13 +338,13 @@ namespace TelegramUpdater.Hosting
 
             updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
-            serviceDescriptors.AddSingleton(
+            serviceDescriptors.AddSingleton<IUpdater>(
                 services =>
                 {
                     var updater = new Updater(telegramBot, new UpdaterOptions(
                         updaterOptions.MaxDegreeOfParallelism,
                         updaterOptions.PerUserOneByOneProcess,
-                        logger: services.GetRequiredService<ILogger<Updater>>(),
+                        logger: services.GetRequiredService<ILogger<IUpdater>>(),
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
                         updaterOptions.AllowedUpdates
@@ -379,13 +379,13 @@ namespace TelegramUpdater.Hosting
 
             updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
-            serviceDescriptors.AddSingleton(
+            serviceDescriptors.AddSingleton<IUpdater>(
                 services =>
                 {
                     var updater = new Updater(telegramBot, new UpdaterOptions(
                         updaterOptions.MaxDegreeOfParallelism,
                         updaterOptions.PerUserOneByOneProcess,
-                        logger: services.GetRequiredService<ILogger<Updater>>(),
+                        logger: services.GetRequiredService<ILogger<IUpdater>>(),
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
                         updaterOptions.AllowedUpdates
@@ -402,7 +402,7 @@ namespace TelegramUpdater.Hosting
         /// <summary>
         /// Use this method to write updates when manual writing in enabled.
         /// </summary>
-        public static async Task WriteUpdateAsync(this Updater updater,
+        public static async Task WriteUpdateAsync(this IUpdater updater,
                                                   Update update,
                                                   CancellationToken cancellationToken = default)
             => await updater.ChannelWriter.WriteAsync(update, cancellationToken);

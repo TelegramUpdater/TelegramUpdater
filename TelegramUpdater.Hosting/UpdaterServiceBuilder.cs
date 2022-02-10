@@ -24,7 +24,7 @@ namespace TelegramUpdater.Hosting
         /// <summary>
         /// Add data to updater and discard this.
         /// </summary>
-        public void AddToUpdater(Updater updater)
+        public void AddToUpdater(IUpdater updater)
         {
             foreach (var container in _scopedHandlerContainers)
             {
@@ -251,7 +251,7 @@ namespace TelegramUpdater.Hosting
         /// <para>Leave null to handle all.</para>
         /// </param>
         public UpdaterServiceBuilder AddExceptionHandler<TException>(
-            Func<Updater, Exception, Task> callback,
+            Func<IUpdater, Exception, Task> callback,
             Filter<string>? messageMatch = default,
             Type[]? allowedHandlers = null,
             bool inherit = false) where TException : Exception
@@ -266,7 +266,7 @@ namespace TelegramUpdater.Hosting
         /// <param name="callback">A callback function that will be called when the error catched.</param>
         /// <param name="messageMatch">Handle only when <see cref="Exception.Message"/> matches a text.</param>
         public UpdaterServiceBuilder AddExceptionHandler<TException, THandler>(
-            Func<Updater, Exception, Task> callback,
+            Func<IUpdater, Exception, Task> callback,
             Filter<string>? messageMatch = default,
             bool inherit = false)
             where TException : Exception where THandler : IUpdateHandler

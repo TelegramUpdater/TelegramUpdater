@@ -1,12 +1,11 @@
-﻿using Telegram.Bot;
-using Telegram.Bot.Types;
+﻿using Telegram.Bot.Types;
 
 namespace TelegramUpdater.UpdateContainer.UpdateContainers
 {
     public class CallbackQueryContainer : UpdateContainerAbs<CallbackQuery>
     {
-        public CallbackQueryContainer(Updater updater, Update insider, ITelegramBotClient botClient)
-            : base(x => x.CallbackQuery, updater, insider, botClient)
+        public CallbackQueryContainer(IUpdater updater, Update insider)
+            : base(x => x.CallbackQuery, updater, insider)
         {
         }
     }

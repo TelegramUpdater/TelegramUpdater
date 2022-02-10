@@ -30,7 +30,7 @@ namespace TelegramUpdater.ExceptionHandlers
         /// <summary>
         /// A callback function that will be called when the error catched.
         /// </summary>
-        public Func<Updater, Exception, Task> Callback { get; }
+        public Func<IUpdater, Exception, Task> Callback { get; }
 
         /// <summary>
         /// Allow inherit and not only exact type.
@@ -86,7 +86,7 @@ namespace TelegramUpdater.ExceptionHandlers
         /// <param name="messageMatch">Handle only when <see cref="Exception.Message"/> matches a text.</param>
         /// <returns></returns>
         public static ExceptionHandler<TException> ExceptionsInHandler<TException, THandler>(
-            Func<Updater, Exception, Task> callback,
+            Func<IUpdater, Exception, Task> callback,
             Filter<string>? messageMatch = default)
             where TException : Exception where THandler : IUpdateHandler
                 => new ExceptionHandler<TException>(

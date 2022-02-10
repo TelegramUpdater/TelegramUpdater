@@ -2,19 +2,32 @@
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateChannels
 {
+    /// <summary>
+    /// An abstract class for channel updates.
+    /// </summary>
+    /// <typeparam name="T">Type of update to channel</typeparam>
     public abstract class AbstractChannel<T> : IUpdateChannel where T : class
     {
-        private readonly Channel<Update> _channel;
+        private readonly Channel<IContainer<T>> _channel;
         private readonly CancellationTokenSource _tokenSource;
         private readonly Func<Update, T?> _getT;
         private readonly Filter<T>? _filter;
         private bool disposedValue;
 
+        /// <summary>
+        /// An abstract class for channel updates.
+        /// </summary>
+        /// <param name="updateType">Type of update.</param>
+        /// <param name="getT">A function to select the right update from <see cref="Update"/></param>
+        /// <param name="filter">Filter.</param>
+        /// <exception cref="ArgumentNullException"></exception>
         protected AbstractChannel(
             UpdateType updateType,
             Func<Update, T?> getT,
@@ -23,7 +36,7 @@ namespace TelegramUpdater.UpdateChannels
             _filter = filter;
             UpdateType = updateType;
             _getT = getT ?? throw new ArgumentNullException(nameof(getT));
-            _channel = Channel.CreateBounded<Update>(new BoundedChannelOptions(1)
+            _channel = Channel.CreateBounded<IContainer<T>>(new BoundedChannelOptions(1)
             {
                 AllowSynchronousContinuations = true,
                 FullMode = BoundedChannelFullMode.Wait,
@@ -33,24 +46,35 @@ namespace TelegramUpdater.UpdateChannels
             _tokenSource = new CancellationTokenSource();
         }
 
+        /// <inheritdoc/>
         public UpdateType UpdateType { get; }
 
+        /// <summary>
+        /// A function to select the right update from <see cref="Update"/>
+        /// </summary>
+        /// <param name="update"></param>
+        /// <returns></returns>
         public T? GetT(Update update) => _getT(update);
 
-        public Update? Update { get; private set; }
 
+        /// <inheritdoc/>
         public bool Cancelled => _tokenSource.IsCancellationRequested;
 
-        public async Task<Update> ReadAsync(TimeSpan timeOut)
+        /// <inheritdoc/>
+        public async Task<IContainer<T>> ReadAsync(TimeSpan timeOut)
         {
             _tokenSource.CancelAfter(timeOut);
-            Update = await _channel.Reader.ReadAsync(_tokenSource.Token);
-            return Update;
+            return await _channel.Reader.ReadAsync(_tokenSource.Token);
         }
 
-        public async Task WriteAsync(Update update)
-            => await _channel.Writer.WriteAsync(update, _tokenSource.Token);
+        /// <inheritdoc/>
+        public async Task WriteAsync(IUpdater updater, Update update)
+        {
+            var container = ContainerBuilder(updater, update);
+            await _channel.Writer.WriteAsync(container, _tokenSource.Token);
+        }
 
+        /// <inheritdoc/>
         protected bool ShouldChannel(T t)
         {
             if (_filter is null) return true;
@@ -58,6 +82,9 @@ namespace TelegramUpdater.UpdateChannels
             return _filter.TheyShellPass(t);
         }
 
+        /// <summary>
+        /// If this update should be channeled.
+        /// </summary>
         public bool ShouldChannel(Update update)
         {
             var insider = GetT(update);
@@ -67,11 +94,17 @@ namespace TelegramUpdater.UpdateChannels
             return ShouldChannel(insider);
         }
 
+        protected abstract IContainer<T> ContainerBuilder(IUpdater updater, Update update);
+
+        /// <inheritdoc/>
         public void Cancel()
         {
             _tokenSource.Cancel();
         }
 
+        /// <summary>
+        /// Dispose.
+        /// </summary>
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -87,6 +120,9 @@ namespace TelegramUpdater.UpdateChannels
             }
         }
 
+        /// <summary>
+        /// Dispose.
+        /// </summary>
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method

@@ -21,8 +21,8 @@ namespace TelegramUpdater
         /// <param name="callback">Callback function to handle your update.</param>
         /// <param name="filter">Filters.</param>
         /// <param name="group">Handling priority.</param>
-        public static Updater AddUpdateHandler<T>(
-            this Updater updater,
+        public static IUpdater AddUpdateHandler<T>(
+            this IUpdater updater,
             Func<Update, T?> updateSelector,
             Func<IContainer<T>, Task> callback,
             Filter<T>? filter = default,

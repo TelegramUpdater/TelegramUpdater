@@ -14,13 +14,12 @@ namespace TelegramUpdater.UpdateContainer
 
         protected UpdateContainerAbs(
             Func<Update, T?> insiderResovler,
-            Updater updater,
-            Update insider,
-            ITelegramBotClient botClient)
+            IUpdater updater,
+            Update insider)
         {
             Updater = updater;
             Container = insider;
-            BotClient = botClient;
+            BotClient = updater.BotClient;
             _insiderResovler = insiderResovler;
         }
 
@@ -37,11 +36,14 @@ namespace TelegramUpdater.UpdateContainer
                 return inner;
             }
         }
-
+  
+        /// <inheritdoc/>
         public Update Container { get; }
 
+        /// <inheritdoc/>
         public ITelegramBotClient BotClient { get; }
 
-        public Updater Updater { get; }
+        /// <inheritdoc/>
+        public IUpdater Updater { get; }
     }
 }

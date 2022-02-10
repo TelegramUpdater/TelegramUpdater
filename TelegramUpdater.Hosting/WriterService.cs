@@ -8,7 +8,7 @@ namespace TelegramUpdater.Hosting
 {
     internal class WriterService : UpdateWriterServiceAbs
     {
-        public WriterService(Updater updater) : base(updater)
+        public WriterService(IUpdater updater) : base(updater)
         {
         }
 

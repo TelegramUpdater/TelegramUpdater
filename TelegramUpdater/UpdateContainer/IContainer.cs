@@ -17,7 +17,7 @@ namespace TelegramUpdater.UpdateContainer
         /// <typeparam name="K">Type of update you're excepting.</typeparam>
         /// <param name="updateChannel">An <see cref="IUpdateChannel"/></param>
         /// <param name="timeOut">Maximum allowed time to wait for that update.</param>
-        public async Task<K?> OpenChannel<K>(AbstractChannel<K> updateChannel, TimeSpan timeOut)
+        public async Task<IContainer<K>?> OpenChannel<K>(AbstractChannel<K> updateChannel, TimeSpan timeOut)
             where K : class
         {
             return await Updater.OpenChannel(updateChannel, timeOut);

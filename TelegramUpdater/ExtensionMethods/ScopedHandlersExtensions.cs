@@ -19,8 +19,8 @@ namespace TelegramUpdater
         /// A function to choose real update from <see cref="Update"/>
         /// <para>Don't touch it if you don't know.</para>
         /// </param>
-        public static Updater AddScopedHandler<THandler, TUpdate>(
-            this Updater updater,
+        public static IUpdater AddScopedHandler<THandler, TUpdate>(
+            this IUpdater updater,
             Filter<TUpdate>? filter = default,
             UpdateType? updateType = default,
             Func<Update, TUpdate>? getT = default)
@@ -79,12 +79,11 @@ namespace TelegramUpdater
         /// A function to choose real update from <see cref="Update"/>
         /// <para>Don't touch it if you don't know.</para>
         /// </param>
-        public static Updater AddScopedHandler<TUpdate>(
-            this Updater updater,
-            Type typeOfScopedHandler,
-            Filter<TUpdate>? filter = default,
-            UpdateType? updateType = default,
-            Func<Update, TUpdate>? getT = default) where TUpdate : class
+        public static IUpdater AddScopedHandler<TUpdate>(this IUpdater updater,
+                                                         Type typeOfScopedHandler,
+                                                         Filter<TUpdate>? filter = default,
+                                                         UpdateType? updateType = default,
+                                                         Func<Update, TUpdate>? getT = default) where TUpdate : class
         {
             if (!typeof(IScopedUpdateHandler).IsAssignableFrom(typeOfScopedHandler))
             {
@@ -158,8 +157,8 @@ namespace TelegramUpdater
         /// Leave empty if you applied your fillter using <see cref="ApplyFilterAttribute"/> before.
         /// </para>
         /// </param>
-        public static Updater AddScopedMessage<THandler>(this Updater updater,
-                                                      Filter<Message>? filter = default)
+        public static IUpdater AddScopedMessage<THandler>(this IUpdater updater,
+                                                          Filter<Message>? filter = default)
             where THandler : IScopedUpdateHandler
             => updater.AddScopedHandler<THandler, Message>(
                 filter, UpdateType.Message, x => x.Message!);
@@ -175,8 +174,8 @@ namespace TelegramUpdater
         /// Leave empty if you applied your fillter using <see cref="ApplyFilterAttribute"/> before.
         /// </para>
         /// </param>
-        public static Updater AddScopedCallbackQuery<THandler>(this Updater updater,
-                                                            Filter<CallbackQuery>? filter = default)
+        public static IUpdater AddScopedCallbackQuery<THandler>(this IUpdater updater,
+                                                                Filter<CallbackQuery>? filter = default)
             where THandler : IScopedUpdateHandler
             => updater.AddScopedHandler<THandler, CallbackQuery>(
                 filter, UpdateType.Message, x => x.CallbackQuery!);

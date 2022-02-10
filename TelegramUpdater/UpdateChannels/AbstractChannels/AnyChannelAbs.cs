@@ -1,16 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
 
-namespace TelegramUpdater.UpdateHandlers.AbstractHandlers
+namespace TelegramUpdater.UpdateChannels.AbstractChannels
 {
-    public abstract class AnyUpdateHandlerAbs<T> : AbstractHandler<T> where T : class
+    public class AnyChannelAbs<T> : AbstractChannel<T> where T : class
     {
-        protected AnyUpdateHandlerAbs(
-            UpdateType updateType, Func<Update, T?> getT, Filter<T>? filter, int group)
-            : base(updateType, getT, filter, group)
+        public AnyChannelAbs(
+            UpdateType updateType, Func<Update, T?> getT, Filter<T>? filter)
+            : base(updateType, getT, filter)
         {
         }
 

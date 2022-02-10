@@ -13,7 +13,7 @@ namespace ManualWriterWorker
     /// </summary>
     public class MyManualWriter : UpdateWriterServiceAbs
     {
-        public MyManualWriter(Updater updater) : base(updater)
+        public MyManualWriter(IUpdater updater) : base(updater)
         {
         }
 
