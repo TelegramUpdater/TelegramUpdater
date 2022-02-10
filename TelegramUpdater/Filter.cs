@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace TelegramUpdater
 {
@@ -17,29 +16,67 @@ namespace TelegramUpdater
         /// <param name="filter">A function to check the input and return a boolean</param>
         public Filter(Func<T, bool> filter) => _filter = filter;
 
-        public virtual bool TheyShellPass([NotNullWhen(true)] T input)
+        /// <summary>
+        /// Indicates if an input of type <typeparamref name="T"/> can pass this filter
+        /// </summary>
+        /// <param name="input">The input value to check</param>
+        /// <returns></returns>
+        public virtual bool TheyShellPass(T input)
             => input != null && _filter(input);
 
+        /// <summary>
+        /// Converts a filter to a fucntion.
+        /// </summary>
+        /// <param name="filter"></param>
         public static implicit operator Func<T, bool>(Filter<T> filter)
             => filter.TheyShellPass;
 
+        /// <summary>
+        /// Returns an <see cref="AndFilter{T}"/> version.
+        /// <para>
+        /// This and <paramref name="simpleFilter"/>
+        /// </para>
+        /// </summary>
         public Filter<T> And(Filter<T> simpleFilter)
             => new AndFilter<T>(this, simpleFilter);
 
+        /// <summary>
+        /// Returns an <see cref="OrFilter{T}"/> version.
+        /// <para>
+        /// This Or <paramref name="simpleFilter"/>
+        /// </para>
+        /// </summary>
         public Filter<T> Or(Filter<T> simpleFilter)
             => new OrFilter<T>(this, simpleFilter);
 
+        /// <summary>
+        /// Returns a reversed version of this <see cref="Filter{T}"/>
+        /// </summary>
+        /// <returns></returns>
         public Filter<T> Reverse() => new ReverseFilter<T>(this);
 
+        /// <summary>
+        /// Converts a <paramref name="filter"/> to <see cref="Filter{T}"/>
+        /// </summary>
+        /// <param name="filter"></param>
 
         public static implicit operator Filter<T>(Func<T, bool> filter) => new Filter<T>(filter);
 
+        /// <summary>
+        /// Creates an <see cref="AndFilter{T}"/>
+        /// </summary>
         public static Filter<T> operator &(Filter<T> a, Filter<T> b)
             => new AndFilter<T>(a, b);
 
+        /// <summary>
+        /// Creates an <see cref="OrFilter{T}"/>
+        /// </summary>
         public static Filter<T> operator |(Filter<T> a, Filter<T> b)
             => new OrFilter<T>(a, b);
 
+        /// <summary>
+        /// Creates a reversed version of this <see cref="Filter{T}"/>
+        /// </summary>
         public static Filter<T> operator ~(Filter<T> a)
             => new ReverseFilter<T>(a);
     }
