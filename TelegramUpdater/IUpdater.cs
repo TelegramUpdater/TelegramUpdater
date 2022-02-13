@@ -1,12 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramUpdater.ExceptionHandlers;
-using TelegramUpdater.TrafficLights;
 using TelegramUpdater.UpdateChannels;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers;
@@ -25,29 +23,9 @@ namespace TelegramUpdater
         ITelegramBotClient BotClient { get; }
 
         /// <summary>
-        /// You can read updates from here.
-        /// </summary>
-        ChannelReader<Update> ChannelReader { get; }
-
-        /// <summary>
-        /// You can read updates from here.
-        /// </summary>
-        ChannelWriter<Update> ChannelWriter { get; }
-
-        /// <summary>
-        /// An emergency cancellation token.
-        /// </summary>
-        CancellationToken EmergencyToken { get; }
-
-        /// <summary>
         /// This updater logger.
         /// </summary>
         ILogger<IUpdater> Logger { get; }
-
-        /// <summary>
-        /// A dict of tasks for in process updates
-        /// </summary>
-        TrafficLight<Update, long> TrafficLight { get; }
 
         /// <summary>
         /// Options for this updater.
@@ -76,11 +54,6 @@ namespace TelegramUpdater
         Updater AddUpdateHandler(ISingletonUpdateHandler updateHandler);
 
         /// <summary>
-        /// Cancell the updater job.
-        /// </summary>
-        void Cancel();
-
-        /// <summary>
         /// Get current <see cref="TelegramBotClient"/>'s user information.
         /// </summary>
         /// <remarks>
@@ -103,6 +76,6 @@ namespace TelegramUpdater
         /// <param name="manualWriting">If you gonna write updates manually and no polling required.</param>
         /// <param name="cancellationToken">Use this to cancel the task.</param>
         /// <param name="fromServices">Indicates if there is service provider available.</param>
-        Task Start(bool block = true, bool manualWriting = false, bool fromServices = false, CancellationToken cancellationToken = default);
+        Task Start(bool block = true, bool manualWriting = false, CancellationToken cancellationToken = default);
     }
 }
