@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <Authors>immmdreza</Authors>
     <Company>TelegramUpdater</Company>
-    <Version>1.0.6-alpha</Version>
-    <Description>Telegram updater is a telegram bot api framework of simplicity. </Description>
+    <Version>1.1.0-alpha</Version>
+    <Description>Telegram updater is a telegram bot api framework of simplicity.</Description>
     <Copyright>TelegramUpdater by immmdreza</Copyright>
     <PackageProjectUrl>https://telegramupdater.github.io/</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -39,6 +39,10 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
     <PackageReference Include="Telegram.Bot" Version="17.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\RainbowUtlities\TelegramUpdater.RainbowUtlities\TelegramUpdater.RainbowUtlities.csproj" />
   </ItemGroup>
 
 </Project>
