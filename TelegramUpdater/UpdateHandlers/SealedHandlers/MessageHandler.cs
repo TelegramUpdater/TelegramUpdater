@@ -6,9 +6,12 @@ using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateHandlers.SealedHandlers
 {
+    /// <summary>
+    /// An update handler for <see cref="Update.Message"/>.
+    /// </summary>
     public sealed class MessageHandler : AnyUpdateHandler<Message>
     {
-        public MessageHandler(
+        internal MessageHandler(
             Func<IContainer<Message>, Task> callbak,
             Filter<Message>? filter,
             int group = 0)

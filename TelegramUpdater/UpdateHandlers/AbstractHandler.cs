@@ -2,16 +2,21 @@
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using TelegramUpdater.RainbowUtlities;
 using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateHandlers
 {
+    /// <summary>
+    /// Abstract base to create update handlers.
+    /// </summary>
+    /// <typeparam name="T">Update type.</typeparam>
     public abstract class AbstractHandler<T> : ISingletonUpdateHandler where T : class
     {
         private readonly Func<Update, T?> _getT;
         private readonly Filter<T>? _filter;
 
-        protected AbstractHandler(
+        internal AbstractHandler(
             UpdateType updateType,
             Func<Update, T?> getT,
             Filter<T>? filter,
@@ -38,8 +43,8 @@ namespace TelegramUpdater.UpdateHandlers
             return _filter.TheyShellPass(t);
         }
 
-        public async Task HandleAsync(IUpdater updater, Update update)
-            => await HandleAsync(ContainerBuilder(updater, update));
+        public async Task HandleAsync(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
+            => await HandleAsync(ContainerBuilder(updater, shiningInfo));
 
         public bool ShouldHandle(Update update)
         {
@@ -52,6 +57,6 @@ namespace TelegramUpdater.UpdateHandlers
 
         protected abstract Task HandleAsync(IContainer<T> updateContainer);
 
-        protected abstract IContainer<T> ContainerBuilder(IUpdater updater, Update update);
+        internal abstract IContainer<T> ContainerBuilder(IUpdater updater, ShiningInfo<long, Update> shiningInfo);
     }
 }

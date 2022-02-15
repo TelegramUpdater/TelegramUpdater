@@ -4,13 +4,18 @@ using Telegram.Bot.Types.Enums;
 
 namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
 {
+    /// <summary>
+    /// Builds containers for <see cref="IScopedUpdateHandler"/>s.
+    /// </summary>
+    /// <typeparam name="THandler">The handler, which is <see cref="IScopedUpdateHandler"/></typeparam>
+    /// <typeparam name="TUpdate">Update type.</typeparam>
     public sealed class UpdateContainerBuilder<THandler, TUpdate>
         : AbstractUpdateContainer<THandler, TUpdate>
         where THandler : IScopedUpdateHandler where TUpdate : class
     {
         private readonly Func<Update, TUpdate>? _getT;
 
-        public UpdateContainerBuilder(
+        internal UpdateContainerBuilder(
             UpdateType updateType,
             Filter<TUpdate>? filter = default,
             Func<Update, TUpdate>? getT = default)

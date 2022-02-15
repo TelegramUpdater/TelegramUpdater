@@ -363,5 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 .vscode/
+Releases/
 .Releases/
 PrivateContents/

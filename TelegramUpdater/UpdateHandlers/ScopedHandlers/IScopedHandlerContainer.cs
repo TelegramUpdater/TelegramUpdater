@@ -20,8 +20,18 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
         /// </summary>
         public UpdateType UpdateType { get; }
 
+        /// <summary>
+        /// Checks if an update can be handled in a handler of type <see cref="ScopedHandlerType"/>.
+        /// </summary>
+        /// <param name="update">The update.</param>
+        /// <returns></returns>
         public bool ShouldHandle(Update update);
 
+        /// <summary>
+        /// Initialize an instance of <see cref="ScopedHandlerType"/>.
+        /// </summary>
+        /// <param name="scope">If there is any <see cref="IServiceProvider"/> and <see cref="IServiceScope"/></param>
+        /// <returns></returns>
         public IScopedUpdateHandler? CreateInstance(IServiceScope? scope = default)
         {
             if (scope != null)

@@ -1,14 +1,20 @@
 ﻿using System;
 using Telegram.Bot.Types;
+using TelegramUpdater.RainbowUtlities;
 
 namespace TelegramUpdater.UpdateContainer.UpdateContainers
 {
+    /// <summary>
+    /// Create an update container for any type of update.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class AnyContainer<T> : UpdateContainerAbs<T> where T : class
     {
-        public AnyContainer(
+        internal AnyContainer(
             Func<Update, T?> insiderResovler,
-            IUpdater updater, Update insider) : base(insiderResovler, updater, insider)
-        {
-        }
+            IUpdater updater,
+            ShiningInfo<long, Update> shiningInfo)
+            : base(insiderResovler, updater, shiningInfo)
+        { }
     }
 }
