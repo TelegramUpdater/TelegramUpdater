@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Channels;
-using System.Threading.Tasks;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using TelegramUpdater.RainbowUtlities;
 using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateChannels
@@ -15,11 +12,8 @@ namespace TelegramUpdater.UpdateChannels
     /// <typeparam name="T">Type of update to channel</typeparam>
     public abstract class AbstractChannel<T> : IUpdateChannel where T : class
     {
-        private readonly Channel<IContainer<T>> _channel;
-        private readonly CancellationTokenSource _tokenSource;
         private readonly Func<Update, T?> _getT;
         private readonly Filter<T>? _filter;
-        private bool disposedValue;
 
         /// <summary>
         /// An abstract class for channel updates.
@@ -36,14 +30,6 @@ namespace TelegramUpdater.UpdateChannels
             _filter = filter;
             UpdateType = updateType;
             _getT = getT ?? throw new ArgumentNullException(nameof(getT));
-            _channel = Channel.CreateBounded<IContainer<T>>(new BoundedChannelOptions(1)
-            {
-                AllowSynchronousContinuations = true,
-                FullMode = BoundedChannelFullMode.Wait,
-                SingleReader = true,
-                SingleWriter = true
-            });
-            _tokenSource = new CancellationTokenSource();
         }
 
         /// <inheritdoc/>
@@ -55,24 +41,6 @@ namespace TelegramUpdater.UpdateChannels
         /// <param name="update"></param>
         /// <returns></returns>
         public T? GetT(Update update) => _getT(update);
-
-
-        /// <inheritdoc/>
-        public bool Cancelled => _tokenSource.IsCancellationRequested;
-
-        /// <inheritdoc/>
-        public async Task<IContainer<T>> ReadAsync(TimeSpan timeOut)
-        {
-            _tokenSource.CancelAfter(timeOut);
-            return await _channel.Reader.ReadAsync(_tokenSource.Token);
-        }
-
-        /// <inheritdoc/>
-        public async Task WriteAsync(IUpdater updater, Update update)
-        {
-            var container = ContainerBuilder(updater, update);
-            await _channel.Writer.WriteAsync(container, _tokenSource.Token);
-        }
 
         /// <inheritdoc/>
         protected bool ShouldChannel(T t)
@@ -94,40 +62,8 @@ namespace TelegramUpdater.UpdateChannels
             return ShouldChannel(insider);
         }
 
-        protected abstract IContainer<T> ContainerBuilder(IUpdater updater, Update update);
-
         /// <inheritdoc/>
-        public void Cancel()
-        {
-            _tokenSource.Cancel();
-        }
-
-        /// <summary>
-        /// Dispose.
-        /// </summary>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    _tokenSource.Dispose();
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
-                disposedValue = true;
-            }
-        }
-
-        /// <summary>
-        /// Dispose.
-        /// </summary>
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
+        internal abstract IContainer<T> ContainerBuilder(
+            IUpdater updater, ShiningInfo<long, Update> shiningInfo);
     }
 }

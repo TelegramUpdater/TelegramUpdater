@@ -18,7 +18,7 @@ namespace TelegramUpdater
         public static User Sender(this IContainer<CallbackQuery> simpleContext)
             => simpleContext.Update.From;
 
-        public static async Task<IContainer<Message>> Send(this IContainer<CallbackQuery> simpleContext,
+        public static async Task<Message> Send(this IContainer<CallbackQuery> simpleContext,
                                                            string text,
                                                            bool sendAsReply = true,
                                                            ParseMode? parseMode = default,
@@ -38,8 +38,7 @@ namespace TelegramUpdater
                                                                        disableNotification,
                                                                        replyToMessageId: sendAsReply ? simpleContext.Update.Message.MessageId : 0,
                                                                        allowSendingWithoutReply: true,
-                                                                       replyMarkup: replyMarkup)
-                    .WrapAsync(simpleContext);
+                                                                       replyMarkup: replyMarkup);
             }
             else
             {
@@ -61,7 +60,7 @@ namespace TelegramUpdater
         /// Edits a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<IContainer<Message>?> Edit(this IContainer<CallbackQuery> simpleContext,
+        public static async Task<Message?> Edit(this IContainer<CallbackQuery> simpleContext,
                                                             string text,
                                                             ParseMode? parseMode = default,
                                                             IEnumerable<MessageEntity>? messageEntities = default,
@@ -89,8 +88,7 @@ namespace TelegramUpdater
                                                                 messageEntities,
                                                                 disableWebpagePreview,
                                                                 inlineKeyboardMarkup,
-                                                                cancellationToken)
-                    .WrapAsync(simpleContext);
+                                                                cancellationToken);
             }
 
             throw new InvalidOperationException("InlineMessageId and Message are both null!");
@@ -100,7 +98,7 @@ namespace TelegramUpdater
         /// Edits live location of a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<IContainer<Message>?> Edit(this IContainer<CallbackQuery> simpleContext,
+        public static async Task<Message?> Edit(this IContainer<CallbackQuery> simpleContext,
                                                 double latitude,
                                                 double longitude,
                                                 float? horizontalAccuracy = default,
@@ -131,8 +129,7 @@ namespace TelegramUpdater
                                                                                heading,
                                                                                proximityAlertRadius,
                                                                                inlineKeyboardMarkup,
-                                                                               cancellationToken)
-                    .WrapAsync(simpleContext);
+                                                                               cancellationToken);
             }
 
             throw new InvalidOperationException("InlineMessageId and Message are both null!");
@@ -142,7 +139,7 @@ namespace TelegramUpdater
         /// Edits media of a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<IContainer<Message>?> Edit(this IContainer<CallbackQuery> simpleContext,
+        public static async Task<Message?> Edit(this IContainer<CallbackQuery> simpleContext,
                                                 InputMediaBase inputMediaBase,
                                                 InlineKeyboardMarkup? inlineKeyboardMarkup = default,
                                                 CancellationToken cancellationToken = default)
@@ -161,8 +158,7 @@ namespace TelegramUpdater
                                                                 simpleContext.Update.Message.MessageId,
                                                                 inputMediaBase,
                                                                 inlineKeyboardMarkup,
-                                                                cancellationToken)
-                    .WrapAsync(simpleContext);
+                                                                cancellationToken);
             }
 
             throw new InvalidOperationException("InlineMessageId and Message are both null!");
@@ -172,7 +168,7 @@ namespace TelegramUpdater
         /// Edits caption of a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<IContainer<Message>?> Edit(this IContainer<CallbackQuery> simpleContext,
+        public static async Task<Message?> Edit(this IContainer<CallbackQuery> simpleContext,
                                                 string caption,
                                                 ParseMode? parseMode = default,
                                                 IEnumerable<MessageEntity>? messageEntities = default,
@@ -197,8 +193,7 @@ namespace TelegramUpdater
                                                                 parseMode,
                                                                 messageEntities,
                                                                 inlineKeyboardMarkup,
-                                                                cancellationToken)
-                    .WrapAsync(simpleContext);
+                                                                cancellationToken);
             }
 
             throw new InvalidOperationException("InlineMessageId and Message are both null!");
@@ -208,7 +203,7 @@ namespace TelegramUpdater
         /// Edits reply markup of a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<IContainer<Message>?> Edit(this IContainer<CallbackQuery> simpleContext,
+        public static async Task<Message?> Edit(this IContainer<CallbackQuery> simpleContext,
                                                 InlineKeyboardMarkup? inlineKeyboardMarkup = default,
                                                 CancellationToken cancellationToken = default)
         {
@@ -224,8 +219,7 @@ namespace TelegramUpdater
                 return await simpleContext.BotClient.EditMessageReplyMarkupAsync(simpleContext.Update.Message.Chat.Id,
                                                                               simpleContext.Update.Message.MessageId,
                                                                               inlineKeyboardMarkup,
-                                                                              cancellationToken)
-                    .WrapAsync(simpleContext);
+                                                                              cancellationToken);
             }
 
             throw new InvalidOperationException("InlineMessageId and Message are both null!");

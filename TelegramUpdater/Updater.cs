@@ -26,7 +26,6 @@ namespace TelegramUpdater
         private readonly List<ISingletonUpdateHandler> _updateHandlers;
         private readonly List<IScopedHandlerContainer> _scopedHandlerContainers;
         private readonly List<IExceptionHandler> _exceptionHandlers;
-        private readonly ConcurrentDictionary<string, IUpdateChannel> _updateChannels;
         private readonly ILogger<IUpdater> _logger;
         private readonly UpdaterOptions _updaterOptions;
         private readonly IServiceProvider? _serviceDescriptors;
@@ -48,7 +47,6 @@ namespace TelegramUpdater
             _updaterOptions = updaterOptions;
             _serviceDescriptors = serviceDescriptors;
 
-            _updateChannels = new ConcurrentDictionary<string, IUpdateChannel>();
             _updateHandlers = new List<ISingletonUpdateHandler>();
             _exceptionHandlers = new List<IExceptionHandler>();
             _scopedHandlerContainers = new List<IScopedHandlerContainer>();
@@ -87,6 +85,9 @@ namespace TelegramUpdater
         public ILogger<IUpdater> Logger => _logger;
 
         /// <inheritdoc/>
+        public Rainbow<long, Update> Rainbow => _rainbow;
+
+        /// <inheritdoc/>
         public Updater AddUpdateHandler(ISingletonUpdateHandler updateHandler)
         {
             _updateHandlers.Add(updateHandler);
@@ -112,33 +113,13 @@ namespace TelegramUpdater
         }
 
         /// <inheritdoc/>
-        public async Task<IContainer<T>?> OpenChannel<T>(AbstractChannel<T> updateChannel, TimeSpan timeOut)
-            where T : class
+        public async Task WriteAsync(Update update)
         {
-            var key = updateChannel.GetHashCode().ToString();
-            if (_updateChannels.TryAdd(
-                key, updateChannel))
-            {
-                try
-                {
-                    return await updateChannel.ReadAsync(timeOut);
-                }
-                catch (OperationCanceledException)
-                {
-                    _updateChannels.Remove(key!, out _);
-                    updateChannel.Dispose();
-                    return null;
-                }
-            }
-            else
-            {
-                throw new Exception("Can't open channel!");
-            }
+            await Rainbow.WriteAsync(update);
         }
 
         /// <inheritdoc/>
-        public async Task Start(
-            bool block = true,
+        public async Task StartAsync(
             bool manualWriting = false,
             CancellationToken cancellationToken = default)
         {
@@ -158,41 +139,34 @@ namespace TelegramUpdater
                 var updaterTask = Task.Run(() => UpdateReceiver(cancellationToken), cancellationToken);
             }
 
-            
-            if (block)
+
+            _logger.LogInformation("Blocking the current thread to read updates!");
+            await _rainbow.ShineAsync(ShineCallback, ShineErrors, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public void Start(
+            bool manualWriting = false,
+            CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken == default)
             {
-                _logger.LogInformation("Blocking the current thread to read updates!");
-                await _rainbow.ShineAsync(ShineCallback, ShineErrors, cancellationToken);
+                _logger.LogInformation("Start's CancellationToken set to CancellationToken in UpdaterOptions");
+                cancellationToken = _updaterOptions.CancellationToken;
+            }
+
+            if (manualWriting)
+            {
+                _logger.LogWarning("Manual writing is enabled! You should write updates yourself.");
             }
             else
             {
-                _logger.LogInformation("Reading updates is done in background.");
-                _rainbow.Shine(ShineCallback, ShineErrors, cancellationToken);
+                _logger.LogInformation("Auto writing updates enabled!");
+                var updaterTask = Task.Run(() => UpdateReceiver(cancellationToken), cancellationToken);
             }
-        }
 
-        private Task ShineErrors(Exception exception, CancellationToken cancellationToken)
-        {
-            Logger.LogError(exception: exception, message: "Error in Rainbow!");
-            return Task.CompletedTask;
-        }
-
-        private async Task ShineCallback(
-            ShinigInfo<long, Update> shinigInfo, CancellationToken cancellationToken)
-        {
-            var update = shinigInfo.Value;
-
-            if (update == null)
-                return;
-
-            if (_serviceDescriptors != null)
-            {
-                await ProcessUpdateFromServices(update, cancellationToken);
-            }
-            else
-            {
-                await ProcessUpdate(update, cancellationToken);
-            }
+            _logger.LogInformation("Reading updates is done in background.");
+            _rainbow.Shine(ShineCallback, ShineErrors, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -204,6 +178,28 @@ namespace TelegramUpdater
             }
 
             return _me;
+        }
+
+        private Task ShineErrors(Exception exception, CancellationToken cancellationToken)
+        {
+            Logger.LogError(exception: exception, message: "Error in Rainbow!");
+            return Task.CompletedTask;
+        }
+
+        private async Task ShineCallback(
+            ShiningInfo<long, Update> shiningInfo, CancellationToken cancellationToken)
+        {
+            if (shiningInfo == null)
+                return;
+
+            if (_serviceDescriptors != null)
+            {
+                await ProcessUpdateFromServices(shiningInfo, cancellationToken);
+            }
+            else
+            {
+                await ProcessUpdate(shiningInfo, cancellationToken);
+            }
         }
 
         private async Task UpdateReceiver(CancellationToken cancellationToken = default)
@@ -229,7 +225,7 @@ namespace TelegramUpdater
 
                     foreach (var update in updates)
                     {
-                        await _rainbow.WriteAsync(update);
+                        await WriteAsync(update);
                         offset = update.Id + 1;
                     }
                 }
@@ -244,7 +240,7 @@ namespace TelegramUpdater
         }
 
         private async Task ProcessUpdateFromServices(
-            Update update, CancellationToken cancellationToken)
+            ShiningInfo<long, Update> shiningInfo, CancellationToken cancellationToken)
         {
             try
             {
@@ -257,38 +253,9 @@ namespace TelegramUpdater
                     return;
                 }
 
-                if (!_updateChannels.IsEmpty)
-                {
-                    IUpdateChannel? updateChannel = null;
-                    string? key = null;
-
-                    foreach (var channel in _updateChannels
-                        .Where(x => x.Value.UpdateType == update.Type))
-                    {
-                        if (channel.Value.ShouldChannel(update))
-                        {
-                            updateChannel = channel.Value;
-                            key = channel.Key;
-                            break;
-                        }
-                    }
-
-                    if (updateChannel != null)
-                    {
-                        if (!updateChannel.Cancelled)
-                        {
-                            await updateChannel.WriteAsync(this, update);
-                        }
-
-                        _updateChannels.Remove(key!, out _);
-                        updateChannel.Dispose();
-                        return;
-                    }
-                }
-
                 var scopedHandlers = _scopedHandlerContainers
-                    .Where(x => x.UpdateType == update.Type)
-                    .Where(x => x.ShouldHandle(update));
+                    .Where(x => x.UpdateType == shiningInfo.Value.Type)
+                    .Where(x => x.ShouldHandle(shiningInfo.Value));
 
                 if (!scopedHandlers.Any())
                 { 
@@ -311,7 +278,7 @@ namespace TelegramUpdater
 
                     if (handler != null)
                     {
-                        if (!await HandleHandler(update, handler, cancellationToken))
+                        if (!await HandleHandler(shiningInfo, handler, cancellationToken))
                         {
                             break;
                         }
@@ -325,7 +292,7 @@ namespace TelegramUpdater
         }
 
         private async Task ProcessUpdate(
-            Update update, CancellationToken cancellationToken)
+            ShiningInfo<long, Update> shiningInfo, CancellationToken cancellationToken)
         {
             try
             {
@@ -334,43 +301,14 @@ namespace TelegramUpdater
                     return;
                 }
 
-                if (!_updateChannels.IsEmpty)
-                {
-                    IUpdateChannel? updateChannel = null;
-                    string? key = null;
-
-                    foreach (var channel in _updateChannels
-                        .Where(x => x.Value.UpdateType == update.Type))
-                    {
-                        if (channel.Value.ShouldChannel(update))
-                        {
-                            updateChannel = channel.Value;
-                            key = channel.Key;
-                            break;
-                        }
-                    }
-
-                    if (updateChannel != null)
-                    {
-                        if (!updateChannel.Cancelled)
-                        {
-                            await updateChannel.WriteAsync(this, update);
-                        }
-
-                        _updateChannels.Remove(key!, out _);
-                        updateChannel.Dispose();
-                        return;
-                    }
-                }
-
                 var singletonhandlers = _updateHandlers
-                    .Where(x => x.UpdateType == update.Type)
-                    .Where(x => x.ShouldHandle(update))
+                    .Where(x => x.UpdateType == shiningInfo.Value.Type)
+                    .Where(x => x.ShouldHandle(shiningInfo.Value))
                     .Select(x => (IUpdateHandler)x);
 
                 var scopedHandlers = _scopedHandlerContainers
-                    .Where(x => x.UpdateType == update.Type)
-                    .Where(x => x.ShouldHandle(update))
+                    .Where(x => x.UpdateType == shiningInfo.Value.Type)
+                    .Where(x => x.ShouldHandle(shiningInfo.Value))
                     .Select(x => x.CreateInstance())
                     .Where(x => x != null)
                     .Cast<IScopedUpdateHandler>()
@@ -394,7 +332,7 @@ namespace TelegramUpdater
                         break;
                     }
 
-                    if (!await HandleHandler(update, handler, cancellationToken))
+                    if (!await HandleHandler(shiningInfo, handler, cancellationToken))
                     {
                         break;
                     }
@@ -410,7 +348,7 @@ namespace TelegramUpdater
         /// Returns false to break.
         /// </summary>
         private async Task<bool> HandleHandler(
-            Update update,
+            ShiningInfo<long, Update> shiningInfo,
             IUpdateHandler handler,
             CancellationToken cancellationToken)
         {
@@ -422,7 +360,7 @@ namespace TelegramUpdater
             // Handle the shit.
             try
             {
-                await handler.HandleAsync(this, update);
+                await handler.HandleAsync(this, shiningInfo);
             }
             // Cut handlers chain.
             catch (StopPropagation)

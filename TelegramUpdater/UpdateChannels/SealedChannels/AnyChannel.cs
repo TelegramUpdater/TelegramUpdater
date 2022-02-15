@@ -5,19 +5,18 @@ using TelegramUpdater.RainbowUtlities;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
 
-namespace TelegramUpdater.UpdateHandlers.AbstractHandlers
+namespace TelegramUpdater.UpdateChannels.AbstractChannels
 {
     /// <summary>
-    /// A class to create update handler for any type of updates.
+    /// Create channel for any type of <see cref="Update"/>.
     /// </summary>
-    /// <typeparam name="T"><see cref="Update"/> type</typeparam>
-    public abstract class AnyUpdateHandlerAbs<T> : AbstractHandler<T> where T : class
+    /// <typeparam name="T"></typeparam>
+    public abstract class AnyChannel<T> : AbstractChannel<T> where T : class
     {
-        internal AnyUpdateHandlerAbs(
-            UpdateType updateType, Func<Update, T?> getT, Filter<T>? filter, int group)
-            : base(updateType, getT, filter, group)
-        {
-        }
+        internal AnyChannel(
+            UpdateType updateType, Func<Update, T?> getT, Filter<T>? filter)
+            : base(updateType, getT, filter)
+        { }
 
         internal override IContainer<T> ContainerBuilder(
             IUpdater updater, ShiningInfo<long, Update> shiningInfo)
