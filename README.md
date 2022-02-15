@@ -50,12 +50,11 @@ updater = new Updater(new TelegramBotClient("BotToken"),
                                     // Eg: first 10 updates are answers quickly, but others should wait
                                     // for any of that 10 to be done.
 
-        perUserOneByOneProcess: true, // a user should finish a request to go to next one.
         allowedUpdates: new[] { UpdateType.Message, UpdateType.CallbackQuery }))
 
     .AddScopedMessage<MyScopedMessageHandler>(); // Scoped handler;
 
-await updater.Start(true); // 🔥 Fire up and block!
+await updater.StartAsync(); // 🔥 Fire up and block!
 ```
 
 - `OpenChannel` Method! You can use this to wait for a user response.
@@ -75,7 +74,7 @@ await container.ChannelUserClick(TimeSpan.FromSeconds(5), "ok")
     })
     .Else(async _ =>
     {
-        await msg.Edit("Slow");
+        await container.Response("Slow", sendAsReply: false);
     });
 ```
 
@@ -136,7 +135,7 @@ var updater = new UpdaterBuilder(
 
 // ---------- Start! ----------
 
-await updater.Start(true); // 🔥 Fire up and block!
+await updater.StartAsync(); // 🔥 Fire up and block!
 ```
 
 Of course this can be even less, but these're required for production! For instance `StepTwo` adds a default exception handler ( Take a look at methods docs! )
