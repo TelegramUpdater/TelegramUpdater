@@ -112,9 +112,9 @@ namespace TelegramUpdater
         }
 
         /// <inheritdoc/>
-        public async Task WriteAsync(Update update)
+        public async Task WriteAsync(Update update, CancellationToken cancellationToken)
         {
-            await Rainbow.WriteAsync(update);
+            await Rainbow.WriteAsync(update, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -235,7 +235,7 @@ namespace TelegramUpdater
 
                     foreach (var update in updates)
                     {
-                        await WriteAsync(update);
+                        await WriteAsync(update, cancellationToken);
                         offset = update.Id + 1;
                     }
                 }

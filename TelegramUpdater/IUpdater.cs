@@ -67,7 +67,7 @@ namespace TelegramUpdater
         /// <summary>
         /// Manually write an update to the <see cref="Rainbow"/>
         /// </summary>
-        Task WriteAsync(Update update);
+        Task WriteAsync(Update update, CancellationToken cancellationToken);
 
         /// <summary>
         /// Start handling updates ( non blocking ).

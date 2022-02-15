@@ -14,7 +14,6 @@ var updater = new UpdaterBuilder(
                                       // Eg: first 10 updates are answers quickly, but others should wait
                                       // for any of that 10 to be done.
 
-        perUserOneByOneProcess: true, // a user should finish a request to go to next one.
         allowedUpdates: new[] { UpdateType.Message, UpdateType.CallbackQuery })
 
     .StepTwo(inherit: false)
@@ -46,4 +45,4 @@ var updater = new UpdaterBuilder(
 var me = await updater.GetMeAsync();
 updater.Logger.LogInformation("Start listening to {username}", me.Username);
 
-await updater.Start(true); // 🔥 Fire up and block!
+await updater.StartAsync(); // 🔥 Fire up and block!

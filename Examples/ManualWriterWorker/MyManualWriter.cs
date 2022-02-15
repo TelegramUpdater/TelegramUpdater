@@ -32,7 +32,7 @@ namespace ManualWriterWorker
                     HandleUpdateAsync,
                     HandleErrorAsync,
                     receiverOptions,
-                    Updater.EmergencyToken
+                    stoppingToken
                 );
             }
             catch (OperationCanceledException)

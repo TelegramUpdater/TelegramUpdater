@@ -25,7 +25,7 @@ namespace UpdaterProduction
                 })
                 .Else(async _ =>
                 {
-                    await msg.Edit("Slow");
+                    await container.Response("Slow", sendAsReply: false);
                 });
         }
     }

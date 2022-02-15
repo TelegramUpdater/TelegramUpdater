@@ -31,7 +31,14 @@ namespace TelegramUpdater.Hosting
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _updater.Logger.LogInformation("Executing updater start.");
-            await _updater.Start(true, ManualWriting, true, stoppingToken);
+            if (ManualWriting)
+            {
+                await _updater.StartReaderOnlyAsync(stoppingToken);
+            }
+            else
+            {
+                await _updater.StartAsync(stoppingToken);
+            }
         }
     }
 }

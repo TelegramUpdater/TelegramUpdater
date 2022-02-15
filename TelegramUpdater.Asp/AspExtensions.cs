@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using TelegramUpdater.Asp.Services;
@@ -115,9 +116,10 @@ namespace TelegramUpdater.Asp
         }
 
         public static async Task<ActionResult> WriteUpdateFromWebhook(this IUpdater updater,
-                                                                      Update update)
+                                                                      Update update, 
+                                                                      CancellationToken cancellationToken = default)
         {
-            await updater.ChannelWriter.WriteAsync(update);
+            await updater.WriteAsync(update, cancellationToken);
             return new OkResult();
         }
     }

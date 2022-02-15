@@ -55,8 +55,7 @@ namespace TelegramUpdater.Hosting
                     var botClient = services.GetRequiredService<ITelegramBotClient>();
                     var updater = new Updater(botClient, new UpdaterOptions(
                         configs.MaxDegreeOfParallelism,
-                        configs.PerUserOneByOneProcess,
-                        logger: services.GetRequiredService<ILogger<Updater>>()
+                        logger: services.GetRequiredService<ILogger<IUpdater>>()
                      ), services);
 
                     updaterBuilder.AddToUpdater(updater);
@@ -97,7 +96,6 @@ namespace TelegramUpdater.Hosting
                     var botClient = services.GetRequiredService<ITelegramBotClient>();
                     var updater = new Updater(botClient, new UpdaterOptions(
                         configs.MaxDegreeOfParallelism,
-                        configs.PerUserOneByOneProcess,
                         logger: services.GetRequiredService<ILogger<IUpdater>>()
                      ), services);
 
@@ -140,7 +138,6 @@ namespace TelegramUpdater.Hosting
                     var botClient = services.GetRequiredService<ITelegramBotClient>();
                     var updater = new Updater(botClient, new UpdaterOptions(
                         configs.MaxDegreeOfParallelism,
-                        configs.PerUserOneByOneProcess,
                         logger: services.GetRequiredService<ILogger<IUpdater>>()
                      ), services);
 
@@ -178,7 +175,6 @@ namespace TelegramUpdater.Hosting
                     var botClient = services.GetRequiredService<ITelegramBotClient>();
                     var updater = new Updater(botClient, new UpdaterOptions(
                         updaterOptions.MaxDegreeOfParallelism,
-                        updaterOptions.PerUserOneByOneProcess,
                         logger: services.GetRequiredService<ILogger<IUpdater>>(),
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
@@ -221,7 +217,6 @@ namespace TelegramUpdater.Hosting
                     var botClient = services.GetRequiredService<ITelegramBotClient>();
                     var updater = new Updater(botClient, new UpdaterOptions(
                         updaterOptions.MaxDegreeOfParallelism,
-                        updaterOptions.PerUserOneByOneProcess,
                         logger: services.GetRequiredService<ILogger<IUpdater>>(),
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
@@ -263,7 +258,6 @@ namespace TelegramUpdater.Hosting
                     var botClient = services.GetRequiredService<ITelegramBotClient>();
                     var updater = new Updater(botClient, new UpdaterOptions(
                         updaterOptions.MaxDegreeOfParallelism,
-                        updaterOptions.PerUserOneByOneProcess,
                         logger: services.GetRequiredService<ILogger<IUpdater>>(),
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
@@ -302,7 +296,6 @@ namespace TelegramUpdater.Hosting
                 {
                     var updater = new Updater(telegramBot, new UpdaterOptions(
                         updaterOptions.MaxDegreeOfParallelism,
-                        updaterOptions.PerUserOneByOneProcess,
                         logger: services.GetRequiredService<ILogger<IUpdater>>(),
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
@@ -343,7 +336,6 @@ namespace TelegramUpdater.Hosting
                 {
                     var updater = new Updater(telegramBot, new UpdaterOptions(
                         updaterOptions.MaxDegreeOfParallelism,
-                        updaterOptions.PerUserOneByOneProcess,
                         logger: services.GetRequiredService<ILogger<IUpdater>>(),
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
@@ -384,7 +376,6 @@ namespace TelegramUpdater.Hosting
                 {
                     var updater = new Updater(telegramBot, new UpdaterOptions(
                         updaterOptions.MaxDegreeOfParallelism,
-                        updaterOptions.PerUserOneByOneProcess,
                         logger: services.GetRequiredService<ILogger<IUpdater>>(),
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
@@ -405,6 +396,6 @@ namespace TelegramUpdater.Hosting
         public static async Task WriteUpdateAsync(this IUpdater updater,
                                                   Update update,
                                                   CancellationToken cancellationToken = default)
-            => await updater.ChannelWriter.WriteAsync(update, cancellationToken);
+            => await updater.WriteAsync(update, cancellationToken);
     }
 }

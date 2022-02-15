@@ -15,7 +15,7 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
     {
         private readonly Func<Update, TUpdate>? _getT;
 
-        internal UpdateContainerBuilder(
+        public UpdateContainerBuilder(
             UpdateType updateType,
             Filter<TUpdate>? filter = default,
             Func<Update, TUpdate>? getT = default)

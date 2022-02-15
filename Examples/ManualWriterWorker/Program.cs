@@ -13,7 +13,6 @@ IHost host = Host.CreateDefaultBuilder(args)
                                             // Eg: first 10 updates are answers quickly, but others should wait
                                             // for any of that 10 to be done.
 
-                perUserOneByOneProcess: true, // a user should finish a request to go to next one.
                 allowedUpdates: new[] { UpdateType.Message, UpdateType.CallbackQuery }),
 
             (builder) => builder
