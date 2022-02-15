@@ -102,13 +102,7 @@ namespace TelegramUpdater
         {
             if (updateContainer.Update.From != null)
             {
-                var realFilter = FilterCutify.MsgOfUsers(updateContainer.Update.From.Id);
-                if (filter != null)
-                {
-                    realFilter &= filter;
-                }
-
-                return await updateContainer.ChannelMessage(realFilter, timeOut);
+                return await updateContainer.ChannelMessage(filter, timeOut);
             }
             else
             {

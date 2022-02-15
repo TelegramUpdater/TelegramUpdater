@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -10,8 +9,6 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.RainbowUtlities;
-using TelegramUpdater.UpdateChannels;
-using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers;
 using TelegramUpdater.UpdateHandlers.ScopedHandlers;
 
@@ -100,7 +97,7 @@ namespace TelegramUpdater
         {
             var _h = scopedHandlerContainer.GetType();
             _scopedHandlerContainers.Add(scopedHandlerContainer);
-            _logger.LogInformation($"Added new scoped handler :: {_h.Name}.");
+            _logger.LogInformation("Added new scoped handler :: {Name}.", _h.Name);
             return this;
         }
 
@@ -108,7 +105,9 @@ namespace TelegramUpdater
         public Updater AddExceptionHandler(IExceptionHandler exceptionHandler)
         {
             _exceptionHandlers.Add(exceptionHandler);
-            _logger.LogInformation($"Added exception handler for {exceptionHandler.ExceptionType}");
+            _logger.LogInformation(
+                "Added exception handler for {ExceptionType}",
+                exceptionHandler.ExceptionType);
             return this;
         }
 
@@ -119,9 +118,7 @@ namespace TelegramUpdater
         }
 
         /// <inheritdoc/>
-        public async Task StartAsync(
-            bool manualWriting = false,
-            CancellationToken cancellationToken = default)
+        public async Task StartAsync(CancellationToken cancellationToken = default)
         {
             if (cancellationToken == default)
             {
@@ -129,25 +126,15 @@ namespace TelegramUpdater
                 cancellationToken = _updaterOptions.CancellationToken;
             }
 
-            if (manualWriting)
-            {
-                _logger.LogWarning("Manual writing is enabled! You should write updates yourself.");
-            }
-            else
-            {
-                _logger.LogInformation("Auto writing updates enabled!");
-                var updaterTask = Task.Run(() => UpdateReceiver(cancellationToken), cancellationToken);
-            }
-
+            _logger.LogInformation("Auto writing updates enabled!");
+            var updaterTask = Task.Run(() => UpdateReceiver(cancellationToken), cancellationToken);
 
             _logger.LogInformation("Blocking the current thread to read updates!");
             await _rainbow.ShineAsync(ShineCallback, ShineErrors, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public void Start(
-            bool manualWriting = false,
-            CancellationToken cancellationToken = default)
+        public async Task StartReaderOnlyAsync(CancellationToken cancellationToken = default)
         {
             if (cancellationToken == default)
             {
@@ -155,17 +142,40 @@ namespace TelegramUpdater
                 cancellationToken = _updaterOptions.CancellationToken;
             }
 
-            if (manualWriting)
+            _logger.LogWarning("Manual writing is enabled! You should write updates yourself.");
+
+            _logger.LogInformation("Blocking the current thread to read updates!");
+            await _rainbow.ShineAsync(ShineCallback, ShineErrors, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public void Start(CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken == default)
             {
-                _logger.LogWarning("Manual writing is enabled! You should write updates yourself.");
-            }
-            else
-            {
-                _logger.LogInformation("Auto writing updates enabled!");
-                var updaterTask = Task.Run(() => UpdateReceiver(cancellationToken), cancellationToken);
+                _logger.LogInformation("Start's CancellationToken set to CancellationToken in UpdaterOptions");
+                cancellationToken = _updaterOptions.CancellationToken;
             }
 
+            _logger.LogInformation("Auto writing updates enabled!");
+            var updaterTask = Task.Run(() => UpdateReceiver(cancellationToken), cancellationToken);
+
             _logger.LogInformation("Reading updates is done in background.");
+            _rainbow.Shine(ShineCallback, ShineErrors, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public void StartReaderOnly(CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken == default)
+            {
+                _logger.LogInformation("Start's CancellationToken set to CancellationToken in UpdaterOptions");
+                cancellationToken = _updaterOptions.CancellationToken;
+            }
+
+            _logger.LogWarning("Manual writing is enabled! You should write updates yourself.");
+
+            _logger.LogInformation("Blocking the current thread to read updates!");
             _rainbow.Shine(ShineCallback, ShineErrors, cancellationToken);
         }
 

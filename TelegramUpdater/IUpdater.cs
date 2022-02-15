@@ -72,15 +72,51 @@ namespace TelegramUpdater
         /// <summary>
         /// Start handling updates ( non blocking ).
         /// </summary>
-        /// <param name="manualWriting">If you gonna write updates manually and no polling required.</param>
+        /// <remarks>
+        /// This method enables auto writing updates from telegram to <see cref="Rainbow"/>.
+        /// <para>
+        /// If you wanna write updates yourself ( eg: webhook app ) use <see cref="StartReaderOnly(CancellationToken)"/>.
+        /// </para>
+        /// </remarks>
         /// <param name="cancellationToken">Use this to cancel the task.</param>
-        void Start(bool manualWriting = false, CancellationToken cancellationToken = default);
+        void Start(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Start handling updates ( non blocking ).
+        /// </summary>
+        /// <remarks>
+        /// This method dose not get any updates.
+        /// and you should write them yourself using <see cref="WriteAsync(Update)"/>.
+        /// <para>
+        /// Use <see cref="Start(CancellationToken)"/> for an auto update writer.
+        /// </para>
+        /// </remarks>
+        /// <param name="cancellationToken">Use this to cancel the task.</param>
+        void StartReaderOnly(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Start handling updates ( blocking ).
         /// </summary>
-        /// <param name="manualWriting">If you gonna write updates manually and no polling required.</param>
+        /// <remarks>
+        /// This method enables auto writing updates from telegram to <see cref="Rainbow"/>.
+        /// <para>
+        /// If you wanna write updates yourself ( eg: webhook app ) use <see cref="StartReaderOnlyAsync(CancellationToken)"/>.
+        /// </para>
+        /// </remarks>
         /// <param name="cancellationToken">Use this to cancel the task.</param>
-        Task StartAsync(bool manualWriting = false, CancellationToken cancellationToken = default);
+        Task StartAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Start handling updates ( blocking ).
+        /// </summary>
+        /// <remarks>
+        /// This method dose not get any updates.
+        /// and you should write them yourself using <see cref="WriteAsync(Update)"/>.
+        /// <para>
+        /// Use <see cref="StartAsync(CancellationToken)"/> for an auto update writer.
+        /// </para>
+        /// </remarks>
+        /// <param name="cancellationToken">Use this to cancel the task.</param>
+        public Task StartReaderOnlyAsync(CancellationToken cancellationToken = default);
     }
 }
