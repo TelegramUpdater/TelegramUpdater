@@ -36,7 +36,7 @@ namespace TelegramUpdater
         /// </para>
         /// </summary>
         /// <remarks>
-        /// Call <see cref="StepOne"/> when your done here.
+        /// Call <see cref="StepOne(UpdaterOptions)"/> when your done here.
         /// </remarks>
         /// <param name="botClient">
         /// Create an instance of <see cref="TelegramBotClient"/> and pass here.
@@ -60,7 +60,7 @@ namespace TelegramUpdater
         /// </para>
         /// </summary>
         /// <remarks>
-        /// Call <see cref="StepOne"/> when your done here.
+        /// Call <see cref="StepOne(UpdaterOptions)"/> when your done here.
         /// </remarks>
         /// <param name="apiToken">Your bot api token.</param>
         public UpdaterBuilder(string apiToken)
@@ -79,11 +79,6 @@ namespace TelegramUpdater
         /// This a rate controller option! In <see cref="Updater"/>
         /// The updates are handled in parallel, so you have to limit how many updates
         /// can go for handling, at the same time. Defaults to <see cref="Environment.ProcessorCount"/>
-        /// </param>
-        /// <param name="perUserOneByOneProcess">
-        /// This a rate controller option too! By enabling this the <see cref="Updater"/>
-        /// won't allow a single user to have more than one update in process at the same time.
-        /// The user should wait for the current request of him to finish and has no effects on other users.
         /// </param>
         /// <param name="logger">
         /// This a logger which logs things when it's required. You can use your own customize logger
@@ -104,14 +99,12 @@ namespace TelegramUpdater
         /// </para>
         /// </param>
         public UpdaterBuilder StepOne(int? maxDegreeOfParallelism = default,
-                                      bool perUserOneByOneProcess = true,
                                       ILogger<Updater>? logger = default,
                                       CancellationToken cancellationToken = default,
                                       bool flushUpdatesQueue = false,
                                       UpdateType[]? allowedUpdates = default)
         {
             var updaterOptions = new UpdaterOptions(maxDegreeOfParallelism,
-                                                    perUserOneByOneProcess,
                                                     logger,
                                                     cancellationToken,
                                                     flushUpdatesQueue,
@@ -131,7 +124,7 @@ namespace TelegramUpdater
         /// Create an instance of <see cref="UpdaterOptions"/> and pass here.
         /// </param>
         /// <remarks>
-        /// Call <see cref="StepTwo"/> when you're done here.
+        /// Call <see cref="StepTwo(bool)"/> when you're done here.
         /// </remarks>
         public UpdaterBuilder StepOne(UpdaterOptions updaterOptions)
         {
@@ -170,7 +163,7 @@ namespace TelegramUpdater
         /// </para>
         /// </param>
         /// <remarks>
-        /// Go for <see cref="StepThree"/> if you're done here too.
+        /// Go for <see cref="StepThree(IScopedHandlerContainer)"/> if you're done here too.
         /// </remarks>
         public UpdaterBuilder StepTwo<T>(Func<IUpdater, Exception, Task> callback,
                                          Filter<string>? messageMatch = default,
@@ -209,7 +202,7 @@ namespace TelegramUpdater
         /// </para>
         /// </param>
         /// <remarks>
-        /// Go for <see cref="StepThree"/> if you're done here too.
+        /// Go for <see cref="StepThree(IScopedHandlerContainer)"/> if you're done here too.
         /// </remarks>
         public UpdaterBuilder StepTwo<TException, THandler>(
             Func<IUpdater, Exception, Task> callback,
@@ -237,14 +230,14 @@ namespace TelegramUpdater
         /// </para>
         /// </summary>
         /// <param name="inherit">
-        /// If it's <see cref="true"/>, every object that inherits from <see cref="Exception"/>
+        /// If it's true, every object that inherits from <see cref="Exception"/>
         /// Will catched! meaning all exceptions.
         /// <para>
         /// If you have exception handlers for specified exceptions, you better turn this off.
         /// </para>
         /// </param>
         /// <remarks>
-        /// Go for <see cref="StepThree"/> if you're done here too.
+        /// Go for <see cref="StepThree(IScopedHandlerContainer)"/> if you're done here too.
         /// </remarks>
         public UpdaterBuilder StepTwo(bool inherit = true)
         {
@@ -277,7 +270,7 @@ namespace TelegramUpdater
         /// Your <see cref="ExceptionHandler{T}"/>.
         /// </param>
         /// <remarks>
-        /// Go for <see cref="StepThree"/> if you're done here too.
+        /// Go for <see cref="StepThree(IScopedHandlerContainer)"/> if you're done here too.
         /// </remarks>
         public UpdaterBuilder StepTwo(IExceptionHandler exceptionHandler)
         {

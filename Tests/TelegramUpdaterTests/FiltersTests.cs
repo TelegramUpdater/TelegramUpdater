@@ -11,7 +11,7 @@ namespace TelegramUpdaterTests
         }
     }
 
-    public class UnitTest1
+    public class FiltersTests
     {
         [Fact]
         public void AndFilterTest_1()

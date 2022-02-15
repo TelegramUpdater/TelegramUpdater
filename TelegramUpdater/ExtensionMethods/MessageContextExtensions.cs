@@ -24,7 +24,7 @@ namespace TelegramUpdater
         /// <summary>
         /// Updates a <see cref="Message"/> of your own with removing it and sending a new message.
         /// </summary>
-        public static async Task<IContainer<Message>> ForceUpdate(this IContainer<Message> simpleContext,
+        public static async Task<Message> ForceUpdate(this IContainer<Message> simpleContext,
                                                                   string text,
                                                                   bool sendAsReply = true,
                                                                   ParseMode? parseMode = default,
@@ -45,8 +45,7 @@ namespace TelegramUpdater
                                                                    disableNotification,
                                                                    replyToMessageId: sendAsReply ? simpleContext.Update.MessageId : 0,
                                                                    allowSendingWithoutReply: true,
-                                                                   replyMarkup: replyMarkup)
-                    .WrapAsync(simpleContext);
+                                                                   replyMarkup: replyMarkup);
         }
 
         /// <summary>
@@ -56,7 +55,7 @@ namespace TelegramUpdater
         /// <param name="text">Text to response</param>
         /// <param name="sendAsReply">To send it as a replied message if possible.</param>
         /// <returns></returns>
-        public static async Task<IContainer<Message>> Response(this IContainer<Message> simpleContext,
+        public static async Task<Message> Response(this IContainer<Message> simpleContext,
                                                                string text,
                                                                bool sendAsReply = true,
                                                                ParseMode? parseMode = default,
@@ -72,14 +71,13 @@ namespace TelegramUpdater
                                                                disableNotification,
                                                                replyToMessageId: sendAsReply ? simpleContext.Update.MessageId : 0,
                                                                allowSendingWithoutReply: true,
-                                                               replyMarkup: replyMarkup)
-                    .WrapAsync(simpleContext);
+                                                               replyMarkup: replyMarkup);
 
         /// <summary>
         /// Edits a message
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public static async Task<IContainer<Message>?> Edit(this IContainer<Message> simpleContext,
+        public static async Task<Message?> Edit(this IContainer<Message> simpleContext,
                                                             string text,
                                                             ParseMode? parseMode = default,
                                                             IEnumerable<MessageEntity>? messageEntities = default,
@@ -94,8 +92,7 @@ namespace TelegramUpdater
                                                             messageEntities,
                                                             disableWebpagePreview,
                                                             inlineKeyboardMarkup,
-                                                            cancellationToken)
-                .WrapAsync(simpleContext);
+                                                            cancellationToken);
         }
 
         /// <summary>

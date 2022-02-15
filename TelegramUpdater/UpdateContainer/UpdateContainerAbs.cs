@@ -1,6 +1,7 @@
 ﻿using System;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using TelegramUpdater.RainbowUtlities;
 
 namespace TelegramUpdater.UpdateContainer
 {
@@ -12,17 +13,21 @@ namespace TelegramUpdater.UpdateContainer
     {
         private readonly Func<Update, T?> _insiderResovler;
 
-        protected UpdateContainerAbs(
+        internal UpdateContainerAbs(
             Func<Update, T?> insiderResovler,
             IUpdater updater,
-            Update insider)
+            ShiningInfo<long, Update> insider)
         {
             Updater = updater;
-            Container = insider;
+            ShiningInfo = insider;
+            Container = insider.Value;
             BotClient = updater.BotClient;
             _insiderResovler = insiderResovler;
         }
 
+        /// <summary>
+        /// Orginal update. ( inner update, like <see cref="Update.Message"/> ) 
+        /// </summary>
         public T Update
         {
             get
@@ -42,6 +47,9 @@ namespace TelegramUpdater.UpdateContainer
 
         /// <inheritdoc/>
         public ITelegramBotClient BotClient { get; }
+
+        /// <inheritdoc/>
+        public ShiningInfo<long, Update> ShiningInfo { get; }
 
         /// <inheritdoc/>
         public IUpdater Updater { get; }

@@ -1,11 +1,15 @@
 ﻿using Telegram.Bot.Types;
+using TelegramUpdater.RainbowUtlities;
 
 namespace TelegramUpdater.UpdateContainer.UpdateContainers
 {
-    public class CallbackQueryContainer : UpdateContainerAbs<CallbackQuery>
+    /// <summary>
+    /// A container for <see cref="Update.CallbackQuery"/> only.
+    /// </summary>
+    public sealed class CallbackQueryContainer : UpdateContainerAbs<CallbackQuery>
     {
-        public CallbackQueryContainer(IUpdater updater, Update insider)
-            : base(x => x.CallbackQuery, updater, insider)
+        internal CallbackQueryContainer(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
+            : base(x => x.CallbackQuery, updater, shiningInfo)
         {
         }
     }

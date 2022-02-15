@@ -9,34 +9,6 @@ namespace TelegramUpdater
 {
     public static class CommonExtensions
     {
-        internal static MessageContainer RebaseContainer<T>(
-            this IContainer<T> containerAbs, Message message) where T : class
-            => new MessageContainer(
-                containerAbs.Updater,
-                new Update { Message = message });
-
-        internal static MessageContainer Wrap<T>(this Message message,
-                                            IContainer<T> containerAbs) where T : class
-            => containerAbs.RebaseContainer(message);
-
-        internal static async Task<MessageContainer> WrapAsync<T>(this Task<Message> message,
-                                            IContainer<T> containerAbs) where T : class
-            => containerAbs.RebaseContainer(await message);
-
-        internal static CallbackQueryContainer RebaseContainer<T>(
-            this IContainer<T> containerAbs, CallbackQuery callbackQuery) where T : class
-            => new CallbackQueryContainer(
-                containerAbs.Updater,
-                new Update { CallbackQuery = callbackQuery });
-
-        internal static CallbackQueryContainer Wrap<T>(this CallbackQuery message,
-                                            IContainer<T> containerAbs) where T : class
-            => containerAbs.RebaseContainer(message);
-
-        internal static async Task<CallbackQueryContainer> WrapAsync<T>(this Task<CallbackQuery> message,
-                                            IContainer<T> containerAbs) where T : class
-            => containerAbs.RebaseContainer(await message);
-
         public static object GetInnerUpdate(this Update update)
         {
             if (update.Type == UpdateType.Unknown)
