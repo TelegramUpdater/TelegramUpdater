@@ -36,6 +36,11 @@ namespace TelegramUpdater
         public Rainbow<long, Update> Rainbow { get; }
 
         /// <summary>
+        /// Stop reader and writer ( if available ) tasks.
+        /// </summary>
+        public void EmergencyCancel();
+
+        /// <summary>
         /// Add your exception handler to this updater.
         /// </summary>
         /// <param name="exceptionHandler"></param>

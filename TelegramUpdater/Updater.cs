@@ -27,6 +27,7 @@ namespace TelegramUpdater
         private readonly UpdaterOptions _updaterOptions;
         private readonly IServiceProvider? _serviceDescriptors;
         private readonly Rainbow<long, Update> _rainbow;
+        private CancellationTokenSource? _emergencyCancel;
         private User? _me = null;
 
         /// <summary>
@@ -56,10 +57,7 @@ namespace TelegramUpdater
             {
                 using var _loggerFactory = LoggerFactory.Create(builder =>
                 {
-                    builder
-                        .AddFilter("Microsoft", LogLevel.Warning)
-                        .AddFilter("System", LogLevel.Warning)
-                        .AddConsole();
+                    builder.AddConsole();
                 });
 
                 _logger = _loggerFactory.CreateLogger<Updater>();
@@ -127,10 +125,15 @@ namespace TelegramUpdater
             }
 
             _logger.LogInformation("Auto writing updates enabled!");
-            var updaterTask = Task.Run(() => UpdateReceiver(cancellationToken), cancellationToken);
+
+            _emergencyCancel = new CancellationTokenSource();
+            using var liked = CancellationTokenSource.CreateLinkedTokenSource(
+                _emergencyCancel.Token, cancellationToken);
+
+            var updaterTask = Task.Run(() => UpdateReceiver(liked.Token), liked.Token);
 
             _logger.LogInformation("Blocking the current thread to read updates!");
-            await _rainbow.ShineAsync(ShineCallback, ShineErrors, cancellationToken);
+            await _rainbow.ShineAsync(ShineCallback, ShineErrors, liked.Token);
         }
 
         /// <inheritdoc/>
@@ -144,8 +147,12 @@ namespace TelegramUpdater
 
             _logger.LogWarning("Manual writing is enabled! You should write updates yourself.");
 
+            _emergencyCancel = new CancellationTokenSource();
+            using var liked = CancellationTokenSource.CreateLinkedTokenSource(
+                _emergencyCancel.Token, cancellationToken);
+
             _logger.LogInformation("Blocking the current thread to read updates!");
-            await _rainbow.ShineAsync(ShineCallback, ShineErrors, cancellationToken);
+            await _rainbow.ShineAsync(ShineCallback, ShineErrors, liked.Token);
         }
 
         /// <inheritdoc/>
@@ -158,10 +165,14 @@ namespace TelegramUpdater
             }
 
             _logger.LogInformation("Auto writing updates enabled!");
-            var updaterTask = Task.Run(() => UpdateReceiver(cancellationToken), cancellationToken);
+
+            _emergencyCancel = new CancellationTokenSource();
+            using var liked = CancellationTokenSource.CreateLinkedTokenSource(
+                _emergencyCancel.Token, cancellationToken);
+            var updaterTask = Task.Run(() => UpdateReceiver(liked.Token), liked.Token);
 
             _logger.LogInformation("Reading updates is done in background.");
-            _rainbow.Shine(ShineCallback, ShineErrors, cancellationToken);
+            _rainbow.Shine(ShineCallback, ShineErrors, liked.Token);
         }
 
         /// <inheritdoc/>
@@ -175,8 +186,12 @@ namespace TelegramUpdater
 
             _logger.LogWarning("Manual writing is enabled! You should write updates yourself.");
 
+            _emergencyCancel = new CancellationTokenSource();
+            using var liked = CancellationTokenSource.CreateLinkedTokenSource(
+                _emergencyCancel.Token, cancellationToken);
+
             _logger.LogInformation("Blocking the current thread to read updates!");
-            _rainbow.Shine(ShineCallback, ShineErrors, cancellationToken);
+            _rainbow.Shine(ShineCallback, ShineErrors, liked.Token);
         }
 
         /// <inheritdoc/>
@@ -242,8 +257,7 @@ namespace TelegramUpdater
                 catch (Exception e)
                 {
                     Logger.LogCritical(exception: e, "Auto update writer stopped due to an ecxeption.");
-                    //_emergencyCts.Cancel();
-                    // TODO do smth
+                    EmergencyCancel();
                     break;
                 }
             }
@@ -403,6 +417,13 @@ namespace TelegramUpdater
             }
 
             return true;
+        }
+
+        /// <inheritdoc/>
+        public void EmergencyCancel()
+        {
+            _logger.LogWarning("Emergency cancel triggered.");
+            _emergencyCancel?.Cancel();
         }
     }
 }
