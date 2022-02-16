@@ -15,10 +15,10 @@ namespace ManualWriterWorker
                 replyMarkup: new InlineKeyboardMarkup(
                     InlineKeyboardButton.WithCallbackData("Yes i'm OK!", "ok")));
 
-            await container.ChannelUserClick(TimeSpan.FromSeconds(5), "ok")
+            await container.ChannelUserResponse(TimeSpan.FromMinutes(5))
                 .IfNotNull(async answer =>
                 {
-                    await answer.Edit(text: "Well ...");
+                    await answer.Response("Well ...");
                 })
                 .Else(async _ =>
                 {
