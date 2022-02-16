@@ -43,6 +43,7 @@ namespace TelegramUpdater.Hosting
                 catch (Exception e)
                 {
                     Logger.LogCritical(exception: e, "Auto update writer stopped due to an ecxeption.");
+                    Updater.EmergencyCancel();
                     break;
                 }
             }
