@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace TelegramUpdater.Hosting
 {
@@ -14,49 +11,57 @@ namespace TelegramUpdater.Hosting
     /// <remarks>
     /// <see cref="Updater"/> Should exsits in <see cref="IServiceProvider"/>
     /// </remarks>
-    public abstract class UpdateWriterServiceAbs : BackgroundService
+    public abstract class UpdateWriterServiceAbs : UpdateWriterAbs,
+        IHostedService, IDisposable
     {
-        private readonly IUpdater _updater;
+        private Task? _executingTask;
+        private readonly CancellationTokenSource _stoppingCts = new();
 
-        /// <summary>
-        /// Use this abstract class to build your custome update writer as a background service.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="Updater"/> Should exsits in <see cref="IServiceProvider"/>
-        /// </remarks>
-        protected UpdateWriterServiceAbs(IUpdater updater)
+        /// <inheritdoc/>
+        protected UpdateWriterServiceAbs(IUpdater updater) : base(updater)
         {
-            _updater = updater;
         }
 
-        protected IUpdater Updater { get { return _updater; } }
-
-        protected UpdaterOptions Options => _updater.UpdaterOptions;
-
-        protected ITelegramBotClient BotClient => _updater.BotClient;
-
-        protected ILogger<IUpdater> Logger => _updater.Logger;
-
-        /// <summary>
-        /// Here you should implement code to getUpdates.
-        /// <para>
-        /// After getting the update, call <see cref="Write(Update)"/> to write it to the updater.
-        /// </para>
-        /// </summary>
-        /// <returns></returns>
-        protected abstract Task GetUpdatesProcess(CancellationToken stoppingToken);
-
-        /// <summary>
-        /// Write update.
-        /// </summary>
-        protected async Task Write(Update update, CancellationToken cancellationToken = default)
+        public virtual Task StartAsync(CancellationToken cancellationToken)
         {
-            await _updater.WriteUpdateAsync(update, cancellationToken);
+            // Store the task we're executing
+            _executingTask = ExecuteAsync(_stoppingCts.Token);
+
+            // If the task is completed then return it,
+            // this will bubble cancellation and failure to the caller
+            if (_executingTask.IsCompleted)
+            {
+                return _executingTask;
+            }
+
+            // Otherwise it's running
+            return Task.CompletedTask;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public virtual async Task StopAsync(CancellationToken cancellationToken)
         {
-            await GetUpdatesProcess(stoppingToken).ConfigureAwait(false);
+            // Stop called without start
+            if (_executingTask == null)
+            {
+                return;
+            }
+
+            try
+            {
+                // Signal cancellation to the executing method
+                _stoppingCts.Cancel();
+            }
+            finally
+            {
+                // Wait until the task completes or the stop token triggers
+                await Task.WhenAny(_executingTask, Task.Delay(Timeout.Infinite,
+                                                              cancellationToken));
+            }
+        }
+
+        public virtual void Dispose()
+        {
+            _stoppingCts.Cancel();
         }
     }
 }

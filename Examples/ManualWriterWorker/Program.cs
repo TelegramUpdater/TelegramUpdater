@@ -6,7 +6,7 @@ using TelegramUpdater.Hosting;
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
-        services.AddTelegramManualUpdater<MyManualWriter>( // Use your own manual update writer!
+        services.AddTelegramUpdater<MyManualWriter>( // Use your own manual update writer!
             "2015323878:AAF2yZqFMnZr3VnYvXCeH079w0RhB71jS7k",
             new UpdaterOptions(
                 maxDegreeOfParallelism: 2, // maximum update process tasks count at the same time

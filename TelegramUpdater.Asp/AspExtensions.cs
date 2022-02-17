@@ -16,7 +16,7 @@ namespace TelegramUpdater.Asp
     {
         /// <summary>
         /// Use this in you webhook app if you wanna write updates from webhook controller,
-        /// Using <see cref="WriteUpdateFromWebhook(IUpdater, Update)"/>
+        /// Using <see cref="WriteUpdateFromWebhook(IUpdater, Update, CancellationToken)"/>
         /// </summary>
         /// <param name="serviceDescriptors"></param>
         /// <param name="configs"></param>
@@ -25,7 +25,7 @@ namespace TelegramUpdater.Asp
                                                     UpdaterConfigs configs,
                                                     Action<UpdaterServiceBuilder> builder)
         {
-            serviceDescriptors.AddTelegramUpdater<ManualWritingUpdaterService>(configs, builder);
+            serviceDescriptors.AddTelegramManualUpdater(configs, builder);
         }
 
         /// <summary>

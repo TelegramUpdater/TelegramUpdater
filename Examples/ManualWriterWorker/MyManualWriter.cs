@@ -17,7 +17,7 @@ namespace ManualWriterWorker
         {
         }
 
-        protected override async Task GetUpdatesProcess(CancellationToken stoppingToken)
+        public override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             Logger.LogInformation("Getting updates from my manual writer using Polling extesion.");
 
@@ -42,7 +42,7 @@ namespace ManualWriterWorker
 
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            await Write(update, cancellationToken);
+            await EnqueueUpdateAsync(update, cancellationToken);
         }
 
         Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
