@@ -72,56 +72,20 @@ namespace TelegramUpdater
         /// <summary>
         /// Manually write an update to the <see cref="Rainbow"/>
         /// </summary>
-        Task WriteAsync(Update update, CancellationToken cancellationToken);
+        ValueTask WriteAsync(Update update, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Start handling updates ( non blocking ).
+        /// Use this to start writing updates ( using your custom writer <typeparamref name="TWriter"/> ) to the updater. ( Blocking )
         /// </summary>
-        /// <remarks>
-        /// This method enables auto writing updates from telegram to <see cref="Rainbow"/>.
-        /// <para>
-        /// If you wanna write updates yourself ( eg: webhook app ) use <see cref="StartReaderOnly(CancellationToken)"/>.
-        /// </para>
-        /// </remarks>
-        /// <param name="cancellationToken">Use this to cancel the task.</param>
-        void Start(CancellationToken cancellationToken = default);
+        /// <typeparam name="TWriter">Your custom update writer. a sub-class of <see cref="UpdateWriterAbs"/>.</typeparam>
+        /// <param name="cancellationToken">To cancel the job manually,</param>
+        public Task StartAsync<TWriter>(CancellationToken cancellationToken = default)
+            where TWriter : UpdateWriterAbs, new();
 
         /// <summary>
-        /// Start handling updates ( non blocking ).
+        /// Use this to start writing updates ( using a simple update writer ) to the updater. ( Blocking )
         /// </summary>
-        /// <remarks>
-        /// This method dose not get any updates.
-        /// and you should write them yourself using <see cref="WriteAsync(Update)"/>.
-        /// <para>
-        /// Use <see cref="Start(CancellationToken)"/> for an auto update writer.
-        /// </para>
-        /// </remarks>
-        /// <param name="cancellationToken">Use this to cancel the task.</param>
-        void StartReaderOnly(CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Start handling updates ( blocking ).
-        /// </summary>
-        /// <remarks>
-        /// This method enables auto writing updates from telegram to <see cref="Rainbow"/>.
-        /// <para>
-        /// If you wanna write updates yourself ( eg: webhook app ) use <see cref="StartReaderOnlyAsync(CancellationToken)"/>.
-        /// </para>
-        /// </remarks>
-        /// <param name="cancellationToken">Use this to cancel the task.</param>
-        Task StartAsync(CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Start handling updates ( blocking ).
-        /// </summary>
-        /// <remarks>
-        /// This method dose not get any updates.
-        /// and you should write them yourself using <see cref="WriteAsync(Update)"/>.
-        /// <para>
-        /// Use <see cref="StartAsync(CancellationToken)"/> for an auto update writer.
-        /// </para>
-        /// </remarks>
-        /// <param name="cancellationToken">Use this to cancel the task.</param>
-        public Task StartReaderOnlyAsync(CancellationToken cancellationToken = default);
+        /// <param name="cancellationToken">To cancel the job manually,</param>
+        public Task StartAsync(CancellationToken cancellationToken = default);
     }
 }

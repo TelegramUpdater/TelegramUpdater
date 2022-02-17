@@ -23,15 +23,14 @@ namespace TelegramUpdater.RainbowUtlities
         private readonly ConcurrentDictionary<ushort, Channel<TValue>?> _availableQueues;
         private readonly ConcurrentDictionary<ushort, Task?> _workingTasks;
         private readonly ConcurrentDictionary<TId, ushort> _ownerIdMapping;
-        private readonly Channel<TValue> _waitingList;
-        private readonly Channel<TValue> _mainChannel;
         private readonly Func<TValue, TId> _idResolver;
-        private Func<ShiningInfo<TId, TValue>, CancellationToken, Task>? _handler;
-        private Func<Exception, CancellationToken, Task>? _exceptionHandler;
+        private readonly Func<ShiningInfo<TId, TValue>, CancellationToken, Task>? _handler;
+        private readonly Func<Exception, CancellationToken, Task>? _exceptionHandler;
         private readonly ILogger<Rainbow<TId, TValue>> _logger;
         private readonly Action<Rainbow<TId, TValue>>? _gotIdle;
         private readonly TimeSpan _waitingListTimeOut;
 
+        private Channel<TValue>? _waitingList;
         private Task? _waitlistTask = null;
 
         /// <summary>
@@ -52,12 +51,22 @@ namespace TelegramUpdater.RainbowUtlities
         /// <see cref="Rainbow{TId, TValue}"/> has nothing to do for now.
         /// </param>
         /// <param name="waitingListTimeout">Timeout to cancel waiting task if it's idle.</param>
+        /// <param name="callback">A callback function to call for each object.</param>
+        /// <param name="exceptionHandler">
+        /// A callback function that will be called if any exceptions occures in
+        /// <paramref name="callback"/> method.
+        /// </param>
         public Rainbow(int maximumParallel,
                        Func<TValue, TId> idResolver,
+                       Func<ShiningInfo<TId, TValue>, CancellationToken, Task> callback,
+                       Func<Exception, CancellationToken, Task>? exceptionHandler = default,
                        ILogger<Rainbow<TId, TValue>>? logger = default,
                        Action<Rainbow<TId, TValue>>? gotIdle = default,
                        TimeSpan waitingListTimeout = default)
         {
+            _exceptionHandler = exceptionHandler;
+            _handler = callback ?? throw new ArgumentNullException(nameof(callback));
+
             if (maximumParallel <= 0)
                 throw new ArgumentOutOfRangeException(nameof(maximumParallel));
 
@@ -87,19 +96,6 @@ namespace TelegramUpdater.RainbowUtlities
             _workingTasks = new(maximumParallel + 1, maximumParallel);
             _ownerIdMapping = new(maximumParallel + 1, maximumParallel);
             _gotIdle = gotIdle;
-            _waitingList = Channel.CreateUnbounded<TValue>(new UnboundedChannelOptions()
-            {
-                AllowSynchronousContinuations = true,
-                SingleReader = true,
-                SingleWriter = true,
-            });
-            _mainChannel = Channel.CreateBounded<TValue>(new BoundedChannelOptions(100)
-            {
-                SingleReader = true,
-                SingleWriter = true,
-                AllowSynchronousContinuations = true,
-                FullMode = BoundedChannelFullMode.Wait
-            });
 
             // Init avaiable queues
             _logger.LogInformation(
@@ -114,37 +110,86 @@ namespace TelegramUpdater.RainbowUtlities
         }
 
         /// <summary>
-        /// Starts shining ( blocking ).
-        /// </summary>
-        /// <param name="callback">A callback function to call for each object.</param>
-        /// <param name="exceptionHandler">
-        /// A callback function that will be called if any exceptions occures in
-        /// <paramref name="callback"/> method.
-        /// </param>
-        /// <param name="cancellationToken">Cancel the job.</param>
-        /// <returns></returns>
-        [MemberNotNull("_handler")]
-        public async Task ShineAsync(Func<ShiningInfo<TId, TValue>, CancellationToken, Task> callback,
-                                     Func<Exception, CancellationToken, Task>? exceptionHandler = default,
-                                     CancellationToken cancellationToken = default)
-        {
-            _exceptionHandler = exceptionHandler;
-            _handler = callback ?? throw new ArgumentNullException(nameof(callback));
-
-            _logger.LogInformation("Started main queuer task.");
-            await MainQueuer(cancellationToken);
-        }
-
-        /// <summary>
         /// Write a new object to the rainbow for queuing
         /// </summary>
-        public async Task WriteAsync(TValue value,
+        public async ValueTask EnqueueAsync(TValue value,
                                      CancellationToken cancellationToken = default)
         {
             if (value == null)
                 return;
 
-            await _mainChannel.Writer.WriteAsync(value, cancellationToken);
+            var ownerId = _idResolver(value);
+
+            if (_ownerIdMapping.ContainsKey(ownerId))
+            {
+                var alreadyQueue = _availableQueues[_ownerIdMapping[ownerId]];
+
+                // Cannot be null here!
+                await alreadyQueue!.Writer.WriteAsync(value, cancellationToken);
+            }
+            else
+            {
+                var queueId = GetAvailableQueue();
+
+                // No empty queue
+                if (queueId == null)
+                {
+                    _logger.LogInformation("Queues are full! Object added to waiting list.");
+                    if (_waitlistTask == null)
+                    {
+                        _waitingList = Channel.CreateUnbounded<TValue>(new UnboundedChannelOptions()
+                        {
+                            AllowSynchronousContinuations = true,
+                            SingleReader = true,
+                            SingleWriter = true,
+                        });
+                        _logger.LogInformation("Started a new waiting task.");
+
+                        await _waitingList.Writer.WriteAsync(value, cancellationToken);
+                        _waitlistTask = WaitingQueuer(cancellationToken);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Object added to an existing waiting list...");
+                    }
+                    return;
+                }
+
+                var availableQueue = _availableQueues[queueId!.Value];
+
+                if (availableQueue == null)
+                {
+                    if (!_ownerIdMapping.TryAdd(ownerId, queueId.Value))
+                    {
+                        _ownerIdMapping[ownerId] = queueId.Value;
+                    };
+
+                    var queue = Channel.CreateUnbounded<TValue>();
+                    await queue.Writer.WriteAsync(value, cancellationToken);
+                    _availableQueues[queueId.Value] = queue;
+
+                    // ---- Create reading background task ----
+                    var t = Task.Run(() => Processor(queueId.Value), cancellationToken);
+                    if (!_workingTasks.TryAdd(queueId.Value, t))
+                    {
+                        _workingTasks[queueId.Value] = t;
+                    }
+
+                    _logger.LogInformation(
+                        "Created a new processor ({id}), Owned by {owner}",
+                        queueId.Value, ownerId);
+                }
+                else
+                {
+                    _ownerIdMapping.AddOrUpdate(ownerId, queueId.Value, (_, __) => queueId.Value);
+                    _logger.LogInformation(
+                        "Queue {id}'s owner changed to {owner}", queueId.Value, ownerId);
+                    var t = Task.Run(() => Processor(queueId.Value), cancellationToken);
+                    _workingTasks[queueId.Value] = t;
+
+                    await availableQueue.Writer.WriteAsync(value, cancellationToken);
+                }
+            }
         }
 
         /// <summary>
@@ -348,7 +393,7 @@ namespace TelegramUpdater.RainbowUtlities
 
                 try
                 {
-                    TValue? update = await _waitingList.Reader.ReadAsync(linkedCts.Token);
+                    TValue? update = await _waitingList!.Reader.ReadAsync(linkedCts.Token);
 
                     var ownerId = _idResolver(update);
 
@@ -416,6 +461,7 @@ namespace TelegramUpdater.RainbowUtlities
                     {
                         _logger.LogInformation("Waiting task stoped due to a long idle.");
                         _waitlistTask = null;
+                        _waitingList = null;
                     }
 
                     throw;
@@ -423,78 +469,6 @@ namespace TelegramUpdater.RainbowUtlities
                 catch(Exception e)
                 {
                     _logger.LogError(exception: e, "Error while handlig waiting list.");
-                }
-            }
-        }
-
-        private async Task MainQueuer(CancellationToken cancellationToken = default)
-        {
-            _logger.LogInformation("---------- Main Writer Started! ----------");
-
-            while (true)
-            {
-                TValue? update = await _mainChannel.Reader.ReadAsync(cancellationToken);
-
-                var ownerId = _idResolver(update);
-
-                if (_ownerIdMapping.ContainsKey(ownerId))
-                {
-                    var alreadyQueue = _availableQueues[_ownerIdMapping[ownerId]];
-
-                    // Cannot be null here!
-                    await alreadyQueue!.Writer.WriteAsync(update, cancellationToken);
-                }
-                else
-                {
-                    var queueId = GetAvailableQueue();
-
-                    // No empty queue
-                    if (queueId == null)
-                    {
-                        _logger.LogInformation("Queues are full! Object added to waiting list.");
-                        await _waitingList.Writer.WriteAsync(update, cancellationToken);
-                        if (_waitlistTask == null)
-                        {
-                            _logger.LogInformation("Started waiting task.");
-                            _waitlistTask = WaitingQueuer(cancellationToken);
-                        }
-                        continue;
-                    }
-
-                    var availableQueue = _availableQueues[queueId!.Value];
-
-                    if (availableQueue == null)
-                    {
-                        if (!_ownerIdMapping.TryAdd(ownerId, queueId.Value))
-                        {
-                            _ownerIdMapping[ownerId] = queueId.Value;
-                        };
-
-                        var queue = Channel.CreateUnbounded<TValue>();
-                        await queue.Writer.WriteAsync(update, cancellationToken);
-                        _availableQueues[queueId.Value] = queue;
-
-                        // ---- Create reading background task ----
-                        var t = Task.Run(() => Processor(queueId.Value), cancellationToken);
-                        if (!_workingTasks.TryAdd(queueId.Value, t))
-                        {
-                            _workingTasks[queueId.Value] = t;
-                        }
-
-                        _logger.LogInformation(
-                            "Created a new processor ({id}), Owned by {owner}",
-                            queueId.Value, ownerId);
-                    }
-                    else
-                    {
-                        _ownerIdMapping.AddOrUpdate(ownerId, queueId.Value, (_, __) => queueId.Value);
-                        _logger.LogInformation(
-                            "Queue {id}'s owner changed to {owner}", queueId.Value, ownerId);
-                        var t = Task.Run(() => Processor(queueId.Value), cancellationToken);
-                        _workingTasks[queueId.Value] = t;
-
-                        await availableQueue.Writer.WriteAsync(update, cancellationToken);
-                    }
                 }
             }
         }
@@ -579,6 +553,8 @@ namespace TelegramUpdater.RainbowUtlities
                             // Make sure the owner is removed
                             while (!_ownerIdMapping.TryRemove(owner.Value, out _))
                             { }
+
+                            _logger.LogInformation("{owner} Is not {id}'owner anymore", owner, id);
                         }
 
                         if (IsIdle)

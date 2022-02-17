@@ -6,13 +6,12 @@ using TelegramUpdater.Hosting;
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
-        services.AddTelegramManualUpdater<MyManualWriter>( // Use your own manual update writer!
-            "2015323878:AAF2yZqFMnZr3VnYvXCeH079w0RhB71jS7k",
+        services.AddTelegramUpdater<MyManualWriter>( // Use your own manual update writer!
+            "BOT_TOKEN",
             new UpdaterOptions(
-                maxDegreeOfParallelism: 2, // maximum update process tasks count at the same time
+                maxDegreeOfParallelism: 2,  // maximum update process tasks count at the same time
                                             // Eg: first 10 updates are answers quickly, but others should wait
                                             // for any of that 10 to be done.
-
                 allowedUpdates: new[] { UpdateType.Message, UpdateType.CallbackQuery }),
 
             (builder) => builder

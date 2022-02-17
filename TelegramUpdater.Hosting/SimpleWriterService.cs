@@ -6,15 +6,15 @@ using Telegram.Bot;
 
 namespace TelegramUpdater.Hosting
 {
-    internal class WriterService : UpdateWriterServiceAbs
+    internal class SimpleWriterService : UpdateWriterServiceAbs
     {
-        public WriterService(IUpdater updater) : base(updater)
+        public SimpleWriterService(IUpdater updater) : base(updater)
         {
         }
 
-        protected override async Task GetUpdatesProcess(CancellationToken stoppingToken)
+        public override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            if (Options.FlushUpdatesQueue)
+            if (UpdaterOptions.FlushUpdatesQueue)
             {
                 Logger.LogInformation("Flushing updates.");
                 await BotClient.GetUpdatesAsync(-1, 1, 0, cancellationToken: stoppingToken);
@@ -32,11 +32,11 @@ namespace TelegramUpdater.Hosting
                     var updates = await BotClient.GetUpdatesAsync(offset,
                                                                   100,
                                                                   timeOut,
-                                                                  allowedUpdates: Options.AllowedUpdates,
+                                                                  allowedUpdates: UpdaterOptions.AllowedUpdates,
                                                                   cancellationToken: stoppingToken);
                     foreach (var update in updates)
                     {
-                        await Write(update, stoppingToken);
+                        await EnqueueUpdateAsync(update, stoppingToken);
                         offset = update.Id + 1;
                     }
                 }

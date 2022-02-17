@@ -11,6 +11,7 @@ using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.RainbowUtlities;
 using TelegramUpdater.UpdateHandlers;
 using TelegramUpdater.UpdateHandlers.ScopedHandlers;
+using TelegramUpdater.UpdateWriters;
 
 namespace TelegramUpdater
 {
@@ -51,7 +52,8 @@ namespace TelegramUpdater
 
             _rainbow = new Rainbow<long, Update>(
                 updaterOptions.MaxDegreeOfParallelism?? Environment.ProcessorCount,
-                x => x.GetSenderId() ?? 0);
+                x => x.GetSenderId() ?? 0,
+                ShineCallback, ShineErrors);
 
             if (_updaterOptions.Logger == null)
             {
@@ -110,88 +112,36 @@ namespace TelegramUpdater
         }
 
         /// <inheritdoc/>
-        public async Task WriteAsync(Update update, CancellationToken cancellationToken)
+        public async ValueTask WriteAsync(Update update, CancellationToken cancellationToken = default)
         {
-            await Rainbow.WriteAsync(update, cancellationToken);
+            await Rainbow.EnqueueAsync(update, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public async Task StartAsync<TWriter>(CancellationToken cancellationToken = default)
+            where TWriter: UpdateWriterAbs, new()
+        {
+            if (cancellationToken == default)
+            {
+                _logger.LogInformation("Start's CancellationToken set to CancellationToken in UpdaterOptions");
+                cancellationToken = _updaterOptions.CancellationToken;
+            }
+
+            _emergencyCancel = new CancellationTokenSource();
+            using var liked = CancellationTokenSource.CreateLinkedTokenSource(
+                _emergencyCancel.Token, cancellationToken);
+
+            var writer = new TWriter();
+            writer.SetUpdater(this);
+
+            _logger.LogInformation("Start reading updates from {writer}", typeof(TWriter));
+            await writer.ExecuteAsync(liked.Token);
         }
 
         /// <inheritdoc/>
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
-            if (cancellationToken == default)
-            {
-                _logger.LogInformation("Start's CancellationToken set to CancellationToken in UpdaterOptions");
-                cancellationToken = _updaterOptions.CancellationToken;
-            }
-
-            _logger.LogInformation("Auto writing updates enabled!");
-
-            _emergencyCancel = new CancellationTokenSource();
-            using var liked = CancellationTokenSource.CreateLinkedTokenSource(
-                _emergencyCancel.Token, cancellationToken);
-
-            var updaterTask = Task.Run(() => UpdateReceiver(liked.Token), liked.Token);
-
-            _logger.LogInformation("Blocking the current thread to read updates!");
-            await _rainbow.ShineAsync(ShineCallback, ShineErrors, liked.Token);
-        }
-
-        /// <inheritdoc/>
-        public async Task StartReaderOnlyAsync(CancellationToken cancellationToken = default)
-        {
-            if (cancellationToken == default)
-            {
-                _logger.LogInformation("Start's CancellationToken set to CancellationToken in UpdaterOptions");
-                cancellationToken = _updaterOptions.CancellationToken;
-            }
-
-            _logger.LogWarning("Manual writing is enabled! You should write updates yourself.");
-
-            _emergencyCancel = new CancellationTokenSource();
-            using var liked = CancellationTokenSource.CreateLinkedTokenSource(
-                _emergencyCancel.Token, cancellationToken);
-
-            _logger.LogInformation("Blocking the current thread to read updates!");
-            await _rainbow.ShineAsync(ShineCallback, ShineErrors, liked.Token);
-        }
-
-        /// <inheritdoc/>
-        public void Start(CancellationToken cancellationToken = default)
-        {
-            if (cancellationToken == default)
-            {
-                _logger.LogInformation("Start's CancellationToken set to CancellationToken in UpdaterOptions");
-                cancellationToken = _updaterOptions.CancellationToken;
-            }
-
-            _logger.LogInformation("Auto writing updates enabled!");
-
-            _emergencyCancel = new CancellationTokenSource();
-            using var liked = CancellationTokenSource.CreateLinkedTokenSource(
-                _emergencyCancel.Token, cancellationToken);
-            var updaterTask = Task.Run(() => UpdateReceiver(liked.Token), liked.Token);
-
-            _logger.LogInformation("Reading updates is done in background.");
-            _rainbow.Shine(ShineCallback, ShineErrors, liked.Token);
-        }
-
-        /// <inheritdoc/>
-        public void StartReaderOnly(CancellationToken cancellationToken = default)
-        {
-            if (cancellationToken == default)
-            {
-                _logger.LogInformation("Start's CancellationToken set to CancellationToken in UpdaterOptions");
-                cancellationToken = _updaterOptions.CancellationToken;
-            }
-
-            _logger.LogWarning("Manual writing is enabled! You should write updates yourself.");
-
-            _emergencyCancel = new CancellationTokenSource();
-            using var liked = CancellationTokenSource.CreateLinkedTokenSource(
-                _emergencyCancel.Token, cancellationToken);
-
-            _logger.LogInformation("Blocking the current thread to read updates!");
-            _rainbow.Shine(ShineCallback, ShineErrors, liked.Token);
+            await StartAsync<SimpleUpdateWriter>(cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -224,42 +174,6 @@ namespace TelegramUpdater
             else
             {
                 await ProcessUpdate(shiningInfo, cancellationToken);
-            }
-        }
-
-        private async Task UpdateReceiver(CancellationToken cancellationToken = default)
-        {
-            if (_updaterOptions.FlushUpdatesQueue)
-            {
-                _logger.LogInformation("Flushing updates.");
-                await _botClient.GetUpdatesAsync(-1, 1, 0, cancellationToken: cancellationToken);
-            }
-
-            var offset = 0;
-            var timeOut = 1000;
-
-            _logger.LogInformation("Started Polling.");
-
-            while (true)
-            {
-                try
-                {
-                    var updates = await _botClient.GetUpdatesAsync(offset, 100, timeOut,
-                                                                    allowedUpdates: _updaterOptions.AllowedUpdates,
-                                                                    cancellationToken: cancellationToken);
-
-                    foreach (var update in updates)
-                    {
-                        await WriteAsync(update, cancellationToken);
-                        offset = update.Id + 1;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Logger.LogCritical(exception: e, "Auto update writer stopped due to an ecxeption.");
-                    EmergencyCancel();
-                    break;
-                }
             }
         }
 
