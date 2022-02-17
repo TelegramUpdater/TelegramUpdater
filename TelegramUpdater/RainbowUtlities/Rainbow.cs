@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -334,6 +335,28 @@ namespace TelegramUpdater.RainbowUtlities
 
                 // Throw if it's cancelled manually.
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Yields all <typeparamref name="TValue"/>s from given <paramref name="queueId"/>.
+        /// </summary>
+        /// <param name="queueId">Queue id.</param>
+        /// <param name="cancellationToken">Cancel the job.</param>
+        public async IAsyncEnumerable<ShiningInfo<TId, TValue>> YieldAsync(
+            ushort queueId, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            if (!_availableQueues.TryGetValue(queueId, out var channel)) yield break;
+
+            if (channel == null) yield break;
+
+            var currentOwner = GetQueueOwner(queueId);
+
+            if (currentOwner == null) yield break;
+
+            await foreach (var item in channel.Reader.ReadAllAsync(cancellationToken))
+            {
+                yield return new ShiningInfo<TId, TValue>(item, this, queueId);
             }
         }
 
