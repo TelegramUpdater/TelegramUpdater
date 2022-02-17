@@ -112,7 +112,7 @@ namespace TelegramUpdater.RainbowUtlities
         /// <summary>
         /// Write a new object to the rainbow for queuing
         /// </summary>
-        public async Task EnqueueAsync(TValue value,
+        public async ValueTask EnqueueAsync(TValue value,
                                      CancellationToken cancellationToken = default)
         {
             if (value == null)
