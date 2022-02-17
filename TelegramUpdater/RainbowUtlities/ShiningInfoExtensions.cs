@@ -40,13 +40,12 @@ namespace TelegramUpdater.RainbowUtlities
         /// <summary>
         /// Yields all <typeparamref name="TValue"/>s from given <paramref name="queueId"/>.
         /// </summary>
-        /// <param name="queueId">Queue id.</param>
         /// <param name="cancellationToken">Cancel the job.</param>
         public static async IAsyncEnumerable<ShiningInfo<TId, TValue>> YieldAsync<TId, TValue>(
-            this ShiningInfo<TId, TValue> shinigInfo, ushort queueId, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+            this ShiningInfo<TId, TValue> shinigInfo, [EnumeratorCancellation] CancellationToken cancellationToken = default)
             where TId : struct
         {
-            await foreach (var item in shinigInfo.YieldAsync(shinigInfo.ProcessId, cancellationToken))
+            await foreach (var item in shinigInfo.Rainbow.YieldAsync(shinigInfo.ProcessId, cancellationToken))
             {
                 yield return item;
             };

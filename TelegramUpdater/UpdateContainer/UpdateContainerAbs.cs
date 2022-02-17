@@ -25,6 +25,18 @@ namespace TelegramUpdater.UpdateContainer
             _insiderResovler = insiderResovler;
         }
 
+        internal UpdateContainerAbs(
+            Func<Update, T?> insiderResovler,
+            IUpdater updater,
+            Update insider)
+        {
+            ShiningInfo = null!;
+            Updater = updater;
+            Container = insider;
+            BotClient = updater.BotClient;
+            _insiderResovler = insiderResovler;
+        }
+
         /// <summary>
         /// Orginal update. ( inner update, like <see cref="Update.Message"/> ) 
         /// </summary>
@@ -43,15 +55,15 @@ namespace TelegramUpdater.UpdateContainer
         }
   
         /// <inheritdoc/>
-        public Update Container { get; }
+        public virtual Update Container { get; }
 
         /// <inheritdoc/>
-        public ITelegramBotClient BotClient { get; }
+        public virtual ITelegramBotClient BotClient { get; }
 
         /// <inheritdoc/>
-        public ShiningInfo<long, Update> ShiningInfo { get; }
+        public virtual ShiningInfo<long, Update> ShiningInfo { get; }
 
         /// <inheritdoc/>
-        public IUpdater Updater { get; }
+        public virtual IUpdater Updater { get; }
     }
 }
