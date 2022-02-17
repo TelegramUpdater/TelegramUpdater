@@ -51,7 +51,8 @@ namespace TelegramUpdater
 
             _rainbow = new Rainbow<long, Update>(
                 updaterOptions.MaxDegreeOfParallelism?? Environment.ProcessorCount,
-                x => x.GetSenderId() ?? 0);
+                x => x.GetSenderId() ?? 0,
+                ShineCallback, ShineErrors);
 
             if (_updaterOptions.Logger == null)
             {
@@ -112,7 +113,7 @@ namespace TelegramUpdater
         /// <inheritdoc/>
         public async Task WriteAsync(Update update, CancellationToken cancellationToken)
         {
-            await Rainbow.WriteAsync(update, cancellationToken);
+            await Rainbow.EnqueueAsync(update, cancellationToken);
         }
 
         /// <inheritdoc/>
