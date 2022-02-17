@@ -9,7 +9,7 @@ namespace TelegramUpdater.RainbowUtlities
     /// <typeparam name="TValue">Object's type</typeparam>
     public sealed class ProcessorInfo<TId, TValue> where TId : struct
     {
-        internal ProcessorInfo(ushort id, TId? ownerId, TaskStatus? taskStatus, int pendingCount)
+        internal ProcessorInfo(ushort id, OwnerInfo<TId>? ownerId, TaskStatus? taskStatus, int pendingCount)
         {
             Id = id;
             OwnerId = ownerId;
@@ -23,9 +23,9 @@ namespace TelegramUpdater.RainbowUtlities
         public ushort Id { get; }
 
         /// <summary>
-        /// Object's id, known as owner id of the queue.
+        /// Object's owner inforamtion.
         /// </summary>
-        public TId? OwnerId { get; }
+        public OwnerInfo<TId>? OwnerId { get; }
 
         /// <summary>
         /// Status of a task that acts for this queue.
