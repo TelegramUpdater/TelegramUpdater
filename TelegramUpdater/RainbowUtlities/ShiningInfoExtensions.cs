@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,5 +36,19 @@ namespace TelegramUpdater.RainbowUtlities
             where TId : struct
             => await shinigInfo.Rainbow.ReadNextAsync(
                 shinigInfo.ProcessId, timeOut, cancellationToken);
+
+        /// <summary>
+        /// Yields all <typeparamref name="TValue"/>s from given <paramref name="queueId"/>.
+        /// </summary>
+        /// <param name="cancellationToken">Cancel the job.</param>
+        public static async IAsyncEnumerable<ShiningInfo<TId, TValue>> YieldAsync<TId, TValue>(
+            this ShiningInfo<TId, TValue> shinigInfo, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+            where TId : struct
+        {
+            await foreach (var item in shinigInfo.Rainbow.YieldAsync(shinigInfo.ProcessId, cancellationToken))
+            {
+                yield return item;
+            };
+        }
     }
 }

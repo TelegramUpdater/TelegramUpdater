@@ -26,10 +26,18 @@ namespace TelegramUpdater
         private readonly List<IExceptionHandler> _exceptionHandlers;
         private readonly ILogger<IUpdater> _logger;
         private readonly UpdaterOptions _updaterOptions;
-        private readonly IServiceProvider? _serviceDescriptors;
-        private readonly Rainbow<long, Update> _rainbow;
-        private CancellationTokenSource? _emergencyCancel;
         private User? _me = null;
+
+        // Updater can use this to cancel update processing when it's needed.
+        private CancellationTokenSource? _emergencyCancel;
+
+        // Updater can use this to change the behavior on scoped handlers.
+        // If it's present, then DI will be available inside scoped handlers
+        private readonly IServiceProvider? _serviceDescriptors;
+
+        // This the main class responseable for queueing updates
+        // It handles everything related to process priotiry and more
+        private readonly Rainbow<long, Update> _rainbow;
 
         /// <summary>
         /// Creates an instance of updater to fetch updates from telegram and handle them.
@@ -127,6 +135,7 @@ namespace TelegramUpdater
                 cancellationToken = _updaterOptions.CancellationToken;
             }
 
+            // Link tokens. so we can use _emergencyCancel when required.
             _emergencyCancel = new CancellationTokenSource();
             using var liked = CancellationTokenSource.CreateLinkedTokenSource(
                 _emergencyCancel.Token, cancellationToken);

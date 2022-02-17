@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ namespace TelegramUpdater.RainbowUtlities
     {
         private readonly ConcurrentDictionary<ushort, Channel<TValue>?> _availableQueues;
         private readonly ConcurrentDictionary<ushort, Task?> _workingTasks;
-        private readonly ConcurrentDictionary<TId, ushort> _ownerIdMapping;
+        private readonly ConcurrentDictionary<TId, OwnerInfo<TId>> _ownerIdMapping;
         private readonly Func<TValue, TId> _idResolver;
         private readonly Func<ShiningInfo<TId, TValue>, CancellationToken, Task>? _handler;
         private readonly Func<Exception, CancellationToken, Task>? _exceptionHandler;
@@ -122,7 +123,7 @@ namespace TelegramUpdater.RainbowUtlities
 
             if (_ownerIdMapping.ContainsKey(ownerId))
             {
-                var alreadyQueue = _availableQueues[_ownerIdMapping[ownerId]];
+                var alreadyQueue = _availableQueues[_ownerIdMapping[ownerId].QueueId];
 
                 // Cannot be null here!
                 await alreadyQueue!.Writer.WriteAsync(value, cancellationToken);
@@ -159,9 +160,10 @@ namespace TelegramUpdater.RainbowUtlities
 
                 if (availableQueue == null)
                 {
-                    if (!_ownerIdMapping.TryAdd(ownerId, queueId.Value))
+                    var ownerInfo = new OwnerInfo<TId>(ownerId, queueId.Value, DateTime.UtcNow);
+                    if (!_ownerIdMapping.TryAdd(ownerId, ownerInfo))
                     {
-                        _ownerIdMapping[ownerId] = queueId.Value;
+                        _ownerIdMapping[ownerId] = ownerInfo;
                     };
 
                     var queue = Channel.CreateUnbounded<TValue>();
@@ -181,7 +183,8 @@ namespace TelegramUpdater.RainbowUtlities
                 }
                 else
                 {
-                    _ownerIdMapping.AddOrUpdate(ownerId, queueId.Value, (_, __) => queueId.Value);
+                    var ownerInfo = new OwnerInfo<TId>(ownerId, queueId.Value, DateTime.UtcNow);
+                    _ownerIdMapping.AddOrUpdate(ownerId, ownerInfo, (_, __) => ownerInfo);
                     _logger.LogInformation(
                         "Queue {id}'s owner changed to {owner}", queueId.Value, ownerId);
                     var t = Task.Run(() => Processor(queueId.Value), cancellationToken);
@@ -319,7 +322,7 @@ namespace TelegramUpdater.RainbowUtlities
 
                 var ownerAgain = GetQueueOwner(queueId);
 
-                if (ownerAgain != null && ownerAgain.Value.Equals(currentOwner.Value))
+                if (ownerAgain != null && ownerAgain.Value.OwnerId.Equals(currentOwner.Value.OwnerId))
                 {
                     return new ShiningInfo<TId, TValue>(result, this, queueId);
                 }
@@ -334,6 +337,28 @@ namespace TelegramUpdater.RainbowUtlities
 
                 // Throw if it's cancelled manually.
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Yields all <typeparamref name="TValue"/>s from given <paramref name="queueId"/>.
+        /// </summary>
+        /// <param name="queueId">Queue id.</param>
+        /// <param name="cancellationToken">Cancel the job.</param>
+        public async IAsyncEnumerable<ShiningInfo<TId, TValue>> YieldAsync(
+            ushort queueId, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            if (!_availableQueues.TryGetValue(queueId, out var channel)) yield break;
+
+            if (channel == null) yield break;
+
+            var currentOwner = GetQueueOwner(queueId);
+
+            if (currentOwner == null) yield break;
+
+            await foreach (var item in channel.Reader.ReadAllAsync(cancellationToken))
+            {
+                yield return new ShiningInfo<TId, TValue>(item, this, queueId);
             }
         }
 
@@ -399,7 +424,7 @@ namespace TelegramUpdater.RainbowUtlities
 
                     if (_ownerIdMapping.ContainsKey(ownerId)) // It's rare to happen here
                     {
-                        var alreadyQueue = _availableQueues[_ownerIdMapping[ownerId]];
+                        var alreadyQueue = _availableQueues[_ownerIdMapping[ownerId].QueueId];
 
                         // Cannot be null here!
                         await alreadyQueue!.Writer.WriteAsync(update, cancellationToken);
@@ -423,9 +448,11 @@ namespace TelegramUpdater.RainbowUtlities
 
                         if (availableQueue == null)
                         {
-                            if (!_ownerIdMapping.TryAdd(ownerId, queueId.Value))
+                            var ownerInfo = new OwnerInfo<TId>(ownerId, queueId.Value, DateTime.UtcNow);
+
+                            if (!_ownerIdMapping.TryAdd(ownerId, ownerInfo))
                             {
-                                _ownerIdMapping[ownerId] = queueId.Value;
+                                _ownerIdMapping[ownerId] = ownerInfo;
                             };
 
                             var queue = Channel.CreateUnbounded<TValue>();
@@ -445,7 +472,9 @@ namespace TelegramUpdater.RainbowUtlities
                         }
                         else
                         {
-                            _ownerIdMapping.AddOrUpdate(ownerId, queueId.Value, (_, __) => queueId.Value);
+                            var ownerInfo = new OwnerInfo<TId>(ownerId, queueId.Value, DateTime.UtcNow);
+
+                            _ownerIdMapping.AddOrUpdate(ownerId, ownerInfo, (_, __) => ownerInfo);
                             _logger.LogInformation(
                                 "Queue {id}'s owner changed to {owner}", queueId.Value, ownerId);
                             var t = Task.Run(() => Processor(queueId.Value), cancellationToken);
@@ -473,11 +502,11 @@ namespace TelegramUpdater.RainbowUtlities
             }
         }
 
-        private TId? GetQueueOwner(ushort queueId)
+        private OwnerInfo<TId>? GetQueueOwner(ushort queueId)
         {
             try
             {
-                return _ownerIdMapping!.First(x => x.Value == queueId).Key;
+                return _ownerIdMapping!.First(x => x.Value.QueueId == queueId).Value;
             }
             catch (InvalidOperationException)
             {
@@ -551,7 +580,7 @@ namespace TelegramUpdater.RainbowUtlities
                         if (owner != null)
                         {
                             // Make sure the owner is removed
-                            while (!_ownerIdMapping.TryRemove(owner.Value, out _))
+                            while (!_ownerIdMapping.TryRemove(owner.Value.OwnerId, out _))
                             { }
 
                             _logger.LogInformation("{owner} Is not {id}'owner anymore", owner, id);

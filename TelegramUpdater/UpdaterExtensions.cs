@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using TelegramUpdater.UpdateContainer;
-using TelegramUpdater.UpdateContainer.UpdateContainers;
 
 namespace TelegramUpdater
 {
-    public static class CommonExtensions
+    public static class UpdaterExtensions
     {
         public static object GetInnerUpdate(this Update update)
         {
