@@ -21,12 +21,18 @@ namespace TelegramUpdater.UpdateChannels
         /// <param name="updateType">Type of update.</param>
         /// <param name="getT">A function to select the right update from <see cref="Update"/></param>
         /// <param name="filter">Filter.</param>
+        /// <param name="timeOut">Time out to wait for the channel.</param>
         /// <exception cref="ArgumentNullException"></exception>
         protected AbstractChannel(
             UpdateType updateType,
             Func<Update, T?> getT,
+            TimeSpan timeOut,
             Filter<T>? filter)
         {
+            if (timeOut == default)
+                throw new ArgumentException("Use a valid time out.");
+
+            TimeOut = timeOut;
             _filter = filter;
             UpdateType = updateType;
             _getT = getT ?? throw new ArgumentNullException(nameof(getT));
@@ -34,6 +40,9 @@ namespace TelegramUpdater.UpdateChannels
 
         /// <inheritdoc/>
         public UpdateType UpdateType { get; }
+
+        /// <inheritdoc/>
+        public TimeSpan TimeOut { get; }
 
         /// <summary>
         /// A function to select the right update from <see cref="Update"/>

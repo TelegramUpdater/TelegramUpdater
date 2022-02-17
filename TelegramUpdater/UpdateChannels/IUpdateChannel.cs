@@ -1,4 +1,5 @@
-﻿using Telegram.Bot.Types;
+﻿using System;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace TelegramUpdater.UpdateChannels
@@ -12,6 +13,11 @@ namespace TelegramUpdater.UpdateChannels
         /// Update type.
         /// </summary>
         public UpdateType UpdateType { get; }
+
+        /// <summary>
+        /// Time out to wait for a channel.
+        /// </summary>
+        public TimeSpan TimeOut { get; }
 
         /// <summary>
         /// If this update should be channeled.
