@@ -11,7 +11,7 @@ namespace TelegramUpdater.UpdateHandlers.SealedHandlers
     /// </summary>
     public sealed class MessageHandler : AnyUpdateHandler<Message>
     {
-        internal MessageHandler(
+        public MessageHandler(
             Func<IContainer<Message>, Task> callbak,
             Filter<Message>? filter,
             int group = 0)

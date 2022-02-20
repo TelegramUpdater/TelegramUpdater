@@ -583,7 +583,7 @@ namespace TelegramUpdater.RainbowUtlities
                             while (!_ownerIdMapping.TryRemove(owner.Value.OwnerId, out _))
                             { }
 
-                            _logger.LogInformation("{owner} Is not {id}'owner anymore", owner, id);
+                            _logger.LogInformation("{owner} Is not {id}'owner anymore", owner.Value.OwnerId, id);
                         }
 
                         if (IsIdle)

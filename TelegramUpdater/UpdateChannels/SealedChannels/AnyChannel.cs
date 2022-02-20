@@ -14,8 +14,8 @@ namespace TelegramUpdater.UpdateChannels.AbstractChannels
     public abstract class AnyChannel<T> : AbstractChannel<T> where T : class
     {
         internal AnyChannel(
-            UpdateType updateType, Func<Update, T?> getT, Filter<T>? filter)
-            : base(updateType, getT, filter)
+            UpdateType updateType, Func<Update, T?> getT, TimeSpan timeOut, Filter<T>? filter)
+            : base(updateType, getT, timeOut, filter)
         { }
 
         internal override IContainer<T> ContainerBuilder(

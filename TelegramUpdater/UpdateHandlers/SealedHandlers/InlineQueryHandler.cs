@@ -11,7 +11,7 @@ namespace TelegramUpdater.UpdateHandlers.SealedHandlers
     /// </summary>
     public sealed class InlineQueryHandler : AnyUpdateHandler<InlineQuery>
     {
-        internal InlineQueryHandler(
+        public InlineQueryHandler(
             Func<IContainer<InlineQuery>, Task> callbak, Filter<InlineQuery>? filter, int group)
             : base(UpdateType.InlineQuery, x => x.InlineQuery, callbak, filter, group)
         {

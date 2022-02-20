@@ -6,7 +6,6 @@ using Telegram.Bot.Types;
 using TelegramUpdater.RainbowUtlities;
 using TelegramUpdater.UpdateChannels;
 using TelegramUpdater.UpdateChannels.SealedChannels;
-using TelegramUpdater.UpdateContainer.UpdateContainers;
 
 namespace TelegramUpdater.UpdateContainer;
 
@@ -22,47 +21,54 @@ public static class ChannelsExtensions
     /// <typeparam name="K">Current container update type.</typeparam>
     /// <param name="container">The container itself.</param>
     /// <param name="abstractChannel">Your channel to choose the right update.</param>
-    /// <param name="updateResolver">Fill this if you left <paramref name="abstractChannel"/> empty.</param>
-    /// <param name="timeOut">Maximum timeOut to wait for that update</param>
+    /// <param name="onUnrelatedUpdate">A callback function to be called if an unrelated update from comes.</param>
     /// <param name="cancellationToken">To cancell the job.</param>
     /// <returns></returns>
     public static async ValueTask<IContainer<T>?> OpenChannelAsync<T, K>(this IContainer<K> container,
-                                                                         TimeSpan timeOut,
                                                                          AbstractChannel<T>? abstractChannel = default,
-                                                                         Func<Update, T>? updateResolver = default,
+                                                                         Func<IUpdater, ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
                                                                          CancellationToken cancellationToken = default)
         where T : class where K : class
     {
         if (container == null)
             throw new ArgumentNullException(nameof(container));
 
-        if (timeOut == default)
-            throw new ArgumentException("Use a valid time out.");
-
-        if (abstractChannel == null && updateResolver == null)
+        if (abstractChannel == null)
         {
             throw new InvalidOperationException(
                 "abstractChannel and updateResolver both can't be null");
         }
 
+        // A scondery timeOut, cuz ReadNextAsync'timeout will reset on unrelated update.
+        var timeOutCts = new CancellationTokenSource();
+        timeOutCts.CancelAfter(abstractChannel.TimeOut);
+
+        using var linkedCts = CancellationTokenSource
+            .CreateLinkedTokenSource(timeOutCts.Token, cancellationToken);
+
         while (true)
         {
-            var update = await container.ShiningInfo.ReadNextAsync(timeOut, cancellationToken);
-
-            if (update == null)
-                return null;
-
-            if (abstractChannel == null)
+            try
             {
-                return new AnyContainer<T>(updateResolver!, container.Updater, update);
-            }
+                var update = await container.ShiningInfo.ReadNextAsync(abstractChannel.TimeOut, linkedCts.Token);
 
-            if (abstractChannel.UpdateType == update.Value.Type)
-            {
+                if (update == null)
+                    return null;
+
                 if (abstractChannel.ShouldChannel(update.Value))
                 {
                     return abstractChannel.ContainerBuilder(container.Updater, update);
                 }
+
+                if (onUnrelatedUpdate != null)
+                {
+                    await onUnrelatedUpdate(container.Updater, update);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                if (timeOutCts.IsCancellationRequested) return default;
+                throw;
             }
         }
     }
@@ -73,15 +79,17 @@ public static class ChannelsExtensions
     /// <param name="updateContainer">The update container</param>
     /// <param name="timeOut">Maximum allowed time to wait for the update.</param>
     /// <param name="filter">Filter updates to get the right one.</param>
+    /// <param name="onUnrelatedUpdate">A callback function to be called if an unrelated update from comes.</param>
     /// <param name="cancellationToken">To cancell the job.</param>
     public static async Task<IContainer<Message>?> ChannelMessage<K>(this IContainer<K> updateContainer,
                                                                      Filter<Message>? filter,
                                                                      TimeSpan? timeOut,
+                                                                     Func<IUpdater, ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
                                                                      CancellationToken cancellationToken = default) where K : class
     {
         return await updateContainer.OpenChannelAsync(
-            timeOut ?? TimeSpan.FromSeconds(30),
-            new MessageChannel(filter),
+            new MessageChannel(timeOut ?? TimeSpan.FromSeconds(30), filter),
+            onUnrelatedUpdate,
             cancellationToken: cancellationToken);
     }
 
@@ -92,13 +100,17 @@ public static class ChannelsExtensions
     /// <param name="updateContainer">The update container</param>
     /// <param name="timeOut">Maximum allowed time to wait for the update.</param>
     /// <param name="filter">Filter updates to get the right one.</param>
+    /// <param name="onUnrelatedUpdate">A callback function to be called if an unrelated update from comes.</param>
+    /// <param name="cancellationToken">To cancell the job.</param>
     public static async Task<IContainer<Message>?> ChannelUserResponse(this IContainer<Message> updateContainer,
                                                                        TimeSpan timeOut,
-                                                                       Filter<Message>? filter = default)
+                                                                       Func<IUpdater, ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
+                                                                       Filter<Message>? filter = default,
+                                                                       CancellationToken cancellationToken = default)
     {
         if (updateContainer.Update.From != null)
         {
-            return await updateContainer.ChannelMessage(filter, timeOut);
+            return await updateContainer.ChannelMessage(filter, timeOut, onUnrelatedUpdate, cancellationToken);
         }
         else
         {
@@ -111,16 +123,18 @@ public static class ChannelsExtensions
                                                                              TimeSpan timeOut,
                                                                              string pattern,
                                                                              RegexOptions? regexOptions = default,
+                                                                             Func<IUpdater, ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
                                                                              CancellationToken cancellationToken = default) where T : class
     {
         var senderId = senderIdResolver(updateContainer.Update);
         if (senderId != null)
         {
             return await updateContainer.OpenChannelAsync(
-                timeOut,
                 new CallbackQueryChannel(
+                    timeOut,
                     FilterCutify.CbqOfUsers(senderId.Value) &
                     FilterCutify.DataMatches(pattern, regexOptions)),
+                onUnrelatedUpdate,
                 cancellationToken: cancellationToken);
         }
         else
@@ -133,12 +147,14 @@ public static class ChannelsExtensions
                                                                           TimeSpan timeOut,
                                                                           string pattern,
                                                                           RegexOptions? regexOptions = default,
+                                                                          Func<IUpdater, ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
                                                                           CancellationToken cancellationToken = default)
     {
         return await updateContainer.ChannelUserClick(x => x.From?.Id ?? x.SenderChat?.Id ?? null,
                                                       timeOut,
                                                       pattern,
                                                       regexOptions,
+                                                      onUnrelatedUpdate,
                                                       cancellationToken);
     }
 
@@ -146,7 +162,8 @@ public static class ChannelsExtensions
                                                                           TimeSpan timeOut,
                                                                           string pattern,
                                                                           RegexOptions? regexOptions = default,
+                                                                          Func<IUpdater, ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
                                                                           CancellationToken cancellationToken = default)
         => await updateContainer.ChannelUserClick(x => x.From.Id,
-                timeOut, pattern, regexOptions, cancellationToken);
+                timeOut, pattern, regexOptions, onUnrelatedUpdate, cancellationToken);
 }

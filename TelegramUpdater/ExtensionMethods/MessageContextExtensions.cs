@@ -11,6 +11,12 @@ namespace TelegramUpdater.UpdateContainer;
 
 public static class MessageContainerExtensions
 {
+    public static long? SenderId(this IContainer<Message> simpleContext)
+    => simpleContext.Update.From?.Id;
+
+    public static User? Sender(this IContainer<Message> simpleContext)
+        => simpleContext.Update.From;
+
     /// <summary>
     /// Deletes a message
     /// </summary>
