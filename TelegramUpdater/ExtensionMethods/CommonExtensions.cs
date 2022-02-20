@@ -2,13 +2,17 @@
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
-using TelegramUpdater.UpdateContainer;
+using TelegramUpdater.RainbowUtlities;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
 
-namespace TelegramUpdater;
+namespace TelegramUpdater.UpdateContainer;
 
 public static class CommonExtensions
 {
+    public static RawContainer RebaseAsRaw<T>(
+        this IContainer<T> container, ShiningInfo<long, Update> shiningInfo) where T : class
+        => new(container.Updater, shiningInfo);
+
     internal static async Task<IContainer<T>> WrapAsync<T>(
         this Task<T> t, Expression<Func<Update, T?>> insiderResovler, IUpdater updater) where T : class
     {

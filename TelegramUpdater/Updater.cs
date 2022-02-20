@@ -201,7 +201,6 @@ namespace TelegramUpdater
                 }
 
                 var scopedHandlers = _scopedHandlerContainers
-                    .Where(x => x.UpdateType == shiningInfo.Value.Type)
                     .Where(x => x.ShouldHandle(shiningInfo.Value));
 
                 if (!scopedHandlers.Any())
@@ -249,12 +248,10 @@ namespace TelegramUpdater
                 }
 
                 var singletonhandlers = _updateHandlers
-                    .Where(x => x.UpdateType == shiningInfo.Value.Type)
                     .Where(x => x.ShouldHandle(shiningInfo.Value))
                     .Select(x => (IUpdateHandler)x);
 
                 var scopedHandlers = _scopedHandlerContainers
-                    .Where(x => x.UpdateType == shiningInfo.Value.Type)
                     .Where(x => x.ShouldHandle(shiningInfo.Value))
                     .Select(x => x.CreateInstance())
                     .Where(x => x != null)

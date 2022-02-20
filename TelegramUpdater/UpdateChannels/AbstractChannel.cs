@@ -64,6 +64,8 @@ namespace TelegramUpdater.UpdateChannels
         /// </summary>
         public bool ShouldChannel(Update update)
         {
+            if (update.Type != UpdateType) return false;
+
             var insider = GetT(update);
 
             if (insider == null) return false;

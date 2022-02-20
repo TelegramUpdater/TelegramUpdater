@@ -39,24 +39,36 @@ public static class ChannelsExtensions
                 "abstractChannel and updateResolver both can't be null");
         }
 
+        // A scondery timeOut, cuz ReadNextAsync'timeout will reset on unrelated update.
+        var timeOutCts = new CancellationTokenSource();
+        timeOutCts.CancelAfter(abstractChannel.TimeOut);
+
+        using var linkedCts = CancellationTokenSource
+            .CreateLinkedTokenSource(timeOutCts.Token, cancellationToken);
+
         while (true)
         {
-            var update = await container.ShiningInfo.ReadNextAsync(abstractChannel.TimeOut, cancellationToken);
-
-            if (update == null)
-                return null;
-
-            if (abstractChannel.UpdateType == update.Value.Type)
+            try
             {
+                var update = await container.ShiningInfo.ReadNextAsync(abstractChannel.TimeOut, linkedCts.Token);
+
+                if (update == null)
+                    return null;
+
                 if (abstractChannel.ShouldChannel(update.Value))
                 {
                     return abstractChannel.ContainerBuilder(container.Updater, update);
                 }
-            }
 
-            if (onUnrelatedUpdate != null)
+                if (onUnrelatedUpdate != null)
+                {
+                    await onUnrelatedUpdate(container.Updater, update);
+                }
+            }
+            catch (OperationCanceledException)
             {
-                await onUnrelatedUpdate(container.Updater, update);
+                if (timeOutCts.IsCancellationRequested) return default;
+                throw;
             }
         }
     }
