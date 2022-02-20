@@ -13,7 +13,7 @@ namespace TelegramUpdater.UpdateHandlers.AbstractHandlers
     /// <typeparam name="T"><see cref="Update"/> type</typeparam>
     public abstract class AnyUpdateHandlerAbs<T> : AbstractHandler<T> where T : class
     {
-        internal AnyUpdateHandlerAbs(
+        public AnyUpdateHandlerAbs(
             UpdateType updateType, Func<Update, T?> getT, Filter<T>? filter, int group)
             : base(updateType, getT, filter, group)
         {

@@ -16,7 +16,7 @@ namespace TelegramUpdater.UpdateHandlers.SealedHandlers
     {
         private readonly Func<IContainer<T>, Task> _handleAsync;
 
-        internal AnyUpdateHandler(UpdateType updateType,
+        public AnyUpdateHandler(UpdateType updateType,
                                 Func<Update, T?> getT,
                                 Func<IContainer<T>, Task> callbak,
                                 Filter<T>? filter,

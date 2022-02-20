@@ -35,7 +35,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PrivateContents", "PrivateC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyConsoleApp", "PrivateContents\MyConsoleApp\MyConsoleApp.csproj", "{FDF76666-F4A3-4D31-981F-19C91CF29FE6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelegramUpdater.FillMyForm", "..\TelegramUpdater.FillMyForm\TelegramUpdater.FillMyForm.csproj", "{2FD284C0-9336-4BFE-B486-DC4C10A2C7A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelegramUpdater.FillMyForm", "..\TelegramUpdater.FillMyForm\TelegramUpdater.FillMyForm\TelegramUpdater.FillMyForm.csproj", "{B020F78F-460B-4418-8438-3B6A2D6621A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,10 +83,10 @@ Global
 		{FDF76666-F4A3-4D31-981F-19C91CF29FE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FDF76666-F4A3-4D31-981F-19C91CF29FE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FDF76666-F4A3-4D31-981F-19C91CF29FE6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2FD284C0-9336-4BFE-B486-DC4C10A2C7A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2FD284C0-9336-4BFE-B486-DC4C10A2C7A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2FD284C0-9336-4BFE-B486-DC4C10A2C7A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2FD284C0-9336-4BFE-B486-DC4C10A2C7A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B020F78F-460B-4418-8438-3B6A2D6621A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B020F78F-460B-4418-8438-3B6A2D6621A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B020F78F-460B-4418-8438-3B6A2D6621A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B020F78F-460B-4418-8438-3B6A2D6621A4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
