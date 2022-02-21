@@ -46,6 +46,8 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
         /// <inheritdoc/>
         public bool ShouldHandle(Update update)
         {
+            if (update.Type != UpdateType) return false;
+
             var insider = GetT(update);
 
             if (insider == null) return false;

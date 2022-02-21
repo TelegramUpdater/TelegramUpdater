@@ -5,7 +5,7 @@ using TelegramUpdater.RainbowUtlities;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
 
-namespace TelegramUpdater.UpdateChannels.AbstractChannels
+namespace TelegramUpdater.UpdateChannels.SealedChannels
 {
     /// <summary>
     /// Create channel for any type of <see cref="Update"/>.
