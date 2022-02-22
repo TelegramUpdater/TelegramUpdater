@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.RainbowUtlities;
 using TelegramUpdater.UpdateHandlers;
@@ -25,7 +26,7 @@ namespace TelegramUpdater
         private readonly List<IScopedHandlerContainer> _scopedHandlerContainers;
         private readonly List<IExceptionHandler> _exceptionHandlers;
         private readonly ILogger<IUpdater> _logger;
-        private readonly UpdaterOptions _updaterOptions;
+        private UpdaterOptions _updaterOptions;
         private User? _me = null;
 
         // Updater can use this to cancel update processing when it's needed.
@@ -52,6 +53,7 @@ namespace TelegramUpdater
         {
             _botClient = botClient ?? throw new ArgumentNullException(nameof(botClient));
             _updaterOptions = updaterOptions;
+
             _serviceDescriptors = serviceDescriptors;
 
             _updateHandlers = new List<ISingletonUpdateHandler>();
@@ -91,6 +93,9 @@ namespace TelegramUpdater
 
         /// <inheritdoc/>
         public Rainbow<long, Update> Rainbow => _rainbow;
+
+        /// <inheritdoc/>
+        public UpdateType[] AllowedUpdates => _updaterOptions.AllowedUpdates;
 
         /// <inheritdoc/>
         public Updater AddUpdateHandler(ISingletonUpdateHandler updateHandler)
@@ -135,6 +140,20 @@ namespace TelegramUpdater
                 cancellationToken = _updaterOptions.CancellationToken;
             }
 
+            if (_updaterOptions.AllowedUpdates == null)
+            {
+                // I need to recreate the options since it's readonly.
+                _updaterOptions = new UpdaterOptions(
+                    UpdaterOptions.MaxDegreeOfParallelism,
+                    UpdaterOptions.Logger,
+                    UpdaterOptions.CancellationToken,
+                    UpdaterOptions.FlushUpdatesQueue,
+                    DetectAllowedUpdates()); // Auto detect allowed updates
+
+                _logger.LogInformation("Detected allowed updates automatically {allowed}",
+                    string.Join(", ", AllowedUpdates.Select(x=> x.ToString())));
+            }
+
             // Link tokens. so we can use _emergencyCancel when required.
             _emergencyCancel = new CancellationTokenSource();
             using var liked = CancellationTokenSource.CreateLinkedTokenSource(
@@ -163,6 +182,13 @@ namespace TelegramUpdater
 
             return _me;
         }
+
+        private UpdateType[] DetectAllowedUpdates()
+            => _updateHandlers
+                .Select(x => x.UpdateType)
+                .Concat(_scopedHandlerContainers.Select(x => x.UpdateType))
+                .Distinct()
+                .ToArray();
 
         private Task ShineErrors(Exception exception, CancellationToken cancellationToken)
         {

@@ -17,7 +17,7 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
         internal AbstractScopedHandler(Func<Update, T?> getT, int group)
         {
             Group = group;
-            _getT = getT;
+            _getT = getT ?? throw new ArgumentNullException(nameof(getT));
         }
 
         /// <inheritdoc/>

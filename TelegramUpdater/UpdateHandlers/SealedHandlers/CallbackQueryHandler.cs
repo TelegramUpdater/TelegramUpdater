@@ -11,8 +11,9 @@ namespace TelegramUpdater.UpdateHandlers.SealedHandlers
     /// </summary>
     public sealed class CallbackQueryHandler : AnyUpdateHandler<CallbackQuery>
     {
-        public CallbackQueryHandler(
-            Func<IContainer<CallbackQuery>, Task> callbak, Filter<CallbackQuery>? filter, int group = 0)
+        public CallbackQueryHandler(Func<IContainer<CallbackQuery>, Task> callbak,
+                                    Filter<CallbackQuery>? filter = default,
+                                    int group = 0)
             : base(UpdateType.CallbackQuery, x => x.CallbackQuery, callbak, filter, group)
         { }
     }

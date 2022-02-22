@@ -7,6 +7,9 @@ using TelegramUpdater.UpdateHandlers.SealedHandlers;
 
 namespace TelegramUpdater;
 
+/// <summary>
+/// A set of extension methods for <see cref="IUpdater"/> handlers.
+/// </summary>
 public static class UpdateHandlerExtensions
 {
     /// <summary>
@@ -38,5 +41,53 @@ public static class UpdateHandlerExtensions
 
         return updater.AddUpdateHandler(
             new AnyUpdateHandler<T>(updateType, updateSelector, callback, filter, group));
+    }
+
+    /// <summary>
+    /// Add <see cref="Message"/> handler to the updater.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">Callback function to handle your update.</param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="group">Handling priority.</param>
+    public static IUpdater AddUpdateHandler(
+        this IUpdater updater,
+        Func<IContainer<Message>, Task> callback,
+        Filter<Message>? filter = default,
+        int group = default)
+    {
+        return updater.AddUpdateHandler(new MessageHandler(callback, filter, group));
+    }
+
+    /// <summary>
+    /// Add <see cref="CallbackQuery"/> handler to the updater.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">Callback function to handle your update.</param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="group">Handling priority.</param
+    public static IUpdater AddUpdateHandler(
+        this IUpdater updater,
+        Func<IContainer<CallbackQuery>, Task> callback,
+        Filter<CallbackQuery>? filter = default,
+        int group = default)
+    {
+        return updater.AddUpdateHandler(new CallbackQueryHandler(callback, filter, group));
+    }
+
+    /// <summary>
+    /// Add <see cref="InlineQuery"/> handler to the updater.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">Callback function to handle your update.</param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="group">Handling priority.</param
+    public static IUpdater AddUpdateHandler(
+        this IUpdater updater,
+        Func<IContainer<InlineQuery>, Task> callback,
+        Filter<InlineQuery>? filter = default,
+        int group = default)
+    {
+        return updater.AddUpdateHandler(new InlineQueryHandler(callback, filter, group));
     }
 }

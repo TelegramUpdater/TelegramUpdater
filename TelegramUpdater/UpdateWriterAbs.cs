@@ -22,7 +22,7 @@ namespace TelegramUpdater
         /// <summary>
         /// Create a default instanse of update writer.
         /// </summary>
-        internal UpdateWriterAbs() { }
+        protected UpdateWriterAbs() { }
 
         /// <summary>
         /// Create a default instanse of update writer.

@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.RainbowUtlities;
 using TelegramUpdater.UpdateHandlers;
@@ -36,6 +37,11 @@ namespace TelegramUpdater
         public Rainbow<long, Update> Rainbow { get; }
 
         /// <summary>
+        /// A list of allowed updates. updater only receives and handles this kind of updates.
+        /// </summary>
+        public UpdateType[] AllowedUpdates { get; }
+
+        /// <summary>
         /// Stop reader and writer ( if available ) tasks.
         /// </summary>
         public void EmergencyCancel();
@@ -49,6 +55,9 @@ namespace TelegramUpdater
         /// <summary>
         /// Adds an scoped handler to the updater.
         /// </summary>
+        /// <remarks>
+        /// If you use this method, filter attributes <b>would not be applied!</b>
+        /// </remarks>
         /// <param name="scopedHandlerContainer">
         /// Use <see cref="UpdateContainerBuilder{THandler, TUpdate}"/>
         /// To Create a new <see cref="IScopedHandlerContainer"/>

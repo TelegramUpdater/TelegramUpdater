@@ -362,6 +362,21 @@ namespace TelegramUpdater.RainbowUtlities
             }
         }
 
+        /// <summary>
+        /// Get an owner's queue.
+        /// </summary>
+        /// <param name="ownerId">Owner id</param>
+        /// <returns>Returns null if there's no queue for this owner.</returns>
+        public ushort? GetOwnersQueue(TId ownerId)
+        {
+            if (_ownerIdMapping.ContainsKey(ownerId))
+            {
+                return _ownerIdMapping[ownerId].QueueId;
+            }
+
+            return default;
+        }
+
         private ushort? GetAvailableQueue()
         {
             if (_availableQueues.Any(x => x.Value == null || x.Value.Reader.Count == 0))
