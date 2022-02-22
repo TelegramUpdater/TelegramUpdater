@@ -22,14 +22,19 @@ namespace TelegramUpdater.UpdateHandlers
             Filter<T>? filter,
             int group)
         {
+            if (updateType == UpdateType.Unknown)
+                throw new ArgumentException($"There's nothing uknown here! {nameof(updateType)}");
+
             _filter = filter;
-            _getT = getT;
+            _getT = getT ?? throw new ArgumentNullException(nameof(getT));
             UpdateType = updateType;
             Group = group;
         }
 
+        /// <inheritdoc/>
         public UpdateType UpdateType { get; }
 
+        /// <inheritdoc/>
         public int Group { get; }
 
         protected T? GetT(Update update) => _getT(update);
@@ -43,9 +48,11 @@ namespace TelegramUpdater.UpdateHandlers
             return _filter.TheyShellPass(t);
         }
 
+        /// <inheritdoc/>
         public async Task HandleAsync(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
             => await HandleAsync(ContainerBuilder(updater, shiningInfo));
 
+        /// <inheritdoc/>
         public bool ShouldHandle(Update update)
         {
             if (update.Type != UpdateType) return false;
@@ -57,6 +64,7 @@ namespace TelegramUpdater.UpdateHandlers
             return ShouldHandle(insider);
         }
 
+        /// <inheritdoc/>
         protected abstract Task HandleAsync(IContainer<T> updateContainer);
 
         internal abstract IContainer<T> ContainerBuilder(IUpdater updater, ShiningInfo<long, Update> shiningInfo);

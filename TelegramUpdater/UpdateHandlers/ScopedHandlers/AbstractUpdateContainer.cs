@@ -17,6 +17,9 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
         internal AbstractUpdateContainer(
             UpdateType updateType, Filter<TUpdate>? filter = default)
         {
+            if (updateType == UpdateType.Unknown)
+                throw new ArgumentException($"There's nothing uknown here! {nameof(updateType)}");
+
             UpdateType = updateType;
             _filter = filter;
             ScopedHandlerType = typeof(THandler);

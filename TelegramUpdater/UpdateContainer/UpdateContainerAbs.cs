@@ -18,11 +18,11 @@ namespace TelegramUpdater.UpdateContainer
             IUpdater updater,
             ShiningInfo<long, Update> insider)
         {
-            Updater = updater;
+            Updater = updater ?? throw new ArgumentNullException(nameof(updater));
             ShiningInfo = insider;
             Container = insider.Value;
             BotClient = updater.BotClient;
-            _insiderResovler = insiderResovler;
+            _insiderResovler = insiderResovler ?? throw new ArgumentNullException(nameof(insiderResovler));
         }
 
         internal UpdateContainerAbs(

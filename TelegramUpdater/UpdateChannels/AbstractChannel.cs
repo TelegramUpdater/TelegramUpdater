@@ -32,6 +32,9 @@ namespace TelegramUpdater.UpdateChannels
             if (timeOut == default)
                 throw new ArgumentException("Use a valid time out.");
 
+            if (updateType == UpdateType.Unknown)
+                throw new ArgumentException($"There's nothing uknown here! {nameof(updateType)}");
+
             TimeOut = timeOut;
             _filter = filter;
             UpdateType = updateType;

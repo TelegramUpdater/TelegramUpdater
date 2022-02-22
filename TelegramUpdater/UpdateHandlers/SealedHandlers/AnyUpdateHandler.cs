@@ -22,6 +22,9 @@ namespace TelegramUpdater.UpdateHandlers.SealedHandlers
                                 Filter<T>? filter,
                                 int group) : base(updateType, getT, filter, group)
         {
+            if (callbak == null)
+                throw new ArgumentNullException(nameof(callbak));
+
             _handleAsync = callbak;
         }
 
