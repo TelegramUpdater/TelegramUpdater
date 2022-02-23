@@ -11,29 +11,6 @@ namespace TelegramUpdater;
 /// </summary>
 public static class ScopedHandlersExtensions
 {
-    internal static Filter<T> GetFilterAttributes<T>(Type type) where T: class
-    {
-        Filter<T> filter = null!;
-        var applied = type.GetCustomAttributes(typeof(ApplyFilterAttribute), false);
-        foreach (ApplyFilterAttribute item in applied)
-        {
-            var f = (Filter<T>?)Activator.CreateInstance(item.FilterType);
-            if (f != null)
-            {
-                if (filter == null)
-                {
-                    filter = f;
-                }
-                else
-                {
-                    filter &= f;
-                }
-            }
-        }
-
-        return filter;
-    }
-
     /// <summary>
     /// Adds an scoped handler to the updater.
     /// </summary>
@@ -69,13 +46,6 @@ public static class ScopedHandlersExtensions
             {
                 throw new InvalidCastException($"{_t} is not an Update! Should be Message, CallbackQuery, ...");
             }
-        }
-
-        if (filter == null)
-        {
-            // If no filter passed as method args the look at attributes
-            // Attribute filters are all combined using & operator.
-            filter = GetFilterAttributes<TUpdate>(typeOfScopedHandler);
         }
 
         var containerGeneric = typeof(UpdateContainerBuilder<,>).MakeGenericType(
@@ -132,13 +102,6 @@ public static class ScopedHandlersExtensions
         }
 
         var _h = typeof(THandler);
-
-        if (filter == null)
-        {
-            // If no filter passed as method args the look at attributes
-            // Attribute filters are all combined using & operator.
-            filter = GetFilterAttributes<TUpdate>(_h);
-        }
 
         return updater.AddScopedHandler(new UpdateContainerBuilder<THandler, TUpdate>(
                 updateType.Value, filter, getT));

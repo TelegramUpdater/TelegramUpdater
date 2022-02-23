@@ -1,47 +1,24 @@
 ﻿using System;
-using System.Linq;
 using Telegram.Bot.Types;
+using TelegramUpdater.Filters;
 
-namespace TelegramUpdater.Filters
+namespace TelegramUpdater.FilterAttributes.Attributes
 {
     /// <summary>
-    /// Filters messages with specified command
+    /// An attribute for <see cref="CommandFilter"/>. Works only on <see cref="Message"/> handlers.
     /// </summary>
-    public class CommandFilter : Filter<Message>
+    public class CommandAttribute : AbstractFilterAttribute
     {
-        private static bool _CommandFilter(
-            Message incoming,
-            char prefix = '/',
-            ArgumentsMode argumentsMode = ArgumentsMode.Idc,
-            params string[] commands)
-        {
-            if (string.IsNullOrEmpty(incoming.Text)) return false;
-
-            var args = incoming.Text.Split(' ');
-
-            var command = args[0].ToLower();
-
-            if (argumentsMode == ArgumentsMode.Require &&
-                args.Length < 2) return false;
-
-            if (argumentsMode == ArgumentsMode.NoArgs &&
-                args.Length > 1) return false;
-
-            return commands.Any(x => prefix + x == command);
-        }
-
         /// <summary>
         /// Filters messages with specified command
         /// </summary>
         /// <param name="commands">Command that are allowed. default prefix '/' will be applied!</param>
-        public CommandFilter(params string[] commands)
-            : base(x =>
-            {
-                return _CommandFilter(x, '/', ArgumentsMode.Idc, commands);
-            })
+        public CommandAttribute(params string[] commands)
         {
             if (commands == null || commands.Length == 0)
                 throw new ArgumentNullException(nameof(commands));
+
+            Commands = commands;
         }
 
         /// <summary>
@@ -49,14 +26,13 @@ namespace TelegramUpdater.Filters
         /// </summary>
         /// <param name="prefix">Prefix of command. default to '/'</param>
         /// <param name="commands">Command that are allowed</param>
-        public CommandFilter(char prefix, params string[] commands)
-            : base(x =>
-            {
-                return _CommandFilter(x, prefix, ArgumentsMode.Idc, commands);
-            })
+        public CommandAttribute(char prefix, params string[] commands)
         {
             if (commands == null || commands.Length == 0)
                 throw new ArgumentNullException(nameof(commands));
+
+            Commands = commands;
+            Prefix = prefix;
         }
 
         /// <summary>
@@ -65,38 +41,56 @@ namespace TelegramUpdater.Filters
         /// <param name="prefix">Prefix of command. default to '/'</param>
         /// <param name="commands">Command that are allowed</param>
         /// <param name="argumentsMode">If command should carry arguments</param>
-        public CommandFilter(
+        public CommandAttribute(
             char prefix,
             ArgumentsMode argumentsMode,
             params string[] commands)
-            : base(x =>
-            {
-                return _CommandFilter(x, prefix, argumentsMode, commands);
-            })
         {
             if (commands == null || commands.Length == 0)
                 throw new ArgumentNullException(nameof(commands));
+
+            Prefix = prefix;
+            ArgumentsMode = argumentsMode;
+            Commands = commands;
         }
 
         /// <summary>
         /// Filters messages with specified command
         /// </summary>
-        /// <param name="commands">Command that are allowed</param>
+        /// <param name="command">Command that are allowed</param>
         /// <param name="prefix">Prefix of command. default to '/'</param>
         /// <param name="argumentsMode">If command should carry arguments</param>
-        public CommandFilter(
-            string commands,
+        public CommandAttribute(
+            string command,
             char prefix = '/',
             ArgumentsMode argumentsMode = ArgumentsMode.Idc)
-            : base(x =>
-            {
-                return _CommandFilter(x, prefix, argumentsMode, commands);
-            })
         {
-            if (string.IsNullOrEmpty(commands))
+            if (command is null)
             {
-                throw new ArgumentException($"'{nameof(commands)}' cannot be null or empty.", nameof(commands));
+                throw new ArgumentNullException(nameof(command));
             }
+
+            Commands = new[] { command };
+            Prefix = prefix;
+            ArgumentsMode = argumentsMode;
+        }
+
+        internal string[] Commands { get; init; }
+
+        internal char Prefix { get; init; } = '/';
+
+        internal ArgumentsMode ArgumentsMode { get; init; } = ArgumentsMode.Idc;
+
+        /// <inheritdoc/>
+        protected internal override object GetFilterTypeOf(Type requestedType)
+        {
+            if (requestedType == null)
+                throw new ArgumentNullException(nameof(requestedType));
+
+            if (requestedType != typeof(Message))
+                throw new ArgumentException("CommandAttribute are supported only for Messages.");
+
+            return new CommandFilter(Prefix, ArgumentsMode, Commands);
         }
     }
 }
