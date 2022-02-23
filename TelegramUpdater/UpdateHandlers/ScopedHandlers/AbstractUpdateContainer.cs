@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Reflection;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using TelegramUpdater.FilterAttributes;
 
 namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
 {
@@ -21,8 +23,15 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
                 throw new ArgumentException($"There's nothing uknown here! {nameof(updateType)}");
 
             UpdateType = updateType;
-            _filter = filter;
             ScopedHandlerType = typeof(THandler);
+
+            _filter = filter;
+
+            if (_filter == null)
+            {
+                // Check for attributes
+                _filter = GetFilterAttributes<TUpdate>(ScopedHandlerType);
+            }
         }
 
         /// <inheritdoc/>
@@ -56,6 +65,29 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
             if (insider == null) return false;
 
             return ShouldHandle(insider);
+        }
+
+        internal static Filter<T> GetFilterAttributes<T>(Type type) where T : class
+        {
+            Filter<T> filter = null!;
+            var applied = type.GetCustomAttributes<AbstractFilterAttribute>();
+            foreach (var item in applied)
+            {
+                var f = (Filter<T>?)item.GetFilterTypeOf(typeof(T));
+                if (f != null)
+                {
+                    if (filter == null)
+                    {
+                        filter = f;
+                    }
+                    else
+                    {
+                        filter &= f;
+                    }
+                }
+            }
+
+            return filter;
         }
     }
 }

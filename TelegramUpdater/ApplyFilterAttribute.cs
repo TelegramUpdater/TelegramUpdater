@@ -1,4 +1,5 @@
 ﻿using System;
+using TelegramUpdater.FilterAttributes;
 
 namespace TelegramUpdater
 {
@@ -8,9 +9,11 @@ namespace TelegramUpdater
     /// <remarks>
     /// The filter should have a parameterless constructor.
     /// </remarks>
-    [AttributeUsage(AttributeTargets.Class)]
-    public sealed class ApplyFilterAttribute : Attribute
+    public sealed class ApplyFilterAttribute : AbstractFilterAttribute
     {
+        /// <summary>
+        /// Type of filter to be applied.
+        /// </summary>
         public Type FilterType { get; }
 
         /// <summary>
@@ -23,6 +26,15 @@ namespace TelegramUpdater
         public ApplyFilterAttribute(Type filterType)
         {
             FilterType = filterType;
+        }
+
+        /// <inheritdoc/>
+        protected internal override object GetFilterTypeOf(Type requestedType)
+        {
+            var filter = Activator.CreateInstance(FilterType);
+            if (filter == null)
+                throw new InvalidOperationException($"Cannot initialize filter of type {FilterType}");
+            return filter;
         }
     }
 }

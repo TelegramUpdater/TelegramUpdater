@@ -55,9 +55,6 @@ namespace TelegramUpdater
         /// <summary>
         /// Adds an scoped handler to the updater.
         /// </summary>
-        /// <remarks>
-        /// If you use this method, filter attributes <b>would not be applied!</b>
-        /// </remarks>
         /// <param name="scopedHandlerContainer">
         /// Use <see cref="UpdateContainerBuilder{THandler, TUpdate}"/>
         /// To Create a new <see cref="IScopedHandlerContainer"/>

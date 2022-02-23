@@ -62,13 +62,13 @@ namespace TelegramUpdater
         /// A message comes only from specified user(s) is <paramref name="users"/>
         /// </summary>
         public static Filter<Message> MsgOfUsers(params long[] users)
-            => new FromUsersMessageFilter(users);
+            => FromUsersFilter.Messages(users);
 
         /// <summary>
         /// A callback query comes only from specified user(s) is <paramref name="users"/>
         /// </summary>
         public static Filter<CallbackQuery> CbqOfUsers(params long[] users)
-            => new FromUsersCallbackQueryFilter(users);
+            => FromUsersFilter.CallbackQueries(users);
 
         /// <summary>
         /// A replied message.
