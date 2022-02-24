@@ -16,11 +16,12 @@ Take a look at code below describing a handler:
 using Telegram.Bot.Types;
 using TelegramUpdater;
 using TelegramUpdater.UpdateContainer;
+using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse;
 
 namespace ConsoleApp;
 
-[ApplyFilter(typeof(PrivateTestCommand))]
+[Command("test")]
 internal class MyScopedMessageHandler : ScopedMessageHandler
 {
     public MyScopedMessageHandler() : base(group: 0)
@@ -29,14 +30,6 @@ internal class MyScopedMessageHandler : ScopedMessageHandler
     protected override async Task HandleAsync(UpdateContainerAbs<Message> container)
     {
         await container.Response("Tested!");
-    }
-}
-
-internal class PrivateTestCommand : Filter<Message>
-{
-    public PrivateTestCommand()
-        : base(FilterCutify.OnCommand("test") & FilterCutify.PM())
-    {
     }
 }
 ```
