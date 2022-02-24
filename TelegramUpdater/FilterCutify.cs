@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TelegramUpdater.Filters;
+using TelegramUpdater.Helpers;
 
 namespace TelegramUpdater
 {
@@ -115,5 +116,13 @@ namespace TelegramUpdater
         /// </summary>
         public static Filter<Message> Video()
             => NotNullFilter<Message, Video>(x => x.Video);
+
+        /// <summary>
+        /// Filter <see cref="Message"/>s by <see cref="ChatTypeFlags"/> ( flags version of <see cref="ChatType"/> ).
+        /// </summary>
+        /// <param name="chatTypeFlags">Chat type flags.</param>
+        /// <returns></returns>
+        public static Filter<Message> InChatType(ChatTypeFlags chatTypeFlags)
+            => new Filter<Message>(x => x.Chat.Type.IsCorrect(chatTypeFlags));
     }
 }

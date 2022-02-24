@@ -21,5 +21,29 @@ namespace TelegramUpdater.FilterAttributes
         /// Get the inner filter for type <paramref name="requestedType"/> if possible.
         /// </summary>
         protected internal abstract object GetFilterTypeOf(Type requestedType);
+
+        /// <summary>
+        /// Indicates how the filter is going to be appended to others.
+        /// </summary>
+        /// <remarks>
+        /// <list type="bullet">
+        /// <item>
+        /// <see langword="true"/>, to append as an <b>Or Filter</b>.
+        /// </item>
+        /// <item>
+        /// <see langword="false"/>, to append as an <b>And Filter</b>
+        /// </item>
+        /// </list>
+        /// Defaults to <see langword="false"/> to append as an <b>And Filter</b>.
+        /// </remarks>
+        public bool ApplyAsOr { get; set; } = false;
+
+        /// <summary>
+        /// Indicates if the filter should be reversed.
+        /// </summary>
+        /// <remarks>
+        /// Defaults to <see langword="false"/>.
+        /// </remarks>
+        public bool Reverse { get; set; } = false;
     }
 }
