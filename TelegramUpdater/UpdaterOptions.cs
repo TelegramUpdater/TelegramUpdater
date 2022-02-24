@@ -1,7 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using Telegram.Bot.Types.Enums;
 
 namespace TelegramUpdater
 {

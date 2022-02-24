@@ -1,9 +1,11 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using ConsoleApp;
 using Microsoft.Extensions.Logging;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TelegramUpdater;
 using TelegramUpdater.ExceptionHandlers;
+using TelegramUpdater.UpdateContainer;
 
 var updater = new UpdaterBuilder(
     "BOT_TOKEN")
@@ -31,7 +33,7 @@ var updater = new UpdaterBuilder(
         async container => await container.Response("Started!"),
         FilterCutify.OnCommand("start"))
 
-    .AddScopedMessage<MyScopedMessageHandler>(); // Scoped handler
+    .AddScopedHandler<MyScopedMessageHandler, Message>(); // Scoped handler
 
 
 // ---------- Start! ----------

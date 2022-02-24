@@ -1,8 +1,4 @@
-﻿using System;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-
-namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
+﻿namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
 {
     /// <summary>
     /// Builds containers for <see cref="IScopedUpdateHandler"/>s.

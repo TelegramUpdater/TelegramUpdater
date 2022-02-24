@@ -1,7 +1,4 @@
-﻿using System;
-using System.Reflection;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
+﻿using System.Reflection;
 using TelegramUpdater.FilterAttributes;
 
 namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
@@ -76,13 +73,25 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
                 var f = (Filter<T>?)item.GetFilterTypeOf(typeof(T));
                 if (f != null)
                 {
+                    if (item.Reverse)
+                    {
+                        f = ~f; // Reverse the filter.
+                    }
+
                     if (filter == null)
                     {
                         filter = f;
                     }
                     else
                     {
-                        filter &= f;
+                        if (item.ApplyAsOr)
+                        {
+                            filter |= f;
+                        }
+                        else
+                        {
+                            filter &= f;
+                        }
                     }
                 }
             }

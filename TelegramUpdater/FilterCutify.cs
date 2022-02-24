@@ -1,7 +1,6 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using Telegram.Bot.Types;
+﻿using System.Text.RegularExpressions;
 using TelegramUpdater.Filters;
+using TelegramUpdater.Helpers;
 
 namespace TelegramUpdater
 {
@@ -13,13 +12,13 @@ namespace TelegramUpdater
         /// <summary>
         /// The handler will always be triggered on specified update type of <typeparamref name="T"/>
         /// </summary>
-        public static Filter<T> Always<T>() => new Filter<T>((_) => true);
+        public static Filter<T> Always<T>() => new((_) => true);
 
         /// <summary>
         /// The handler will be triggered when <paramref name="func"/> returns true
         /// on specified update type of <typeparamref name="T"/>
         /// </summary>
-        public static Filter<T> When<T>(Func<T, bool> func) => new Filter<T>(func);
+        public static Filter<T> When<T>(Func<T, bool> func) => new(func);
 
         /// <summary>
         /// The handler will be triggered when <paramref name="func"/> passes
@@ -59,6 +58,12 @@ namespace TelegramUpdater
         public static Filter<Message> PM() => new PrivateMessageFilter();
 
         /// <summary>
+        /// Filter messages from <see cref="ChatType.Group"/> and <see cref="ChatType.Supergroup"/>.
+        /// </summary>
+        /// <returns></returns>
+        public static Filter<Message> Group() => InChatType(ChatTypeFlags.Group | ChatTypeFlags.SuperGroup);
+
+        /// <summary>
         /// A message comes only from specified user(s) is <paramref name="users"/>
         /// </summary>
         public static Filter<Message> MsgOfUsers(params long[] users)
@@ -81,14 +86,12 @@ namespace TelegramUpdater
         /// <param name="selector">Function to select a property out of <typeparamref name="T"/></param>
         /// <returns></returns>
         public static Filter<K> NotNullFilter<K, T>(Func<K, T?> selector)
-            where T : class
-            => new Filter<K>(x => selector(x) != null);
+            where T : class => new(x => selector(x) != null);
 
         /// <summary>
         /// Filters text messages.
         /// </summary>
-        public static Filter<Message> Text()
-            => NotNullFilter<Message, string>(x => x.Text);
+        public static Filter<Message> Text() => MessageTypeOf(MessageType.Text);
 
         /// <summary>
         /// Filters messages with caption.
@@ -99,13 +102,28 @@ namespace TelegramUpdater
         /// <summary>
         /// Filters photo messages.
         /// </summary>
-        public static Filter<Message> Photo()
-            => NotNullFilter<Message, PhotoSize[]>(x => x.Photo);
+        public static Filter<Message> Photo() => MessageTypeOf(MessageType.Photo);
 
         /// <summary>
         /// Filters video messages.
         /// </summary>
-        public static Filter<Message> Video()
-            => NotNullFilter<Message, Video>(x => x.Video);
+        public static Filter<Message> Video() => MessageTypeOf(MessageType.Video);
+
+        /// <summary>
+        /// Filter <see cref="Message"/>s by <see cref="ChatTypeFlags"/> ( flags version of <see cref="ChatType"/> ).
+        /// </summary>
+        /// <param name="chatTypeFlags">Chat type flags.</param>
+        /// <returns></returns>
+        public static Filter<Message> InChatType(ChatTypeFlags chatTypeFlags)
+            => new(x => x.Chat.Type.IsCorrect(chatTypeFlags));
+
+        /// <summary>
+        /// Filter messages of type <paramref name="messageType"/>.
+        /// </summary>
+        /// <param name="messageType">Type of the message - text, video ...</param>
+        /// <returns></returns>
+        public static Filter<Message> MessageTypeOf(MessageType messageType)
+            => new(x => x.Type == messageType);
+
     }
 }

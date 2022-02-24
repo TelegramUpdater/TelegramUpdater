@@ -1,7 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 using TelegramUpdater.UpdateHandlers.ScopedHandlers;
 
 namespace TelegramUpdater;

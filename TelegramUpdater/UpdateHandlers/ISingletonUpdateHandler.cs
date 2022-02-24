@@ -1,7 +1,4 @@
-﻿using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-
-namespace TelegramUpdater.UpdateHandlers
+﻿namespace TelegramUpdater.UpdateHandlers
 {
     /// <summary>
     /// Interface for normal update handler ( known as singleton handlers )

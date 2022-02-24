@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using TelegramUpdater.UpdateHandlers;
+﻿using TelegramUpdater.UpdateHandlers;
 
 namespace TelegramUpdater.ExceptionHandlers
 {

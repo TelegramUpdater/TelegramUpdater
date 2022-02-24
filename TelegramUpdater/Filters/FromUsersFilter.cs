@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using Telegram.Bot.Types;
-
-namespace TelegramUpdater.Filters
+﻿namespace TelegramUpdater.Filters
 {
     internal class FromUsersFilter<T> : Filter<T>
     {

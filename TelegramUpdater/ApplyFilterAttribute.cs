@@ -1,5 +1,4 @@
-﻿using System;
-using TelegramUpdater.FilterAttributes;
+﻿using TelegramUpdater.FilterAttributes;
 
 namespace TelegramUpdater
 {

@@ -1,7 +1,4 @@
-﻿using System;
-using Telegram.Bot.Types;
-
-namespace TelegramUpdater.Filters
+﻿namespace TelegramUpdater.Filters
 {
     /// <summary>
     /// A filter on <see cref="Message.Text"/>

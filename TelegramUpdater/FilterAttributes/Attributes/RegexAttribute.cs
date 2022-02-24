@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using Telegram.Bot.Types;
+﻿using System.Text.RegularExpressions;
 using TelegramUpdater.Filters;
 
 namespace TelegramUpdater.FilterAttributes.Attributes

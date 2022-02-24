@@ -1,12 +1,24 @@
-﻿using System;
-
-namespace TelegramUpdater
+﻿namespace TelegramUpdater
 {
+    /// <summary>
+    /// Base interface for filters.
+    /// </summary>
+    /// <typeparam name="T">A type that filter will apply to.</typeparam>
+    public interface IFilter<T>
+    {
+        /// <summary>
+        /// Indicates if an input of type <typeparamref name="T"/> can pass this filter
+        /// </summary>
+        /// <param name="input">The input value to check</param>
+        /// <returns></returns>
+        public bool TheyShellPass(T input);
+    }
+
     /// <summary>
     /// A simple basic filter
     /// </summary>
     /// <typeparam name="T">Object type that filter is gonna apply to</typeparam>
-    public class Filter<T>
+    public class Filter<T> : IFilter<T>
     {
         private readonly Func<T, bool> _filter;
 
@@ -118,5 +130,67 @@ namespace TelegramUpdater
         public ReverseFilter(Filter<T> filter1)
             : base(x => !filter1.TheyShellPass(x))
         { }
+    }
+
+    /// <summary>
+    /// Extension methods for filters
+    /// </summary>
+    public static class FiltersExtensions
+    {
+        /// <summary>
+        /// Checks if <paramref name="type"/> is an filter.
+        /// </summary>
+        /// <param name="type">Type of your filter.</param>
+        /// <returns></returns>
+        public static bool IsFilter(this Type type)
+        {
+            return type.GetInterfaces().Any(x =>
+              x.IsGenericType &&
+              x.GetGenericTypeDefinition() == typeof(IFilter<>));
+        }
+
+        /// <summary>
+        /// Checks if <paramref name="filterType"/> is an filter for <paramref name="genericType"/>.
+        /// </summary>
+        /// <param name="filterType">Type of your filter.</param>
+        /// <param name="genericType">The type which filter applied on.</param>
+        public static bool IsFilterOfType(this Type filterType, Type genericType)
+        {
+            return filterType.GetInterfaces().Any(x =>
+            {
+                if (x.IsGenericType)
+                {
+                    var f = x.GetGenericTypeDefinition();
+                    if (f == typeof(IFilter<>))
+                    {
+                        return x.GetGenericArguments()[0] == genericType;
+                    }
+                }
+
+                return false;
+            });
+        }
+
+        /// <summary>
+        /// Checks if <paramref name="filterType"/> is an filter for <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type which filter applied on.</typeparam>
+        /// <param name="filterType">Type of your filter.</param>
+        public static bool IsFilterOfType<T>(this Type filterType)
+        {
+            return filterType.GetInterfaces().Any(x =>
+            {
+                if (x.IsGenericType)
+                {
+                    var f = x.GetGenericTypeDefinition();
+                    if (f == typeof(IFilter<>))
+                    {
+                        return x.GetGenericArguments()[0] == typeof(T);
+                    }
+                }
+
+                return false;
+            });
+        }
     }
 }

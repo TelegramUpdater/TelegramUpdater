@@ -4,6 +4,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TelegramUpdater;
 using TelegramUpdater.ExceptionHandlers;
+using TelegramUpdater.UpdateContainer;
 using UpdaterProduction;
 
 
@@ -34,7 +35,7 @@ var updater = new UpdaterBuilder(
         async container => await container.Response("Started!"),
         FilterCutify.OnCommand("start"))
 
-    .AddScopedMessage<MyScopedMessageHandler>()
+    .AddScopedHandler<MyScopedMessageHandler, Message>()
 
     .AddScopedHandler<Message>(typeof(AboutMessageHandler)); // Other way
                                                              // Can be done with: updater.AddScopedMessage<AboutMessageHandler>();

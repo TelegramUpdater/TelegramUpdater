@@ -1,13 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.RainbowUtlities;
 using TelegramUpdater.UpdateHandlers;
@@ -19,13 +11,14 @@ namespace TelegramUpdater
     /// <summary>
     /// Fetch updates from telegram and handle them.
     /// </summary>
-    public class Updater : IUpdater
+    public sealed class Updater : IUpdater
     {
         private readonly ITelegramBotClient _botClient;
         private readonly List<ISingletonUpdateHandler> _updateHandlers;
         private readonly List<IScopedHandlerContainer> _scopedHandlerContainers;
         private readonly List<IExceptionHandler> _exceptionHandlers;
         private readonly ILogger<IUpdater> _logger;
+        Func<IUpdater, ShiningInfo<long, Update>, Task<bool>>? _preProcess;
         private UpdaterOptions _updaterOptions;
         private User? _me = null;
 
@@ -45,14 +38,24 @@ namespace TelegramUpdater
         /// </summary>
         /// <param name="botClient">Telegram bot client</param>
         /// <param name="updaterOptions">Options for this updater.</param>
-        /// <param name="serviceDescriptors">Optional service provider.</param>
+        /// <param name="serviceDescriptors">Optional service provider.</param>t
+        /// <param name="preProcess">
+        /// A callback function that will be called every time an update comes from writer.
+        /// It's at the start of processing update.
+        /// <para>
+        /// If this callback func is available ( not <see langword="null"/> ) and it returns <see langword="false"/>,
+        /// Then <b>the update will not being processed.</b>
+        /// </para>
+        /// </param>
         public Updater(
             ITelegramBotClient botClient,
             UpdaterOptions updaterOptions = default,
-            IServiceProvider? serviceDescriptors = default)
+            IServiceProvider? serviceDescriptors = default,
+            Func<IUpdater, ShiningInfo<long, Update>, Task<bool>>? preProcess = default)
         {
             _botClient = botClient ?? throw new ArgumentNullException(nameof(botClient));
             _updaterOptions = updaterOptions;
+            _preProcess = preProcess;
 
             _serviceDescriptors = serviceDescriptors;
 
@@ -61,7 +64,7 @@ namespace TelegramUpdater
             _scopedHandlerContainers = new List<IScopedHandlerContainer>();
 
             _rainbow = new Rainbow<long, Update>(
-                updaterOptions.MaxDegreeOfParallelism?? Environment.ProcessorCount,
+                updaterOptions.MaxDegreeOfParallelism ?? Environment.ProcessorCount,
                 x => x.GetSenderId() ?? 0,
                 ShineCallback, ShineErrors);
 
@@ -132,7 +135,7 @@ namespace TelegramUpdater
 
         /// <inheritdoc/>
         public async Task StartAsync<TWriter>(CancellationToken cancellationToken = default)
-            where TWriter: UpdateWriterAbs, new()
+            where TWriter : UpdateWriterAbs, new()
         {
             if (cancellationToken == default)
             {
@@ -151,7 +154,7 @@ namespace TelegramUpdater
                     DetectAllowedUpdates()); // Auto detect allowed updates
 
                 _logger.LogInformation("Detected allowed updates automatically {allowed}",
-                    string.Join(", ", AllowedUpdates.Select(x=> x.ToString())));
+                    string.Join(", ", AllowedUpdates.Select(x => x.ToString())));
             }
 
             // Link tokens. so we can use _emergencyCancel when required.
@@ -202,6 +205,15 @@ namespace TelegramUpdater
             if (shiningInfo == null)
                 return;
 
+            if (_preProcess != null)
+            {
+                if (!await _preProcess(this, shiningInfo))
+                {
+                    // Skip
+                    return;
+                }
+            }
+
             if (_serviceDescriptors != null)
             {
                 await ProcessUpdateFromServices(shiningInfo, cancellationToken);
@@ -230,7 +242,7 @@ namespace TelegramUpdater
                     .Where(x => x.ShouldHandle(shiningInfo.Value));
 
                 if (!scopedHandlers.Any())
-                { 
+                {
                     return;
                 }
 

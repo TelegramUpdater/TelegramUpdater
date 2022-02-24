@@ -1,8 +1,4 @@
-﻿using System;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-
-namespace TelegramUpdater.UpdateChannels.SealedChannels
+﻿namespace TelegramUpdater.UpdateChannels.SealedChannels
 {
     /// <summary>
     /// A channel for <see cref="Update.CallbackQuery"/>.

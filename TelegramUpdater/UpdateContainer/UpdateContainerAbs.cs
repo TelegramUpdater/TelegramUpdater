@@ -1,7 +1,4 @@
-﻿using System;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using TelegramUpdater.RainbowUtlities;
+﻿using TelegramUpdater.RainbowUtlities;
 
 namespace TelegramUpdater.UpdateContainer
 {
@@ -53,7 +50,7 @@ namespace TelegramUpdater.UpdateContainer
                 return inner;
             }
         }
-  
+
         /// <inheritdoc/>
         public virtual Update Container { get; }
 
