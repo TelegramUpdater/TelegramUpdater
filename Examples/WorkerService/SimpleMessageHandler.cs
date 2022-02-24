@@ -1,37 +1,28 @@
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
-using TelegramUpdater;
+using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse;
 
-namespace WorkerService
+namespace WorkerService;
+
+[Command("hello"), Private]
+public class SimpleMessageHandler : ScopedMessageHandler
 {
-    [ApplyFilter(typeof(PrivateHelloCommand))]
-    public class SimpleMessageHandler : ScopedMessageHandler
+    protected override async Task HandleAsync(IContainer<Message> container)
     {
-        protected override async Task HandleAsync(IContainer<Message> container)
-        {
-            var msg = await container.Response($"Are you ok? answer quick!",
-                replyMarkup: new InlineKeyboardMarkup(
-                    InlineKeyboardButton.WithCallbackData("Yes i'm OK!", "ok")));
+        var msg = await container.Response($"Are you ok? answer quick!",
+            replyMarkup: new InlineKeyboardMarkup(
+                InlineKeyboardButton.WithCallbackData("Yes i'm OK!", "ok")));
 
-            await container.ChannelUserClick(TimeSpan.FromSeconds(5), "ok")
-                .IfNotNull(async answer =>
-                {
-                    await answer.Edit(text: "Well ...");
-                })
-                .Else(async _ =>
-                {
-                    await container.Response("Slow", sendAsReply: false);
-                });
-        }
-    }
-
-    internal class PrivateHelloCommand : Filter<Message>
-    {
-        public PrivateHelloCommand()
-            : base(FilterCutify.OnCommand("hello") & FilterCutify.PM())
-        {
-        }
+        await container.ChannelUserClick(TimeSpan.FromSeconds(5), "ok")
+            .IfNotNull(async answer =>
+            {
+                await answer.Edit(text: "Well ...");
+            })
+            .Else(async _ =>
+            {
+                await container.Response("Slow", sendAsReply: false);
+            });
     }
 }

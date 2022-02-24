@@ -1,11 +1,12 @@
 ﻿using Telegram.Bot.Types;
-using TelegramUpdater;
+using TelegramUpdater.FilterAttributes.Attributes;
+using TelegramUpdater.Helpers;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse;
 
 namespace ConsoleApp;
 
-[ApplyFilter(typeof(PrivateTestCommand))]
+[Command("test"), ChatType(ChatTypeFlags.Private)]
 internal class MyScopedMessageHandler : ScopedMessageHandler
 {
     public MyScopedMessageHandler() : base(group: 0)
@@ -14,13 +15,5 @@ internal class MyScopedMessageHandler : ScopedMessageHandler
     protected override async Task HandleAsync(IContainer<Message> container)
     {
         await container.Response("Tested!");
-    }
-}
-
-internal class PrivateTestCommand : Filter<Message>
-{
-    public PrivateTestCommand()
-        : base(FilterCutify.OnCommand("test") & FilterCutify.PM())
-    {
     }
 }

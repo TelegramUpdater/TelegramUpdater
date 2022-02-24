@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="TelegramUpdater" Version="1.1.10-alpha" />
+    <PackageReference Include="TelegramUpdater" Version="1.2.2-alpha" />
   </ItemGroup>
 
 </Project>
