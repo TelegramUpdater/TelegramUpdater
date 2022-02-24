@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using TelegramUpdater.Filters;
 
 namespace TelegramUpdater
@@ -57,6 +58,13 @@ namespace TelegramUpdater
         /// The handler will be triggered when a message sent in private chat
         /// </summary>
         public static Filter<Message> PM() => new PrivateMessageFilter();
+
+        /// <summary>
+        /// Filter messages from <see cref="ChatType.Group"/> and <see cref="ChatType.Supergroup"/>.
+        /// </summary>
+        /// <returns></returns>
+        public static Filter<Message> Group() => new Filter<Message>(
+            x => x.Chat.Type == ChatType.Group || x.Chat.Type == ChatType.Supergroup);
 
         /// <summary>
         /// A message comes only from specified user(s) is <paramref name="users"/>

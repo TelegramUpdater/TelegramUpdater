@@ -7,7 +7,7 @@ namespace TelegramUpdater.FilterAttributes.Attributes
     /// <summary>
     /// An attribute for <see cref="CommandFilter"/>. Works only on <see cref="Message"/> handlers.
     /// </summary>
-    public class CommandAttribute : AbstractFilterAttribute
+    public sealed class CommandAttribute : AbstractFilterAttribute
     {
         /// <summary>
         /// Filters messages with specified command

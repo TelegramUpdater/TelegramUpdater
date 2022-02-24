@@ -94,5 +94,71 @@ namespace TelegramUpdaterTests
 
             Assert.False(filter_2.TheyShellPass(0));
         }
+
+        [Fact]
+        public void IsFilterTest_1()
+        {
+            var filter = new Filter<int>(x => false) | new Filter<int>(x => false);
+
+            var isFilter = filter.GetType().IsFilter();
+            Assert.True(isFilter);
+        }
+
+        [Fact]
+        public void IsFilterTest_2()
+        {
+            var filter = new Filter<int>(x => false);
+
+            var isFilter = filter.GetType().IsFilter();
+            Assert.True(isFilter);
+        }
+
+        class MyFilter : Filter<int>
+        {
+            public MyFilter() : base(x=> x == 10)
+            {
+            }
+        }
+
+        [Fact]
+        public void IsFilterTest_3()
+        {
+            var isFilter = typeof(MyFilter).IsFilter();
+            Assert.True(isFilter);
+        }
+
+        [Fact]
+        public void IsFilterTest_4()
+        {
+            var myFilter = new MyFilter();
+
+            var isFilter = myFilter.GetType().IsFilter();
+            Assert.True(isFilter);
+        }
+
+        [Fact]
+        public void IsFilterOfTypeTest_1()
+        {
+            var filter = new Filter<int>(x => false);
+
+            var isFilter = filter.GetType().IsFilterOfType(typeof(int));
+            Assert.True(isFilter);
+        }
+
+        [Fact]
+        public void IsFilterOfTypeTest_2()
+        {
+            var filter = new Filter<int>(x => false) | new Filter<int>(x => false);
+
+            var isFilter = filter.GetType().IsFilterOfType(typeof(int));
+            Assert.True(isFilter);
+        }
+
+        [Fact]
+        public void IsFilterOfTypeTest_3()
+        {
+            var isFilter = typeof(MyFilter).IsFilterOfType(typeof(int));
+            Assert.True(isFilter);
+        }
     }
 }
