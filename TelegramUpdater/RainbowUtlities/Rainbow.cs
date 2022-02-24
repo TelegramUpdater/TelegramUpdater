@@ -1,13 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Channels;
-using System.Threading.Tasks;
 
 namespace TelegramUpdater.RainbowUtlities
 {
@@ -499,7 +494,7 @@ namespace TelegramUpdater.RainbowUtlities
                         }
                     }
                 }
-                catch(OperationCanceledException)
+                catch (OperationCanceledException)
                 {
                     if (timeOutCts.IsCancellationRequested)
                     {
@@ -510,7 +505,7 @@ namespace TelegramUpdater.RainbowUtlities
 
                     throw;
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     _logger.LogError(exception: e, "Error while handlig waiting list.");
                 }

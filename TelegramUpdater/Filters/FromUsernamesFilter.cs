@@ -1,10 +1,6 @@
-﻿using System;
-using System.Linq;
-using Telegram.Bot.Types;
-
-namespace TelegramUpdater.Filters
+﻿namespace TelegramUpdater.Filters
 {
-    internal class FromUsernamesFilter<T> : Filter<T> where T: class
+    internal class FromUsernamesFilter<T> : Filter<T> where T : class
     {
         internal FromUsernamesFilter(
             Func<T, string?> usernameSelector, params string[] usernames)

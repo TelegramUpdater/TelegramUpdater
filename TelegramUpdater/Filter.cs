@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace TelegramUpdater
+﻿namespace TelegramUpdater
 {
     /// <summary>
     /// Base interface for filters.
@@ -21,7 +18,7 @@ namespace TelegramUpdater
     /// A simple basic filter
     /// </summary>
     /// <typeparam name="T">Object type that filter is gonna apply to</typeparam>
-    public class Filter<T>: IFilter<T>
+    public class Filter<T> : IFilter<T>
     {
         private readonly Func<T, bool> _filter;
 

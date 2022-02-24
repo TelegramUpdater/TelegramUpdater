@@ -1,10 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers;

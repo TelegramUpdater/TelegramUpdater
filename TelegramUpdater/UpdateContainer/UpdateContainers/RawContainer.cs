@@ -1,6 +1,4 @@
-﻿using Telegram.Bot;
-using Telegram.Bot.Types;
-using TelegramUpdater.RainbowUtlities;
+﻿using TelegramUpdater.RainbowUtlities;
 
 namespace TelegramUpdater.UpdateContainer.UpdateContainers
 {

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
-using Telegram.Bot.Types;
 using TelegramUpdater.RainbowUtlities;
 
 namespace TelegramUpdater.UpdateContainer.UpdateContainers
@@ -43,9 +41,9 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers
         }
 
         internal static IContainer<Message> MessageLiteContainer(Message update, IUpdater updater)
-            => CreateLiteContainer(x=> x.Message, update, updater);
+            => CreateLiteContainer(x => x.Message, update, updater);
 
         internal static IContainer<CallbackQuery> CallbackQueryLiteContainer(CallbackQuery update, IUpdater updater)
-            => CreateLiteContainer(x=> x.CallbackQuery, update, updater);
+            => CreateLiteContainer(x => x.CallbackQuery, update, updater);
     }
 }

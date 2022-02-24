@@ -1,6 +1,4 @@
-﻿using System;
-using Telegram.Bot.Types;
-using TelegramUpdater.Filters;
+﻿using TelegramUpdater.Filters;
 
 namespace TelegramUpdater.FilterAttributes.Attributes
 {

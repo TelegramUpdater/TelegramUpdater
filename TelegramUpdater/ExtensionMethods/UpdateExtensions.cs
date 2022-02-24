@@ -1,6 +1,4 @@
-﻿using Telegram.Bot.Types;
-
-namespace TelegramUpdater;
+﻿namespace TelegramUpdater;
 
 public static class UpdateExtensions
 {

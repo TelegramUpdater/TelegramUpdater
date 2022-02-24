@@ -1,8 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using Telegram.Bot.Types;
+﻿using System.Text.RegularExpressions;
 using TelegramUpdater.RainbowUtlities;
 using TelegramUpdater.UpdateChannels;
 using TelegramUpdater.UpdateChannels.SealedChannels;

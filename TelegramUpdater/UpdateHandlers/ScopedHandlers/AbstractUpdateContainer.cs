@@ -1,7 +1,4 @@
-﻿using System;
-using System.Reflection;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
+﻿using System.Reflection;
 using TelegramUpdater.FilterAttributes;
 
 namespace TelegramUpdater.UpdateHandlers.ScopedHandlers

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using TelegramUpdater.UpdateContainer;
+﻿using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers.SealedHandlers;
 
 namespace TelegramUpdater;

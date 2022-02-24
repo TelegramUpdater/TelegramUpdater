@@ -1,7 +1,4 @@
-﻿using System;
-using Telegram.Bot.Types.Enums;
-
-namespace TelegramUpdater.Helpers
+﻿namespace TelegramUpdater.Helpers
 {
     /// <summary>
     /// Flags shadow for <see cref="ChatType"/>.

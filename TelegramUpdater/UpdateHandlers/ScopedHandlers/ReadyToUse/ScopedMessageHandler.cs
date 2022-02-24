@@ -1,6 +1,4 @@
-﻿using Telegram.Bot.Types;
-
-namespace TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse
+﻿namespace TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse
 {
     /// <summary>
     /// Abstarct <see cref="IScopedUpdateHandler"/> for <see cref="Update.Message"/>.

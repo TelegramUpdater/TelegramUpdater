@@ -1,6 +1,4 @@
-﻿using Telegram.Bot.Types;
-
-namespace TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse
+﻿namespace TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse
 {
     public abstract class ScopedInlineQueryHandler : AnyScopedHandler<InlineQuery>
     {

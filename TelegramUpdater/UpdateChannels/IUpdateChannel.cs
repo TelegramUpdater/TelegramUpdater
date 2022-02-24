@@ -1,8 +1,4 @@
-﻿using System;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-
-namespace TelegramUpdater.UpdateChannels
+﻿namespace TelegramUpdater.UpdateChannels
 {
     /// <summary>
     /// Base interface for channels.

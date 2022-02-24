@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-
-namespace TelegramUpdater.FilterAttributes
+﻿namespace TelegramUpdater.FilterAttributes
 {
     /// <summary>
     /// Using this class you can build filter attributes which can be cross update type.

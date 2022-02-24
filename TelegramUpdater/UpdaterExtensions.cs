@@ -1,8 +1,4 @@
-﻿using System;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-
-namespace TelegramUpdater
+﻿namespace TelegramUpdater
 {
     public static class UpdaterExtensions
     {

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TelegramUpdater.FilterAttributes
+﻿namespace TelegramUpdater.FilterAttributes
 {
     /// <summary>
     /// Abstract base for filter attributes.

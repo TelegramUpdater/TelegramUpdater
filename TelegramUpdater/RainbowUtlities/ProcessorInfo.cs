@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace TelegramUpdater.RainbowUtlities
+﻿namespace TelegramUpdater.RainbowUtlities
 {
     /// <summary>
     /// Provides information about a process in <see cref="Rainbow{TId, TValue}"/>
