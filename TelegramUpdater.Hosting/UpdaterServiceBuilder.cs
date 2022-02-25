@@ -108,31 +108,6 @@ namespace TelegramUpdater.Hosting
                 }
             }
 
-            var _h = typeof(THandler);
-
-            if (filter == null)
-            {
-                // If no filter passed as method args the look at attributes
-                // Attribute filters are all combined using & operator.
-
-                var applied = _h.GetCustomAttributes(typeof(ApplyFilterAttribute), false);
-                foreach (ApplyFilterAttribute item in applied)
-                {
-                    var f = (Filter<TUpdate>?)Activator.CreateInstance(item.FilterType);
-                    if (f != null)
-                    {
-                        if (filter == null)
-                        {
-                            filter = f;
-                        }
-                        else
-                        {
-                            filter &= f;
-                        }
-                    }
-                }
-            }
-
             return AddHandler(new UpdateContainerBuilder<THandler, TUpdate>(
                     updateType.Value, filter, getT));
         }
@@ -169,29 +144,6 @@ namespace TelegramUpdater.Hosting
                 else
                 {
                     throw new InvalidCastException($"{_t} is not an Update! Should be Message, CallbackQuery, ...");
-                }
-            }
-
-            if (filter == null)
-            {
-                // If no filter passed as method args the look at attributes
-                // Attribute filters are all combined using & operator.
-
-                var applied = typeOfScopedHandler.GetCustomAttributes(typeof(ApplyFilterAttribute), false);
-                foreach (ApplyFilterAttribute item in applied)
-                {
-                    var f = (Filter<TUpdate>?)Activator.CreateInstance(item.FilterType);
-                    if (f != null)
-                    {
-                        if (filter == null)
-                        {
-                            filter = f;
-                        }
-                        else
-                        {
-                            filter &= f;
-                        }
-                    }
                 }
             }
 

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using TelegramUpdater.Asp.Services;
 using TelegramUpdater.Hosting;
+using TelegramUpdater.RainbowUtlities;
 
 namespace TelegramUpdater.Asp
 {
@@ -18,14 +19,19 @@ namespace TelegramUpdater.Asp
         /// Use this in you webhook app if you wanna write updates from webhook controller,
         /// Using <see cref="WriteUpdateFromWebhook(IUpdater, Update, CancellationToken)"/>
         /// </summary>
+        /// <remarks>Don't add <see cref="ITelegramBotClient"/> to services manually.</remarks>
         /// <param name="serviceDescriptors"></param>
         /// <param name="configs"></param>
         /// <param name="builder"></param>
-        public static void AddTelegramManualUpdater(this IServiceCollection serviceDescriptors,
+        public static void AddTelegramWebhookUpdater(this IServiceCollection serviceDescriptors,
                                                     UpdaterConfigs configs,
-                                                    Action<UpdaterServiceBuilder> builder)
+                                                    Action<UpdaterServiceBuilder> builder,
+                                                    Type? preUpdateProcessorType = default)
         {
-            serviceDescriptors.AddTelegramManualUpdater(configs, builder);
+            serviceDescriptors.AddTelegramManualUpdater(
+                configs.BotToken?? throw new ArgumentException("BotToken in configs is null!"),
+                new UpdaterOptions(configs.MaxDegreeOfParallelism),
+                builder, preUpdateProcessorType);
         }
 
         /// <summary>
