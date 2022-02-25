@@ -33,14 +33,18 @@ namespace TelegramUpdater.Hosting
         /// <remarks>
         /// This method will also adds <see cref="ITelegramBotClient"/> to the service collection as Singleton.
         /// If you already did that, Pass an instance of <see cref="ITelegramBotClient"/> instead of <paramref name="botToken"/>.
+        /// <para>
+        /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
+        /// </para>
         /// </remarks>
         /// <param name="botToken">Your bot api token.</param>
         /// <param name="updaterOptions">Updater options.</param>
         /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="UpdateWriterServiceAbs"/></typeparam>
         public static void AddTelegramUpdater<TWriter>(this IServiceCollection serviceDescriptors,
-                                                 string botToken,
-                                                 UpdaterOptions updaterOptions,
-                                                 Action<UpdaterServiceBuilder> builder)
+                                                       string botToken,
+                                                       UpdaterOptions updaterOptions,
+                                                       Action<UpdaterServiceBuilder> builder,
+                                                       Type? preUpdateProcessorType = default)
             where TWriter : UpdateWriterServiceAbs
         {
             serviceDescriptors.AddTelegramBotClient(botToken);
@@ -60,12 +64,16 @@ namespace TelegramUpdater.Hosting
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
                         updaterOptions.AllowedUpdates
-                     ), services);
+                     ), services, preUpdateProcessorType);
 
                     updaterBuilder.AddToUpdater(updater);
                     return updater;
                 });
 
+            if (preUpdateProcessorType is not null)
+            {
+                serviceDescriptors.AddScoped(preUpdateProcessorType);
+            }
             serviceDescriptors.AddHostedService<TWriter>();
         }
 
@@ -77,13 +85,17 @@ namespace TelegramUpdater.Hosting
         /// This method adds updater and handlers to the <see cref="IServiceCollection"/>,
         /// But not <paramref name="telegramBot"/>! and you should do it yourself.
         /// <para>You better pass botToken as <see cref="string"/></para>
+        /// <para>
+        /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
+        /// </para>
         /// </remarks>
         /// <param name="telegramBot"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
         /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="UpdateWriterServiceAbs"/></typeparam>
         public static void AddTelegramUpdater<TWriter>(this IServiceCollection serviceDescriptors,
-                                                 ITelegramBotClient telegramBot,
-                                                 UpdaterOptions updaterOptions,
-                                                 Action<UpdaterServiceBuilder> builder)
+                                                       ITelegramBotClient telegramBot,
+                                                       UpdaterOptions updaterOptions,
+                                                       Action<UpdaterServiceBuilder> builder,
+                                                       Type? preUpdateProcessorType = default)
             where TWriter : UpdateWriterServiceAbs
         {
             var updaterBuilder = new UpdaterServiceBuilder();
@@ -100,12 +112,16 @@ namespace TelegramUpdater.Hosting
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
                         updaterOptions.AllowedUpdates
-                     ), services);
+                     ), services, preUpdateProcessorType);
 
                     updaterBuilder.AddToUpdater(updater);
                     return updater;
                 });
 
+            if (preUpdateProcessorType is not null)
+            {
+                serviceDescriptors.AddScoped(preUpdateProcessorType);
+            }
             serviceDescriptors.AddHostedService<TWriter>();
         }
 
@@ -113,25 +129,91 @@ namespace TelegramUpdater.Hosting
         /// Add telegram updater to the <see cref="IServiceCollection"/>.
         /// Using your custom update writer service.
         /// </summary>
-        /// <param name="configs">
-        /// You can use <see cref="AspExtensions.GetUpdaterConfigs(Microsoft.Extensions.Configuration.IConfiguration, string)"/>
-        /// to read configs from appsettings.json
-        /// </param>
-        /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="UpdateWriterServiceAbs"/></typeparam>
         /// <remarks>
-        /// Use updater configs only in webhook apps! Since it miss
-        /// <see cref="UpdaterOptions.AllowedUpdates"/> and <see cref="UpdaterOptions.FlushUpdatesQueue"/>.
-        /// If you wanna specify these and update writer is not an external webhook use <see cref="UpdaterOptions"/>.
+        /// This method adds updater and handlers to the <see cref="IServiceCollection"/>.
+        /// <para>This method gets <see cref="ITelegramBotClient"/> from services.</para>
+        /// <para>
+        /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
+        /// </para>
         /// </remarks>
+        /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="UpdateWriterServiceAbs"/></typeparam>
         public static void AddTelegramUpdater<TWriter>(this IServiceCollection serviceDescriptors,
-                                                 UpdaterConfigs configs,
-                                                 Action<UpdaterServiceBuilder> builder)
+                                                       UpdaterOptions updaterOptions,
+                                                       Action<UpdaterServiceBuilder> builder,
+                                                       Type? preUpdateProcessorType = default)
             where TWriter : UpdateWriterServiceAbs
         {
-            serviceDescriptors.AddTelegramUpdater<TWriter>(
-                configs.BotToken ?? throw new NullReferenceException("Bot token can't be null"),
-                new UpdaterOptions(maxDegreeOfParallelism: configs.MaxDegreeOfParallelism),
-                builder);
+            var updaterBuilder = new UpdaterServiceBuilder();
+            builder(updaterBuilder);
+
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
+
+            serviceDescriptors.AddSingleton<IUpdater>(
+                services =>
+                {
+                    var telegramBot = services.GetRequiredService<ITelegramBotClient>();
+
+                    var updater = new Updater(telegramBot, new UpdaterOptions(
+                        updaterOptions.MaxDegreeOfParallelism,
+                        logger: services.GetRequiredService<ILogger<IUpdater>>(),
+                        updaterOptions.CancellationToken,
+                        updaterOptions.FlushUpdatesQueue,
+                        updaterOptions.AllowedUpdates
+                     ), services, preUpdateProcessorType);
+
+                    updaterBuilder.AddToUpdater(updater);
+                    return updater;
+                });
+
+            if (preUpdateProcessorType is not null)
+            {
+                serviceDescriptors.AddScoped(preUpdateProcessorType);
+            }
+            serviceDescriptors.AddHostedService<TWriter>();
+        }
+
+        /// <summary>
+        /// Add telegram updater to the <see cref="IServiceCollection"/>.
+        /// Using your custom update writer service.
+        /// </summary>
+        /// <remarks>
+        /// This method adds updater and handlers to the <see cref="IServiceCollection"/>.
+        /// <para>This method gets <see cref="ITelegramBotClient"/> from services.</para>
+        /// <para>
+        /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
+        /// </para>
+        /// </remarks>
+        /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="UpdateWriterServiceAbs"/></typeparam>
+        public static void AddTelegramUpdater<TWriter>(this IServiceCollection serviceDescriptors,
+                                                       UpdaterConfigs updaterConfigs,
+                                                       Action<UpdaterServiceBuilder> builder,
+                                                       Type? preUpdateProcessorType = default)
+            where TWriter : UpdateWriterServiceAbs
+        {
+            var updaterBuilder = new UpdaterServiceBuilder();
+            builder(updaterBuilder);
+
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
+
+            serviceDescriptors.AddSingleton<IUpdater>(
+                services =>
+                {
+                    var telegramBot = services.GetRequiredService<ITelegramBotClient>();
+
+                    var updater = new Updater(telegramBot, new UpdaterOptions(
+                        updaterConfigs.MaxDegreeOfParallelism,
+                        logger: services.GetRequiredService<ILogger<IUpdater>>()
+                     ), services, preUpdateProcessorType);
+
+                    updaterBuilder.AddToUpdater(updater);
+                    return updater;
+                });
+
+            if (preUpdateProcessorType is not null)
+            {
+                serviceDescriptors.AddScoped(preUpdateProcessorType);
+            }
+            serviceDescriptors.AddHostedService<TWriter>();
         }
 
         /// <summary>
@@ -141,15 +223,20 @@ namespace TelegramUpdater.Hosting
         /// <remarks>
         /// This method will also adds <see cref="ITelegramBotClient"/> to the service collection as Singleton.
         /// If you already did that, Pass an instance of <see cref="ITelegramBotClient"/> instead of <paramref name="botToken"/>.
+        /// <para>
+        /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
+        /// </para>
         /// </remarks>
         /// <param name="botToken">Your bot api token.</param>
         /// <param name="updaterOptions">Updater options.</param>
         public static void AddTelegramUpdater(this IServiceCollection serviceDescriptors,
                                               string botToken,
                                               UpdaterOptions updaterOptions,
-                                              Action<UpdaterServiceBuilder> builder)
+                                              Action<UpdaterServiceBuilder> builder,
+                                              Type? preUpdateProcessorType = default)
         {
-            serviceDescriptors.AddTelegramUpdater<SimpleWriterService>(botToken, updaterOptions, builder);
+            serviceDescriptors.AddTelegramUpdater<SimpleWriterService>(
+                botToken, updaterOptions, builder, preUpdateProcessorType);
         }
 
         /// <summary>
@@ -164,12 +251,16 @@ namespace TelegramUpdater.Hosting
         /// Use updater configs only in webhook apps! Since it miss
         /// <see cref="UpdaterOptions.AllowedUpdates"/> and <see cref="UpdaterOptions.FlushUpdatesQueue"/>.
         /// If you wanna specify these and update writer is not an external webhook use <see cref="UpdaterOptions"/>.
+        /// <para>
+        /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
+        /// </para>
         /// </remarks>
         public static void AddTelegramUpdater(this IServiceCollection serviceDescriptors,
                                               UpdaterConfigs configs,
-                                              Action<UpdaterServiceBuilder> builder)
+                                              Action<UpdaterServiceBuilder> builder,
+                                              Type? preUpdateProcessorType = default)
         {
-            serviceDescriptors.AddTelegramUpdater<SimpleWriterService>(configs, builder);
+            serviceDescriptors.AddTelegramUpdater<SimpleWriterService>(configs, builder, preUpdateProcessorType);
         }
 
         /// <summary>
@@ -179,15 +270,19 @@ namespace TelegramUpdater.Hosting
         /// This method adds updater and handlers to the <see cref="IServiceCollection"/>,
         /// But not <paramref name="telegramBot"/>! and you should do it yourself.
         /// <para>You better pass botToken as <see cref="string"/></para>
+        /// <para>
+        /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
+        /// </para>
         /// </remarks>
         /// <param name="telegramBot"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
         public static void AddTelegramUpdater(this IServiceCollection serviceDescriptors,
                                               ITelegramBotClient telegramBot,
                                               UpdaterOptions updaterOptions,
-                                              Action<UpdaterServiceBuilder> builder)
+                                              Action<UpdaterServiceBuilder> builder,
+                                              Type? preUpdateProcessorType = default)
         {
             serviceDescriptors.AddTelegramUpdater<SimpleWriterService>(
-                telegramBot, updaterOptions, builder);
+                telegramBot, updaterOptions, builder, preUpdateProcessorType);
         }
 
         /// <summary>
@@ -198,12 +293,16 @@ namespace TelegramUpdater.Hosting
         /// This method adds updater and handlers to the <see cref="IServiceCollection"/>,
         /// But not <paramref name="telegramBot"/>! and you should do it yourself.
         /// <para>You better pass botToken as <see cref="string"/></para>
+        /// <para>
+        /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
+        /// </para>
         /// </remarks>
         /// <param name="telegramBot"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
         public static void AddTelegramManualUpdater(this IServiceCollection serviceDescriptors,
-                                                             ITelegramBotClient telegramBot,
-                                                             UpdaterOptions updaterOptions,
-                                                             Action<UpdaterServiceBuilder> builder)
+                                                    ITelegramBotClient telegramBot,
+                                                    UpdaterOptions updaterOptions,
+                                                    Action<UpdaterServiceBuilder> builder,
+                                                    Type? preUpdateProcessorType = default)
         {
             var updaterBuilder = new UpdaterServiceBuilder();
             builder(updaterBuilder);
@@ -219,11 +318,151 @@ namespace TelegramUpdater.Hosting
                         updaterOptions.CancellationToken,
                         updaterOptions.FlushUpdatesQueue,
                         updaterOptions.AllowedUpdates
-                     ), services);
+                     ), services, preUpdateProcessorType);
 
                     updaterBuilder.AddToUpdater(updater);
                     return updater;
                 });
+
+            if (preUpdateProcessorType is not null)
+            {
+                serviceDescriptors.AddScoped(preUpdateProcessorType);
+            }
+        }
+
+        /// <summary>
+        /// Add telegram updater to the <see cref="IServiceCollection"/>.
+        /// <b>Which the auto update writer is disabled!.</b>
+        /// </summary>
+        /// <remarks>
+        /// This method adds updater and handlers to the <see cref="IServiceCollection"/>,
+        /// <para>This method gets <see cref="ITelegramBotClient"/> from services.</para>
+        /// <para>
+        /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
+        /// </para>
+        /// </remarks>
+        /// <param name="telegramBot"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
+        public static void AddTelegramManualUpdater(this IServiceCollection serviceDescriptors,
+                                                    UpdaterOptions updaterOptions,
+                                                    Action<UpdaterServiceBuilder> builder,
+                                                    Type? preUpdateProcessorType = default)
+        {
+            var updaterBuilder = new UpdaterServiceBuilder();
+            builder(updaterBuilder);
+
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
+
+            serviceDescriptors.AddSingleton<IUpdater>(
+                services =>
+                {
+                    var telegramBot = services.GetRequiredService<ITelegramBotClient>();
+
+                    var updater = new Updater(telegramBot, new UpdaterOptions(
+                        updaterOptions.MaxDegreeOfParallelism,
+                        logger: services.GetRequiredService<ILogger<IUpdater>>(),
+                        updaterOptions.CancellationToken,
+                        updaterOptions.FlushUpdatesQueue,
+                        updaterOptions.AllowedUpdates
+                     ), services, preUpdateProcessorType);
+
+                    updaterBuilder.AddToUpdater(updater);
+                    return updater;
+                });
+
+            if (preUpdateProcessorType is not null)
+            {
+                serviceDescriptors.AddScoped(preUpdateProcessorType);
+            }
+        }
+
+        /// <summary>
+        /// Add telegram updater to the <see cref="IServiceCollection"/>.
+        /// <b>Which the auto update writer is disabled!.</b>
+        /// </summary>
+        /// <remarks>
+        /// This method adds updater and handlers to the <see cref="IServiceCollection"/>,
+        /// <para>This method gets <see cref="ITelegramBotClient"/> from services.</para>
+        /// <para>
+        /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
+        /// </para>
+        /// </remarks>
+        /// <param name="telegramBot"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
+        public static void AddTelegramManualUpdater(this IServiceCollection serviceDescriptors,
+                                                    UpdaterConfigs updaterConfigs,
+                                                    Action<UpdaterServiceBuilder> builder,
+                                                    Type? preUpdateProcessorType = default)
+        {
+            var updaterBuilder = new UpdaterServiceBuilder();
+            builder(updaterBuilder);
+
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
+
+            serviceDescriptors.AddSingleton<IUpdater>(
+                services =>
+                {
+                    var telegramBot = services.GetRequiredService<ITelegramBotClient>();
+
+                    var updater = new Updater(telegramBot, new UpdaterOptions(
+                        updaterConfigs.MaxDegreeOfParallelism,
+                        logger: services.GetRequiredService<ILogger<IUpdater>>()
+                     ), services, preUpdateProcessorType);
+
+                    updaterBuilder.AddToUpdater(updater);
+                    return updater;
+                });
+
+            if (preUpdateProcessorType is not null)
+            {
+                serviceDescriptors.AddScoped(preUpdateProcessorType);
+            }
+        }
+
+        /// <summary>
+        /// Add telegram updater to the <see cref="IServiceCollection"/>.
+        /// Using your custom update writer service.
+        /// </summary>
+        /// <remarks>
+        /// This method will also adds <see cref="ITelegramBotClient"/> to the service collection as Singleton.
+        /// <para>
+        /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
+        /// </para>
+        /// </remarks>
+        /// <param name="botToken">Your bot api token.</param>
+        /// <param name="updaterOptions">Updater options.</param>
+        /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="UpdateWriterServiceAbs"/></typeparam>
+        public static void AddTelegramManualUpdater(this IServiceCollection serviceDescriptors,
+                                                    string botToken,
+                                                    UpdaterOptions updaterOptions,
+                                                    Action<UpdaterServiceBuilder> builder,
+                                                    Type? preUpdateProcessorType = default)
+        {
+            serviceDescriptors.AddTelegramBotClient(botToken);
+
+            var updaterBuilder = new UpdaterServiceBuilder();
+            builder(updaterBuilder);
+
+            updaterBuilder.AddToServiceCollection(serviceDescriptors);
+
+            serviceDescriptors.AddSingleton<IUpdater>(
+                services =>
+                {
+                    var botClient = services.GetRequiredService<ITelegramBotClient>();
+                    var updater = new Updater(botClient, new UpdaterOptions(
+                        updaterOptions.MaxDegreeOfParallelism,
+                        logger: services.GetRequiredService<ILogger<IUpdater>>(),
+                        updaterOptions.CancellationToken,
+                        updaterOptions.FlushUpdatesQueue,
+                        updaterOptions.AllowedUpdates
+                     ), services, preUpdateProcessorType);
+
+                    updaterBuilder.AddToUpdater(updater);
+                    return updater;
+                });
+
+            if (preUpdateProcessorType is not null)
+            {
+                serviceDescriptors.AddScoped(preUpdateProcessorType);
+            }
         }
 
         /// <summary>

@@ -18,7 +18,7 @@ namespace TelegramUpdater
         private readonly List<IScopedHandlerContainer> _scopedHandlerContainers;
         private readonly List<IExceptionHandler> _exceptionHandlers;
         private readonly ILogger<IUpdater> _logger;
-        Func<IUpdater, ShiningInfo<long, Update>, Task<bool>>? _preProcess;
+        private readonly Type? _preUpdateProcessorType;
         private UpdaterOptions _updaterOptions;
         private User? _me = null;
 
@@ -39,23 +39,44 @@ namespace TelegramUpdater
         /// <param name="botClient">Telegram bot client</param>
         /// <param name="updaterOptions">Options for this updater.</param>
         /// <param name="serviceDescriptors">Optional service provider.</param>t
-        /// <param name="preProcess">
-        /// A callback function that will be called every time an update comes from writer.
-        /// It's at the start of processing update.
+        /// <param name="preUpdateProcessorType">
+        /// Type of a class that will be initialized on every incoming update.
+        /// It should be a sub-class of <see cref="AbstractPreUpdateProcessor"/>.
         /// <para>
-        /// If this callback func is available ( not <see langword="null"/> ) and it returns <see langword="false"/>,
-        /// Then <b>the update will not being processed.</b>
+        /// Your class should have a parameterless ctor if <paramref name="serviceDescriptors"/>
+        /// is <see langword="null"/>. otherwise you can use items which are in services.
+        /// </para>
+        /// <para>
+        /// Don't forget to add this to service collections if available.
         /// </para>
         /// </param>
         public Updater(
             ITelegramBotClient botClient,
             UpdaterOptions updaterOptions = default,
             IServiceProvider? serviceDescriptors = default,
-            Func<IUpdater, ShiningInfo<long, Update>, Task<bool>>? preProcess = default)
+            Type? preUpdateProcessorType = default)
         {
             _botClient = botClient ?? throw new ArgumentNullException(nameof(botClient));
             _updaterOptions = updaterOptions;
-            _preProcess = preProcess;
+            _preUpdateProcessorType = preUpdateProcessorType;
+
+            if (_preUpdateProcessorType is not null)
+            {
+                if (!typeof(AbstractPreUpdateProcessor).IsAssignableFrom(preUpdateProcessorType))
+                {
+                    throw new InvalidOperationException(
+                        $"Input type for preUpdateProcessorType ( {preUpdateProcessorType} ) should be an instance of AbstractPreUpdateProcessor.");
+                }
+
+                if (serviceDescriptors is null)
+                {
+                    if (preUpdateProcessorType.GetConstructor(Type.EmptyTypes) == null)
+                    {
+                        throw new InvalidOperationException(
+                            $"Input type for preUpdateProcessorType ( {preUpdateProcessorType} ) should have an empty ctor when there's no service provider.");
+                    }
+                }
+            }
 
             _serviceDescriptors = serviceDescriptors;
 
@@ -205,16 +226,31 @@ namespace TelegramUpdater
             if (shiningInfo == null)
                 return;
 
-            if (_preProcess != null)
+            var servicesAvailabe = _serviceDescriptors is not null;
+
+            if (_preUpdateProcessorType != null)
             {
-                if (!await _preProcess(this, shiningInfo))
+                AbstractPreUpdateProcessor processor;
+                if (servicesAvailabe)
                 {
-                    // Skip
+                    using var scope = _serviceDescriptors!.CreateScope();
+                    processor = (AbstractPreUpdateProcessor)scope.ServiceProvider
+                        .GetRequiredService(_preUpdateProcessorType);
+                }
+                else
+                {
+                    processor = (AbstractPreUpdateProcessor)Activator
+                        .CreateInstance(_preUpdateProcessorType)!;
+                    processor.SetUpdater(this);
+                }
+
+                if (!await processor.PreProcessor(shiningInfo))
+                {
                     return;
                 }
             }
 
-            if (_serviceDescriptors != null)
+            if (servicesAvailabe)
             {
                 await ProcessUpdateFromServices(shiningInfo, cancellationToken);
             }
