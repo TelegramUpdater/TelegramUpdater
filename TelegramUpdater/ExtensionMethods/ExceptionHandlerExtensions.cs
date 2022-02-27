@@ -1,4 +1,5 @@
-﻿using TelegramUpdater.ExceptionHandlers;
+﻿using Microsoft.Extensions.Logging;
+using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.UpdateHandlers;
 
 namespace TelegramUpdater;
@@ -40,5 +41,25 @@ public static class ExceptionHandlerExtensions
     {
         return updater.AddExceptionHandler<TException>(
             callback, messageMatch, new[] { typeof(THandler) }, inherit);
+    }
+
+    /// <summary>
+    /// Adds a default exception handler that uses <see cref="IUpdater.Logger"/>
+    /// to notify about exceptions occured in update handlers.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="logLevel">Logging level defaults to <see cref="LogLevel.Error"/>.</param>
+    /// <returns></returns>
+    public static IUpdater AddDefaultExceptionHandler(
+        this IUpdater updater, LogLevel? logLevel = default)
+    {
+        return updater.AddExceptionHandler<Exception>((u, e) =>
+        {
+            u.Logger.Log(
+                logLevel ?? LogLevel.Error,
+                exception: e,
+                message: "Execption occured in update handlers");
+            return Task.CompletedTask;
+        });
     }
 }
