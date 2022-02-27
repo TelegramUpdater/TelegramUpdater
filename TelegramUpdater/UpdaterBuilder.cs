@@ -445,5 +445,63 @@ namespace TelegramUpdater
             _updater.AddScopedHandler(scopedHandlerContainer);
             return this._updater;
         }
+
+        /// <summary>
+        /// - <b>Step three</b>: Add an <see cref="IUpdateHandler"/>
+        /// <para>
+        /// This is the main part! update handler are where you do what you actually excpect from this lib.
+        /// Like answering user message and etc.
+        /// </para>
+        /// <para>
+        /// There're two core things you need to create for an <see cref="IUpdateHandler"/>
+        /// <list type="number">
+        /// <item>
+        /// <term><see cref="Filter{T}"/>s</term>
+        /// <description>
+        /// Filters are used to let <see cref="Updater"/> know what kind of updates you excpect for your handler.
+        /// </description>
+        /// </item>
+        /// <item>
+        /// <term>Callback functions</term>
+        /// <description>
+        /// After an update verified and passed the filters, it's time to handle it.
+        /// Handling updates are done in callback functions.
+        /// <para>
+        /// Callback function gives you an instance of <see cref="UpdateContainerAbs{T}"/>
+        /// as argument. and this is all you need! with a large set of Extension methods.
+        /// </para>
+        /// </description>
+        /// </item>
+        /// </list>
+        /// </para>
+        /// <para>
+        /// You can use <see cref="FilterCutify"/> class to create your filter.
+        /// </para>
+        /// <para>
+        /// <see cref="FilterCutify.OnCommand(string[])"/> is a good start to handle commands like
+        /// <c>/start</c>.
+        /// </para>
+        /// </summary>
+        /// <param name="autoCollectScopedHandlers">
+        /// Set to <see langword="true"/> so that, <see cref="IUpdater"/> will collect scoped handers
+        /// automatically ( see <see cref="UpdaterExtensions.AutoCollectScopedHandlers(IUpdater, string)"/> for more info about it ).
+        /// otherwise dose nothing to add a handler later.
+        /// </param>
+        /// <remarks>
+        /// You can use <see cref="IUpdater.AddUpdateHandler(ISingletonUpdateHandler)"/>
+        /// or <see cref="IUpdater.AddScopedHandler(IScopedHandlerContainer)"/>
+        /// later to add more update handler.
+        /// </remarks>
+        public IUpdater StepThree(bool autoCollectScopedHandlers = false)
+        {
+            if (_updater == null)
+                throw new InvalidOperationException("Please go step by step, you missed StepTwo ?");
+
+            if (autoCollectScopedHandlers)
+            {
+                _updater.AutoCollectScopedHandlers();
+            }
+            return this._updater;
+        }
     }
 }

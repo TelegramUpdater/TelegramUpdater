@@ -134,7 +134,7 @@ namespace TelegramUpdater
         {
             var _h = scopedHandlerContainer.GetType();
             _scopedHandlerContainers.Add(scopedHandlerContainer);
-            _logger.LogInformation("Added new scoped handler :: {Name}.", _h.Name);
+            _logger.LogInformation("Added new scoped handler");
             return this;
         }
 
