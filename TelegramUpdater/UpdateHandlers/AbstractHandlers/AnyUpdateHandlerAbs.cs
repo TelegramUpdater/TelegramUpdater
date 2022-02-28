@@ -11,7 +11,7 @@ namespace TelegramUpdater.UpdateHandlers.AbstractHandlers
     public abstract class AnyUpdateHandlerAbs<T> : AbstractHandler<T> where T : class
     {
         public AnyUpdateHandlerAbs(
-            UpdateType updateType, Func<Update, T?> getT, Filter<T>? filter, int group)
+            UpdateType updateType, Func<Update, T?> getT, IFilter<T>? filter, int group)
             : base(updateType, getT, filter, group)
         {
         }
@@ -19,7 +19,7 @@ namespace TelegramUpdater.UpdateHandlers.AbstractHandlers
         internal override IContainer<T> ContainerBuilder(
             IUpdater updater, ShiningInfo<long, Update> shiningInfo)
         {
-            return new AnyContainer<T>(GetT, updater, shiningInfo);
+            return new AnyContainer<T>(GetT, updater, shiningInfo, ExtraData);
         }
     }
 }

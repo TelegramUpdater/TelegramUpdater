@@ -9,30 +9,38 @@ namespace TelegramUpdater.UpdateContainer
     public abstract class UpdateContainerAbs<T> : IContainer<T> where T : class
     {
         private readonly Func<Update, T?> _insiderResovler;
+        private readonly IReadOnlyDictionary<string, object> _extraObjects;
 
         internal UpdateContainerAbs(
             Func<Update, T?> insiderResovler,
             IUpdater updater,
-            ShiningInfo<long, Update> insider)
+            ShiningInfo<long, Update> shiningInsider,
+            IReadOnlyDictionary<string, object>? extraObjects = default)
         {
             Updater = updater ?? throw new ArgumentNullException(nameof(updater));
-            ShiningInfo = insider;
-            Container = insider.Value;
+            ShiningInfo = shiningInsider;
+            Container = shiningInsider.Value;
             BotClient = updater.BotClient;
             _insiderResovler = insiderResovler ?? throw new ArgumentNullException(nameof(insiderResovler));
+            _extraObjects = extraObjects?? new Dictionary<string, object>();
         }
 
         internal UpdateContainerAbs(
             Func<Update, T?> insiderResovler,
             IUpdater updater,
-            Update insider)
+            Update insider,
+            IReadOnlyDictionary<string, object>? extraObjects = default)
         {
             ShiningInfo = null!;
             Updater = updater;
             Container = insider;
             BotClient = updater.BotClient;
             _insiderResovler = insiderResovler;
+            _extraObjects = extraObjects ?? new Dictionary<string, object>();
         }
+
+        /// <inheritdoc/>
+        public object this[string key] => _extraObjects[key];
 
         /// <summary>
         /// Orginal update. ( inner update, like <see cref="Update.Message"/> ) 
@@ -62,5 +70,8 @@ namespace TelegramUpdater.UpdateContainer
 
         /// <inheritdoc/>
         public virtual IUpdater Updater { get; }
+
+        /// <inheritdoc/>
+        public bool ContainsKey(string key) => _extraObjects.ContainsKey(key);
     }
 }

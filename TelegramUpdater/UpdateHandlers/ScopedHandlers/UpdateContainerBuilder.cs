@@ -23,7 +23,7 @@
         /// <param name="getT">A function to resolve inner update from <see cref="Update"/>.</param>
         public UpdateContainerBuilder(
             UpdateType updateType,
-            Filter<TUpdate>? filter = default,
+            IFilter<TUpdate>? filter = default,
             Func<Update, TUpdate?>? getT = default)
             : base(updateType, filter)
         {

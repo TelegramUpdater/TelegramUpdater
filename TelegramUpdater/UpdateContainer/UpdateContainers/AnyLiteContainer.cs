@@ -17,10 +17,13 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers
         /// <param name="insiderResovler">A function to resolve inner update.</param>
         /// <param name="update">The update itself.</param>
         /// <param name="updater">The updater instanse</param>
+        /// <param name="extraObjects"></param>
         internal AnyLiteContainer(
             Func<Update, T?> insiderResovler,
             Update update,
-            IUpdater updater) : base(insiderResovler, updater, update)
+            IUpdater updater,
+            IReadOnlyDictionary<string, object>? extraObjects = default)
+            : base(insiderResovler, updater, insider: update, extraObjects: extraObjects)
         { }
 
 

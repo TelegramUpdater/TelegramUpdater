@@ -15,18 +15,15 @@ namespace TelegramUpdater.UpdateHandlers.SealedHandlers
         public AnyUpdateHandler(UpdateType updateType,
                                 Func<Update, T?> getT,
                                 Func<IContainer<T>, Task> callbak,
-                                Filter<T>? filter,
+                                IFilter<T>? filter,
                                 int group) : base(updateType, getT, filter, group)
         {
-            if (callbak == null)
-                throw new ArgumentNullException(nameof(callbak));
-
-            _handleAsync = callbak;
+            _handleAsync = callbak ?? throw new ArgumentNullException(nameof(callbak));
         }
 
         internal override IContainer<T> ContainerBuilder(
             IUpdater updater, ShiningInfo<long, Update> shiningInfo)
-                => new AnyContainer<T>(GetT, updater, shiningInfo);
+                => new AnyContainer<T>(GetT, updater, shiningInfo, ExtraData);
 
         /// <inheritdoc/>
         protected override async Task HandleAsync(IContainer<T> updateContainer)

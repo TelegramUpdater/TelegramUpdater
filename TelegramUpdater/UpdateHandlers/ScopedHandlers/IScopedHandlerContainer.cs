@@ -7,6 +7,8 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
     /// </summary>
     public interface IScopedHandlerContainer
     {
+        internal IReadOnlyDictionary<string, object>? ExtraData { get; }
+
         /// <summary>
         /// Type of <see cref="IScopedHandlerContainer"/>
         /// </summary>
@@ -31,15 +33,19 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
         /// <returns></returns>
         public IScopedUpdateHandler? CreateInstance(IServiceScope? scope = default)
         {
+            IScopedUpdateHandler? scopedHandler;
             if (scope != null)
             {
-                return (IScopedUpdateHandler?)scope.ServiceProvider.GetRequiredService(
+                scopedHandler = (IScopedUpdateHandler?)scope.ServiceProvider.GetRequiredService(
                     ScopedHandlerType);
             }
             else
             {
-                return (IScopedUpdateHandler?)Activator.CreateInstance(ScopedHandlerType);
+                scopedHandler = (IScopedUpdateHandler?)Activator.CreateInstance(ScopedHandlerType);
             }
+
+            scopedHandler?.SetExtraData(ExtraData);
+            return scopedHandler;
         }
     }
 }

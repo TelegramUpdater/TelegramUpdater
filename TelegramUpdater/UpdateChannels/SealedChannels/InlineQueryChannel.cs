@@ -10,7 +10,7 @@
         /// </summary>
         /// <param name="timeOut">Waiting for update timeout.</param>
         /// <param name="filter">A filter to select the right update.</param>
-        public InlineQueryChannel(TimeSpan timeOut, Filter<InlineQuery>? filter)
+        public InlineQueryChannel(TimeSpan timeOut, IFilter<InlineQuery>? filter)
             : base(UpdateType.InlineQuery, x => x.InlineQuery, timeOut, filter)
         {
         }

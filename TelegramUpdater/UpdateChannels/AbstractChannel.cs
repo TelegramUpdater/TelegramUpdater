@@ -10,7 +10,7 @@ namespace TelegramUpdater.UpdateChannels
     public abstract class AbstractChannel<T> : IUpdateChannel where T : class
     {
         private readonly Func<Update, T?> _getT;
-        private readonly Filter<T>? _filter;
+        private readonly IFilter<T>? _filter;
 
         /// <summary>
         /// An abstract class for channel updates.
@@ -24,7 +24,7 @@ namespace TelegramUpdater.UpdateChannels
             UpdateType updateType,
             Func<Update, T?> getT,
             TimeSpan timeOut,
-            Filter<T>? filter)
+            IFilter<T>? filter)
         {
             if (timeOut == default)
                 throw new ArgumentException("Use a valid time out.");
@@ -37,6 +37,9 @@ namespace TelegramUpdater.UpdateChannels
             UpdateType = updateType;
             _getT = getT ?? throw new ArgumentNullException(nameof(getT));
         }
+
+        internal IReadOnlyDictionary<string, object>? ExtraData => _filter?.ExtraData;
+
 
         /// <inheritdoc/>
         public UpdateType UpdateType { get; }
