@@ -224,12 +224,6 @@ namespace TelegramUpdater
         }
 
         /// <inheritdoc/>
-        public async Task StartAsync(CancellationToken cancellationToken = default)
-        {
-            await StartAsync<SimpleUpdateWriter>(cancellationToken);
-        }
-
-        /// <inheritdoc/>
         public async Task<User> GetMeAsync()
         {
             if (_me == null)

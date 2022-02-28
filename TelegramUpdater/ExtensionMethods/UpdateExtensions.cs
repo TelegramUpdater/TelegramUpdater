@@ -1,5 +1,8 @@
-﻿namespace TelegramUpdater;
+﻿namespace Telegram.Bot.Types;
 
+/// <summary>
+/// Extensions for <see cref="Update"/>
+/// </summary>
 public static class UpdateExtensions
 {
     /// <summary>
