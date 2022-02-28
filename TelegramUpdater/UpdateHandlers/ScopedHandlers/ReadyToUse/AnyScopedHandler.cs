@@ -17,7 +17,7 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse
         internal sealed override IContainer<T> ContainerBuilder(
             IUpdater updater, ShiningInfo<long, Update> shiningInfo)
         {
-            return new AnyContainer<T>(GetT, updater, shiningInfo);
+            return new AnyContainer<T>(GetT, updater, shiningInfo, ExtraData);
         }
     }
 }

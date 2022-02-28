@@ -10,7 +10,7 @@
         /// </summary>
         /// <param name="timeOut">Waiting for update timeout.</param>
         /// <param name="filter">A filter to select the right update.</param>
-        public MessageChannel(TimeSpan timeOut, Filter<Message>? filter = default)
+        public MessageChannel(TimeSpan timeOut, IFilter<Message>? filter = default)
             : base(UpdateType.Message, x => x.Message, timeOut, filter)
         {
         }

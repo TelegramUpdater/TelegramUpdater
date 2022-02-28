@@ -9,7 +9,7 @@ namespace TelegramUpdater.UpdateHandlers.SealedHandlers
     {
         public MessageHandler(
             Func<IContainer<Message>, Task> callbak,
-            Filter<Message>? filter = default,
+            IFilter<Message>? filter = default,
             int group = 0)
             : base(UpdateType.Message, x => x.Message, callbak, filter, group)
         {

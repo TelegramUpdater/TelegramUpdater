@@ -10,7 +10,7 @@
         /// </summary>
         /// <param name="timeOut">Waiting for update timeout.</param>
         /// <param name="filter">A filter to select the right update.</param>
-        public CallbackQueryChannel(TimeSpan timeOut, Filter<CallbackQuery>? filter = default)
+        public CallbackQueryChannel(TimeSpan timeOut, IFilter<CallbackQuery>? filter = default)
             : base(UpdateType.CallbackQuery, x => x.CallbackQuery, timeOut, filter)
         {
         }

@@ -82,11 +82,5 @@ namespace TelegramUpdater
         /// <param name="cancellationToken">To cancel the job manually,</param>
         public Task StartAsync<TWriter>(CancellationToken cancellationToken = default)
             where TWriter : UpdateWriterAbs, new();
-
-        /// <summary>
-        /// Use this to start writing updates ( using a simple update writer ) to the updater. ( Blocking )
-        /// </summary>
-        /// <param name="cancellationToken">To cancel the job manually,</param>
-        public Task StartAsync(CancellationToken cancellationToken = default);
     }
 }

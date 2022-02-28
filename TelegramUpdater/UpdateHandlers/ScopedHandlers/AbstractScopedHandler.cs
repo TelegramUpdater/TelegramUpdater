@@ -10,6 +10,7 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
     public abstract class AbstractScopedHandler<T> : IScopedUpdateHandler where T : class
     {
         private readonly Func<Update, T?> _getT;
+        private IReadOnlyDictionary<string, object>? _extraData;
 
         internal AbstractScopedHandler(Func<Update, T?> getT, int group)
         {
@@ -20,6 +21,10 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
         /// <inheritdoc/>
         public int Group { get; }
 
+        IReadOnlyDictionary<string, object>? IScopedUpdateHandler.ExtraData => _extraData;
+
+        internal IReadOnlyDictionary<string, object>? ExtraData => _extraData;
+
         protected abstract Task HandleAsync(IContainer<T> updateContainer);
 
         internal abstract IContainer<T> ContainerBuilder(IUpdater updater, ShiningInfo<long, Update> shiningInfo);
@@ -29,5 +34,10 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
         /// <inheritdoc/>
         public async Task HandleAsync(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
             => await HandleAsync(ContainerBuilder(updater, shiningInfo));
+
+        void IScopedUpdateHandler.SetExtraData(IReadOnlyDictionary<string, object>? extraData)
+        {
+            _extraData = extraData;
+        }
     }
 }

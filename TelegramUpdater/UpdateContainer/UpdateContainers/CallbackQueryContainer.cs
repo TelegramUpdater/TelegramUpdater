@@ -7,8 +7,11 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers
     /// </summary>
     public sealed class CallbackQueryContainer : UpdateContainerAbs<CallbackQuery>
     {
-        internal CallbackQueryContainer(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
-            : base(x => x.CallbackQuery, updater, shiningInfo)
+        internal CallbackQueryContainer(
+            IUpdater updater,
+            ShiningInfo<long, Update> shiningInfo,
+            IReadOnlyDictionary<string, object>? extraObjects = default)
+            : base(x => x.CallbackQuery, updater, shiningInfo, extraObjects)
         {
         }
     }

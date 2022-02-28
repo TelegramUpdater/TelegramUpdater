@@ -11,10 +11,10 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
     public abstract class AbstractUpdateContainer<THandler, TUpdate> : IScopedHandlerContainer
         where THandler : IScopedUpdateHandler where TUpdate : class
     {
-        private readonly Filter<TUpdate>? _filter;
+        private readonly IFilter<TUpdate>? _filter;
 
         internal AbstractUpdateContainer(
-            UpdateType updateType, Filter<TUpdate>? filter = default)
+            UpdateType updateType, IFilter<TUpdate>? filter = default)
         {
             if (updateType == UpdateType.Unknown)
                 throw new ArgumentException($"There's nothing uknown here! {nameof(updateType)}");
@@ -36,6 +36,8 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
 
         /// <inheritdoc/>
         public UpdateType UpdateType { get; }
+
+        IReadOnlyDictionary<string, object>? IScopedHandlerContainer.ExtraData => _filter?.ExtraData;
 
         /// <summary>
         /// Checks if an update can be handled in a handler of type <see cref="ScopedHandlerType"/>.
@@ -64,7 +66,7 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
             return ShouldHandle(insider);
         }
 
-        internal static Filter<T> GetFilterAttributes<T>(Type type) where T : class
+        internal static IFilter<T> GetFilterAttributes<T>(Type type) where T : class
         {
             Filter<T> filter = null!;
             var applied = type.GetCustomAttributes<AbstractFilterAttribute>();

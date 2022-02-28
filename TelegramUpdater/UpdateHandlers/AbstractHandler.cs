@@ -10,12 +10,12 @@ namespace TelegramUpdater.UpdateHandlers
     public abstract class AbstractHandler<T> : ISingletonUpdateHandler where T : class
     {
         private readonly Func<Update, T?> _getT;
-        private readonly Filter<T>? _filter;
+        private readonly IFilter<T>? _filter;
 
         internal AbstractHandler(
             UpdateType updateType,
             Func<Update, T?> getT,
-            Filter<T>? filter,
+            IFilter<T>? filter,
             int group)
         {
             if (updateType == UpdateType.Unknown)
@@ -26,6 +26,8 @@ namespace TelegramUpdater.UpdateHandlers
             UpdateType = updateType;
             Group = group;
         }
+
+        internal IReadOnlyDictionary<string, object>? ExtraData => _filter?.ExtraData;
 
         /// <inheritdoc/>
         public UpdateType UpdateType { get; }

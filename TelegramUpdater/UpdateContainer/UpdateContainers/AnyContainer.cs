@@ -11,8 +11,9 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers
         internal AnyContainer(
             Func<Update, T?> insiderResovler,
             IUpdater updater,
-            ShiningInfo<long, Update> shiningInfo)
-            : base(insiderResovler, updater, shiningInfo)
+            ShiningInfo<long, Update> shiningInfo,
+            IReadOnlyDictionary<string, object>? extraObjects = default)
+            : base(insiderResovler, updater, shiningInfo, extraObjects)
         { }
     }
 }

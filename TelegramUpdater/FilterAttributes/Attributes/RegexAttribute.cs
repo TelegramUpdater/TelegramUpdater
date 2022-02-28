@@ -14,7 +14,7 @@ namespace TelegramUpdater.FilterAttributes.Attributes
         /// <param name="pattern"></param>
         /// <param name="regexOptions"></param>
         /// <param name="catchCaption"></param>
-        public RegexAttribute(string pattern, RegexOptions? regexOptions = default, bool? catchCaption = default)
+        public RegexAttribute(string pattern, RegexOptions regexOptions = default, bool catchCaption = false)
         {
             CatchCaption = catchCaption;
             Pattern = pattern;
