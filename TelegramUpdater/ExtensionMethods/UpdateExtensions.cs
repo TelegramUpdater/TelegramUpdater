@@ -29,4 +29,29 @@ public static class UpdateExtensions
             _ => null
         };
     }
+
+    /// <summary>
+    /// Resolve a chat id from <see cref="Update"/>.
+    /// </summary>
+    /// <param name="update"></param>
+    /// <returns></returns>
+    public static long? GetChatId(this Update update)
+    {
+        return update switch
+        {
+            { Message: { Chat: { } chat } } => chat.Id,
+            { Message: { SenderChat: { } chat } } => chat.Id,
+            { EditedMessage: { Chat: { } chat } } => chat.Id,
+            { EditedMessage: { SenderChat: { } chat } } => chat.Id,
+            { ChannelPost: { Chat: { } chat } } => chat.Id,
+            { ChannelPost: { SenderChat: { } chat } } => chat.Id,
+            { EditedChannelPost: { Chat: { } chat } } => chat.Id,
+            { EditedChannelPost: { SenderChat: { } chat } } => chat.Id,
+            { CallbackQuery: { Message: { Chat: { } chat } } } => chat.Id,
+            { ChatJoinRequest: { Chat: { } chat } } => chat.Id,
+            { ChatMember: { Chat: { } chat } } => chat.Id,
+            { MyChatMember: { Chat: { } chat } } => chat.Id,
+            _ => null
+        };
+    }
 }

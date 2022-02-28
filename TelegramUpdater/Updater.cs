@@ -50,11 +50,16 @@ namespace TelegramUpdater
         /// Don't forget to add this to service collections if available.
         /// </para>
         /// </param>
+        /// <param name="customKeyResolver">
+        /// If you wanna customize the way updater resolves a sender id from <see cref="Update"/> 
+        /// ( as queue keys ), you can pass your own. <b>Use with care!</b>
+        /// </param>
         public Updater(
             ITelegramBotClient botClient,
             UpdaterOptions updaterOptions = default,
             IServiceProvider? serviceDescriptors = default,
-            Type? preUpdateProcessorType = default)
+            Type? preUpdateProcessorType = default,
+            Func<Update, long>? customKeyResolver = default)
         {
             _botClient = botClient ?? throw new ArgumentNullException(nameof(botClient));
             _updaterOptions = updaterOptions;
@@ -86,7 +91,7 @@ namespace TelegramUpdater
 
             _rainbow = new Rainbow<long, Update>(
                 updaterOptions.MaxDegreeOfParallelism ?? Environment.ProcessorCount,
-                x => x.GetSenderId() ?? 0,
+                customKeyResolver?? QueueKeyResolver,
                 ShineCallback, ShineErrors);
 
             if (_updaterOptions.Logger == null)
@@ -105,6 +110,34 @@ namespace TelegramUpdater
 
             _logger.LogInformation("Logger initialized.");
         }
+
+        /// <summary>
+        /// Creates an instance of updater to fetch updates from telegram and handle them.
+        /// </summary>
+        /// <param name="botToken">Your telegram bot token.</param>
+        /// <param name="updaterOptions">Options for this updater.</param>
+        /// <param name="preUpdateProcessorType">
+        /// Type of a class that will be initialized on every incoming update.
+        /// It should be a sub-class of <see cref="AbstractPreUpdateProcessor"/>.
+        /// <para>
+        /// Your class should have a parameterless ctor.
+        /// </para>
+        /// <para>
+        /// Don't forget to add this to service collections if available.
+        /// </para>
+        /// </param>
+        /// <param name="customKeyResolver">
+        /// If you wanna customize the way updater resolves a sender id from <see cref="Update"/> 
+        /// ( as queue keys ), you can pass your own. <b>Use with care!</b>
+        /// </param>
+        public Updater(string botToken,
+            UpdaterOptions updaterOptions = default,
+            Type? preUpdateProcessorType = default,
+            Func<Update, long>? customKeyResolver = default)
+            : this(new TelegramBotClient(botToken), updaterOptions,
+                  preUpdateProcessorType: preUpdateProcessorType,
+                  customKeyResolver: customKeyResolver)
+        { }
 
         /// <inheritdoc/>
         public UpdaterOptions UpdaterOptions => _updaterOptions;
@@ -205,6 +238,23 @@ namespace TelegramUpdater
             }
 
             return _me;
+        }
+
+        private long QueueKeyResolver(Update update)
+        {
+            var userId = update.GetSenderId();
+
+            if (userId is null)
+            {
+                if (UpdaterOptions.SwitchChatId)
+                {
+                    var chatId = update.GetChatId();
+                    if (chatId is null) return 0;
+                    return chatId.Value;
+                }
+                return 0;
+            }
+            return userId.Value;
         }
 
         private UpdateType[] DetectAllowedUpdates()
