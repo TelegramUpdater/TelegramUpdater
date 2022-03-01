@@ -81,10 +81,10 @@ namespace TelegramUpdater.FilterAttributes.Attributes
         /// </param>
         public CommandAttribute(
             string command,
+            int joinArgsFormIndex,
             char prefix = '/',
             ArgumentsMode argumentsMode = ArgumentsMode.Idc,
-            char separator = ' ',
-            int? joinArgsFormIndex = default)
+            char separator = ' ')
         {
             Filter = new CommandFilter(
                 command, new CommandFilterOptions(
@@ -101,9 +101,9 @@ namespace TelegramUpdater.FilterAttributes.Attributes
         /// <param name="separator">Separator between arguments. default is ' '.</param>
         public CommandAttribute(
             string command,
+            char separator,
             char prefix = '/',
-            ArgumentsMode argumentsMode = ArgumentsMode.Idc,
-            char separator = ' ')
+            ArgumentsMode argumentsMode = ArgumentsMode.Idc)
         {
             Filter = new CommandFilter(
                 command, new CommandFilterOptions(

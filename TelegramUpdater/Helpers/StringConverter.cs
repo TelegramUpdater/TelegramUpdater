@@ -76,10 +76,30 @@ namespace TelegramUpdater.Helpers
         /// <summary>
         /// Tries to convert an string array elements to given types
         /// </summary>
+        public static bool TryConvertArgs<T1>(
+            this string[] args,
+            [NotNullWhen(true)] out T1? output1,
+            int startIndex = 0)
+        {
+            if (args.Length > startIndex)
+            {
+                if (args[startIndex].TryConvert(out output1))
+                {
+                    return true;
+                }
+            }
+
+            output1 = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to convert an string array elements to given types
+        /// </summary>
         public static bool TryConvertArgs<T1, T2>(
             this string[] args,
-            out T1? output1,
-            out T2? output2,
+            [NotNullWhen(true)] out T1? output1,
+            [NotNullWhen(true)] out T2? output2,
             int startIndex = 0)
         {
             if (args.Length < startIndex + 2)
@@ -105,9 +125,9 @@ namespace TelegramUpdater.Helpers
         /// </summary>
         public static bool TryConvertArgs<T1, T2, T3>(
             this string[] args,
-            out T1? output1,
-            out T2? output2,
-            out T3? output3,
+            [NotNullWhen(true)] out T1? output1,
+            [NotNullWhen(true)] out T2? output2,
+            [NotNullWhen(true)] out T3? output3,
             int startIndex = 0)
         {
             if (args.Length < startIndex + 3)
@@ -136,10 +156,10 @@ namespace TelegramUpdater.Helpers
         /// </summary>
         public static bool TryConvertArgs<T1, T2, T3, T4>(
             this string[] args,
-            out T1? output1,
-            out T2? output2,
-            out T3? output3,
-            out T4? output4,
+            [NotNullWhen(true)] out T1? output1,
+            [NotNullWhen(true)] out T2? output2,
+            [NotNullWhen(true)] out T3? output3,
+            [NotNullWhen(true)] out T4? output4,
             int startIndex = 0)
         {
             if (args.Length < startIndex + 4)

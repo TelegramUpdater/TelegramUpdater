@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using TelegramUpdater.Filters;
+using TelegramUpdater.Helpers;
 
 namespace TelegramUpdater.UpdateContainer
 {
@@ -62,5 +64,122 @@ namespace TelegramUpdater.UpdateContainer
                 return false;
             }
         }
+
+        /// <summary>
+        /// Tries to get and parse the command args. you should have a
+        /// <see cref="CommandFilter"/>..
+        /// </summary>
+        public static bool TryParseCommandArgs<T, T1>(
+            this IContainer<T> container,
+            [NotNullWhen(true)] out T1? output1) where T : class
+        {
+            if (container.TryGetExtraData("args", out string[]? commandArgs))
+            {
+                if (commandArgs.TryConvertArgs(out output1))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    "Command args not found. do you have any CommandFilters there?"
+                );
+            }
+
+            output1 = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to get and parse the command args. you should have a
+        /// <see cref="CommandFilter"/>..
+        /// </summary>
+        public static bool TryParseCommandArgs<T, T1, T2>(
+            this IContainer<T> container,
+            [NotNullWhen(true)] out T1? output1,
+            [NotNullWhen(true)] out T2? output2) where T : class
+        {
+            if (container.TryGetExtraData("args", out string[]? commandArgs))
+            {
+                if (commandArgs.TryConvertArgs(out output1, out output2))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    "Command args not found. do you have any CommandFilters there?"
+                );
+            }
+
+            output1 = default;
+            output2 = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to get and parse the command args. you should have a
+        /// <see cref="CommandFilter"/>..
+        /// </summary>
+        public static bool TryParseCommandArgs<T, T1, T2, T3>(
+            this IContainer<T> container,
+            [NotNullWhen(true)] out T1? output1,
+            [NotNullWhen(true)] out T2? output2,
+            [NotNullWhen(true)] out T3? output3) where T : class
+        {
+            if (container.TryGetExtraData("args", out string[]? commandArgs))
+            {
+                if (commandArgs.TryConvertArgs(out output1, out output2, out output3))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    "Command args not found. do you have any CommandFilters there?"
+                );
+            }
+
+            output1 = default;
+            output2 = default;
+            output3 = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Tries to get and parse the command args. you should have a
+        /// <see cref="CommandFilter"/>..
+        /// </summary>
+        public static bool TryParseCommandArgs<T, T1, T2, T3, T4>(
+            this IContainer<T> container,
+            [NotNullWhen(true)] out T1? output1,
+            [NotNullWhen(true)] out T2? output2,
+            [NotNullWhen(true)] out T3? output3,
+            [NotNullWhen(true)] out T4? output4) where T : class
+        {
+            if (container.TryGetExtraData("args", out string[]? commandArgs))
+            {
+                if (commandArgs.TryConvertArgs(out output1, out output2, out output3, out output4))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    "Command args not found. do you have any CommandFilters there?"
+                );
+            }
+
+            output1 = default;
+            output2 = default;
+            output3 = default;
+            output4 = default;
+            return false;
+        }
+
     }
 }
