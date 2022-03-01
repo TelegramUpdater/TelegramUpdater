@@ -5,6 +5,9 @@ namespace TelegramUpdater.Filters
     /// <summary>
     /// A basic regex filter.
     /// </summary>
+    /// <remarks>
+    /// <b>Extra data:</b> <see cref="MatchCollection"/> "matches".
+    /// </remarks>
     /// <typeparam name="T">Type to apply filter on.</typeparam>
     public class BasicRegexFilter<T> : Filter<T>
     {

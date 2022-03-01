@@ -14,7 +14,7 @@
         public bool TheyShellPass(T input);
 
         /// <summary>
-        /// A dicionary of extra data produced by this filter.
+        /// A dictionary of extra data produced by this filter.
         /// </summary>
         public IReadOnlyDictionary<string, object>? ExtraData { get; }
     }
@@ -35,8 +35,8 @@
         /// Creates a simple basic filter
         /// </summary>
         /// <param name="filter">A function to check the input and return a boolean</param>
-        public Filter(Func<T, bool>? filter = default) 
-        { 
+        public Filter(Func<T, bool>? filter = default)
+        {
             _filter = filter;
         }
 
@@ -62,7 +62,7 @@
             => input != null && (_filter is null || _filter(input));
 
         /// <summary>
-        /// Converts a filter to a fucntion.
+        /// Converts a filter to a function.
         /// </summary>
         /// <param name="filter"></param>
         public static implicit operator Func<T, bool>(Filter<T> filter)
@@ -163,10 +163,10 @@
         public override bool TheyShellPass(T input)
         {
             var shellPass = InnerTheyShellPass(input);
-            _extraData = Filters.Where(x=> x.ExtraData is not null)
-                .SelectMany(x=> x.ExtraData!) // extra data not null here.
-                .DistinctBy(x=> x.Key) // Is it required ?
-                .ToDictionary(x=> x.Key, x => x.Value);
+            _extraData = Filters.Where(x => x.ExtraData is not null)
+                .SelectMany(x => x.ExtraData!) // extra data not null here.
+                .DistinctBy(x => x.Key) // Is it required ?
+                .ToDictionary(x => x.Key, x => x.Value);
             return shellPass;
         }
 

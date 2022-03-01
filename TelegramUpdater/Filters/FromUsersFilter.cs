@@ -2,21 +2,36 @@
 {
     internal class FromUsersFilter<T> : Filter<T>
     {
-        internal FromUsersFilter(Func<T, long?> userSelector, params long[] users)
-            : base(x =>
-            {
-                var user = userSelector(x);
-                if (user is null) return false;
+        private readonly Func<T, long?> _userSelector;
 
-                return users.Any(x => x == user);
-            })
+        public long[] Users { get; }
+
+        internal FromUsersFilter(Func<T, long?> userSelector, params long[] users)
         {
+            _userSelector = userSelector;
+            Users = users;
+        }
+
+        public override bool TheyShellPass(T input)
+        {
+            var user = _userSelector(input);
+            if (user is null) return false;
+
+            if (Users.Any(x => x == user))
+            {
+                AddOrUpdateData("userId", user);
+                return true;
+            }
+            return false;
         }
     }
 
     /// <summary>
     /// Use this to create a <see cref="FromUsersFilter{T}"/>. where is Update type.
     /// </summary>
+    /// <remarks>
+    /// <b>Extra data:</b> <see cref="int"/> "userId".
+    /// </remarks>
     public static class FromUsersFilter
     {
         /// <summary>
