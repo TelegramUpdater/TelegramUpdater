@@ -7,6 +7,7 @@
     {
         internal IReadOnlyDictionary<string, object>? ExtraData { get; }
 
-        internal void SetExtraData(IReadOnlyDictionary<string, object>? extraData);
+        internal void SetExtraData(
+            IReadOnlyDictionary<string, object>? extraData);
     }
 }

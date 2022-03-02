@@ -8,9 +8,11 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse
     /// Creates an <see cref="IScopedUpdateHandler"/> for any type of update.
     /// </summary>
     /// <typeparam name="T">Update type.</typeparam>
-    public abstract class AnyScopedHandler<T> : AbstractScopedHandler<T> where T : class
+    public abstract class AnyScopedHandler<T> : AbstractScopedHandler<T>
+        where T : class
     {
-        internal AnyScopedHandler(Func<Update, T?> getT, int group) : base(getT, group)
+        internal AnyScopedHandler(Func<Update, T?> getT, int group)
+            : base(getT, group)
         {
         }
 

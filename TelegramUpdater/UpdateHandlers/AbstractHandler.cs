@@ -7,7 +7,8 @@ namespace TelegramUpdater.UpdateHandlers
     /// Abstract base to create update handlers.
     /// </summary>
     /// <typeparam name="T">Update type.</typeparam>
-    public abstract class AbstractHandler<T> : ISingletonUpdateHandler where T : class
+    public abstract class AbstractHandler<T> : ISingletonUpdateHandler
+        where T : class
     {
         private readonly Func<Update, T?> _getT;
         private readonly IFilter<T>? _filter;
@@ -19,7 +20,8 @@ namespace TelegramUpdater.UpdateHandlers
             int group)
         {
             if (updateType == UpdateType.Unknown)
-                throw new ArgumentException($"There's nothing uknown here! {nameof(updateType)}");
+                throw new ArgumentException(
+                    $"There's nothing unknown here! {nameof(updateType)}");
 
             _filter = filter;
             _getT = getT ?? throw new ArgumentNullException(nameof(getT));
@@ -27,7 +29,8 @@ namespace TelegramUpdater.UpdateHandlers
             Group = group;
         }
 
-        internal IReadOnlyDictionary<string, object>? ExtraData => _filter?.ExtraData;
+        internal IReadOnlyDictionary<string, object>? ExtraData
+            => _filter?.ExtraData;
 
         /// <inheritdoc/>
         public UpdateType UpdateType { get; }
@@ -35,23 +38,35 @@ namespace TelegramUpdater.UpdateHandlers
         /// <inheritdoc/>
         public int Group { get; }
 
-        protected T? GetT(Update update) => _getT(update);
+        /// <summary>
+        /// Here you may handle the incoming update here.
+        /// </summary>
+        /// <param name="cntr">
+        /// Provides everything you need and everything you want!
+        /// </param>
+        /// <returns></returns>
+        protected abstract Task HandleAsync(IContainer<T> cntr);
 
-        // TODO: implement filter here.
-
-        protected bool ShouldHandle(T t)
+        /// <summary>
+        /// You can override this method instead of using filters.
+        /// To apply a custom filter.
+        /// </summary>
+        /// <param name="input">Actual update.</param>
+        /// <returns></returns>
+        protected virtual bool ShouldHandle(T input)
         {
             if (_filter is null) return true;
 
-            return _filter.TheyShellPass(t);
+            return _filter.TheyShellPass(input);
         }
 
         /// <inheritdoc/>
-        public async Task HandleAsync(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
+        async Task IUpdateHandler.HandleAsync(IUpdater updater,
+                                      ShiningInfo<long, Update> shiningInfo)
             => await HandleAsync(ContainerBuilder(updater, shiningInfo));
 
         /// <inheritdoc/>
-        public bool ShouldHandle(Update update)
+        bool ISingletonUpdateHandler.ShouldHandle(Update update)
         {
             if (update.Type != UpdateType) return false;
 
@@ -62,9 +77,14 @@ namespace TelegramUpdater.UpdateHandlers
             return ShouldHandle(insider);
         }
 
-        /// <inheritdoc/>
-        protected abstract Task HandleAsync(IContainer<T> updateContainer);
+        /// <summary>
+        /// A function to extract actual update from <see cref="Update"/>.
+        /// </summary>
+        /// <param name="update">The update.</param>
+        /// <returns></returns>
+        internal protected T? GetT(Update update) => _getT(update);
 
-        internal abstract IContainer<T> ContainerBuilder(IUpdater updater, ShiningInfo<long, Update> shiningInfo);
+        internal abstract IContainer<T> ContainerBuilder(
+            IUpdater updater, ShiningInfo<long, Update> shiningInfo);
     }
 }

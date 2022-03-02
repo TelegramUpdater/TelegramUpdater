@@ -3,7 +3,7 @@
 namespace TelegramUpdater.UpdateHandlers
 {
     /// <summary>
-    /// Baes interface for all update handlers.
+    /// Base interface for all update handlers.
     /// </summary>
     public interface IUpdateHandler
     {
@@ -15,9 +15,14 @@ namespace TelegramUpdater.UpdateHandlers
         /// <summary>
         /// Handle the update.
         /// </summary>
-        /// <param name="updater">Updater instance that handled this update.</param>
-        /// <param name="shiningInfo">Information about an update that is processing.</param>
+        /// <param name="updater">
+        /// Updater instance that handled this update.
+        /// </param>
+        /// <param name="shiningInfo">
+        /// Information about an update that is processing.
+        /// </param>
         /// <returns></returns>
-        public Task HandleAsync(IUpdater updater, ShiningInfo<long, Update> shiningInfo);
+        internal Task HandleAsync(
+            IUpdater updater, ShiningInfo<long, Update> shiningInfo);
     }
 }
