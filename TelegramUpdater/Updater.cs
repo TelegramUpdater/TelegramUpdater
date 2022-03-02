@@ -29,28 +29,34 @@ namespace TelegramUpdater
         private readonly IServiceProvider? _serviceDescriptors;
 
         // This the main class responseable for queueing updates
-        // It handles everything related to process priotiry and more
+        // It handles everything related to process priority and more
         private readonly Rainbow<long, Update> _rainbow;
 
         /// <summary>
-        /// Creates an instance of updater to fetch updates from telegram and handle them.
+        /// Creates an instance of updater to fetch updates from
+        /// telegram and handle them.
         /// </summary>
         /// <param name="botClient">Telegram bot client</param>
         /// <param name="updaterOptions">Options for this updater.</param>
-        /// <param name="serviceDescriptors">Optional service provider.</param>t
+        /// <param name="serviceDescriptors">
+        /// Optional service provider.
+        /// </param>
         /// <param name="preUpdateProcessorType">
         /// Type of a class that will be initialized on every incoming update.
         /// It should be a sub-class of <see cref="AbstractPreUpdateProcessor"/>.
         /// <para>
-        /// Your class should have a parameterless ctor if <paramref name="serviceDescriptors"/>
-        /// is <see langword="null"/>. otherwise you can use items which are in services.
+        /// Your class should have a parameterless ctor if
+        /// <paramref name="serviceDescriptors"/>
+        /// is <see langword="null"/>.
+        /// otherwise you can use items which are in services.
         /// </para>
         /// <para>
         /// Don't forget to add this to service collections if available.
         /// </para>
         /// </param>
         /// <param name="customKeyResolver">
-        /// If you wanna customize the way updater resolves a sender id from <see cref="Update"/> 
+        /// If you wanna customize the way updater resolves a sender id from
+        /// <see cref="Update"/> 
         /// ( as queue keys ), you can pass your own. <b>Use with care!</b>
         /// </param>
         public Updater(
@@ -60,24 +66,31 @@ namespace TelegramUpdater
             Type? preUpdateProcessorType = default,
             Func<Update, long>? customKeyResolver = default)
         {
-            _botClient = botClient ?? throw new ArgumentNullException(nameof(botClient));
+            _botClient = botClient ??
+                throw new ArgumentNullException(nameof(botClient));
             _updaterOptions = updaterOptions;
             _preUpdateProcessorType = preUpdateProcessorType;
 
             if (_preUpdateProcessorType is not null)
             {
-                if (!typeof(AbstractPreUpdateProcessor).IsAssignableFrom(preUpdateProcessorType))
+                if (!typeof(AbstractPreUpdateProcessor)
+                    .IsAssignableFrom(preUpdateProcessorType))
                 {
                     throw new InvalidOperationException(
-                        $"Input type for preUpdateProcessorType ( {preUpdateProcessorType} ) should be an instance of AbstractPreUpdateProcessor.");
+                        $"Input type for preUpdateProcessorType " +
+                        "( {preUpdateProcessorType} ) should be an" +
+                        " instance of AbstractPreUpdateProcessor.");
                 }
 
                 if (serviceDescriptors is null)
                 {
-                    if (preUpdateProcessorType.GetConstructor(Type.EmptyTypes) == null)
+                    if (preUpdateProcessorType
+                        .GetConstructor(Type.EmptyTypes) == null)
                     {
                         throw new InvalidOperationException(
-                            $"Input type for preUpdateProcessorType ( {preUpdateProcessorType} ) should have an empty ctor when there's no service provider.");
+                            $"Input type for preUpdateProcessorType " +
+                            "( {preUpdateProcessorType} ) should have" +
+                            " an empty ctor when there's no service provider.");
                     }
                 }
             }
@@ -89,8 +102,10 @@ namespace TelegramUpdater
             _scopedHandlerContainers = new List<IScopedHandlerContainer>();
 
             _rainbow = new Rainbow<long, Update>(
-                updaterOptions.MaxDegreeOfParallelism ?? Environment.ProcessorCount,
-                customKeyResolver?? QueueKeyResolver,
+                updaterOptions.MaxDegreeOfParallelism ??
+                    Environment.ProcessorCount,
+
+                customKeyResolver ?? QueueKeyResolver,
                 ShineCallback, ShineErrors);
 
             if (_updaterOptions.Logger == null)
@@ -111,7 +126,8 @@ namespace TelegramUpdater
         }
 
         /// <summary>
-        /// Creates an instance of updater to fetch updates from telegram and handle them.
+        /// Creates an instance of updater to fetch updates from
+        /// telegram and handle them.
         /// </summary>
         /// <param name="botToken">Your telegram bot token.</param>
         /// <param name="updaterOptions">Options for this updater.</param>
@@ -126,7 +142,8 @@ namespace TelegramUpdater
         /// </para>
         /// </param>
         /// <param name="customKeyResolver">
-        /// If you wanna customize the way updater resolves a sender id from <see cref="Update"/> 
+        /// If you wanna customize the way updater resolves a sender id
+        /// from <see cref="Update"/> 
         /// ( as queue keys ), you can pass your own. <b>Use with care!</b>
         /// </param>
         public Updater(string botToken,
@@ -162,7 +179,8 @@ namespace TelegramUpdater
         }
 
         /// <inheritdoc/>
-        public Updater AddScopedHandler(IScopedHandlerContainer scopedHandlerContainer)
+        public Updater AddScopedHandler(
+            IScopedHandlerContainer scopedHandlerContainer)
         {
             var _h = scopedHandlerContainer.GetType();
             _scopedHandlerContainers.Add(scopedHandlerContainer);
@@ -181,18 +199,22 @@ namespace TelegramUpdater
         }
 
         /// <inheritdoc/>
-        public async ValueTask WriteAsync(Update update, CancellationToken cancellationToken = default)
+        public async ValueTask WriteAsync(
+            Update update, CancellationToken cancellationToken = default)
         {
             await Rainbow.EnqueueAsync(update, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public async Task StartAsync<TWriter>(CancellationToken cancellationToken = default)
+        public async Task StartAsync<TWriter>(
+            CancellationToken cancellationToken = default)
             where TWriter : UpdateWriterAbs, new()
         {
             if (cancellationToken == default)
             {
-                _logger.LogInformation("Start's CancellationToken set to CancellationToken in UpdaterOptions");
+                _logger.LogInformation(
+                    "Start's CancellationToken set to " +
+                    "CancellationToken in UpdaterOptions");
                 cancellationToken = _updaterOptions.CancellationToken;
             }
 
@@ -206,8 +228,10 @@ namespace TelegramUpdater
                     UpdaterOptions.FlushUpdatesQueue,
                     DetectAllowedUpdates()); // Auto detect allowed updates
 
-                _logger.LogInformation("Detected allowed updates automatically {allowed}",
-                    string.Join(", ", AllowedUpdates.Select(x => x.ToString())));
+                _logger.LogInformation(
+                    "Detected allowed updates automatically {allowed}",
+                    string.Join(", ", AllowedUpdates.Select(x => x.ToString()))
+                );
             }
 
             // Link tokens. so we can use _emergencyCancel when required.
@@ -218,7 +242,8 @@ namespace TelegramUpdater
             var writer = new TWriter();
             writer.SetUpdater(this);
 
-            _logger.LogInformation("Start reading updates from {writer}", typeof(TWriter));
+            _logger.LogInformation(
+                "Start reading updates from {writer}", typeof(TWriter));
             await writer.ExecuteAsync(liked.Token);
         }
 
@@ -257,14 +282,16 @@ namespace TelegramUpdater
                 .Distinct()
                 .ToArray();
 
-        private Task ShineErrors(Exception exception, CancellationToken cancellationToken)
+        private Task ShineErrors(
+            Exception exception, CancellationToken cancellationToken)
         {
             Logger.LogError(exception: exception, message: "Error in Rainbow!");
             return Task.CompletedTask;
         }
 
         private async Task ShineCallback(
-            ShiningInfo<long, Update> shiningInfo, CancellationToken cancellationToken)
+            ShiningInfo<long, Update> shiningInfo,
+            CancellationToken cancellationToken)
         {
             if (shiningInfo == null)
                 return;
@@ -277,7 +304,8 @@ namespace TelegramUpdater
                 if (servicesAvailabe)
                 {
                     using var scope = _serviceDescriptors!.CreateScope();
-                    processor = (AbstractPreUpdateProcessor)scope.ServiceProvider
+                    processor = (AbstractPreUpdateProcessor)scope
+                        .ServiceProvider
                         .GetRequiredService(_preUpdateProcessorType);
                 }
                 else
@@ -295,7 +323,8 @@ namespace TelegramUpdater
 
             if (servicesAvailabe)
             {
-                await ProcessUpdateFromServices(shiningInfo, cancellationToken);
+                await ProcessUpdateFromServices(
+                    shiningInfo, cancellationToken);
             }
             else
             {
@@ -304,13 +333,16 @@ namespace TelegramUpdater
         }
 
         private async Task ProcessUpdateFromServices(
-            ShiningInfo<long, Update> shiningInfo, CancellationToken cancellationToken)
+            ShiningInfo<long, Update> shiningInfo,
+            CancellationToken cancellationToken)
         {
             try
             {
 
                 if (_serviceDescriptors == null)
-                    throw new InvalidOperationException("Can't ProcessUpdateFromServices when there is no ServiceProvider.");
+                    throw new InvalidOperationException(
+                        "Can't ProcessUpdateFromServices when" +
+                        " there is no ServiceProvider.");
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -341,7 +373,8 @@ namespace TelegramUpdater
 
                     if (handler != null)
                     {
-                        if (!await HandleHandler(shiningInfo, handler, cancellationToken))
+                        if (!await HandleHandler(
+                            shiningInfo, handler, cancellationToken))
                         {
                             break;
                         }
@@ -350,12 +383,14 @@ namespace TelegramUpdater
             }
             catch (Exception e)
             {
-                _logger.LogError(exception: e, "Error in ProcessUpdateFromServices.");
+                _logger.LogError(
+                    exception: e, "Error in ProcessUpdateFromServices.");
             }
         }
 
         private async Task ProcessUpdate(
-            ShiningInfo<long, Update> shiningInfo, CancellationToken cancellationToken)
+            ShiningInfo<long, Update> shiningInfo,
+            CancellationToken cancellationToken)
         {
             try
             {
@@ -393,7 +428,8 @@ namespace TelegramUpdater
                         break;
                     }
 
-                    if (!await HandleHandler(shiningInfo, handler, cancellationToken))
+                    if (!await HandleHandler(
+                        shiningInfo, handler, cancellationToken))
                     {
                         break;
                     }
