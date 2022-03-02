@@ -16,7 +16,9 @@ namespace TelegramUpdater.UpdateChannels
         /// An abstract class for channel updates.
         /// </summary>
         /// <param name="updateType">Type of update.</param>
-        /// <param name="getT">A function to select the right update from <see cref="Update"/></param>
+        /// <param name="getT">
+        /// A function to select the right update from <see cref="Update"/>
+        /// </param>
         /// <param name="filter">Filter.</param>
         /// <param name="timeOut">Time out to wait for the channel.</param>
         /// <exception cref="ArgumentNullException"></exception>
@@ -30,7 +32,8 @@ namespace TelegramUpdater.UpdateChannels
                 throw new ArgumentException("Use a valid time out.");
 
             if (updateType == UpdateType.Unknown)
-                throw new ArgumentException($"There's nothing uknown here! {nameof(updateType)}");
+                throw new ArgumentException(
+                    $"There's nothing unknown here! {nameof(updateType)}");
 
             TimeOut = timeOut;
             _filter = filter;
@@ -38,7 +41,8 @@ namespace TelegramUpdater.UpdateChannels
             _getT = getT ?? throw new ArgumentNullException(nameof(getT));
         }
 
-        internal IReadOnlyDictionary<string, object>? ExtraData => _filter?.ExtraData;
+        internal IReadOnlyDictionary<string, object>? ExtraData
+            => _filter?.ExtraData;
 
 
         /// <inheritdoc/>
@@ -52,10 +56,10 @@ namespace TelegramUpdater.UpdateChannels
         /// </summary>
         /// <param name="update"></param>
         /// <returns></returns>
-        public T? GetT(Update update) => _getT(update);
+        internal T? GetT(Update update) => _getT(update);
 
         /// <inheritdoc/>
-        protected bool ShouldChannel(T t)
+        private bool ShouldChannel(T t)
         {
             if (_filter is null) return true;
 

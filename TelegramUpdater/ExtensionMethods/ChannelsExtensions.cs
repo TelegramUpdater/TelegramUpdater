@@ -35,7 +35,7 @@ public static class ChannelsExtensions
                 "abstractChannel and updateResolver both can't be null");
         }
 
-        // A scondery timeOut, cuz ReadNextAsync'timeout will reset on unrelated update.
+        // A secondary timeOut, cuz ReadNextAsync'timeout will reset on unrelated update.
         var timeOutCts = new CancellationTokenSource();
         timeOutCts.CancelAfter(abstractChannel.TimeOut);
 

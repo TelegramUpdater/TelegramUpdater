@@ -9,11 +9,11 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers
     public class AnyContainer<T> : UpdateContainerAbs<T> where T : class
     {
         internal AnyContainer(
-            Func<Update, T?> insiderResovler,
+            Func<Update, T?> insiderResolver,
             IUpdater updater,
             ShiningInfo<long, Update> shiningInfo,
             IReadOnlyDictionary<string, object>? extraObjects = default)
-            : base(insiderResovler, updater, shiningInfo, extraObjects)
+            : base(insiderResolver, updater, shiningInfo, extraObjects)
         { }
     }
 }

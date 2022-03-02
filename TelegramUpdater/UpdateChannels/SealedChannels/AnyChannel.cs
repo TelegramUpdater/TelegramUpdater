@@ -11,7 +11,10 @@ namespace TelegramUpdater.UpdateChannels.SealedChannels
     public abstract class AnyChannel<T> : AbstractChannel<T> where T : class
     {
         internal AnyChannel(
-            UpdateType updateType, Func<Update, T?> getT, TimeSpan timeOut, IFilter<T>? filter)
+            UpdateType updateType,
+            Func<Update, T?> getT,
+            TimeSpan timeOut,
+            IFilter<T>? filter)
             : base(updateType, getT, timeOut, filter)
         { }
 
