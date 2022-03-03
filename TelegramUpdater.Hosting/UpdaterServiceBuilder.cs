@@ -1,6 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -13,12 +17,12 @@ namespace TelegramUpdater.Hosting
     public class UpdaterServiceBuilder
     {
         private readonly List<IScopedHandlerContainer> _scopedHandlerContainers;
-        private readonly List<IExceptionHandler> _exceptionHandlers;
+        private readonly List<Action<IUpdater>> _otherExecutions;
 
         public UpdaterServiceBuilder()
         {
-            _scopedHandlerContainers = new List<IScopedHandlerContainer>();
-            _exceptionHandlers = new List<IExceptionHandler>();
+            _scopedHandlerContainers = new();
+            _otherExecutions = new();
         }
 
         /// <summary>
@@ -31,9 +35,9 @@ namespace TelegramUpdater.Hosting
                 updater.AddScopedHandler(container);
             }
 
-            foreach (var exceptionHandler in _exceptionHandlers)
+            foreach (var execution in _otherExecutions)
             {
-                updater.AddExceptionHandler(exceptionHandler);
+                execution(updater);
             }
 
             _scopedHandlerContainers.Clear();
@@ -65,16 +69,6 @@ namespace TelegramUpdater.Hosting
         public UpdaterServiceBuilder AddHandler(IScopedHandlerContainer scopedHandlerContainer)
         {
             _scopedHandlerContainers.Add(scopedHandlerContainer);
-            return this;
-        }
-
-        /// <summary>
-        /// Add your exception handler to this updater.
-        /// </summary>
-        /// <param name="exceptionHandler"></param>
-        public UpdaterServiceBuilder AddExceptionHandler(IExceptionHandler exceptionHandler)
-        {
-            _exceptionHandlers.Add(exceptionHandler);
             return this;
         }
 
@@ -193,6 +187,32 @@ namespace TelegramUpdater.Hosting
             => AddHandler<THandler, CallbackQuery>(filter, UpdateType.Message, x => x.CallbackQuery!);
 
         /// <summary>
+        /// Execute any action on the <see cref="IUpdater"/> instance.
+        /// </summary>
+        /// <remarks>
+        /// These actions are only applied on updater, nothing is added to services!
+        /// So DON'T use this if you wanna add scoped handlers and they should be
+        /// available from services.
+        /// </remarks>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public UpdaterServiceBuilder ExecuteOthers(Action<IUpdater> action)
+        {
+            _otherExecutions.Add(action);
+            return this;
+        }
+
+        /// <summary>
+        /// Add your exception handler to this updater.
+        /// </summary>
+        /// <param name="exceptionHandler"></param>
+        public UpdaterServiceBuilder AddExceptionHandler(IExceptionHandler exceptionHandler)
+        {
+            ExecuteOthers(updater=> updater.AddExceptionHandler(exceptionHandler));
+            return this;
+        }
+
+        /// <summary>
         /// Add your exception handler to this updater.
         /// </summary>
         /// <param name="callback">A callback function that will be called when the error catched.</param>
@@ -208,8 +228,8 @@ namespace TelegramUpdater.Hosting
             Type[]? allowedHandlers = null,
             bool inherit = false) where TException : Exception
         {
-            return AddExceptionHandler(
-                new ExceptionHandler<TException>(callback, messageMatch, allowedHandlers, inherit));
+            return ExecuteOthers(x => x.AddExceptionHandler(
+                new ExceptionHandler<TException>(callback, messageMatch, allowedHandlers, inherit)));
         }
 
         /// <summary>
@@ -223,8 +243,111 @@ namespace TelegramUpdater.Hosting
             bool inherit = false)
             where TException : Exception where THandler : IUpdateHandler
         {
-            return AddExceptionHandler<TException>(
-                callback, messageMatch, new[] { typeof(THandler) }, inherit);
+            return ExecuteOthers(updater => updater.AddExceptionHandler<TException>(
+                callback, messageMatch, new[] { typeof(THandler) }, inherit));
+        }
+        
+        /// <summary>
+        /// Add default exception handler to the updater.
+        /// </summary>
+        /// <param name="logLevel"></param>
+        /// <returns></returns>
+        public UpdaterServiceBuilder AddDefaultExceptionHandler(LogLevel? logLevel = default)
+        {
+            return ExecuteOthers(updater => updater.AddDefaultExceptionHandler(logLevel));
+        }
+
+        private static bool TryResovleNamespaceToUpdateType(
+            string handlersParentNamespace, string currentNs, [NotNullWhen(true)] out Type? type)
+        {
+            var nsParts = currentNs.Split('.');
+            if (nsParts.Length != 3)
+                throw new Exception("Namespace is invalid.");
+
+            if ($"{nsParts[0]}.{nsParts[1]}" != handlersParentNamespace)
+                throw new Exception("Base namespace not matching the handler namespace");
+
+            type = nsParts[2] switch
+            {
+                "Messages" => typeof(Message),
+                "CallbackQueries" => typeof(CallbackQuery),
+                "InlineQueries" => typeof(InlineQuery),
+                _ => null
+            };
+
+            if (type is null)
+                return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Automatically collects all classes that are marked as scoped handlers
+        /// And adds them to the <see cref="IUpdater"/> instance.
+        /// </summary>
+        /// <remarks>
+        /// <b>Considerations:</b>
+        /// <list type="number">
+        /// <item>
+        /// You should place handlers of different update types
+        /// ( <see cref="UpdateType.Message"/>, <see cref="UpdateType.CallbackQuery"/> and etc. )
+        /// into different parent folders.
+        /// </item>
+        /// <item>
+        /// Parent name should match the update type name, eg: <c>Messages</c> for <see cref="UpdateType.Message"/>
+        /// </item>
+        /// </list>
+        /// Eg: <paramref name="handlersParentNamespace"/>/Messages/MyScopedMessageHandler
+        /// </remarks>
+        /// <returns></returns>
+        public UpdaterServiceBuilder AutoCollectScopedHandlers(
+            string handlersParentNamespace = "UpdateHandlers")
+        {
+            var entryAssembly = Assembly.GetEntryAssembly();
+
+            if (entryAssembly is null)
+                throw new ApplicationException("Can't find entry assembly.");
+
+            var allTypes = entryAssembly.GetTypes();
+            var assemplyName = entryAssembly.GetName().Name;
+
+            var handlerNs = $"{assemplyName}.{handlersParentNamespace}";
+
+            // All types in *handlersParentNamespace*
+            var typesInNamespace = allTypes
+                .Where(x =>
+                    x.Namespace is not null &&
+                    x.Namespace.StartsWith(handlerNs));
+
+            var validTypesInNamespace = typesInNamespace
+                .Where(x => x.IsClass);
+
+            var scopedHandlersTypes = validTypesInNamespace
+                .Where(x => typeof(IScopedUpdateHandler).IsAssignableFrom(x));
+
+            foreach (var scopedType in scopedHandlersTypes)
+            {
+                if (!TryResovleNamespaceToUpdateType(
+                    handlerNs, scopedType.Namespace!, out var updateType))
+                {
+                    continue;
+                }
+
+                var containerGeneric = typeof(UpdateContainerBuilder<,>)
+                    .MakeGenericType(scopedType, updateType);
+
+                var container = (IScopedHandlerContainer?)Activator.CreateInstance(
+                    containerGeneric,
+                    new object?[]
+                    {
+                        Enum.Parse<UpdateType>(updateType.Name), null, null
+                    });
+
+                if (container is null) continue;
+
+                AddHandler(container);
+            }
+
+            return this;
         }
     }
 }

@@ -128,7 +128,7 @@ public static class UpdaterExtensions
             if (container is null) continue;
 
             updater.Logger.LogInformation("Scoped handler collected! ( {Name} )", scopedType.Name);
-            return updater.AddScopedHandler(container);
+            updater.AddScopedHandler(container);
         }
 
         return updater;

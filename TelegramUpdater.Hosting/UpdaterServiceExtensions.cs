@@ -42,15 +42,15 @@ namespace TelegramUpdater.Hosting
         /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="UpdateWriterServiceAbs"/></typeparam>
         public static void AddTelegramUpdater<TWriter>(this IServiceCollection serviceDescriptors,
                                                        string botToken,
-                                                       UpdaterOptions updaterOptions,
-                                                       Action<UpdaterServiceBuilder> builder,
+                                                       UpdaterOptions updaterOptions = default,
+                                                       Action<UpdaterServiceBuilder>? builder = default,
                                                        Type? preUpdateProcessorType = default)
             where TWriter : UpdateWriterServiceAbs
         {
             serviceDescriptors.AddTelegramBotClient(botToken);
 
             var updaterBuilder = new UpdaterServiceBuilder();
-            builder(updaterBuilder);
+            builder?.Invoke(updaterBuilder);
 
             updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
@@ -93,13 +93,13 @@ namespace TelegramUpdater.Hosting
         /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="UpdateWriterServiceAbs"/></typeparam>
         public static void AddTelegramUpdater<TWriter>(this IServiceCollection serviceDescriptors,
                                                        ITelegramBotClient telegramBot,
-                                                       UpdaterOptions updaterOptions,
-                                                       Action<UpdaterServiceBuilder> builder,
+                                                       UpdaterOptions updaterOptions = default,
+                                                       Action<UpdaterServiceBuilder>? builder = default,
                                                        Type? preUpdateProcessorType = default)
             where TWriter : UpdateWriterServiceAbs
         {
             var updaterBuilder = new UpdaterServiceBuilder();
-            builder(updaterBuilder);
+            builder?.Invoke(updaterBuilder);
 
             updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
@@ -231,8 +231,8 @@ namespace TelegramUpdater.Hosting
         /// <param name="updaterOptions">Updater options.</param>
         public static void AddTelegramUpdater(this IServiceCollection serviceDescriptors,
                                               string botToken,
-                                              UpdaterOptions updaterOptions,
-                                              Action<UpdaterServiceBuilder> builder,
+                                              UpdaterOptions updaterOptions = default,
+                                              Action<UpdaterServiceBuilder>? builder = default,
                                               Type? preUpdateProcessorType = default)
         {
             serviceDescriptors.AddTelegramUpdater<SimpleWriterService>(
@@ -277,8 +277,8 @@ namespace TelegramUpdater.Hosting
         /// <param name="telegramBot"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
         public static void AddTelegramUpdater(this IServiceCollection serviceDescriptors,
                                               ITelegramBotClient telegramBot,
-                                              UpdaterOptions updaterOptions,
-                                              Action<UpdaterServiceBuilder> builder,
+                                              UpdaterOptions updaterOptions = default,
+                                              Action<UpdaterServiceBuilder>? builder = default,
                                               Type? preUpdateProcessorType = default)
         {
             serviceDescriptors.AddTelegramUpdater<SimpleWriterService>(
@@ -300,12 +300,12 @@ namespace TelegramUpdater.Hosting
         /// <param name="telegramBot"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
         public static void AddTelegramManualUpdater(this IServiceCollection serviceDescriptors,
                                                     ITelegramBotClient telegramBot,
-                                                    UpdaterOptions updaterOptions,
-                                                    Action<UpdaterServiceBuilder> builder,
+                                                    UpdaterOptions updaterOptions = default,
+                                                    Action<UpdaterServiceBuilder>? builder = default,
                                                     Type? preUpdateProcessorType = default)
         {
             var updaterBuilder = new UpdaterServiceBuilder();
-            builder(updaterBuilder);
+            builder?.Invoke(updaterBuilder);
 
             updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
@@ -432,14 +432,14 @@ namespace TelegramUpdater.Hosting
         /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="UpdateWriterServiceAbs"/></typeparam>
         public static void AddTelegramManualUpdater(this IServiceCollection serviceDescriptors,
                                                     string botToken,
-                                                    UpdaterOptions updaterOptions,
-                                                    Action<UpdaterServiceBuilder> builder,
+                                                    UpdaterOptions updaterOptions = default,
+                                                    Action<UpdaterServiceBuilder>? builder = default,
                                                     Type? preUpdateProcessorType = default)
         {
             serviceDescriptors.AddTelegramBotClient(botToken);
 
             var updaterBuilder = new UpdaterServiceBuilder();
-            builder(updaterBuilder);
+            builder?.Invoke(updaterBuilder);
 
             updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
