@@ -3,30 +3,34 @@
 namespace TelegramUpdater.UpdateContainer
 {
     /// <summary>
-    /// A container for incoming updates, which contains <typeparamref name="T"/> as your update.
+    /// A container for incoming updates, which contains
+    /// <typeparamref name="T"/> as your update.
     /// </summary>
     /// <typeparam name="T">Update type.</typeparam>
-    public abstract class UpdateContainerAbs<T> : IContainer<T> where T : class
+    public abstract class UpdateContainerAbs<T> : IContainer<T>
+        where T : class
     {
-        private readonly Func<Update, T?> _insiderResovler;
+        private readonly Func<Update, T?> _insiderResolver;
         private readonly IReadOnlyDictionary<string, object> _extraObjects;
 
         internal UpdateContainerAbs(
-            Func<Update, T?> insiderResovler,
+            Func<Update, T?> insiderResolver,
             IUpdater updater,
             ShiningInfo<long, Update> shiningInsider,
             IReadOnlyDictionary<string, object>? extraObjects = default)
         {
-            Updater = updater ?? throw new ArgumentNullException(nameof(updater));
+            Updater = updater ??
+                throw new ArgumentNullException(nameof(updater));
             ShiningInfo = shiningInsider;
             Container = shiningInsider.Value;
             BotClient = updater.BotClient;
-            _insiderResovler = insiderResovler ?? throw new ArgumentNullException(nameof(insiderResovler));
-            _extraObjects = extraObjects?? new Dictionary<string, object>();
+            _insiderResolver = insiderResolver ??
+                throw new ArgumentNullException(nameof(insiderResolver));
+            _extraObjects = extraObjects ?? new Dictionary<string, object>();
         }
 
         internal UpdateContainerAbs(
-            Func<Update, T?> insiderResovler,
+            Func<Update, T?> insiderResolver,
             IUpdater updater,
             Update insider,
             IReadOnlyDictionary<string, object>? extraObjects = default)
@@ -35,7 +39,7 @@ namespace TelegramUpdater.UpdateContainer
             Updater = updater;
             Container = insider;
             BotClient = updater.BotClient;
-            _insiderResovler = insiderResovler;
+            _insiderResolver = insiderResolver;
             _extraObjects = extraObjects ?? new Dictionary<string, object>();
         }
 
@@ -43,17 +47,18 @@ namespace TelegramUpdater.UpdateContainer
         public object this[string key] => _extraObjects[key];
 
         /// <summary>
-        /// Orginal update. ( inner update, like <see cref="Update.Message"/> ) 
+        /// Actual update. ( inner update, like <see cref="Update.Message"/> ) 
         /// </summary>
         public T Update
         {
             get
             {
-                var inner = _insiderResovler(Container);
+                var inner = _insiderResolver(Container);
 
                 if (inner == null)
                     throw new InvalidOperationException(
-                        $"Inner update should not be null! Excpected {typeof(T)} is {GetType()}");
+                        $"Inner update should not be null!" +
+                        "Excpected {typeof(T)} is {GetType()}");
 
                 return inner;
             }

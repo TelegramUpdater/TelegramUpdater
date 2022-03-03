@@ -20,28 +20,34 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
         public UpdateType UpdateType { get; }
 
         /// <summary>
-        /// Checks if an update can be handled in a handler of type <see cref="ScopedHandlerType"/>.
+        /// Checks if an update can be handled in a handler
+        /// of type <see cref="ScopedHandlerType"/>.
         /// </summary>
         /// <param name="update">The update.</param>
         /// <returns></returns>
-        public bool ShouldHandle(Update update);
+        internal bool ShouldHandle(Update update);
 
         /// <summary>
         /// Initialize an instance of <see cref="ScopedHandlerType"/>.
         /// </summary>
-        /// <param name="scope">If there is any <see cref="IServiceProvider"/> and <see cref="IServiceScope"/></param>
+        /// <param name="scope">
+        /// If there is any <see cref="IServiceProvider"/> and
+        /// <see cref="IServiceScope"/>
+        /// </param>
         /// <returns></returns>
-        public IScopedUpdateHandler? CreateInstance(IServiceScope? scope = default)
+        internal IScopedUpdateHandler? CreateInstance(
+            IServiceScope? scope = default)
         {
             IScopedUpdateHandler? scopedHandler;
             if (scope != null)
             {
-                scopedHandler = (IScopedUpdateHandler?)scope.ServiceProvider.GetRequiredService(
-                    ScopedHandlerType);
+                scopedHandler = (IScopedUpdateHandler?)scope
+                    .ServiceProvider.GetRequiredService(ScopedHandlerType);
             }
             else
             {
-                scopedHandler = (IScopedUpdateHandler?)Activator.CreateInstance(ScopedHandlerType);
+                scopedHandler = (IScopedUpdateHandler?)Activator
+                    .CreateInstance(ScopedHandlerType);
             }
 
             scopedHandler?.SetExtraData(ExtraData);

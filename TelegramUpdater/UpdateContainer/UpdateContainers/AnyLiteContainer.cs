@@ -5,8 +5,8 @@ using TelegramUpdater.RainbowUtlities;
 namespace TelegramUpdater.UpdateContainer.UpdateContainers
 {
     /// <summary>
-    /// Lite contianer to use for updates that are catched outside of updaters.
-    /// Eg: the result of requests.
+    /// Lite container to use for updates that are received
+    /// outside of updaters. Eg: the result of requests.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class AnyLiteContainer<T> : UpdateContainerAbs<T> where T : class
@@ -14,16 +14,21 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers
         /// <summary>
         /// Create a lite container.
         /// </summary>
-        /// <param name="insiderResovler">A function to resolve inner update.</param>
+        /// <param name="insiderResolver">
+        /// A function to resolve inner update.
+        /// </param>
         /// <param name="update">The update itself.</param>
-        /// <param name="updater">The updater instanse</param>
+        /// <param name="updater">The updater instance</param>
         /// <param name="extraObjects"></param>
         internal AnyLiteContainer(
-            Func<Update, T?> insiderResovler,
+            Func<Update, T?> insiderResolver,
             Update update,
             IUpdater updater,
             IReadOnlyDictionary<string, object>? extraObjects = default)
-            : base(insiderResovler, updater, insider: update, extraObjects: extraObjects)
+            : base(insiderResolver,
+                   updater,
+                   insider: update,
+                   extraObjects: extraObjects)
         { }
 
 
@@ -33,20 +38,26 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers
                 "Lite contianers have no ShiningInfo, since they're not received from updater.");
 
         internal static IContainer<U> CreateLiteContainer<U>(
-            Expression<Func<Update, U?>> insiderResovler, U update, IUpdater updater)
-            where U : class
+            Expression<Func<Update, U?>> insiderResolver,
+            U update,
+            IUpdater updater) where U : class
         {
             var u = new Update();
-            var prop = (PropertyInfo)((MemberExpression)insiderResovler.Body).Member;
+            var prop = (PropertyInfo)((MemberExpression)insiderResolver.Body)
+                .Member;
+
             prop.SetValue(u, update);
 
-            return new AnyLiteContainer<U>(insiderResovler.Compile(), u, updater);
+            return new AnyLiteContainer<U>(
+                insiderResolver.Compile(), u, updater);
         }
 
-        internal static IContainer<Message> MessageLiteContainer(Message update, IUpdater updater)
+        internal static IContainer<Message> MessageLiteContainer(
+            Message update, IUpdater updater)
             => CreateLiteContainer(x => x.Message, update, updater);
 
-        internal static IContainer<CallbackQuery> CallbackQueryLiteContainer(CallbackQuery update, IUpdater updater)
+        internal static IContainer<CallbackQuery> CallbackQueryLiteContainer(
+            CallbackQuery update, IUpdater updater)
             => CreateLiteContainer(x => x.CallbackQuery, update, updater);
     }
 }

@@ -4,12 +4,15 @@ using TelegramUpdater.FilterAttributes;
 namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
 {
     /// <summary>
-    /// Abstarct base for <see cref="IScopedUpdateHandler"/> containers.
+    /// Abstract base for <see cref="IScopedUpdateHandler"/> containers.
     /// </summary>
-    /// <typeparam name="THandler">The handler, which is <see cref="IScopedUpdateHandler"/></typeparam>
+    /// <typeparam name="THandler">
+    /// The handler, which is <see cref="IScopedUpdateHandler"/>
+    /// </typeparam>
     /// <typeparam name="TUpdate">Update type.</typeparam>
-    public abstract class AbstractUpdateContainer<THandler, TUpdate> : IScopedHandlerContainer
-        where THandler : IScopedUpdateHandler where TUpdate : class
+    public abstract class AbstractUpdateContainer<THandler, TUpdate>
+        : IScopedHandlerContainer where THandler
+        : IScopedUpdateHandler where TUpdate : class
     {
         private readonly IFilter<TUpdate>? _filter;
 
@@ -17,7 +20,8 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
             UpdateType updateType, IFilter<TUpdate>? filter = default)
         {
             if (updateType == UpdateType.Unknown)
-                throw new ArgumentException($"There's nothing uknown here! {nameof(updateType)}");
+                throw new ArgumentException(
+                    $"There's nothing unknown here! {nameof(updateType)}");
 
             UpdateType = updateType;
             ScopedHandlerType = typeof(THandler);
@@ -37,25 +41,30 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
         /// <inheritdoc/>
         public UpdateType UpdateType { get; }
 
-        IReadOnlyDictionary<string, object>? IScopedHandlerContainer.ExtraData => _filter?.ExtraData;
+        IReadOnlyDictionary<string, object>? IScopedHandlerContainer.ExtraData
+            => _filter?.ExtraData;
 
         /// <summary>
         /// Checks if an update can be handled in a handler of type <see cref="ScopedHandlerType"/>.
         /// </summary>
         /// <param name="t">The inner update.</param>
         /// <returns></returns>
-        internal bool ShouldHandle(TUpdate t)
+        private bool ShouldHandle(TUpdate t)
         {
             if (_filter is null) return true;
 
             return _filter.TheyShellPass(t);
         }
 
-        /// <inheritdoc/>
-        protected abstract TUpdate? GetT(Update update);
+        /// <summary>
+        /// A function to extract actual update from <see cref="Update"/>.
+        /// </summary>
+        /// <param name="update">The update.</param>
+        /// <returns></returns>
+        internal protected abstract TUpdate? GetT(Update update);
 
         /// <inheritdoc/>
-        public bool ShouldHandle(Update update)
+        bool IScopedHandlerContainer.ShouldHandle(Update update)
         {
             if (update.Type != UpdateType) return false;
 
@@ -66,7 +75,8 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
             return ShouldHandle(insider);
         }
 
-        internal static IFilter<T> GetFilterAttributes<T>(Type type) where T : class
+        internal static IFilter<T> GetFilterAttributes<T>(Type type)
+            where T : class
         {
             Filter<T> filter = null!;
             var applied = type.GetCustomAttributes<AbstractFilterAttribute>();

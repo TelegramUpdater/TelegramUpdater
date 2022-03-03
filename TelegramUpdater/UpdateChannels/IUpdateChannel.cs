@@ -18,6 +18,6 @@
         /// <summary>
         /// If this update should be channeled.
         /// </summary>
-        public bool ShouldChannel(Update update);
+        internal bool ShouldChannel(Update update);
     }
 }

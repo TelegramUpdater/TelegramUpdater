@@ -3,7 +3,8 @@
 namespace TelegramUpdater.UpdateContainer.UpdateContainers
 {
     /// <summary>
-    /// Raw container has raw <see cref="Update"/> only, inner update must be decieded manually.
+    /// Raw container has raw <see cref="Update"/> only,
+    /// inner update must be decided manually.
     /// </summary>
     public sealed class RawContainer : IUpdateContainer
     {
@@ -13,8 +14,12 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers
         /// Create an instance of <see cref="RawContainer"/>
         /// </summary>
         /// <param name="updater">The <see cref="IUpdater"/> instance</param>
-        /// <param name="shiningInfo">Shining info about the received update,</param>
-        /// <param name="extraObjects">A dictionary of extra data for this container.</param>
+        /// <param name="shiningInfo">
+        /// Shining info about the received update.
+        /// </param>
+        /// <param name="extraObjects">
+        /// A dictionary of extra data for this container.
+        /// </param>
         public RawContainer(
             IUpdater updater,
             ShiningInfo<long, Update> shiningInfo,

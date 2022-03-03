@@ -1,8 +1,18 @@
 ﻿namespace TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse
 {
-    public abstract class ScopedInlineQueryHandler : AnyScopedHandler<InlineQuery>
+    /// <summary>
+    /// Abstract <see cref="IScopedUpdateHandler"/> for
+    /// <see cref="Update.InlineQuery"/>.
+    /// </summary>
+    public abstract class ScopedInlineQueryHandler
+        : AnyScopedHandler<InlineQuery>
     {
-        protected ScopedInlineQueryHandler(int group = default) : base(x => x.InlineQuery, group)
+        /// <summary>
+        /// You can set handling priority in here.
+        /// </summary>
+        /// <param name="group">Handling priority.</param>
+        protected ScopedInlineQueryHandler(int group = default)
+            : base(x => x.InlineQuery, group)
         {
         }
     }

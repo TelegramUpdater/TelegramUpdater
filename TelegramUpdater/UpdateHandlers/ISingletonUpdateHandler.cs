@@ -8,13 +8,14 @@
         /// <summary>
         /// Type of update.
         /// </summary>
-        UpdateType UpdateType { get; }
+        public UpdateType UpdateType { get; }
 
         /// <summary>
-        /// Checks if an update can be handled in this <see cref="ISingletonUpdateHandler"/>
+        /// Checks if an update can be handled in this
+        /// <see cref="ISingletonUpdateHandler"/>.
         /// </summary>
         /// <param name="update">The update.</param>
         /// <returns></returns>
-        public bool ShouldHandle(Update update);
+        internal bool ShouldHandle(Update update);
     }
 }
