@@ -7,13 +7,13 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
     /// Abstract base for <see cref="IScopedUpdateHandler"/>s.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class AbstractScopedHandler<T> : IScopedUpdateHandler
+    public abstract class AbstractScopedUpdateHandler<T> : IScopedUpdateHandler
         where T : class
     {
         private readonly Func<Update, T?> _getT;
         private IReadOnlyDictionary<string, object>? _extraData;
 
-        internal AbstractScopedHandler(Func<Update, T?> getT, int group)
+        internal AbstractScopedUpdateHandler(Func<Update, T?> getT, int group)
         {
             Group = group;
             _getT = getT ?? throw new ArgumentNullException(nameof(getT));

@@ -17,6 +17,60 @@
         /// A dictionary of extra data produced by this filter.
         /// </summary>
         public IReadOnlyDictionary<string, object>? ExtraData { get; }
+
+        /// <summary>
+        /// Returns an <see cref="AndFilter{T}"/> version.
+        /// <para>
+        /// This and <paramref name="simpleFilter"/>
+        /// </para>
+        /// </summary>
+        public IFilter<T> And(IFilter<T> simpleFilter)
+            => new AndFilter<T>(this, simpleFilter);
+
+        /// <summary>
+        /// Returns an <see cref="OrFilter{T}"/> version.
+        /// <para>
+        /// This Or <paramref name="simpleFilter"/>
+        /// </para>
+        /// </summary>
+        public IFilter<T> Or(IFilter<T> simpleFilter)
+            => new OrFilter<T>(this, simpleFilter);
+
+        /// <summary>
+        /// Returns a reversed version of this <see cref="Filter{T}"/>
+        /// </summary>
+        /// <returns></returns>
+        public IFilter<T> Reverse() => new ReverseFilter<T>(this);
+
+        /// <summary>
+        /// Creates an <see cref="AndFilter{T}"/>
+        /// </summary>
+        public static IFilter<T> operator &(IFilter<T> a, IFilter<T> b)
+            => new AndFilter<T>(a, b);
+
+        /// <summary>
+        /// Creates an <see cref="OrFilter{T}"/>
+        /// </summary>
+        public static IFilter<T> operator |(IFilter<T> a, IFilter<T> b)
+            => new OrFilter<T>(a, b);
+
+        /// <summary>
+        /// Creates a reversed version of this <see cref="Filter{T}"/>
+        /// </summary>
+        public static IFilter<T> operator ~(IFilter<T> a)
+            => new ReverseFilter<T>(a);
+    }
+
+    /// <summary>
+    /// Interface for joined filters.
+    /// </summary>
+    /// <typeparam name="T">A type that filter will apply to.</typeparam>
+    public interface IJoinedFilter<T> : IFilter<T>
+    {
+        /// <summary>
+        /// Filters that are going to join.
+        /// </summary>
+        public IFilter<T>[] Filters { get; }
     }
 
     /// <summary>
@@ -62,6 +116,13 @@
             => input != null && (_filter is null || _filter(input));
 
         /// <summary>
+        /// Converts a <paramref name="filter"/> to <see cref="Filter{T}"/>
+        /// </summary>
+        /// <param name="filter"></param>
+
+        public static implicit operator Filter<T>(Func<T, bool> filter) => new(filter);
+
+        /// <summary>
         /// Converts a filter to a function.
         /// </summary>
         /// <param name="filter"></param>
@@ -93,22 +154,15 @@
         public IFilter<T> Reverse() => new ReverseFilter<T>(this);
 
         /// <summary>
-        /// Converts a <paramref name="filter"/> to <see cref="Filter{T}"/>
-        /// </summary>
-        /// <param name="filter"></param>
-
-        public static implicit operator Filter<T>(Func<T, bool> filter) => new(filter);
-
-        /// <summary>
         /// Creates an <see cref="AndFilter{T}"/>
         /// </summary>
-        public static Filter<T> operator &(Filter<T> a, Filter<T> b)
+        public static IFilter<T> operator &(Filter<T> a, Filter<T> b)
             => new AndFilter<T>(a, b);
 
         /// <summary>
         /// Creates an <see cref="OrFilter{T}"/>
         /// </summary>
-        public static Filter<T> operator |(Filter<T> a, Filter<T> b)
+        public static IFilter<T> operator |(Filter<T> a, Filter<T> b)
             => new OrFilter<T>(a, b);
 
         /// <summary>
@@ -135,7 +189,7 @@
     /// Used when two filters are going to join other.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class JoinedFilter<T> : Filter<T>
+    public abstract class JoinedFilter<T> : IJoinedFilter<T>
     {
         private Dictionary<string, object>? _extraData;
 
@@ -147,10 +201,11 @@
             Filters = filters;
         }
 
-        /// <summary>
-        /// An array of sub filters.
-        /// </summary>
+        /// <inheritdoc/>
         public IFilter<T>[] Filters { get; }
+
+        /// <inheritdoc/>
+        public IReadOnlyDictionary<string, object>? ExtraData => _extraData;
 
         /// <summary>
         /// Check if the filters are passed here.
@@ -160,7 +215,7 @@
         protected abstract bool InnerTheyShellPass(T input);
 
         /// <inheritdoc/>
-        public override bool TheyShellPass(T input)
+        public bool TheyShellPass(T input)
         {
             var shellPass = InnerTheyShellPass(input);
             _extraData = Filters.Where(x => x.ExtraData is not null)
@@ -169,9 +224,6 @@
                 .ToDictionary(x => x.Key, x => x.Value);
             return shellPass;
         }
-
-        /// <inheritdoc/>
-        public override IReadOnlyDictionary<string, object>? ExtraData => _extraData;
     }
 
     /// <summary>
@@ -271,6 +323,30 @@
 
                 return false;
             });
+        }
+
+        /// <summary>
+        /// Discover all sub filters of this filter.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="filter"></param>
+        /// <returns></returns>
+        public static IEnumerable<IFilter<T>> DiscoverNestedFilters<T>(this IFilter<T> filter)
+        {
+            if (filter is IJoinedFilter<T> joinedFilter)
+            {
+                foreach (var parts in joinedFilter.Filters)
+                {
+                    foreach (var nestedNested in parts.DiscoverNestedFilters())
+                    {
+                        yield return nestedNested;
+                    }
+                }
+            }
+            else
+            {
+                yield return filter;
+            }
         }
     }
 }

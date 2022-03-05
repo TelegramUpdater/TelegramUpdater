@@ -8,7 +8,7 @@ namespace TelegramUpdater.UpdateHandlers.SealedHandlers
     /// Create update handler for any type of updates.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class AnyUpdateHandler<T> : AbstractHandler<T> where T : class
+    public class AnyUpdateHandler<T> : AbstractSingletonUpdateHandler<T> where T : class
     {
         private readonly Func<IContainer<T>, Task> _handleAsync;
 

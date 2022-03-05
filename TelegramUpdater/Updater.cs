@@ -14,7 +14,7 @@ namespace TelegramUpdater
     {
         private readonly ITelegramBotClient _botClient;
         private readonly List<ISingletonUpdateHandler> _updateHandlers;
-        private readonly List<IScopedHandlerContainer> _scopedHandlerContainers;
+        private readonly List<IScopedUpdateHandlerContainer> _scopedHandlerContainers;
         private readonly List<IExceptionHandler> _exceptionHandlers;
         private readonly ILogger<IUpdater> _logger;
         private readonly Type? _preUpdateProcessorType;
@@ -99,7 +99,7 @@ namespace TelegramUpdater
 
             _updateHandlers = new List<ISingletonUpdateHandler>();
             _exceptionHandlers = new List<IExceptionHandler>();
-            _scopedHandlerContainers = new List<IScopedHandlerContainer>();
+            _scopedHandlerContainers = new List<IScopedUpdateHandlerContainer>();
 
             _rainbow = new Rainbow<long, Update>(
                 updaterOptions.MaxDegreeOfParallelism ??
@@ -171,6 +171,12 @@ namespace TelegramUpdater
         public UpdateType[] AllowedUpdates => _updaterOptions.AllowedUpdates;
 
         /// <inheritdoc/>
+        public IEnumerable<IScopedUpdateHandlerContainer> ScopedHandlerContainers => _scopedHandlerContainers;
+
+        /// <inheritdoc/>
+        public IEnumerable<ISingletonUpdateHandler> SingletonUpdateHandlers => _updateHandlers;
+
+        /// <inheritdoc/>
         public Updater AddUpdateHandler(ISingletonUpdateHandler updateHandler)
         {
             _updateHandlers.Add(updateHandler);
@@ -180,7 +186,7 @@ namespace TelegramUpdater
 
         /// <inheritdoc/>
         public Updater AddScopedHandler(
-            IScopedHandlerContainer scopedHandlerContainer)
+            IScopedUpdateHandlerContainer scopedHandlerContainer)
         {
             var _h = scopedHandlerContainer.GetType();
             _scopedHandlerContainers.Add(scopedHandlerContainer);

@@ -60,6 +60,6 @@ public static class ExceptionHandlerExtensions
                 exception: e,
                 message: "Execption occured in update handlers");
             return Task.CompletedTask;
-        });
+        }, inherit: true);
     }
 }

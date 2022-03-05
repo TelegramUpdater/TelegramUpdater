@@ -7,13 +7,10 @@ namespace TelegramUpdater.UpdateHandlers
     /// Abstract base to create update handlers.
     /// </summary>
     /// <typeparam name="T">Update type.</typeparam>
-    public abstract class AbstractHandler<T> : ISingletonUpdateHandler
+    public abstract class AbstractSingletonUpdateHandler<T> : IGenericSingletonUpdateHandler<T>
         where T : class
     {
-        private readonly Func<Update, T?> _getT;
-        private readonly IFilter<T>? _filter;
-
-        internal AbstractHandler(
+        internal AbstractSingletonUpdateHandler(
             UpdateType updateType,
             Func<Update, T?> getT,
             IFilter<T>? filter,
@@ -23,20 +20,26 @@ namespace TelegramUpdater.UpdateHandlers
                 throw new ArgumentException(
                     $"There's nothing unknown here! {nameof(updateType)}");
 
-            _filter = filter;
-            _getT = getT ?? throw new ArgumentNullException(nameof(getT));
+            Filter = filter;
+            GetActualUpdate = getT ?? throw new ArgumentNullException(nameof(getT));
             UpdateType = updateType;
             Group = group;
         }
 
         internal IReadOnlyDictionary<string, object>? ExtraData
-            => _filter?.ExtraData;
+            => Filter?.ExtraData;
 
         /// <inheritdoc/>
         public UpdateType UpdateType { get; }
 
         /// <inheritdoc/>
         public int Group { get; }
+
+        /// <inheritdoc/>
+        public IFilter<T>? Filter { get; }
+
+        /// <inheritdoc/>
+        public Func<Update, T?> GetActualUpdate { get; }
 
         /// <summary>
         /// Here you may handle the incoming update here.
@@ -55,9 +58,9 @@ namespace TelegramUpdater.UpdateHandlers
         /// <returns></returns>
         protected virtual bool ShouldHandle(T input)
         {
-            if (_filter is null) return true;
+            if (Filter is null) return true;
 
-            return _filter.TheyShellPass(input);
+            return Filter.TheyShellPass(input);
         }
 
         /// <inheritdoc/>
@@ -82,7 +85,7 @@ namespace TelegramUpdater.UpdateHandlers
         /// </summary>
         /// <param name="update">The update.</param>
         /// <returns></returns>
-        internal protected T? GetT(Update update) => _getT(update);
+        internal protected T? GetT(Update update) => GetActualUpdate(update);
 
         internal abstract IContainer<T> ContainerBuilder(
             IUpdater updater, ShiningInfo<long, Update> shiningInfo);

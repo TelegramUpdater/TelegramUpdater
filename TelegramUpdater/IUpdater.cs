@@ -37,6 +37,18 @@ namespace TelegramUpdater
         public UpdateType[] AllowedUpdates { get; }
 
         /// <summary>
+        /// Enumerate over <see cref="IScopedUpdateHandlerContainer"/>s, registered to this instance
+        /// of <see cref="IUpdater"/>.
+        /// </summary>
+        public IEnumerable<IScopedUpdateHandlerContainer> ScopedHandlerContainers { get; }
+
+        /// <summary>
+        /// Enumerate over <see cref="ISingletonUpdateHandler"/>s, registered to this instance
+        /// of <see cref="IUpdater"/>.
+        /// </summary>
+        public IEnumerable<ISingletonUpdateHandler> SingletonUpdateHandlers { get; }
+
+        /// <summary>
         /// Stop reader and writer ( if available ) tasks.
         /// </summary>
         public void EmergencyCancel();
@@ -51,10 +63,10 @@ namespace TelegramUpdater
         /// Adds an scoped handler to the updater.
         /// </summary>
         /// <param name="scopedHandlerContainer">
-        /// Use <see cref="UpdateContainerBuilder{THandler, TUpdate}"/>
-        /// To Create a new <see cref="IScopedHandlerContainer"/>
+        /// Use <see cref="ScopedUpdateHandlerContainerBuilder{THandler, TUpdate}"/>
+        /// To Create a new <see cref="IScopedUpdateHandlerContainer"/>
         /// </param>
-        Updater AddScopedHandler(IScopedHandlerContainer scopedHandlerContainer);
+        Updater AddScopedHandler(IScopedUpdateHandlerContainer scopedHandlerContainer);
 
         /// <summary>
         /// Add your handler to this updater.

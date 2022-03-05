@@ -8,7 +8,7 @@ namespace TelegramUpdater.UpdateHandlers.AbstractHandlers
     /// A class to create update handler for any type of updates.
     /// </summary>
     /// <typeparam name="T"><see cref="Update"/> type</typeparam>
-    public abstract class AnyUpdateHandlerAbs<T> : AbstractHandler<T>
+    public abstract class AnyUpdateHandlerAbs<T> : AbstractSingletonUpdateHandler<T>
         where T : class
     {
         /// <summary>

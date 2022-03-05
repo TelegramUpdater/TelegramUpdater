@@ -258,14 +258,11 @@ namespace TelegramUpdater.Hosting
         }
 
         private static bool TryResovleNamespaceToUpdateType(
-            string handlersParentNamespace, string currentNs, [NotNullWhen(true)] out Type? type)
+            string currentNs, [NotNullWhen(true)] out Type? type)
         {
             var nsParts = currentNs.Split('.');
-            if (nsParts.Length != 3)
+            if (nsParts.Length < 3)
                 throw new Exception("Namespace is invalid.");
-
-            if ($"{nsParts[0]}.{nsParts[1]}" != handlersParentNamespace)
-                throw new Exception("Base namespace not matching the handler namespace");
 
             type = nsParts[2] switch
             {
@@ -307,27 +304,21 @@ namespace TelegramUpdater.Hosting
             if (entryAssembly is null)
                 throw new ApplicationException("Can't find entry assembly.");
 
-            var allTypes = entryAssembly.GetTypes();
             var assemplyName = entryAssembly.GetName().Name;
 
             var handlerNs = $"{assemplyName}.{handlersParentNamespace}";
 
             // All types in *handlersParentNamespace*
-            var typesInNamespace = allTypes
+            var scopedHandlersTypes = entryAssembly.GetTypes()
                 .Where(x =>
                     x.Namespace is not null &&
-                    x.Namespace.StartsWith(handlerNs));
-
-            var validTypesInNamespace = typesInNamespace
-                .Where(x => x.IsClass);
-
-            var scopedHandlersTypes = validTypesInNamespace
+                    x.Namespace.StartsWith(handlerNs))
+                .Where(x => x.IsClass)
                 .Where(x => typeof(IScopedUpdateHandler).IsAssignableFrom(x));
 
             foreach (var scopedType in scopedHandlersTypes)
             {
-                if (!TryResovleNamespaceToUpdateType(
-                    handlerNs, scopedType.Namespace!, out var updateType))
+                if (!TryResovleNamespaceToUpdateType(scopedType.Namespace!, out var updateType))
                 {
                     continue;
                 }

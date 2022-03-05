@@ -35,14 +35,23 @@ public readonly struct CommandFilterOptions
     /// If not null, the trailing augments starting this index are joined together
     /// using the <see cref="Separator"/>.
     /// </param>
+    /// <param name="descriptions">Provide description for every command at same other of commands.</param>
+    /// <param name="botCommandScop">
+    /// Command scope for this filter, This is only for setting commands and has no
+    /// effects on updater or filters.
+    /// </param>
     public CommandFilterOptions(
         ArgumentsMode argumentsMode = ArgumentsMode.Idc,
         char separator = ' ',
-        int? joinArgsFormIndex = default)
+        int? joinArgsFormIndex = default,
+        string[]? descriptions = default,
+        BotCommandScope? botCommandScop = default)
     {
         ArgumentsMode = argumentsMode;
         Separator = separator;
         JoinArgsFormIndex = joinArgsFormIndex;
+        Descriptions = descriptions;
+        BotCommandScope = botCommandScop;
     }
 
     /// <summary>
@@ -60,4 +69,16 @@ public readonly struct CommandFilterOptions
     /// using the <see cref="Separator"/>.
     /// </summary>
     public int? JoinArgsFormIndex { get; } = default;
+
+    /// <summary>
+    /// Provide description for every command at same other of commands.
+    /// </summary>
+    /// <remarks>Description of the command, 3-256 characters.</remarks>
+    public string[]? Descriptions { get; } = null;
+
+    /// <summary>
+    /// Command scope for this filter, This is only for setting commands and has no
+    /// effects on updater or filters.
+    /// </summary>
+    public BotCommandScope? BotCommandScope { get; } = null;
 }

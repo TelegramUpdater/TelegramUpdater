@@ -45,10 +45,10 @@ public static class ScopedHandlersExtensions
             }
         }
 
-        var containerGeneric = typeof(UpdateContainerBuilder<,>).MakeGenericType(
+        var containerGeneric = typeof(ScopedUpdateHandlerContainerBuilder<,>).MakeGenericType(
             typeOfScopedHandler, _t);
 
-        var container = (IScopedHandlerContainer?)Activator.CreateInstance(
+        var container = (IScopedUpdateHandlerContainer?)Activator.CreateInstance(
             containerGeneric, new object?[] { updateType.Value, filter, getT });
 
         if (container != null)
@@ -100,7 +100,7 @@ public static class ScopedHandlersExtensions
 
         var _h = typeof(THandler);
 
-        return updater.AddScopedHandler(new UpdateContainerBuilder<THandler, TUpdate>(
+        return updater.AddScopedHandler(new ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
                 updateType.Value, filter, getT));
     }
 

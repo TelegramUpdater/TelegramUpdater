@@ -15,6 +15,10 @@ namespace TelegramUpdater.FilterAttributes.Attributes
         /// <summary>
         /// Filters messages with specified command
         /// </summary>
+        /// <remarks>
+        /// Text of the command, 1-32 characters. Can contain only lowercase English letters,
+        /// digits and underscores.
+        /// </remarks>
         /// <param name="commands">Command that are allowed. default prefix '/' will be applied!</param>
         public CommandAttribute(params string[] commands)
         {
@@ -27,6 +31,10 @@ namespace TelegramUpdater.FilterAttributes.Attributes
         /// <summary>
         /// Filters messages with specified command
         /// </summary>
+        /// <remarks>
+        /// Text of the command, 1-32 characters. Can contain only lowercase English letters,
+        /// digits and underscores.
+        /// </remarks>
         /// <param name="prefix">Prefix of command. default to '/'</param>
         /// <param name="commands">Command that are allowed</param>
         public CommandAttribute(char prefix, params string[] commands)
@@ -40,6 +48,10 @@ namespace TelegramUpdater.FilterAttributes.Attributes
         /// <summary>
         /// Filters messages with specified command
         /// </summary>
+        /// <remarks>
+        /// Text of the command, 1-32 characters. Can contain only lowercase English letters,
+        /// digits and underscores.
+        /// </remarks>
         /// <param name="prefix">Prefix of command. default to '/'</param>
         /// <param name="commands">Command that are allowed</param>
         /// <param name="argumentsMode">If command should carry arguments</param>
@@ -57,6 +69,10 @@ namespace TelegramUpdater.FilterAttributes.Attributes
         /// <summary>
         /// Filters messages with specified command
         /// </summary>
+        /// <remarks>
+        /// Text of the command, 1-32 characters. Can contain only lowercase English letters,
+        /// digits and underscores.
+        /// </remarks>
         /// <param name="command">Command that are allowed</param>
         /// <param name="prefix">Prefix of command. default to '/'</param>
         /// <param name="argumentsMode">If command should carry arguments</param>
@@ -71,6 +87,10 @@ namespace TelegramUpdater.FilterAttributes.Attributes
         /// <summary>
         /// Filters messages with specified command
         /// </summary>
+        /// <remarks>
+        /// Text of the command, 1-32 characters. Can contain only lowercase English letters,
+        /// digits and underscores.
+        /// </remarks>
         /// <param name="command">Command that are allowed</param>
         /// <param name="prefix">Prefix of command. default to '/'</param>
         /// <param name="argumentsMode">Arguments mode.</param>
@@ -95,6 +115,10 @@ namespace TelegramUpdater.FilterAttributes.Attributes
         /// <summary>
         /// Filters messages with specified command
         /// </summary>
+        /// <remarks>
+        /// Text of the command, 1-32 characters. Can contain only lowercase English letters,
+        /// digits and underscores.
+        /// </remarks>
         /// <param name="command">Command that are allowed</param>
         /// <param name="prefix">Prefix of command. default to '/'</param>
         /// <param name="argumentsMode">Arguments mode.</param>
@@ -109,6 +133,47 @@ namespace TelegramUpdater.FilterAttributes.Attributes
                 command, new CommandFilterOptions(
                     argumentsMode, separator, null),
                 prefix);
+        }
+
+        /// <summary>
+        /// Filters messages with specified command
+        /// </summary>
+        /// <param name="commands"></param>
+        /// <param name="descriptions"></param>
+        /// <param name="prefix"></param>
+        /// <param name="argumentsMode"></param>
+        /// <param name="separator"></param>
+        /// <param name="joinArgs"></param>
+        /// <param name="joinArgsFormIndex"></param>
+        /// <param name="botCommandScopeType"></param>
+        /// <exception cref="Exception"></exception>
+        public CommandAttribute(
+            string[] commands,
+            string[] descriptions,
+            char prefix = '/',
+            ArgumentsMode argumentsMode = ArgumentsMode.Idc,
+            char separator = ' ',
+            bool joinArgs = false,
+            int joinArgsFormIndex = 0,
+            BotCommandScopeType botCommandScopeType = BotCommandScopeType.Default)
+        {
+            Filter = new CommandFilter(commands, prefix,
+                new CommandFilterOptions(
+                    argumentsMode,
+                    separator,
+                    joinArgs ? joinArgsFormIndex : null,
+                    descriptions,
+                    botCommandScopeType switch
+                    {
+                        BotCommandScopeType.Default => new BotCommandScopeDefault(),
+                        BotCommandScopeType.AllPrivateChats => new BotCommandScopeAllPrivateChats(),
+                        BotCommandScopeType.AllGroupChats => new BotCommandScopeAllGroupChats(),
+                        BotCommandScopeType.AllChatAdministrators => new BotCommandScopeChatAdministrators(),
+                        BotCommandScopeType.Chat => new BotCommandScopeChat(),
+                        BotCommandScopeType.ChatAdministrators => new BotCommandScopeChatAdministrators(),
+                        BotCommandScopeType.ChatMember => new BotCommandScopeChatMember(),
+                        _ => throw new Exception("Invalid BotCommandScopeType")
+                    }));
         }
 
         /// <inheritdoc/>

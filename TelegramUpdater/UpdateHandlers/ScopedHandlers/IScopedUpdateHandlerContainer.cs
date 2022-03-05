@@ -5,12 +5,12 @@ namespace TelegramUpdater.UpdateHandlers.ScopedHandlers
     /// <summary>
     /// Base interface for scoped update handlers container.
     /// </summary>
-    public interface IScopedHandlerContainer
+    public interface IScopedUpdateHandlerContainer
     {
         internal IReadOnlyDictionary<string, object>? ExtraData { get; }
 
         /// <summary>
-        /// Type of <see cref="IScopedHandlerContainer"/>
+        /// Type of <see cref="IScopedUpdateHandlerContainer"/>
         /// </summary>
         public Type ScopedHandlerType { get; }
 

@@ -157,7 +157,7 @@ namespace TelegramUpdater
         /// </para>
         /// </param>
         /// <remarks>
-        /// Go for <see cref="StepThree(IScopedHandlerContainer)"/> if you're done here too.
+        /// Go for <see cref="StepThree(IScopedUpdateHandlerContainer)"/> if you're done here too.
         /// </remarks>
         public UpdaterBuilder StepTwo<T>(Func<IUpdater, Exception, Task> callback,
                                          Filter<string>? messageMatch = default,
@@ -196,7 +196,7 @@ namespace TelegramUpdater
         /// </para>
         /// </param>
         /// <remarks>
-        /// Go for <see cref="StepThree(IScopedHandlerContainer)"/> if you're done here too.
+        /// Go for <see cref="StepThree(IScopedUpdateHandlerContainer)"/> if you're done here too.
         /// </remarks>
         public UpdaterBuilder StepTwo<TException, THandler>(
             Func<IUpdater, Exception, Task> callback,
@@ -231,7 +231,7 @@ namespace TelegramUpdater
         /// </para>
         /// </param>
         /// <remarks>
-        /// Go for <see cref="StepThree(IScopedHandlerContainer)"/> if you're done here too.
+        /// Go for <see cref="StepThree(IScopedUpdateHandlerContainer)"/> if you're done here too.
         /// </remarks>
         public UpdaterBuilder StepTwo(bool inherit = true)
         {
@@ -264,7 +264,7 @@ namespace TelegramUpdater
         /// Your <see cref="ExceptionHandler{T}"/>.
         /// </param>
         /// <remarks>
-        /// Go for <see cref="StepThree(IScopedHandlerContainer)"/> if you're done here too.
+        /// Go for <see cref="StepThree(IScopedUpdateHandlerContainer)"/> if you're done here too.
         /// </remarks>
         public UpdaterBuilder StepTwo(IExceptionHandler exceptionHandler)
         {
@@ -318,7 +318,7 @@ namespace TelegramUpdater
         /// <param name="filter">Your filter.</param>
         /// <remarks>
         /// You can use <see cref="IUpdater.AddUpdateHandler(ISingletonUpdateHandler)"/>
-        /// or <see cref="IUpdater.AddScopedHandler(IScopedHandlerContainer)"/>
+        /// or <see cref="IUpdater.AddScopedHandler(IScopedUpdateHandlerContainer)"/>
         /// later to add more update handler.
         /// </remarks>
         public IUpdater StepThree(
@@ -376,7 +376,7 @@ namespace TelegramUpdater
         /// </param>
         /// <remarks>
         /// You can use <see cref="IUpdater.AddUpdateHandler(ISingletonUpdateHandler)"/>
-        /// or <see cref="IUpdater.AddScopedHandler(IScopedHandlerContainer)"/>
+        /// or <see cref="IUpdater.AddScopedHandler(IScopedUpdateHandlerContainer)"/>
         /// later to add more update handler.
         /// </remarks>
         public IUpdater StepThree(ISingletonUpdateHandler singletonUpdateHandler)
@@ -434,10 +434,10 @@ namespace TelegramUpdater
         /// </param>
         /// <remarks>
         /// You can use <see cref="IUpdater.AddUpdateHandler(ISingletonUpdateHandler)"/>
-        /// or <see cref="IUpdater.AddScopedHandler(IScopedHandlerContainer)"/>
+        /// or <see cref="IUpdater.AddScopedHandler(IScopedUpdateHandlerContainer)"/>
         /// later to add more update handler.
         /// </remarks>
-        public IUpdater StepThree(IScopedHandlerContainer scopedHandlerContainer)
+        public IUpdater StepThree(IScopedUpdateHandlerContainer scopedHandlerContainer)
         {
             if (_updater == null)
                 throw new InvalidOperationException("Please go step by step, you missed StepTwo ?");
@@ -489,7 +489,7 @@ namespace TelegramUpdater
         /// </param>
         /// <remarks>
         /// You can use <see cref="IUpdater.AddUpdateHandler(ISingletonUpdateHandler)"/>
-        /// or <see cref="IUpdater.AddScopedHandler(IScopedHandlerContainer)"/>
+        /// or <see cref="IUpdater.AddScopedHandler(IScopedUpdateHandlerContainer)"/>
         /// later to add more update handler.
         /// </remarks>
         public IUpdater StepThree(bool autoCollectScopedHandlers = false)
