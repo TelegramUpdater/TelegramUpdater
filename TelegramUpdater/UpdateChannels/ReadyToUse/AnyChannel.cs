@@ -1,4 +1,4 @@
-﻿namespace TelegramUpdater.UpdateChannels.SealedChannels;
+﻿namespace TelegramUpdater.UpdateChannels.ReadyToUse;
 
 /// <summary>
 /// Create channel for any type of <see cref="Update"/>.

@@ -7,7 +7,7 @@
     public interface IContainer<T> : IUpdateContainer where T : class
     {
         /// <summary>
-        /// The real update.
+        /// The actual update.
         /// </summary>
         public T Update { get; }
     }

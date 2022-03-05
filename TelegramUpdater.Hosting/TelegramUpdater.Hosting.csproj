@@ -2,19 +2,26 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-	  <Nullable>enable</Nullable>
-	  <Authors>immmdreza</Authors>
-	  <Company>TelegramUpdater</Company>
-	  <Version>1.3.2-alpha</Version>
-	  <Description>Hosting extension package for TelegramUpdater</Description>
-	  <Copyright>TelegramUpdater by immmdreza</Copyright>
-	  <PackageProjectUrl>https://telegramupdater.github.io/</PackageProjectUrl>
-	  <PackageReadmeFile>README.md</PackageReadmeFile>
-	  <RepositoryUrl>https://github.com/TelegramUpdater/TelegramUpdater</RepositoryUrl>
-	  <PackageTags>telegram; telegram-bot; bot-api; csharp; framework</PackageTags>
-	  <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
-	  <PackageLicenseFile>LICENSE</PackageLicenseFile>
-	  <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<Nullable>enable</Nullable>
+	<Authors>immmdreza</Authors>
+	<Company>TelegramUpdater</Company>
+	<Version>1.4.0-alpha</Version>
+	<Description>Hosting extension package for TelegramUpdater</Description>
+	<Copyright>TelegramUpdater by immmdreza</Copyright>
+	<PackageProjectUrl>https://telegramupdater.github.io/</PackageProjectUrl>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<RepositoryUrl>https://github.com/TelegramUpdater/TelegramUpdater</RepositoryUrl>
+	<PackageTags>telegram; telegram-bot; bot-api; csharp; framework</PackageTags>
+	<PackageReleaseNotes>Watch out! lots of breaking changes.</PackageReleaseNotes>
+	<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+	<EnableNETAnalyzers>True</EnableNETAnalyzers>
+	<AnalysisLevel>latest</AnalysisLevel>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,7 +40,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-    <PackageReference Include="TelegramUpdater" Version="1.3.5-alpha" />
+    <PackageReference Include="TelegramUpdater" Version="1.4.0-alpha" />
   </ItemGroup>
 
 </Project>

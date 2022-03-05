@@ -2,8 +2,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TelegramUpdater.Filters;
-using TelegramUpdater.UpdateHandlers;
-using TelegramUpdater.UpdateHandlers.ScopedHandlers;
+using TelegramUpdater.UpdateHandlers.Scoped;
+using TelegramUpdater.UpdateHandlers.Singleton;
 using TelegramUpdater.UpdateWriters;
 
 namespace TelegramUpdater;
@@ -121,7 +121,7 @@ public static class UpdaterExtensions
             if (container is null) continue;
 
             updater.Logger.LogInformation("Scoped handler collected! ( {Name} )", scopedType.Name);
-            updater.AddScopedHandler(container);
+            updater.AddScopedUpdateHandler(container);
         }
 
         return updater;

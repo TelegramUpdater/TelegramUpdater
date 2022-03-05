@@ -3,7 +3,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.Helpers;
 using TelegramUpdater.UpdateContainer;
-using TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse;
+using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
 namespace ManualWriterWorker;
 

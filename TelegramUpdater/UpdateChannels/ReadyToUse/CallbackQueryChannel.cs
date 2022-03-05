@@ -1,4 +1,4 @@
-﻿namespace TelegramUpdater.UpdateChannels.SealedChannels;
+﻿namespace TelegramUpdater.UpdateChannels.ReadyToUse;
 
 /// <summary>
 /// A channel for <see cref="Update.CallbackQuery"/>.

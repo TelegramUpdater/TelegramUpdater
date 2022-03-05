@@ -1,12 +1,12 @@
 ﻿using TelegramUpdater.UpdateContainer;
-using TelegramUpdater.UpdateHandlers.SealedHandlers;
+using TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 
 namespace TelegramUpdater;
 
 /// <summary>
 /// A set of extension methods for <see cref="IUpdater"/> handlers.
 /// </summary>
-public static class UpdateHandlerExtensions
+public static class SingletonUpdateHandlerExtensions
 {
     /// <summary>
     /// Add any update handler to the updater.
@@ -20,7 +20,7 @@ public static class UpdateHandlerExtensions
     /// <param name="callback">Callback function to handle your update.</param>
     /// <param name="filter">Filters.</param>
     /// <param name="group">Handling priority.</param>
-    public static IUpdater AddUpdateHandler<T>(
+    public static IUpdater AddSingletonUpdateHandler<T>(
         this IUpdater updater,
         Func<Update, T?> updateSelector,
         Func<IContainer<T>, Task> callback,
@@ -35,8 +35,8 @@ public static class UpdateHandlerExtensions
             throw new InvalidCastException($"{t} is not an Update.");
         }
 
-        return updater.AddUpdateHandler(
-            new AnyUpdateHandler<T>(updateType, updateSelector, callback, filter, group));
+        return updater.AddSingletonUpdateHandler(
+            new AnyHandler<T>(updateType, updateSelector, callback, filter, group));
     }
 
     /// <summary>
@@ -46,13 +46,13 @@ public static class UpdateHandlerExtensions
     /// <param name="callback">Callback function to handle your update.</param>
     /// <param name="filter">Filters.</param>
     /// <param name="group">Handling priority.</param>
-    public static IUpdater AddUpdateHandler(
+    public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<Message>, Task> callback,
         Filter<Message>? filter = default,
         int group = default)
     {
-        return updater.AddUpdateHandler(new MessageHandler(callback, filter, group));
+        return updater.AddSingletonUpdateHandler(new MessageHandler(callback, filter, group));
     }
 
     /// <summary>
@@ -61,14 +61,15 @@ public static class UpdateHandlerExtensions
     /// <param name="updater"></param>
     /// <param name="callback">Callback function to handle your update.</param>
     /// <param name="filter">Filters.</param>
-    /// <param name="group">Handling priority.</param
-    public static IUpdater AddUpdateHandler(
+    /// <param name="group">Handling priority.</param>
+    public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<CallbackQuery>, Task> callback,
         Filter<CallbackQuery>? filter = default,
         int group = default)
     {
-        return updater.AddUpdateHandler(new CallbackQueryHandler(callback, filter, group));
+        return updater.AddSingletonUpdateHandler(
+            new CallbackQueryHandler(callback, filter, group));
     }
 
     /// <summary>
@@ -77,13 +78,14 @@ public static class UpdateHandlerExtensions
     /// <param name="updater"></param>
     /// <param name="callback">Callback function to handle your update.</param>
     /// <param name="filter">Filters.</param>
-    /// <param name="group">Handling priority.</param
-    public static IUpdater AddUpdateHandler(
+    /// <param name="group">Handling priority.</param>
+    public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<InlineQuery>, Task> callback,
         Filter<InlineQuery>? filter = default,
         int group = default)
     {
-        return updater.AddUpdateHandler(new InlineQueryHandler(callback, filter, group));
+        return updater.AddSingletonUpdateHandler(
+            new InlineQueryHandler(callback, filter, group));
     }
 }

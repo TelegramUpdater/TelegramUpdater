@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
-using TelegramUpdater.UpdateHandlers.ScopedHandlers;
+using TelegramUpdater.UpdateHandlers.Scoped;
 
 namespace TelegramUpdater;
 
 /// <summary>
 /// A set of useful extension methods for <see cref="IScopedUpdateHandler"/>s.
 /// </summary>
-public static class ScopedHandlersExtensions
+public static class ScopedUpdateHandlersExtensions
 {
     /// <summary>
     /// Adds an scoped handler to the updater.
@@ -21,7 +21,7 @@ public static class ScopedHandlersExtensions
     /// <para>Don't touch it if you don't know.</para>
     /// </param>
     /// <remarks>This method will add filter attributes if <paramref name="filter"/> is null.</remarks>
-    public static IUpdater AddScopedHandler<TUpdate>(this IUpdater updater,
+    public static IUpdater AddScopedUpdateHandler<TUpdate>(this IUpdater updater,
                                                      Type typeOfScopedHandler,
                                                      Filter<TUpdate>? filter = default,
                                                      UpdateType? updateType = default,
@@ -53,7 +53,7 @@ public static class ScopedHandlersExtensions
 
         if (container != null)
         {
-            return updater.AddScopedHandler(container);
+            return updater.AddScopedUpdateHandler(container);
         }
         else
         {
@@ -78,7 +78,7 @@ public static class ScopedHandlersExtensions
     /// <para>Don't touch it if you don't know.</para>
     /// </param>
     /// <remarks>This method will add filter attributes if <paramref name="filter"/> is null.</remarks>
-    public static IUpdater AddScopedHandler<THandler, TUpdate>(
+    public static IUpdater AddScopedUpdateHandler<THandler, TUpdate>(
         this IUpdater updater,
         Filter<TUpdate>? filter = default,
         UpdateType? updateType = default,
@@ -100,7 +100,7 @@ public static class ScopedHandlersExtensions
 
         var _h = typeof(THandler);
 
-        return updater.AddScopedHandler(new ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
+        return updater.AddScopedUpdateHandler(new ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
                 updateType.Value, filter, getT));
     }
 
@@ -111,11 +111,11 @@ public static class ScopedHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">A filter to choose the right update.</param>
-    public static IUpdater AddScopedHandler<THandler>(
+    public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         Filter<Message>? filter = default) where THandler : IScopedUpdateHandler
     {
-        return updater.AddScopedHandler<THandler, Message>(
+        return updater.AddScopedUpdateHandler<THandler, Message>(
             filter, UpdateType.Message, x => x.Message);
     }
 
@@ -126,11 +126,11 @@ public static class ScopedHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">A filter to choose the right update.</param>
-    public static IUpdater AddScopedHandler<THandler>(
+    public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         Filter<CallbackQuery>? filter = default) where THandler : IScopedUpdateHandler
     {
-        return updater.AddScopedHandler<THandler, CallbackQuery>(
+        return updater.AddScopedUpdateHandler<THandler, CallbackQuery>(
             filter, UpdateType.CallbackQuery, x => x.CallbackQuery);
     }
 
@@ -141,47 +141,11 @@ public static class ScopedHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">A filter to choose the right update.</param>
-    public static IUpdater AddScopedHandler<THandler>(
+    public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         Filter<InlineQuery>? filter = default) where THandler : IScopedUpdateHandler
     {
-        return updater.AddScopedHandler<THandler, InlineQuery>(
+        return updater.AddScopedUpdateHandler<THandler, InlineQuery>(
             filter, UpdateType.InlineQuery, x => x.InlineQuery);
     }
-
-    /// <summary>
-    /// Adds an scoped <see cref="Message"/> handler to the <paramref name="updater"/>.
-    /// </summary>
-    /// <typeparam name="THandler">Your <see cref="Message"/> handler type.</typeparam>
-    /// <param name="updater"><see cref="Updater"/> itself.</param>
-    /// <param name="filter">
-    /// The filter to choose the right updates to handle.
-    /// <para>
-    /// Leave empty if you applied your fillter using <see cref="ApplyFilterAttribute"/> before.
-    /// </para>
-    /// </param>
-    [Obsolete("Use AddScopedHandler instead.")]
-    public static IUpdater AddScopedMessage<THandler>(this IUpdater updater,
-                                                      Filter<Message>? filter = default)
-        where THandler : IScopedUpdateHandler
-        => updater.AddScopedHandler<THandler, Message>(
-            filter, UpdateType.Message, x => x.Message!);
-
-    /// <summary>
-    /// Adds an scoped <see cref="CallbackQuery"/> handler to the <paramref name="updater"/>.
-    /// </summary>
-    /// <typeparam name="THandler">Your <see cref="CallbackQuery"/> handler type.</typeparam>
-    /// <param name="updater"><see cref="Updater"/> itself.</param>
-    /// <param name="filter">
-    /// The filter to choose the right updates to handle.
-    /// <para>
-    /// Leave empty if you applied your fillter using <see cref="ApplyFilterAttribute"/> before.
-    /// </para>
-    /// </param>
-    [Obsolete("Use AddScopedHandler instead.")]
-    public static IUpdater AddScopedCallbackQuery<THandler>(this IUpdater updater,
-                                                            Filter<CallbackQuery>? filter = default)
-        where THandler : IScopedUpdateHandler
-        => updater.AddScopedHandler<THandler, CallbackQuery>(
-            filter, UpdateType.Message, x => x.CallbackQuery!);
 }

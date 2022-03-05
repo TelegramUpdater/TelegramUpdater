@@ -3,14 +3,14 @@
 namespace TelegramUpdater.ExceptionHandlers
 {
     /// <summary>
-    /// Can be used to handle <see cref="Exception"/> of specified type (<typeparamref name="T"/>) in <see cref="Updater"/>.
+    /// Can be used to handle <see cref="Exception"/> of specified type (<typeparamref name="TException"/>) in <see cref="Updater"/>.
     /// </summary>
-    /// <typeparam name="T">Your <see cref="Exception"/> type.</typeparam>
-    public class ExceptionHandler<T> : IExceptionHandler where T : Exception
+    /// <typeparam name="TException">Your <see cref="Exception"/> type.</typeparam>
+    public class ExceptionHandler<TException> : IExceptionHandler where TException : Exception
     {
         /// <summary>
         /// Creates a new instance of <see cref="ExceptionHandler{T}"/>
-        /// where <typeparamref name="T"/> is a <see cref="Exception"/>
+        /// where <typeparamref name="TException"/> is a <see cref="Exception"/>
         /// </summary>
         /// <param name="callback">
         /// A callback function that will be called when the error catches.
@@ -25,7 +25,8 @@ namespace TelegramUpdater.ExceptionHandlers
         /// </param>
         /// <param name="inherit">
         /// Indicates if this handler should catch all of exceptions
-        /// that are inherited from <typeparamref name="T"/>.</param>
+        /// that are inherited from <typeparamref name="TException"/>.
+        /// </param>
         /// <exception cref="InvalidCastException">
         /// If any of <paramref name="allowedHandlers"/> are not.
         /// <see cref="IUpdateHandler"/></exception>
@@ -36,7 +37,7 @@ namespace TelegramUpdater.ExceptionHandlers
             bool inherit = false)
         {
             MessageMatch = messageMatch;
-            ExceptionType = typeof(T);
+            ExceptionType = typeof(TException);
             Callback = callback;
             Inherit = inherit;
 

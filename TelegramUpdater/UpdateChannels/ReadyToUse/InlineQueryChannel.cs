@@ -1,9 +1,9 @@
-﻿namespace TelegramUpdater.UpdateChannels.SealedChannels;
+﻿namespace TelegramUpdater.UpdateChannels.ReadyToUse;
 
 /// <summary>
 /// A channel for <see cref="Update.InlineQuery"/>.
 /// </summary>
-public class InlineQueryChannel : AnyChannel<InlineQuery>
+public sealed class InlineQueryChannel : AnyChannel<InlineQuery>
 {
     /// <summary>
     /// Create an instance of inline query channel.
