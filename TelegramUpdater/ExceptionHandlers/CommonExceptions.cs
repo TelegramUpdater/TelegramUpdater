@@ -3,10 +3,14 @@ using TelegramUpdater.Filters;
 
 namespace TelegramUpdater.ExceptionHandlers
 {
+    /// <summary>
+    /// A set of some common exception handlers.
+    /// </summary>
     public static class CommonExceptions
     {
         /// <summary>
-        /// Handle parse exception occures in api requests (Bad Request: can't parse entities)
+        /// Handle parse exception occurs in api requests
+        /// (Bad Request: can't parse entities)
         /// </summary>
         public static ExceptionHandler<ApiRequestException> ParsingException(
             Func<IUpdater, Exception, Task> callback,

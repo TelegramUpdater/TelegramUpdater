@@ -79,7 +79,7 @@ namespace TelegramUpdater
         /// Or just leave it empty and let us decide.
         /// </param>
         /// <param name="cancellationToken">
-        /// This is a token which you can use later to cancel <see cref="IUpdater.Start(bool, bool, CancellationToken)"/> method
+        /// This is a token which you can use later to cancel <see cref="IUpdater.StartAsync(CancellationToken)"/> method
         /// and shut things down.
         /// </param>
         /// <param name="flushUpdatesQueue">
@@ -129,7 +129,7 @@ namespace TelegramUpdater
         /// <summary>
         /// - <b>Step two</b>: Add an <see cref="ExceptionHandler{T}"/>
         /// <para>
-        /// This is how you can be aware of exceptions occured when handling the updates.
+        /// This is how you can be aware of exceptions occurred when handling the updates.
         /// Add an <see cref="ExceptionHandler{T}"/> here and you can add more
         /// later using <see cref="IUpdater.AddExceptionHandler(IExceptionHandler)"/>
         /// </para>
@@ -141,7 +141,7 @@ namespace TelegramUpdater
         /// </summary>
         /// <typeparam name="T">Type of <see cref="Exception"/> you wanna handle.</typeparam>
         /// <param name="callback">
-        /// A callback function that is called when error occured.
+        /// A callback function that is called when error occurred.
         /// </param>
         /// <param name="messageMatch">
         /// An <see cref="string"/> filter on <see cref="Exception.Message"/>.
@@ -151,7 +151,7 @@ namespace TelegramUpdater
         /// </para>
         /// </param>
         /// <param name="allowedHandlers">
-        /// A list of update handlers type, only exceptions occured in them will be handled.
+        /// A list of update handlers type, only exceptions occurred in them will be handled.
         /// <para>
         /// Leave empty to catch all update handlers.
         /// </para>
@@ -173,7 +173,7 @@ namespace TelegramUpdater
         /// <summary>
         /// - <b>Step two</b>: Add an <see cref="ExceptionHandler{T}"/>
         /// <para>
-        /// This is how you can be aware of exceptions occured when handling the updates.
+        /// This is how you can be aware of exceptions occurred when handling the updates.
         /// Add an <see cref="ExceptionHandler{T}"/> here and you can add more
         /// later using <see cref="IUpdater.AddExceptionHandler(IExceptionHandler)"/>
         /// </para>
@@ -186,7 +186,7 @@ namespace TelegramUpdater
         /// <typeparam name="TException">Type of <see cref="Exception"/> you wanna handle.</typeparam>
         /// <typeparam name="THandler">Type of your handler.</typeparam>
         /// <param name="callback">
-        /// A callback function that is called when error occured.
+        /// A callback function that is called when error occurred.
         /// </param>
         /// <param name="messageMatch">
         /// An <see cref="string"/> filter on <see cref="Exception.Message"/>.
@@ -213,7 +213,7 @@ namespace TelegramUpdater
         /// <summary>
         /// - <b>Step two</b>: Add an <see cref="ExceptionHandler{T}"/>
         /// <para>
-        /// This is how you can be aware of exceptions occured when handling the updates.
+        /// This is how you can be aware of exceptions occurred when handling the updates.
         /// Add an <see cref="ExceptionHandler{T}"/> here and you can add more
         /// later using <see cref="IUpdater.AddExceptionHandler(IExceptionHandler)"/>
         /// </para>
@@ -225,7 +225,7 @@ namespace TelegramUpdater
         /// </summary>
         /// <param name="inherit">
         /// If it's true, every object that inherits from <see cref="Exception"/>
-        /// Will catched! meaning all exceptions.
+        /// Will catch! meaning all exceptions.
         /// <para>
         /// If you have exception handlers for specified exceptions, you better turn this off.
         /// </para>
@@ -250,7 +250,7 @@ namespace TelegramUpdater
         /// <summary>
         /// - <b>Step two</b>: Add an <see cref="ExceptionHandler{T}"/>
         /// <para>
-        /// This is how you can be aware of exceptions occured when handling the updates.
+        /// This is how you can be aware of exceptions occurred when handling the updates.
         /// Add an <see cref="ExceptionHandler{T}"/> here and you can add more
         /// later using <see cref="IUpdater.AddExceptionHandler(IExceptionHandler)"/>
         /// </para>
@@ -278,7 +278,7 @@ namespace TelegramUpdater
         /// <summary>
         /// - <b>Step three</b>: Add an <see cref="IUpdateHandler"/>
         /// <para>
-        /// This is the main part! update handler are where you do what you actually excpect from this lib.
+        /// This is the main part! update handler are where you do what you actually expect from this lib.
         /// Like answering user message and etc.
         /// </para>
         /// <para>
@@ -287,7 +287,7 @@ namespace TelegramUpdater
         /// <item>
         /// <term><see cref="Filter{T}"/>s</term>
         /// <description>
-        /// Filters are used to let <see cref="Updater"/> know what kind of updates you excpect for your handler.
+        /// Filters are used to let <see cref="Updater"/> know what kind of updates you expect for your handler.
         /// </description>
         /// </item>
         /// <item>
@@ -314,7 +314,7 @@ namespace TelegramUpdater
         /// <b>For now</b>, pass a callback function and filter here to handle a <see cref="Message"/>.
         /// </para>
         /// </summary>
-        /// <param name="callbak">Your callback function.</param>
+        /// <param name="callback">Your callback function.</param>
         /// <param name="filter">Your filter.</param>
         /// <remarks>
         /// You can use <see cref="IUpdater.AddUpdateHandler(ISingletonUpdateHandler)"/>
@@ -322,20 +322,20 @@ namespace TelegramUpdater
         /// later to add more update handler.
         /// </remarks>
         public IUpdater StepThree(
-            Func<IContainer<Message>, Task> callbak,
+            Func<IContainer<Message>, Task> callback,
             Filter<Message>? filter)
         {
             if (_updater == null)
                 throw new InvalidOperationException("Please go step by step, you missed StepTwo ?");
 
-            _updater.AddUpdateHandler(new MessageHandler(callbak, filter));
+            _updater.AddUpdateHandler(new MessageHandler(callback, filter));
             return this._updater;
         }
 
         /// <summary>
         /// - <b>Step three</b>: Add an <see cref="IUpdateHandler"/>
         /// <para>
-        /// This is the main part! update handler are where you do what you actually excpect from this lib.
+        /// This is the main part! update handler are where you do what you actually expect from this lib.
         /// Like answering user message and etc.
         /// </para>
         /// <para>
@@ -344,7 +344,7 @@ namespace TelegramUpdater
         /// <item>
         /// <term><see cref="Filter{T}"/>s</term>
         /// <description>
-        /// Filters are used to let <see cref="Updater"/> know what kind of updates you excpect for your handler.
+        /// Filters are used to let <see cref="Updater"/> know what kind of updates you expect for your handler.
         /// </description>
         /// </item>
         /// <item>
@@ -391,7 +391,7 @@ namespace TelegramUpdater
         /// <summary>
         /// - <b>Step three</b>: Add an <see cref="IUpdateHandler"/>
         /// <para>
-        /// This is the main part! update handler are where you do what you actually excpect from this lib.
+        /// This is the main part! update handler are where you do what you actually expect from this lib.
         /// Like answering user message and etc.
         /// </para>
         /// <para>
@@ -400,7 +400,7 @@ namespace TelegramUpdater
         /// <item>
         /// <term><see cref="Filter{T}"/>s</term>
         /// <description>
-        /// Filters are used to let <see cref="Updater"/> know what kind of updates you excpect for your handler.
+        /// Filters are used to let <see cref="Updater"/> know what kind of updates you expect for your handler.
         /// </description>
         /// </item>
         /// <item>
@@ -449,7 +449,7 @@ namespace TelegramUpdater
         /// <summary>
         /// - <b>Step three</b>: Add an <see cref="IUpdateHandler"/>
         /// <para>
-        /// This is the main part! update handler are where you do what you actually excpect from this lib.
+        /// This is the main part! update handler are where you do what you actually expect from this lib.
         /// Like answering user message and etc.
         /// </para>
         /// <para>
@@ -458,7 +458,7 @@ namespace TelegramUpdater
         /// <item>
         /// <term><see cref="Filter{T}"/>s</term>
         /// <description>
-        /// Filters are used to let <see cref="Updater"/> know what kind of updates you excpect for your handler.
+        /// Filters are used to let <see cref="Updater"/> know what kind of updates you expect for your handler.
         /// </description>
         /// </item>
         /// <item>
