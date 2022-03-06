@@ -156,7 +156,7 @@ public sealed class Updater : IUpdater
                 .GetString();
 
             if (description is null) return;
-
+            
             var regex = new Regex(
                 "^Too Many Requests: retry after (?<tryAfter>[0-9]*)$");
             Match match = regex.Match(description);

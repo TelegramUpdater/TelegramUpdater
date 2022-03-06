@@ -138,14 +138,14 @@ namespace TelegramUpdater.FilterAttributes.Attributes
         /// <summary>
         /// Filters messages with specified command
         /// </summary>
-        /// <param name="commands"></param>
-        /// <param name="descriptions"></param>
-        /// <param name="prefix"></param>
-        /// <param name="argumentsMode"></param>
-        /// <param name="separator"></param>
-        /// <param name="joinArgs"></param>
-        /// <param name="joinArgsFormIndex"></param>
-        /// <param name="botCommandScopeType"></param>
+        /// <param name="commands">Allowed commands.</param>
+        /// <param name="descriptions">Description for each <paramref name="commands"/>.</param>
+        /// <param name="prefix">Command prefix.</param>
+        /// <param name="argumentsMode">Command arguments mode.</param>
+        /// <param name="separator">Separator char between arguments</param>
+        /// <param name="joinArgs">If the trailing args should join from <paramref name="joinArgsFormIndex"/>.</param>
+        /// <param name="joinArgsFormIndex">The index that args should join from.</param>
+        /// <param name="botCommandScopeType">Scope type for the commands</param>
         /// <exception cref="Exception"></exception>
         public CommandAttribute(
             string[] commands,
@@ -163,17 +163,37 @@ namespace TelegramUpdater.FilterAttributes.Attributes
                     separator,
                     joinArgs ? joinArgsFormIndex : null,
                     descriptions,
-                    botCommandScopeType switch
-                    {
-                        BotCommandScopeType.Default => new BotCommandScopeDefault(),
-                        BotCommandScopeType.AllPrivateChats => new BotCommandScopeAllPrivateChats(),
-                        BotCommandScopeType.AllGroupChats => new BotCommandScopeAllGroupChats(),
-                        BotCommandScopeType.AllChatAdministrators => new BotCommandScopeChatAdministrators(),
-                        BotCommandScopeType.Chat => new BotCommandScopeChat(),
-                        BotCommandScopeType.ChatAdministrators => new BotCommandScopeChatAdministrators(),
-                        BotCommandScopeType.ChatMember => new BotCommandScopeChatMember(),
-                        _ => throw new Exception("Invalid BotCommandScopeType")
-                    }));
+                    ToBotCommandScope(botCommandScopeType)));
+        }
+
+        /// <summary>
+        /// Filters messages with specified command
+        /// </summary>
+        /// <param name="command">Allowed command.</param>
+        /// <param name="description">Description for <paramref name="command"/>.</param>
+        /// <param name="prefix">Command prefix.</param>
+        /// <param name="argumentsMode">Command arguments mode.</param>
+        /// <param name="separator">Separator char between arguments</param>
+        /// <param name="joinArgs">If the trailing args should join from <paramref name="joinArgsFormIndex"/>.</param>
+        /// <param name="joinArgsFormIndex">The index that args should join from.</param>
+        /// <param name="botCommandScopeType">Scope type for the commands</param>
+        public CommandAttribute(
+             string command,
+             string description,
+             char prefix = '/',
+             ArgumentsMode argumentsMode = ArgumentsMode.Idc,
+             char separator = ' ',
+             bool joinArgs = false,
+             int joinArgsFormIndex = 0,
+             BotCommandScopeType botCommandScopeType = BotCommandScopeType.Default)
+        {
+            Filter = new CommandFilter(new[] { command }, prefix,
+                new CommandFilterOptions(
+                    argumentsMode,
+                    separator,
+                    joinArgs ? joinArgsFormIndex : null,
+                    new[] { description },
+                    ToBotCommandScope(botCommandScopeType)));
         }
 
         /// <inheritdoc/>
@@ -186,6 +206,21 @@ namespace TelegramUpdater.FilterAttributes.Attributes
                 throw new ArgumentException("CommandAttribute are supported only for Messages.");
 
             return Filter;
+        }
+
+        private static BotCommandScope ToBotCommandScope(BotCommandScopeType botCommandScopeType)
+        {
+            return botCommandScopeType switch
+            {
+                BotCommandScopeType.Default => new BotCommandScopeDefault(),
+                BotCommandScopeType.AllPrivateChats => new BotCommandScopeAllPrivateChats(),
+                BotCommandScopeType.AllGroupChats => new BotCommandScopeAllGroupChats(),
+                BotCommandScopeType.AllChatAdministrators => new BotCommandScopeChatAdministrators(),
+                BotCommandScopeType.Chat => new BotCommandScopeChat(),
+                BotCommandScopeType.ChatAdministrators => new BotCommandScopeChatAdministrators(),
+                BotCommandScopeType.ChatMember => new BotCommandScopeChatMember(),
+                _ => throw new Exception("Invalid BotCommandScopeType")
+            };
         }
     }
 }
