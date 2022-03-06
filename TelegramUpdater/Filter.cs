@@ -1,4 +1,7 @@
-﻿namespace TelegramUpdater
+﻿using System.Reflection;
+using TelegramUpdater.FilterAttributes;
+
+namespace TelegramUpdater
 {
     /// <summary>
     /// Base interface for filters.
@@ -347,6 +350,78 @@
             {
                 yield return filter;
             }
+        }
+
+        internal static IFilter<T> GetFilterAttributes<T>(this Type type)
+            where T : class
+        {
+            IFilter<T> filter = null!;
+            var applied = type.GetCustomAttributes<AbstractFilterAttribute>();
+            foreach (var item in applied)
+            {
+                var f = (IFilter<T>?)item.GetFilterTypeOf(typeof(T));
+                if (f != null)
+                {
+                    if (item.Reverse)
+                    {
+                        f = ~f; // Reverse the filter.
+                    }
+
+                    if (filter == null)
+                    {
+                        filter = f;
+                    }
+                    else
+                    {
+                        if (item.ApplyAsOr)
+                        {
+                            filter |= f;
+                        }
+                        else
+                        {
+                            filter &= f;
+                        }
+                    }
+                }
+            }
+
+            return filter;
+        }
+
+        internal static IFilter<T> GetFilterAttributes<T>(this MethodInfo method)
+            where T : class
+        {
+            IFilter<T> filter = null!;
+            var applied = method.GetCustomAttributes<AbstractFilterAttribute>();
+            foreach (var item in applied)
+            {
+                var f = (IFilter<T>?)item.GetFilterTypeOf(typeof(T));
+                if (f != null)
+                {
+                    if (item.Reverse)
+                    {
+                        f = ~f; // Reverse the filter.
+                    }
+
+                    if (filter == null)
+                    {
+                        filter = f;
+                    }
+                    else
+                    {
+                        if (item.ApplyAsOr)
+                        {
+                            filter |= f;
+                        }
+                        else
+                        {
+                            filter &= f;
+                        }
+                    }
+                }
+            }
+
+            return filter;
         }
     }
 }

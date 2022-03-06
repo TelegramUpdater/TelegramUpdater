@@ -77,9 +77,6 @@ public abstract class AbstractScopedUpdateHandler<T> : IScopedUpdateHandler
     /// <summary>
     /// Create update container for this handler.
     /// </summary>
-    /// <param name="updater"></param>
-    /// <param name="shiningInfo"></param>
-    /// <returns></returns>
     internal protected abstract IContainer<T> ContainerBuilder(
         IUpdater updater, ShiningInfo<long, Update> shiningInfo);
 

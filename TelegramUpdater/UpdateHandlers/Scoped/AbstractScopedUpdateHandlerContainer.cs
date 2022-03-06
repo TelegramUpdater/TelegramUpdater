@@ -30,7 +30,7 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
         if (Filter == null)
         {
             // Check for attributes
-            Filter = GetFilterAttributes<TUpdate>(ScopedHandlerType);
+            Filter = ScopedHandlerType.GetFilterAttributes<TUpdate>();
         }
     }
 
@@ -75,41 +75,5 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
         if (insider == null) return false;
 
         return ShouldHandle(insider);
-    }
-
-    internal static IFilter<T> GetFilterAttributes<T>(Type type)
-        where T : class
-    {
-        IFilter<T> filter = null!;
-        var applied = type.GetCustomAttributes<AbstractFilterAttribute>();
-        foreach (var item in applied)
-        {
-            var f = (IFilter<T>?)item.GetFilterTypeOf(typeof(T));
-            if (f != null)
-            {
-                if (item.Reverse)
-                {
-                    f = ~f; // Reverse the filter.
-                }
-
-                if (filter == null)
-                {
-                    filter = f;
-                }
-                else
-                {
-                    if (item.ApplyAsOr)
-                    {
-                        filter |= f;
-                    }
-                    else
-                    {
-                        filter &= f;
-                    }
-                }
-            }
-        }
-
-        return filter;
     }
 }
