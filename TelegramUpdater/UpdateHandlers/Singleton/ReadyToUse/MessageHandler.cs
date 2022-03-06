@@ -3,22 +3,29 @@
 namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 
 /// <summary>
-/// An update handler for <see cref="Update.Message"/>.
+/// Sealed singleton update handler for <see cref="UpdateType.Message"/>.
 /// </summary>
 public sealed class MessageHandler : AnyHandler<Message>
 {
     /// <summary>
-    /// Create update handler for <see cref="Message"/>.
+    /// Initialize a new instance of singleton update handler
+    /// <see cref="MessageHandler"/>.
     /// </summary>
-    /// <param name="filter">Filters for this handler.</param>
-    /// <param name="group">Handling priority for this handler.</param>
     /// <param name="callback">
-    /// A callback function where you may handle the incoming update.
+    /// A callback function that will be called when an <see cref="Update"/>
+    /// passes the <paramref name="filter"/>.
+    /// </param>
+    /// <param name="filter">
+    /// A filter to choose the right update to be handled inside
+    /// <paramref name="callback"/>.
+    /// </param>
+    /// <param name="group">
+    /// Handling priority group, The lower the sooner to process.
     /// </param>
     public MessageHandler(
         Func<IContainer<Message>, Task> callback,
         IFilter<Message>? filter = default,
-        int group = 0)
+        int group = default)
         : base(UpdateType.Message,
                x => x.Message,
                callback,

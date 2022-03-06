@@ -1,15 +1,16 @@
-﻿using TelegramUpdater.UpdateContainer;
+﻿using Telegram.Bot.Types.Payments;
+using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 
 /// <summary>
-/// Sealed singleton update handler for <see cref="UpdateType.CallbackQuery"/>.
+/// Sealed singleton update handler for <see cref="UpdateType.ShippingQuery"/>.
 /// </summary>
-public sealed class CallbackQueryHandler : AnyHandler<CallbackQuery>
+public sealed class ShippingQueryHandler : AnyHandler<ShippingQuery>
 {
     /// <summary>
     /// Initialize a new instance of singleton update handler
-    /// <see cref="CallbackQueryHandler"/>.
+    /// <see cref="ShippingQueryHandler"/>.
     /// </summary>
     /// <param name="callback">
     /// A callback function that will be called when an <see cref="Update"/>
@@ -22,14 +23,10 @@ public sealed class CallbackQueryHandler : AnyHandler<CallbackQuery>
     /// <param name="group">
     /// Handling priority group, The lower the sooner to process.
     /// </param>
-    public CallbackQueryHandler(
-        Func<IContainer<CallbackQuery>, Task> callback,
-        IFilter<CallbackQuery>? filter = default,
-        int group = default)
-        : base(UpdateType.CallbackQuery,
-               x => x.CallbackQuery,
-               callback,
-               filter,
-               group)
-    { }
+    public ShippingQueryHandler(Func<IContainer<ShippingQuery>, Task> callback,
+                                IFilter<ShippingQuery>? filter,
+                                int group)
+        : base(UpdateType.ShippingQuery, x=> x.ShippingQuery, callback, filter, group)
+    {
+    }
 }

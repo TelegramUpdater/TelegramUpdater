@@ -3,21 +3,28 @@
 namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 
 /// <summary>
-/// An update handler for <see cref="Update.InlineQuery"/>.
+/// Sealed singleton update handler for <see cref="UpdateType.InlineQuery"/>.
 /// </summary>
 public sealed class InlineQueryHandler : AnyHandler<InlineQuery>
 {
     /// <summary>
-    /// Create update handler for <see cref="InlineQuery"/>.
+    /// Initialize a new instance of singleton update handler
+    /// <see cref="InlineQueryHandler"/>.
     /// </summary>
-    /// <param name="filter">Filters for this handler.</param>
-    /// <param name="group">Handling priority for this handler.</param>
     /// <param name="callback">
-    /// A callback function where you may handle the incoming update.
+    /// A callback function that will be called when an <see cref="Update"/>
+    /// passes the <paramref name="filter"/>.
+    /// </param>
+    /// <param name="filter">
+    /// A filter to choose the right update to be handled inside
+    /// <paramref name="callback"/>.
+    /// </param>
+    /// <param name="group">
+    /// Handling priority group, The lower the sooner to process.
     /// </param>
     public InlineQueryHandler(Func<IContainer<InlineQuery>, Task> callback,
                               IFilter<InlineQuery>? filter = default,
-                              int group = 0)
+                              int group = default)
         : base(UpdateType.InlineQuery,
                x => x.InlineQuery,
                callback,

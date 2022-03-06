@@ -3,13 +3,13 @@
 namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 
 /// <summary>
-/// Sealed singleton update handler for <see cref="UpdateType.CallbackQuery"/>.
+/// Sealed singleton update handler for <see cref="UpdateType.ChannelPost"/>.
 /// </summary>
-public sealed class CallbackQueryHandler : AnyHandler<CallbackQuery>
+public sealed class ChannelPostHandler : AnyHandler<Message>
 {
     /// <summary>
     /// Initialize a new instance of singleton update handler
-    /// <see cref="CallbackQueryHandler"/>.
+    /// <see cref="ChannelPostHandler"/>.
     /// </summary>
     /// <param name="callback">
     /// A callback function that will be called when an <see cref="Update"/>
@@ -22,14 +22,10 @@ public sealed class CallbackQueryHandler : AnyHandler<CallbackQuery>
     /// <param name="group">
     /// Handling priority group, The lower the sooner to process.
     /// </param>
-    public CallbackQueryHandler(
-        Func<IContainer<CallbackQuery>, Task> callback,
-        IFilter<CallbackQuery>? filter = default,
-        int group = default)
-        : base(UpdateType.CallbackQuery,
-               x => x.CallbackQuery,
-               callback,
-               filter,
-               group)
-    { }
+    public ChannelPostHandler(Func<IContainer<Message>, Task> callback,
+                              IFilter<Message>? filter,
+                              int group) 
+        : base(UpdateType.ChannelPost, x=> x.ChannelPost, callback, filter, group)
+    {
+    }
 }
