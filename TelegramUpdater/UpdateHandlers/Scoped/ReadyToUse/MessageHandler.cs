@@ -3,16 +3,15 @@
 namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
 /// <summary>
-/// Abstract <see cref="IScopedUpdateHandler"/> for
-/// <see cref="Update.Message"/>.
+/// Abstract scoped update handler for <see cref="UpdateType.Message"/>.
 /// </summary>
 public abstract class MessageHandler : AnyHandler<Message>
 {
     /// <summary>
-    /// You can set handling priority in here.
+    /// Set handling priority of this handler.
     /// </summary>
-    /// <param name="group">Handling priority.</param>
-    protected MessageHandler(int group = 0)
+    /// <param name="group">Handling priority group, The lower the sooner to process.</param>
+    protected MessageHandler(int group = default)
         : base(x => x.Message, group)
     {
     }

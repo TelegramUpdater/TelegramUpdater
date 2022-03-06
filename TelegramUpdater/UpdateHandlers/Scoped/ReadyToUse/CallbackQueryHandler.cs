@@ -1,16 +1,15 @@
 ﻿namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
 /// <summary>
-/// Abstract <see cref="IScopedUpdateHandler"/> for
-/// <see cref="Update.CallbackQuery"/>.
+/// Abstract scoped update handler for <see cref="UpdateType.CallbackQuery"/>.
 /// </summary>
 public abstract class CallbackQueryHandler
     : AnyHandler<CallbackQuery>
 {
     /// <summary>
-    /// You can set handling priority in here.
+    /// Set handling priority of this handler.
     /// </summary>
-    /// <param name="group">Handling priority.</param>
+    /// <param name="group">Handling priority group, The lower the sooner to process.</param>
     protected CallbackQueryHandler(int group = 0)
         : base(x => x.CallbackQuery, group)
     {
