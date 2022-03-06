@@ -22,4 +22,17 @@ public abstract class AnyHandler<T> : AbstractScopedUpdateHandler<T>
     {
         return new AnyContainer<T>(GetT, updater, shiningInfo, ExtraData);
     }
+
+
+    #region Extension Methods
+    /// <summary>
+    /// All pending handlers for this update will be ignored after throwing this.
+    /// </summary>
+    protected void StopPropagation() => Container.StopPropagation();
+
+    /// <summary>
+    /// Continue to the next pending handler for this update and ignore the rest of this handler.
+    /// </summary>
+    protected void ContinuePropagation() => Container.ContinuePropagation();
+    #endregion
 }

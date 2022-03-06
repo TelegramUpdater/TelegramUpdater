@@ -1,5 +1,8 @@
 ﻿namespace TelegramUpdater.UpdateContainer;
 
+/// <summary>
+/// Extensions to manage propagation inside handlers.
+/// </summary>
 public static class PropagationExtensions
 {
     /// <summary>

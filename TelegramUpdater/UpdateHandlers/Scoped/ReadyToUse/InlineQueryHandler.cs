@@ -15,4 +15,10 @@ public abstract class InlineQueryHandler
         : base(x => x.InlineQuery, group)
     {
     }
+
+
+    #region Extension Methods
+    /// <inheritdoc cref="InlineQuery.From"/>.
+    protected User From => ActualUpdate.From;
+    #endregion
 }
