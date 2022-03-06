@@ -7,10 +7,10 @@ using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 namespace UpdaterProduction;
 
 [Command("about"), Private]
-internal class AboutMessageHandler : ScopedMessageHandler
+internal class AboutMessageHandler : MessageHandler
 {
     protected override async Task HandleAsync(IContainer<Message> container)
     {
-        await container.Response($"*How about you?", parseMode: ParseMode.Markdown);
+        await ResponseAsync($"*How about you?", parseMode: ParseMode.Markdown);
     }
 }

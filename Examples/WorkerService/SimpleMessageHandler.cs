@@ -1,21 +1,23 @@
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramUpdater.FilterAttributes.Attributes;
+using TelegramUpdater.Filters;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
 namespace WorkerService;
 
 [Command("hello"), Private]
-public class SimpleMessageHandler : ScopedMessageHandler
+public class SimpleMessageHandler : MessageHandler
 {
     protected override async Task HandleAsync(IContainer<Message> container)
     {
-        var msg = await container.Response($"Are you ok? answer quick!",
+        var msg = await ResponseAsync($"Are you ok? answer quick!",
             replyMarkup: new InlineKeyboardMarkup(
                 InlineKeyboardButton.WithCallbackData("Yes i'm OK!", "ok")));
 
-        await container.ChannelUserClick(TimeSpan.FromSeconds(5), "ok")
+        await container.ChannelUserClick(
+                TimeSpan.FromSeconds(5), new CallbackQueryRegex("ok"))
             .IfNotNull(async answer =>
             {
                 await answer.Edit(text: "Well ...");

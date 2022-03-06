@@ -7,13 +7,13 @@ using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 namespace ConsoleApp;
 
 [Command("test"), ChatType(ChatTypeFlags.Private)]
-internal class MyScopedMessageHandler : ScopedMessageHandler
+internal class MyScopedMessageHandler : MessageHandler
 {
     public MyScopedMessageHandler() : base(group: 0)
     { }
 
     protected override async Task HandleAsync(IContainer<Message> container)
     {
-        await container.Response("Tested!");
+        await ResponseAsync("Tested!");
     }
 }

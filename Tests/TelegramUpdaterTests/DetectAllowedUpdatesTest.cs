@@ -8,7 +8,6 @@ using Telegram.Bot.Types.Enums;
 using TelegramUpdater;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
-using TelegramUpdater.UpdateHandlers.SealedHandlers;
 using Xunit;
 
 namespace TelegramUpdaterTests
@@ -44,10 +43,11 @@ namespace TelegramUpdaterTests
         {
             var testUpdater = new Updater(new TelegramBotClient(""));
 
-            testUpdater.AddScopedHandler<MyMessageHandler, Message>();
-            testUpdater.AddScopedHandler<MyCallbackQueryHandler, CallbackQuery>();
+            testUpdater.AddScopedUpdateHandler<MyMessageHandler, Message>();
+            testUpdater.AddScopedUpdateHandler<MyCallbackQueryHandler, CallbackQuery>();
 
-            testUpdater.AddUpdateHandler(new MessageHandler(_T));
+            testUpdater.AddSingletonUpdateHandler(
+                new TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse.MessageHandler(_T));
 
             await testUpdater.StartAsync<FakeWriter>();
 

@@ -35,9 +35,9 @@ var updater = new UpdaterBuilder(
         async container => await container.Response("Started!"),
         FilterCutify.OnCommand("start"))
 
-    .AddScopedHandler<MyScopedMessageHandler, Message>()
+    .AddScopedUpdateHandler<MyScopedMessageHandler, Message>()
 
-    .AddScopedHandler<Message>(typeof(AboutMessageHandler)); // Other way
+    .AddScopedUpdateHandler<Message>(typeof(AboutMessageHandler)); // Other way
                                                              // Can be done with: updater.AddScopedMessage<AboutMessageHandler>();
 
 

@@ -8,7 +8,7 @@ using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 namespace ManualWriterWorker;
 
 [Command("ok"), ChatType(ChatTypeFlags.Private)]
-public class SimpleMessageHandler : ScopedMessageHandler
+public class SimpleMessageHandler : MessageHandler
 {
     protected override async Task HandleAsync(IContainer<Message> container)
     {

@@ -16,13 +16,7 @@ IHost host = Host.CreateDefaultBuilder(args)
 
             (builder) => builder
                 .AddMessageHandler<SimpleMessageHandler>()
-                .AddExceptionHandler<Exception>(
-                    (u, e) =>
-                    {
-                        u.Logger.LogWarning(exception: e, message: "Error while handlig ...");
-                        return Task.CompletedTask;
-                    }, inherit: true)
-                );
+                .AddDefaultExceptionHandler());
     })
     .Build();
 
