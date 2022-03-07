@@ -8,7 +8,8 @@ namespace TelegramUpdater.ExceptionHandlers
     public interface IExceptionHandler
     {
         /// <summary>
-        /// Handle only when the <see cref="Exception"/> occured in specified <see cref="IUpdateHandler"/>s
+        /// Handle only when the <see cref="Exception"/>
+        /// occurred in specified <see cref="IUpdateHandler"/>s.
         /// </summary>
         /// <remarks>If it's null, mean all!</remarks>
         public IEnumerable<Type>? AllowedHandlers { get; }
@@ -24,7 +25,7 @@ namespace TelegramUpdater.ExceptionHandlers
         public Filter<string>? MessageMatch { get; }
 
         /// <summary>
-        /// A callback function that will be called when the error catched.
+        /// A callback function that will be called when the error catches.
         /// </summary>
         public Func<IUpdater, Exception, Task> Callback { get; }
 
@@ -74,12 +75,20 @@ namespace TelegramUpdater.ExceptionHandlers
 
         /// <summary>
         /// Creates a new instance of <see cref="ExceptionHandler{T}"/>
-        /// where <typeparamref name="T"/> is a <see cref="Exception"/>
+        /// where <typeparamref name="TException"/> is a <see cref="Exception"/>
         /// </summary>
-        /// <typeparam name="TException">Your <see cref="Exception"/> type.</typeparam>
-        /// <typeparam name="THandler">Your <see cref="IUpdateHandler"/></typeparam>
-        /// <param name="callback">A callback function that will be called when the error catched.</param>
-        /// <param name="messageMatch">Handle only when <see cref="Exception.Message"/> matches a text.</param>
+        /// <typeparam name="TException">
+        /// Your <see cref="Exception"/> type.
+        /// </typeparam>
+        /// <typeparam name="THandler">
+        /// Your <see cref="IUpdateHandler"/>
+        /// </typeparam>
+        /// <param name="callback">
+        /// A callback function that will be called when the error catches.
+        /// </param>
+        /// <param name="messageMatch">
+        /// Handle only when <see cref="Exception.Message"/> matches a text.
+        /// </param>
         /// <returns></returns>
         public static ExceptionHandler<TException> ExceptionsInHandler<TException, THandler>(
             Func<IUpdater, Exception, Task> callback,

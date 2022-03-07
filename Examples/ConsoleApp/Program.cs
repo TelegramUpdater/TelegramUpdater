@@ -33,7 +33,7 @@ var updater = new UpdaterBuilder(
         async container => await container.Response("Started!"),
         FilterCutify.OnCommand("start"))
 
-    .AddScopedHandler<MyScopedMessageHandler, Message>(); // Scoped handler
+    .AddScopedUpdateHandler<MyScopedMessageHandler, Message>(); // Scoped handler
 
 
 // ---------- Start! ----------

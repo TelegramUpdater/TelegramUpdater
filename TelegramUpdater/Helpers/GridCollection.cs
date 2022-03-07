@@ -20,13 +20,13 @@ namespace TelegramUpdater.Helpers
         public GridCollection(int? rowCapacity = default)
         {
             RowCapacity = rowCapacity;
-            _grid = new() { rowCapacity == null? new(): new(rowCapacity.Value) };
+            _grid = new() { rowCapacity == null ? new() : new(rowCapacity.Value) };
         }
 
         /// <summary>
         /// Returns the count of all elements in the grid.
         /// </summary>
-        public int Count => _grid.Sum(x=> x.Count);
+        public int Count => _grid.Sum(x => x.Count);
 
         /// <summary>
         /// Count the rows.
@@ -98,7 +98,6 @@ namespace TelegramUpdater.Helpers
         /// <summary>
         /// Adds an item to the specified row.
         /// </summary>
-        /// <remarks><see cref="AutoExtend"/> dose not work on this.</remarks>
         /// <param name="rowIndex">Index of target row.</param>
         /// <param name="item">Item to add.</param>
         public GridCollection<T> AddToRow(int rowIndex, T item)
@@ -128,7 +127,7 @@ namespace TelegramUpdater.Helpers
         /// <inheritdoc/>
         public IEnumerator<T> GetEnumerator()
         {
-            return _grid.SelectMany(x=> x).GetEnumerator();
+            return _grid.SelectMany(x => x).GetEnumerator();
         }
 
         /// <summary>

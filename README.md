@@ -1,14 +1,20 @@
 # Here is **Updater**
 
+** !! Preview !! **
+
 This is your telegram updater package written in C# and dotnet core 3.1
 
 The updater is supposed to fetch and handle new updates coming from bot api server
 
 The updater is written on top of [TelegramBots/Telegram.Bot: .NET Client for Telegram Bot API](https://github.com/TelegramBots/Telegram.Bot) package
 
+## More support
+
+We can talk through [@TUTalkings](https://t.me/TUTalkings) if you want to.
+
 ## Why use this?
 
-- Updater uses update handlers which are a great help to write clean, simple to write and read and more powerfull code base.
+- Updater uses update handlers which are a great help to write clean, simple to write and read and more powerful code base.
 - Updater provides `Filter<T>` class that helps you to easily choose the right handler for incoming updates.
 Take a look at code below describing a handler:
 
@@ -51,7 +57,7 @@ await updater.StartAsync(); // 🔥 Fire up and block!
 ```
 
 - `OpenChannel` Method! You can use this to wait for a user response.
-- Batch of extension methods to incease speed and make cleaner code.
+- Batch of extension methods to increase speed and make cleaner code.
 
 As instance `ChannelUserClick` is an helper method for `OpenChannel` that waits for a user click.
 
@@ -87,7 +93,7 @@ await container.ChannelUserClick(TimeSpan.FromSeconds(5), "ok")
         }))
 ```
 
-- Supports DI and batch of extension methods for hosted or wenhook apps ( thanks to Telegram.Bot webhook example )
+- Supports DI and batch of extension methods for hosted or webhook apps ( thanks to Telegram.Bot webhook example )
 - Updater has a lot of base classes, interfaces and generic types to make everything highly customizable.
 - More ...
 
@@ -99,11 +105,11 @@ Here are starting pack for common SDKs in .NET
 
 ### Basic
 
-If you're using a console app with no Hosting and `IServiceCollection` then it's your choise
+If you're using a console app with no Hosting and `IServiceCollection` then it's your choice
 **And even if you don't, you're suggested to!**
 
 Base class of this package is `Updater`, but there's a helper class in case of basic apps called `UpdaterBuilder` which helps you
-get familliar with the package.
+get familiar with the package.
 
 `UpdaterBuilder` helps you build `Updater` in steps with fully documented methods.
 See [UpdaterProduction](https://github.com/TelegramUpdater/TelegramUpdater/tree/master/Examples/UpdaterProduction) and

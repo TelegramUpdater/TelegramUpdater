@@ -3,7 +3,7 @@
     /// <summary>
     /// Abstract base for filter attributes.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
     public abstract class AbstractFilterAttribute : Attribute
     {
         /// <summary>

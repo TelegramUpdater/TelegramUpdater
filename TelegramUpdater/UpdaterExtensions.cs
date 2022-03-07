@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using TelegramUpdater.UpdateHandlers.ScopedHandlers;
+using TelegramUpdater.Filters;
+using TelegramUpdater.UpdateHandlers.Scoped;
+using TelegramUpdater.UpdateHandlers.Singleton;
 using TelegramUpdater.UpdateWriters;
 
 namespace TelegramUpdater;
@@ -40,14 +42,11 @@ public static class UpdaterExtensions
     }
 
     private static bool TryResovleNamespaceToUpdateType(
-        string handlersParentNamespace, string currentNs, [NotNullWhen(true)] out Type? type)
+        string currentNs, [NotNullWhen(true)] out Type? type)
     {
         var nsParts = currentNs.Split('.');
-        if (nsParts.Length != 3)
+        if (nsParts.Length < 3)
             throw new Exception("Namespace is invalid.");
-
-        if ($"{nsParts[0]}.{nsParts[1]}" != handlersParentNamespace)
-            throw new Exception("Base namespace not matching the handler namespace");
 
         type = nsParts[2] switch
         {
@@ -90,35 +89,29 @@ public static class UpdaterExtensions
         if (entryAssembly is null)
             throw new ApplicationException("Can't find entry assembly.");
 
-        var allTypes = entryAssembly.GetTypes();
         var assemplyName = entryAssembly.GetName().Name;
 
         var handlerNs = $"{assemplyName}.{handlersParentNamespace}";
 
         // All types in *handlersParentNamespace*
-        var typesInNamespace = allTypes
+        var scopedHandlersTypes = entryAssembly.GetTypes()
             .Where(x =>
                 x.Namespace is not null &&
-                x.Namespace.StartsWith(handlerNs));
-
-        var validTypesInNamespace = typesInNamespace
-            .Where(x => x.IsClass);
-
-        var scopedHandlersTypes = validTypesInNamespace
+                x.Namespace.StartsWith(handlerNs))
+            .Where(x => x.IsClass)
             .Where(x => typeof(IScopedUpdateHandler).IsAssignableFrom(x));
 
         foreach (var scopedType in scopedHandlersTypes)
         {
-            if (!TryResovleNamespaceToUpdateType(
-                handlerNs, scopedType.Namespace!, out var updateType))
+            if (!TryResovleNamespaceToUpdateType(scopedType.Namespace!, out var updateType))
             {
                 continue;
             }
 
-            var containerGeneric = typeof(UpdateContainerBuilder<,>)
+            var containerGeneric = typeof(ScopedUpdateHandlerContainerBuilder<,>)
                 .MakeGenericType(scopedType, updateType);
 
-            var container = (IScopedHandlerContainer?)Activator.CreateInstance(
+            var container = (IScopedUpdateHandlerContainer?)Activator.CreateInstance(
                 containerGeneric,
                 new object?[]
                 {
@@ -128,7 +121,7 @@ public static class UpdaterExtensions
             if (container is null) continue;
 
             updater.Logger.LogInformation("Scoped handler collected! ( {Name} )", scopedType.Name);
-            return updater.AddScopedHandler(container);
+            updater.AddScopedUpdateHandler(container);
         }
 
         return updater;
@@ -143,5 +136,52 @@ public static class UpdaterExtensions
         this IUpdater updater, CancellationToken cancellationToken = default)
     {
         await updater.StartAsync<SimpleUpdateWriter>(cancellationToken);
+    }
+
+    /// <summary>
+    /// Set commands from your filter using method
+    /// <see cref="TelegramBotClientExtensions.SetMyCommandsAsync(ITelegramBotClient, IEnumerable{BotCommand}, BotCommandScope?, string?, CancellationToken)"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <returns></returns>
+    public static async Task SetCommandsAsync(this IUpdater updater)
+    {
+        var singletonHandlerFilters = updater.SingletonUpdateHandlers
+            .Where(x => x is IGenericSingletonUpdateHandler<Message>)
+            .Cast<IGenericSingletonUpdateHandler<Message>>()
+            .Where(x => x.Filter is not null)
+            .Select(x => x.Filter!.DiscoverNestedFilters())
+            .SelectMany(x => x)
+            .Where(x=> x is CommandFilter)
+            .Cast<CommandFilter>();
+
+        var scopedHandlerFilters = updater.ScopedHandlerContainers
+            .Where(x => x is IGenericScopedUpdateHandlerContainer<Message>)
+            .Cast<IGenericScopedUpdateHandlerContainer<Message>>()
+            .Where(x => x.Filter is not null)
+            .Select(x => x.Filter!.DiscoverNestedFilters())
+            .SelectMany(x => x)
+            .Where(x => x is CommandFilter)
+            .Cast<CommandFilter>();
+
+        var allCommands = singletonHandlerFilters.Concat(scopedHandlerFilters);
+
+        var groupedCommands = allCommands.GroupBy(
+            x => x.Options.BotCommandScope?.Type?? BotCommandScopeType.Default);
+
+        foreach (var scope in groupedCommands)
+        {
+            var commandScope = scope.First().Options.BotCommandScope;
+
+            await updater.BotClient.SetMyCommandsAsync(
+                scope.SelectMany(x => x.ToBotCommand())
+                    .OrderBy(x=> x.priority)
+                    .Select(x=> x.command),
+                commandScope);
+
+            updater.Logger.LogInformation(
+                "Set {count} commands to scope {scope}.",
+                scope.Count(), commandScope?.Type?? BotCommandScopeType.Default);
+        }
     }
 }

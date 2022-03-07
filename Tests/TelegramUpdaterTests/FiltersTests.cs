@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using TelegramUpdater;
 using Xunit;
 
@@ -159,6 +160,32 @@ namespace TelegramUpdaterTests
         {
             var isFilter = typeof(MyFilter).IsFilterOfType(typeof(int));
             Assert.True(isFilter);
+        }
+
+        [Fact]
+        public void Discovery_Test_1()
+        {
+            var filter = new Filter<int>(x => x == 10);
+
+            var dicovered = filter.DiscoverNestedFilters();
+
+            Assert.Equal(dicovered.First(), filter);
+        }
+
+        [Fact]
+        public void Discovery_Test_3()
+        {
+            var filter1 = new Filter<int>(x => x == 10);
+            var filter2 = new Filter<int>(x => x == 11);
+            var filter3 = new Filter<int>(x => x == 12);
+            var filter4 = filter1 | filter2;
+            var filter5 = filter4 & filter3;
+
+            var dicovered = filter5.DiscoverNestedFilters();
+
+            Assert.Contains(filter1, dicovered);
+            Assert.Contains(filter2, dicovered);
+            Assert.Contains(filter3, dicovered);
         }
     }
 }

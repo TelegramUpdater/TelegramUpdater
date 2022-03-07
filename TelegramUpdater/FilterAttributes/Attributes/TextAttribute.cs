@@ -1,16 +1,15 @@
-﻿namespace TelegramUpdater.FilterAttributes.Attributes
+﻿namespace TelegramUpdater.FilterAttributes.Attributes;
+
+/// <summary>
+/// Filter attibute for <see cref="FilterCutify.Text"/>
+/// </summary>
+public sealed class TextAttribute : FilterAttributeBuilder
 {
     /// <summary>
-    /// Filter attibute for <see cref="FilterCutify.Text"/>
+    /// Initialize a new instance of <see cref="TextAttribute"/>.
     /// </summary>
-    public sealed class TextAttribute : FilterAttributeBuilder
+    public TextAttribute()
+        : base(x => x.AddFilterForUpdate(FilterCutify.Text()))
     {
-        /// <summary>
-        /// Init <see cref="TextAttribute"/>.
-        /// </summary>
-        public TextAttribute()
-            : base(x => x.AddFilterForUpdate(FilterCutify.Text()))
-        {
-        }
     }
 }

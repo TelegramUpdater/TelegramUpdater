@@ -8,7 +8,7 @@ namespace TelegramUpdater.UpdateHandlers
     public interface IUpdateHandler
     {
         /// <summary>
-        /// Handling priority of this.
+        /// Handling priority group, The lower the sooner to process.
         /// </summary>
         public int Group { get; }
 

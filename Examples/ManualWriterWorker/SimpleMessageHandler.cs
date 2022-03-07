@@ -3,12 +3,12 @@ using Telegram.Bot.Types.ReplyMarkups;
 using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.Helpers;
 using TelegramUpdater.UpdateContainer;
-using TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse;
+using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
 namespace ManualWriterWorker;
 
 [Command("ok"), ChatType(ChatTypeFlags.Private)]
-public class SimpleMessageHandler : ScopedMessageHandler
+public class SimpleMessageHandler : MessageHandler
 {
     protected override async Task HandleAsync(IContainer<Message> container)
     {

@@ -1,23 +1,22 @@
-﻿namespace TelegramUpdater.UpdateChannels
+﻿namespace TelegramUpdater.UpdateChannels;
+
+/// <summary>
+/// Base interface for channels.
+/// </summary>
+public interface IUpdateChannel
 {
     /// <summary>
-    /// Base interface for channels.
+    /// Update type.
     /// </summary>
-    public interface IUpdateChannel
-    {
-        /// <summary>
-        /// Update type.
-        /// </summary>
-        public UpdateType UpdateType { get; }
+    public UpdateType UpdateType { get; }
 
-        /// <summary>
-        /// Time out to wait for a channel.
-        /// </summary>
-        public TimeSpan TimeOut { get; }
+    /// <summary>
+    /// Time out to wait for a channel.
+    /// </summary>
+    public TimeSpan TimeOut { get; }
 
-        /// <summary>
-        /// If this update should be channeled.
-        /// </summary>
-        internal bool ShouldChannel(Update update);
-    }
+    /// <summary>
+    /// If this update should be channeled.
+    /// </summary>
+    internal bool ShouldChannel(Update update);
 }
