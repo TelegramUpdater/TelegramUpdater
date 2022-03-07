@@ -10,7 +10,7 @@ namespace TelegramUpdater.UpdateContainer
     /// <summary>
     /// A set of extension methods for shining info.
     /// </summary>
-    public static class ShiningInfoExtensions
+    public static class ShiningInfoContainerExtensions
     {
         /// <summary>
         /// Tries to drop all pending objects for a given queue.

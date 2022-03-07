@@ -2,7 +2,7 @@
 
 namespace TelegramUpdater.UpdateContainer;
 
-public static class CallbackQueryContextExtensions
+public static class CallbackQueryContainerExtensions
 {
     public static long SenderId(this IContainer<CallbackQuery> simpleContext)
         => simpleContext.Update.From.Id;
