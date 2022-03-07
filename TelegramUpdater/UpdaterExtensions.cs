@@ -166,16 +166,19 @@ public static class UpdaterExtensions
 
         var allCommands = singletonHandlerFilters.Concat(scopedHandlerFilters);
 
-        var groupedCommands = allCommands.GroupBy(x => x.Options.BotCommandScope);
+        var groupedCommands = allCommands.GroupBy(
+            x => x.Options.BotCommandScope?.Type?? BotCommandScopeType.Default);
 
         foreach (var scope in groupedCommands)
         {
+            var commandScope = scope.First().Options.BotCommandScope;
+
             await updater.BotClient.SetMyCommandsAsync(
-                scope.SelectMany(x => x.ToBotCommand()), scope.Key);
+                scope.SelectMany(x => x.ToBotCommand()), commandScope);
 
             updater.Logger.LogInformation(
                 "Set {count} commands to scope {scope}.",
-                scope.Count(), scope.Key?.Type?? BotCommandScopeType.Default);
+                scope.Count(), commandScope?.Type?? BotCommandScopeType.Default);
         }
     }
 }
