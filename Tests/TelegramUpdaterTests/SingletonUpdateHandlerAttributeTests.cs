@@ -22,10 +22,7 @@ namespace TelegramUpdaterTests
         [Fact]
         public void Test_1()
         {
-            var handlers = TelegramUpdater.SingletonAttributesExtensions
-                .IterSingletonUpdateHandlerCallbacks().ToList();
-
-            Assert.Single(handlers);
+            
         }
     }
 }
