@@ -24,4 +24,4 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Publish to github
-      run: dotnet nuget push TelegramUpdater.csproj --api-key ${{ TOKEN }} --source "github"
+      run: dotnet nuget push TelegramUpdater.csproj --api-key ${{ secrets.TOKEN }} --source "github"
