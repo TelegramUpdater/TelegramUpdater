@@ -2,9 +2,9 @@ name: .NET
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, dev ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, dev ]
 
 jobs:
   build:
@@ -23,3 +23,5 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Publish to github
+      run: dotnet nuget add source --username immmdreza --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/TelegramUpdater/index.json"
