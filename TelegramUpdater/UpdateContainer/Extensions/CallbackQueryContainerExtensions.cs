@@ -2,11 +2,16 @@
 
 namespace TelegramUpdater.UpdateContainer;
 
+/// <summary>
+/// A set of extension methods for <see cref="CallbackQuery"/> containers.
+/// </summary>
 public static class CallbackQueryContainerExtensions
 {
+    /// <inheritdoc cref="User.Id"/>
     public static long SenderId(this IContainer<CallbackQuery> simpleContext)
         => simpleContext.Update.From.Id;
 
+    /// <inheritdoc cref="Message.From"/>
     public static User Sender(this IContainer<CallbackQuery> simpleContext)
         => simpleContext.Update.From;
 

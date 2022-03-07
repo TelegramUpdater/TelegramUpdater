@@ -2,19 +2,20 @@
 
 namespace TelegramUpdater.UpdateContainer;
 
+/// <summary>
+/// A set of extension methods for message <see cref="IContainer{T}"/>.
+/// </summary>
 public static class MessageContainerExtensions
 {
+    /// <inheritdoc cref="User.Id"/>
     public static long? SenderId(this IContainer<Message> simpleContext)
-    => simpleContext.Update.From?.Id;
+        => simpleContext.Update.From?.Id;
 
+    /// <inheritdoc cref="Message.From"/>
     public static User? Sender(this IContainer<Message> simpleContext)
         => simpleContext.Update.From;
 
-    /// <summary>
-    /// Deletes a message
-    /// </summary>
-    /// <param name="simpleContext"></param>
-    /// <returns></returns>
+    /// <inheritdoc cref="TelegramBotClientExtensions.DeleteMessageAsync(ITelegramBotClient, ChatId, int, CancellationToken)"/>
     public static async Task Delete(this IContainer<Message> simpleContext)
         => await simpleContext.BotClient.DeleteMessageAsync(
             simpleContext.Update.Chat.Id, simpleContext.Update.MessageId);
@@ -96,9 +97,7 @@ public static class MessageContainerExtensions
             .WrapMessageAsync(simpleContext.Updater);
     }
 
-    /// <summary>
-    /// Message is sent to private chat.
-    /// </summary>
+    /// <inheritdoc cref="ChatType.Private"/>
     public static bool IsPrivate(this IContainer<Message> simpleContext)
         => simpleContext.Update.Chat.Type == ChatType.Private;
 

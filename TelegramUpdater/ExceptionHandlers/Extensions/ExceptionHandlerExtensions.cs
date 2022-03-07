@@ -4,6 +4,9 @@ using TelegramUpdater.UpdateHandlers;
 
 namespace TelegramUpdater;
 
+/// <summary>
+/// Extension methods for <see cref="ExceptionHandler{TException}"/>.
+/// </summary>
 public static class ExceptionHandlerExtensions
 {
     /// <summary>
