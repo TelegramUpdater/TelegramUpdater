@@ -174,7 +174,10 @@ public static class UpdaterExtensions
             var commandScope = scope.First().Options.BotCommandScope;
 
             await updater.BotClient.SetMyCommandsAsync(
-                scope.SelectMany(x => x.ToBotCommand()), commandScope);
+                scope.SelectMany(x => x.ToBotCommand())
+                    .OrderBy(x=> x.priority)
+                    .Select(x=> x.command),
+                commandScope);
 
             updater.Logger.LogInformation(
                 "Set {count} commands to scope {scope}.",

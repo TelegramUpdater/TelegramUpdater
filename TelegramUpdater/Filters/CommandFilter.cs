@@ -197,21 +197,35 @@
         /// </remarks>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public IEnumerable<BotCommand> ToBotCommand()
+        public IEnumerable<(int priority, BotCommand command)> ToBotCommand()
         {
             if (Options.Descriptions is null)
                 throw new InvalidOperationException(
                     "Commands should have a description to convert to BotCommand");
 
+            int[] setPriorities;
+            if (Options.SetCommandPriorities is null ||
+                Options.SetCommandPriorities.Length != Commands.Length)
+            {
+                setPriorities = new int[Commands.Length];
+            }
+            else
+            {
+                setPriorities = Options.SetCommandPriorities;
+            }
+                
+
             if (Commands.Length != Options.Descriptions.Length)
                 throw new InvalidOperationException(
                     "Descriptions count dose not match commands count");
 
-            return Commands.Zip(Options.Descriptions).Select(x => new BotCommand
+            var commands = Commands.Zip(Options.Descriptions).Select(x => new BotCommand
             {
                 Command = x.First,
                 Description = x.Second
             });
+
+            return setPriorities.Zip(commands);
         }
     }
 }

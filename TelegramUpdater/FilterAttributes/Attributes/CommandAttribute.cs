@@ -146,10 +146,12 @@ public sealed class CommandAttribute : AbstractFilterAttribute
     /// <param name="joinArgs">If the trailing args should join from <paramref name="joinArgsFormIndex"/>.</param>
     /// <param name="joinArgsFormIndex">The index that args should join from.</param>
     /// <param name="botCommandScopeType">Scope type for the commands</param>
+    /// <param name="setCommandPriorities">Commands are ordered based on the when setting them.</param>
     /// <exception cref="Exception"></exception>
     public CommandAttribute(
         string[] commands,
         string[] descriptions,
+        int[]? setCommandPriorities,
         char prefix = '/',
         ArgumentsMode argumentsMode = ArgumentsMode.Idc,
         char separator = ' ',
@@ -163,7 +165,8 @@ public sealed class CommandAttribute : AbstractFilterAttribute
                 separator,
                 joinArgs ? joinArgsFormIndex : null,
                 descriptions,
-                ToBotCommandScope(botCommandScopeType)));
+                ToBotCommandScope(botCommandScopeType),
+                setCommandPriorities));
     }
 
     /// <summary>
@@ -177,9 +180,11 @@ public sealed class CommandAttribute : AbstractFilterAttribute
     /// <param name="joinArgs">If the trailing args should join from <paramref name="joinArgsFormIndex"/>.</param>
     /// <param name="joinArgsFormIndex">The index that args should join from.</param>
     /// <param name="botCommandScopeType">Scope type for the commands</param>
+    /// <param name="setCommandPriority">Commands are ordered based on the when setting them.</param>
     public CommandAttribute(
          string command,
          string description,
+         int setCommandPriority = default,
          char prefix = '/',
          ArgumentsMode argumentsMode = ArgumentsMode.Idc,
          char separator = ' ',
@@ -193,7 +198,8 @@ public sealed class CommandAttribute : AbstractFilterAttribute
                 separator,
                 joinArgs ? joinArgsFormIndex : null,
                 new[] { description },
-                ToBotCommandScope(botCommandScopeType)));
+                ToBotCommandScope(botCommandScopeType),
+                new[] { setCommandPriority }));
     }
 
     /// <inheritdoc/>
