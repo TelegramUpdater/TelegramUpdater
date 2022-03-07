@@ -1,16 +1,15 @@
-﻿namespace TelegramUpdater.FilterAttributes.Attributes
+﻿namespace TelegramUpdater.FilterAttributes.Attributes;
+
+/// <summary>
+/// Filter attribute for <see cref="FilterCutify.Group"/>
+/// </summary>
+public sealed class GroupAttribute : FilterAttributeBuilder
 {
     /// <summary>
-    /// Filter attribute for <see cref="FilterCutify.Group"/>
+    /// Initialize a new instance of <see cref="GroupAttribute"/>.
     /// </summary>
-    public sealed class GroupAttribute : FilterAttributeBuilder
+    public GroupAttribute()
+        : base(x => x.AddFilterForUpdate(FilterCutify.Group()))
     {
-        /// <summary>
-        /// Init <see cref="GroupAttribute"/>.
-        /// </summary>
-        public GroupAttribute()
-            : base(x => x.AddFilterForUpdate(FilterCutify.Group()))
-        {
-        }
     }
 }
