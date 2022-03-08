@@ -5,7 +5,7 @@
 	<Nullable>enable</Nullable>
 	<Authors>immmdreza</Authors>
 	<Company>TelegramUpdater</Company>
-	<Version>1.4.0-preview.0.1</Version>
+	<Version>1.4.0-preview.0.2</Version>
 	<Description>Hosting extension package for TelegramUpdater</Description>
 	<Copyright>TelegramUpdater by immmdreza</Copyright>
 	<PackageProjectUrl>https://telegramupdater.github.io/</PackageProjectUrl>
@@ -37,7 +37,6 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
     <PackageReference Include="TelegramUpdater" Version="1.4.0-preview.0.2" />
