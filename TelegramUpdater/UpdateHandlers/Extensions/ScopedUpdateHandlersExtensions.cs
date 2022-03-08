@@ -22,15 +22,17 @@ public static class ScopedUpdateHandlersExtensions
     /// <para>Don't touch it if you don't know.</para>
     /// </param>
     /// <remarks>This method will add filter attributes if <paramref name="filter"/> is null.</remarks>
-    public static IUpdater AddScopedUpdateHandler<TUpdate>(this IUpdater updater,
-                                                     Type typeOfScopedHandler,
-                                                     Filter<TUpdate>? filter = default,
-                                                     UpdateType? updateType = default,
-                                                     Func<Update, TUpdate>? getT = default) where TUpdate : class
+    public static IUpdater AddScopedUpdateHandler<TUpdate>(
+        this IUpdater updater,
+        Type typeOfScopedHandler,
+        Filter<TUpdate>? filter = default,
+        UpdateType? updateType = default,
+        Func<Update, TUpdate>? getT = default) where TUpdate : class
     {
         if (!typeof(IScopedUpdateHandler).IsAssignableFrom(typeOfScopedHandler))
         {
-            throw new InvalidCastException($"{typeOfScopedHandler} Should be an IScopedUpdateHandler");
+            throw new InvalidCastException(
+                $"{typeOfScopedHandler} Should be an IScopedUpdateHandler");
         }
 
         var _t = typeof(TUpdate);
@@ -101,7 +103,8 @@ public static class ScopedUpdateHandlersExtensions
 
         var _h = typeof(THandler);
 
-        return updater.AddScopedUpdateHandler(new ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
+        return updater.AddScopedUpdateHandler(
+            new ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
                 updateType.Value, filter, getT));
     }
 

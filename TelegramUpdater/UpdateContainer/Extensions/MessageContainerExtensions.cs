@@ -23,77 +23,70 @@ public static class MessageContainerExtensions
     /// <summary>
     /// Updates a <see cref="Message"/> of your own with removing it and sending a new message.
     /// </summary>
-    public static async Task<IContainer<Message>> ForceUpdate(this IContainer<Message> simpleContext,
-                                                              string text,
-                                                              bool sendAsReply = true,
-                                                              ParseMode? parseMode = default,
-                                                              IEnumerable<MessageEntity>? messageEntities = default,
-                                                              bool? disableWebpagePreview = default,
-                                                              bool? disableNotification = default,
-                                                              IReplyMarkup? replyMarkup = default)
+    public static async Task<IContainer<Message>> ForceUpdateAsync(
+        this IContainer<Message> simpleContext,
+        string text,
+        bool sendAsReply = true,
+        ParseMode? parseMode = default,
+        IEnumerable<MessageEntity>? messageEntities = default,
+        bool? disableWebpagePreview = default,
+        bool? disableNotification = default,
+        IReplyMarkup? replyMarkup = default)
     {
         if (simpleContext.Update.From?.Id != simpleContext.BotClient.BotId)
             throw new InvalidOperationException("The message should be for the bot it self.");
 
         await simpleContext.Delete();
-        return await simpleContext.BotClient.SendTextMessageAsync(simpleContext.Update.Chat.Id,
-                                                               text,
-                                                               parseMode,
-                                                               messageEntities,
-                                                               disableWebpagePreview,
-                                                               disableNotification,
-                                                               replyToMessageId: sendAsReply ? simpleContext.Update.MessageId : 0,
-                                                               allowSendingWithoutReply: true,
-                                                               replyMarkup: replyMarkup)
+        return await simpleContext.BotClient.SendTextMessageAsync(
+            simpleContext.Update.Chat.Id,
+            text, parseMode, messageEntities,
+            disableWebpagePreview, disableNotification,
+            replyToMessageId: sendAsReply ? simpleContext.Update.MessageId : 0,
+            allowSendingWithoutReply: true,
+            replyMarkup: replyMarkup)
             .WrapMessageAsync(simpleContext.Updater);
     }
 
-    /// <summary>
-    /// Quickest possible way to response to a message
-    /// Shortcut for <c>SendTextMessageAsync</c>
-    /// </summary>
-    /// <param name="text">Text to response</param>
-    /// <param name="sendAsReply">To send it as a replied message if possible.</param>
-    /// <returns></returns>
-    public static async Task<IContainer<Message>> Response(this IContainer<Message> simpleContext,
-                                                           string text,
-                                                           bool sendAsReply = true,
-                                                           ParseMode? parseMode = default,
-                                                           IEnumerable<MessageEntity>? messageEntities = default,
-                                                           bool? disableWebpagePreview = default,
-                                                           bool? disableNotification = default,
-                                                           IReplyMarkup? replyMarkup = default)
-        => await simpleContext.BotClient.SendTextMessageAsync(simpleContext.Update.Chat.Id,
-                                                           text,
-                                                           parseMode,
-                                                           messageEntities,
-                                                           disableWebpagePreview,
-                                                           disableNotification,
-                                                           replyToMessageId: sendAsReply ? simpleContext.Update.MessageId : 0,
-                                                           allowSendingWithoutReply: true,
-                                                           replyMarkup: replyMarkup)
+    /// <inheritdoc cref="TelegramBotClientExtensions.SendTextMessageAsync(
+    /// ITelegramBotClient, ChatId, string, ParseMode?,
+    /// IEnumerable{MessageEntity}?, bool?, bool?, int?,
+    /// bool?, IReplyMarkup?, CancellationToken)"/>
+    public static async Task<IContainer<Message>> ResponseAsync(
+        this IContainer<Message> simpleContext,
+        string text,
+        bool sendAsReply = true,
+        ParseMode? parseMode = default,
+        IEnumerable<MessageEntity>? messageEntities = default,
+        bool? disableWebpagePreview = default,
+        bool? disableNotification = default,
+        IReplyMarkup? replyMarkup = default)
+        => await simpleContext.BotClient.SendTextMessageAsync(
+            simpleContext.Update.Chat.Id,
+            text, parseMode, messageEntities,
+            disableWebpagePreview, disableNotification,
+            replyToMessageId: sendAsReply ? simpleContext.Update.MessageId : 0,
+            allowSendingWithoutReply: true,
+            replyMarkup: replyMarkup)
         .WrapMessageAsync(simpleContext.Updater);
 
-    /// <summary>
-    /// Edits a message
-    /// </summary>
-    /// <exception cref="InvalidOperationException"></exception>
-    public static async Task<IContainer<Message>?> Edit(this IContainer<Message> simpleContext,
-                                                        string text,
-                                                        ParseMode? parseMode = default,
-                                                        IEnumerable<MessageEntity>? messageEntities = default,
-                                                        bool? disableWebpagePreview = default,
-                                                        InlineKeyboardMarkup? inlineKeyboardMarkup = default,
-                                                        CancellationToken cancellationToken = default)
+    /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageTextAsync(
+    /// ITelegramBotClient, ChatId, int, string, ParseMode?,
+    /// IEnumerable{MessageEntity}?, bool?, InlineKeyboardMarkup?,
+    /// CancellationToken)"/>
+    public static async Task<IContainer<Message>?> EditAsync(
+        this IContainer<Message> simpleContext,
+        string text, ParseMode? parseMode = default,
+        IEnumerable<MessageEntity>? messageEntities = default,
+        bool? disableWebpagePreview = default,
+        InlineKeyboardMarkup? inlineKeyboardMarkup = default,
+        CancellationToken cancellationToken = default)
     {
-        return await simpleContext.BotClient.EditMessageTextAsync(simpleContext.Update.Chat.Id,
-                                                        simpleContext.Update.MessageId,
-                                                        text,
-                                                        parseMode,
-                                                        messageEntities,
-                                                        disableWebpagePreview,
-                                                        inlineKeyboardMarkup,
-                                                        cancellationToken)
+        return await simpleContext.BotClient.EditMessageTextAsync(
+            simpleContext.Update.Chat.Id,
+            simpleContext.Update.MessageId,
+            text, parseMode, messageEntities,
+            disableWebpagePreview, inlineKeyboardMarkup,
+            cancellationToken)
             .WrapMessageAsync(simpleContext.Updater);
     }
 
