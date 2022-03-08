@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\TelegramUpdater\TelegramUpdater.csproj" />
+    <ProjectReference Include="..\..\Src\TelegramUpdater\TelegramUpdater.csproj" />
   </ItemGroup>
 
 </Project>
