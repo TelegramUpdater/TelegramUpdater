@@ -1,14 +1,15 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.Helpers
 {
     /// <summary>
-    /// Provide information of a regex match
+    /// Provide information of a regex match.
     /// </summary>
     public readonly struct MatchContext<TUpdate> where TUpdate : class
     {
-        public MatchContext(IContainer<TUpdate> simpleContext,
+        internal MatchContext(IContainer<TUpdate> simpleContext,
                             bool isMatched = default,
                             MatchCollection? matchCollection = default)
         {
@@ -17,13 +18,24 @@ namespace TelegramUpdater.Helpers
             MatchCollection = matchCollection;
         }
 
+        /// <summary>
+        /// Indicates if the regex is matched.
+        /// </summary>
+        [MemberNotNullWhen(true, "MatchCollection")]
         public bool IsMatched { get; }
 
+        /// <summary>
+        /// A <see cref="MatchCollection"/> if <see cref="IsMatched"/> is
+        /// <see langword="true"/>.
+        /// </summary>
         public MatchCollection? MatchCollection { get; }
 
+        /// <summary>
+        /// The update container.
+        /// </summary>
         public IContainer<TUpdate> SimpleContext { get; }
 
-        public static MatchContext<T> Check<T>(
+        internal static MatchContext<T> Check<T>(
             IContainer<T> simpleContext,
             Func<T, string?> getText,
             string pattern,
@@ -44,6 +56,10 @@ namespace TelegramUpdater.Helpers
             return new MatchContext<T>(simpleContext);
         }
 
+        /// <summary>
+        /// The result of <see cref="IsMatched"/>. 
+        /// </summary>
+        /// <param name="matchContext"></param>
         public static implicit operator bool(MatchContext<TUpdate> matchContext)
             => matchContext.IsMatched;
     }

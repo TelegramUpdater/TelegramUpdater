@@ -3,6 +3,9 @@ using TelegramUpdater.Helpers;
 
 namespace TelegramUpdater.UpdateContainer;
 
+/// <summary>
+/// Some extension methods to handle conditional stuff.
+/// </summary>
 public static class ConditionalExtensions
 {
     #region Sync
@@ -101,6 +104,13 @@ public static class ConditionalExtensions
         return matchContext;
     }
 
+    /// <summary>
+    /// Do somthing is somthing else is not <see langword="null"/>.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="simpleContext"></param>
+    /// <param name="func"></param>
+    /// <returns></returns>
     public static MatchContext<T> IfNotNull<T>(this IContainer<T>? simpleContext,
                                                Action<IContainer<T>> func) where T : class
     {
@@ -113,12 +123,19 @@ public static class ConditionalExtensions
         return default;
     }
 
-    public static void IfNotNull<T>(this T everything, Action<T> action)
+    /// <summary>
+    /// Do somthing is somthing else is not <see langword="null"/>.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="anything"></param>
+    /// <param name="action"></param>
+    /// <returns></returns>
+    public static void IfNotNull<T>(this T anything, Action<T> action)
         where T : class
     {
-        if (everything != null)
+        if (anything != null)
         {
-            action(everything);
+            action(anything);
         }
     }
 

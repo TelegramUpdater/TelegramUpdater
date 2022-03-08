@@ -21,11 +21,11 @@ internal class MyScopedMessageHandler : MessageHandler
         await container.ChannelUserClick(TimeSpan.FromSeconds(5), new("ok"))
             .IfNotNull(async answer =>
             {
-                await answer.Edit(text: "Well ...");
+                await answer.EditAsync(text: "Well ...");
             })
             .Else(async _ =>
             {
-                await container.Response("Slow", sendAsReply: false);
+                await container.ResponseAsync("Slow", sendAsReply: false);
             });
     }
 }

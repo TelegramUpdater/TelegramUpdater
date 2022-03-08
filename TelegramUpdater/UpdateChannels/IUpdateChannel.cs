@@ -18,5 +18,5 @@ public interface IUpdateChannel
     /// <summary>
     /// If this update should be channeled.
     /// </summary>
-    internal bool ShouldChannel(Update update);
+    public bool ShouldChannel(Update update);
 }

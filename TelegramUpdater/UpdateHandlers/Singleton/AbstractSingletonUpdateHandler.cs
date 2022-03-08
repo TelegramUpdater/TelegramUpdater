@@ -69,7 +69,7 @@ public abstract class AbstractSingletonUpdateHandler<T> : IGenericSingletonUpdat
         => await HandleAsync(ContainerBuilder(updater, shiningInfo));
 
     /// <inheritdoc/>
-    bool ISingletonUpdateHandler.ShouldHandle(Update update)
+    public bool ShouldHandle(Update update)
     {
         if (update.Type != UpdateType) return false;
 

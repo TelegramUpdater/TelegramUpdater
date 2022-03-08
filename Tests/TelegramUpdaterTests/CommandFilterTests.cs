@@ -20,7 +20,7 @@ namespace TelegramUpdaterTests
 
             var args = (filter.ExtraData["args"]) as string[];
 
-            Assert.Equal(args![0], "hello world");
+            Assert.Equal("hello world", args![0]);
         }
     }
 }

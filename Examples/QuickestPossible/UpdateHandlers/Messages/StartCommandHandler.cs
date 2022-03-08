@@ -20,7 +20,7 @@ namespace QuickestPossible.UpdateHandlers.Messages
 
             if (callback is not null)
             {
-                await callback.Edit(text: $"Why {callback.Update.Data}?");
+                await callback.EditAsync(text: $"Why {callback.Update.Data}?");
             }
             else
             {
