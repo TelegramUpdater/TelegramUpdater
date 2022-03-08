@@ -4,9 +4,12 @@ using TelegramUpdater.UpdateContainer.UpdateContainers;
 
 namespace TelegramUpdater.UpdateContainer;
 
+/// <summary>
+/// A set of common extension.
+/// </summary>
 public static class CommonExtensions
 {
-    public static RawContainer RebaseAsRaw<T>(
+    internal static RawContainer RebaseAsRaw<T>(
         this IContainer<T> container, ShiningInfo<long, Update> shiningInfo) where T : class
         => new(container.Updater, shiningInfo);
 
@@ -18,7 +21,7 @@ public static class CommonExtensions
     }
 
     internal static IContainer<T> Wrap<T>(
-        this T t, Expression<Func<Update, T>> insiderResovler, IUpdater updater) where T : class
+        this T t, Expression<Func<Update, T?>> insiderResovler, IUpdater updater) where T : class
     {
         return AnyLiteContainer<T>.CreateLiteContainer(insiderResovler, t, updater);
     }

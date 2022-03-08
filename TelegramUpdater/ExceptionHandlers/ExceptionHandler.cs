@@ -55,34 +55,19 @@ namespace TelegramUpdater.ExceptionHandlers
             }
         }
 
-        /// <summary>
-        /// Allowed handlers to handle exceptions occurred inside them.
-        /// </summary>
-        /// <value></value>
+        /// <inheritdoc/>
         public IEnumerable<Type>? AllowedHandlers { get; }
 
-        /// <summary>
-        /// Type of exception to catch.
-        /// </summary>
-        /// <value></value>
+        /// <inheritdoc/>
         public Type ExceptionType { get; }
 
-        /// <summary>
-        /// A filter to match <see cref="Exception.Message"/>.
-        /// </summary>
-        /// <value></value>
+        /// <inheritdoc/>
         public Filter<string>? MessageMatch { get; }
 
-        /// <summary>
-        /// A function that will be called when the error catches.
-        /// </summary>
-        /// <value></value>
+        /// <inheritdoc/>
         public Func<IUpdater, Exception, Task> Callback { get; }
 
-        /// <summary>
-        /// Indicates if this handler should catch all of exceptions.
-        /// </summary>
-        /// <value></value>
+        /// <inheritdoc/>
         public bool Inherit { get; }
     }
 }

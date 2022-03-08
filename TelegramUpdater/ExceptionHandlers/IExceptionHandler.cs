@@ -30,7 +30,7 @@ namespace TelegramUpdater.ExceptionHandlers
         public Func<IUpdater, Exception, Task> Callback { get; }
 
         /// <summary>
-        /// Allow inherit and not only exact type.
+        /// Allow inherited exceptions and not only exact type.
         /// </summary>
         public bool Inherit { get; }
 

@@ -12,13 +12,19 @@ public static class ExceptionHandlerExtensions
     /// <summary>
     /// Add your exception handler to this updater.
     /// </summary>
-    /// <param name="callback">A callback function that will be called when the error catched.</param>
-    /// <param name="messageMatch">Handle only when <see cref="Exception.Message"/> matches a text.</param>
+    /// <param name="updater">The updater.</param>
+    /// <param name="callback">
+    /// A callback function that will be called when the error catched.
+    /// </param>
+    /// <param name="messageMatch">
+    /// Handle only when <see cref="Exception.Message"/> matches a text.
+    /// </param>
     /// <param name="allowedHandlers">
     /// Handle only when the <see cref="Exception"/> occured in specified
     /// <see cref="IUpdateHandler"/>s
     /// <para>Leave null to handle all.</para>
     /// </param>
+    /// <param name="inherit">Allow inherited exceptions and not only exact type.</param>
     public static IUpdater AddExceptionHandler<TException>(
         this IUpdater updater,
         Func<IUpdater, Exception, Task> callback,
@@ -33,8 +39,16 @@ public static class ExceptionHandlerExtensions
     /// <summary>
     /// Add your exception handler to this updater.
     /// </summary>
-    /// <param name="callback">A callback function that will be called when the error catched.</param>
-    /// <param name="messageMatch">Handle only when <see cref="Exception.Message"/> matches a text.</param>
+    /// <param name="updater">The updater.</param>
+    /// <param name="callback">
+    /// A callback function that will be called when the error catched.
+    /// </param>
+    /// <param name="messageMatch">
+    /// Handle only when <see cref="Exception.Message"/> matches a text.
+    /// </param>
+    /// <param name="inherit">
+    /// Allow inherited exceptions and not only exact type.
+    /// </param>
     public static IUpdater AddExceptionHandler<TException, THandler>(
         this IUpdater updater,
         Func<IUpdater, Exception, Task> callback,
