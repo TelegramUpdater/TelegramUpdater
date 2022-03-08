@@ -12,18 +12,18 @@ public class SimpleMessageHandler : MessageHandler
 {
     protected override async Task HandleAsync(IContainer<Message> container)
     {
-        var msg = await container.Response($"Are you ok? answer quick!",
+        var msg = await container.ResponseAsync($"Are you ok? answer quick!",
             replyMarkup: new InlineKeyboardMarkup(
                 InlineKeyboardButton.WithCallbackData("Yes i'm OK!", "ok")));
 
         await container.ChannelUserResponse(TimeSpan.FromMinutes(5))
             .IfNotNull(async answer =>
             {
-                await answer.Response("Well ...");
+                await answer.ResponseAsync("Well ...");
             })
             .Else(async _ =>
             {
-                await container.Response("Slow", sendAsReply: false);
+                await container.ResponseAsync("Slow", sendAsReply: false);
             });
     }
 }

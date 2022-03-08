@@ -7,6 +7,7 @@ var updater = new Updater(
     new UpdaterOptions(allowedUpdates: new[] { UpdateType.Message, UpdateType.CallbackQuery }))
 
     .AddDefaultExceptionHandler()
-    .AutoCollectScopedHandlers();
+    .AutoCollectScopedHandlers()
+    .CollectSingletonUpdateHandlerCallbacks();
 
 await updater.StartAsync();

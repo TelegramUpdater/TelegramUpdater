@@ -30,7 +30,7 @@ var updater = new UpdaterBuilder(
         }))
 
     .StepThree( // Quick handler
-        async container => await container.Response("Started!"),
+        async container => await container.ResponseAsync("Started!"),
         FilterCutify.OnCommand("start"))
 
     .AddScopedUpdateHandler<MyScopedMessageHandler, Message>(); // Scoped handler

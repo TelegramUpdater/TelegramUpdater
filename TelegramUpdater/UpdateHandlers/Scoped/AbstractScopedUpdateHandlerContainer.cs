@@ -1,7 +1,4 @@
-﻿using System.Reflection;
-using TelegramUpdater.FilterAttributes;
-
-namespace TelegramUpdater.UpdateHandlers.Scoped;
+﻿namespace TelegramUpdater.UpdateHandlers.Scoped;
 
 /// <summary>
 /// Abstract base for <see cref="IScopedUpdateHandler"/> containers.
@@ -66,7 +63,7 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     internal protected abstract TUpdate? GetT(Update update);
 
     /// <inheritdoc/>
-    bool IScopedUpdateHandlerContainer.ShouldHandle(Update update)
+    public bool ShouldHandle(Update update)
     {
         if (update.Type != UpdateType) return false;
 

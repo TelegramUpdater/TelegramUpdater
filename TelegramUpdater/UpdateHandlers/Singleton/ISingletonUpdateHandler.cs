@@ -16,5 +16,5 @@ public interface ISingletonUpdateHandler : IUpdateHandler
     /// </summary>
     /// <param name="update">The update.</param>
     /// <returns></returns>
-    internal bool ShouldHandle(Update update);
+    public bool ShouldHandle(Update update);
 }

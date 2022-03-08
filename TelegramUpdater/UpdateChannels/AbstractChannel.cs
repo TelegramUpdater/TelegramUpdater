@@ -62,7 +62,7 @@ public abstract class AbstractChannel<T> : IGenericUpdateChannel<T>
     /// <summary>
     /// If this update should be channeled.
     /// </summary>
-    bool IUpdateChannel.ShouldChannel(Update update)
+    public bool ShouldChannel(Update update)
     {
         if (update.Type != UpdateType) return false;
 
