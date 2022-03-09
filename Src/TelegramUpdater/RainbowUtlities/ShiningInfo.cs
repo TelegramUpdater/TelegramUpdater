@@ -1,4 +1,4 @@
-﻿namespace TelegramUpdater.RainbowUtlities
+﻿namespace TelegramUpdater.RainbowUtilities
 {
     /// <summary>
     /// Provides information about a <typeparamref name="TValue"/> while handling.

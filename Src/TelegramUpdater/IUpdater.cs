@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using TelegramUpdater.ExceptionHandlers;
-using TelegramUpdater.RainbowUtlities;
+using TelegramUpdater.RainbowUtilities;
 using TelegramUpdater.UpdateHandlers.Scoped;
 using TelegramUpdater.UpdateHandlers.Singleton;
 
@@ -32,18 +32,21 @@ public interface IUpdater
     public Rainbow<long, Update> Rainbow { get; }
 
     /// <summary>
-    /// A list of allowed updates. updater only receives and handles this kind of updates.
+    /// A list of allowed updates. updater only receives
+    /// and handles this kind of updates.
     /// </summary>
     public UpdateType[] AllowedUpdates { get; }
 
     /// <summary>
-    /// Enumerate over <see cref="IScopedUpdateHandlerContainer"/>s, registered to this instance
+    /// Enumerate over <see cref="IScopedUpdateHandlerContainer"/>s,
+    /// registered to this instance
     /// of <see cref="IUpdater"/>.
     /// </summary>
     public IEnumerable<IScopedUpdateHandlerContainer> ScopedHandlerContainers { get; }
 
     /// <summary>
-    /// Enumerate over <see cref="ISingletonUpdateHandler"/>s, registered to this instance
+    /// Enumerate over <see cref="ISingletonUpdateHandler"/>s,
+    /// registered to this instance
     /// of <see cref="IUpdater"/>.
     /// </summary>
     public IEnumerable<ISingletonUpdateHandler> SingletonUpdateHandlers { get; }
@@ -88,9 +91,13 @@ public interface IUpdater
     ValueTask WriteAsync(Update update, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Use this to start writing updates ( using your custom writer <typeparamref name="TWriter"/> ) to the updater. ( Blocking )
+    /// Use this to start writing updates
+    /// ( using your custom writer <typeparamref name="TWriter"/> )
+    /// to the updater. ( Blocking )
     /// </summary>
-    /// <typeparam name="TWriter">Your custom update writer. a sub-class of <see cref="UpdateWriterAbs"/>.</typeparam>
+    /// <typeparam name="TWriter">
+    /// Your custom update writer. a sub-class of
+    /// <see cref="UpdateWriterAbs"/>.</typeparam>
     /// <param name="cancellationToken">To cancel the job manually,</param>
     public Task StartAsync<TWriter>(CancellationToken cancellationToken = default)
         where TWriter : UpdateWriterAbs, new();

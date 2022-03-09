@@ -16,19 +16,23 @@ public static class UpdaterExtensions
     internal static object GetInnerUpdate(this Update update)
     {
         if (update.Type == UpdateType.Unknown)
-            throw new ArgumentException($"Can't resolve Update of Type {update.Type}");
+            throw new ArgumentException(
+                $"Can't resolve Update of Type {update.Type}");
 
-        return typeof(Update).GetProperty(update.Type.ToString())?.GetValue(update, null)
-            ?? throw new InvalidOperationException($"Inner update is null for {update.Type}");
+        return typeof(Update).GetProperty(update.Type.ToString())?
+            .GetValue(update, null)?? throw new InvalidOperationException(
+                $"Inner update is null for {update.Type}");
     }
 
     internal static T GetInnerUpdate<T>(this Update update)
     {
         if (update.Type == UpdateType.Unknown)
-            throw new ArgumentException($"Can't resolve Update of Type {update.Type}");
+            throw new ArgumentException(
+                $"Can't resolve Update of Type {update.Type}");
 
-        return (T)(typeof(Update).GetProperty(update.Type.ToString())?.GetValue(update, null)
-            ?? throw new InvalidOperationException($"Inner update is null for {update.Type}"));
+        return (T)(typeof(Update).GetProperty(update.Type.ToString())?
+            .GetValue(update, null)?? throw new InvalidOperationException(
+                $"Inner update is null for {update.Type}"));
     }
 
     internal static UpdateType? GetUpdateType<T>()
@@ -41,7 +45,7 @@ public static class UpdaterExtensions
         return null;
     }
 
-    private static bool TryResovleNamespaceToUpdateType(
+    private static bool TryResolveNamespaceToUpdateType(
         string currentNs, [NotNullWhen(true)] out Type? type)
     {
         var nsParts = currentNs.Split('.');
@@ -70,14 +74,17 @@ public static class UpdaterExtensions
     /// <list type="number">
     /// <item>
     /// You should place handlers of different update types
-    /// ( <see cref="UpdateType.Message"/>, <see cref="UpdateType.CallbackQuery"/> and etc. )
+    /// ( <see cref="UpdateType.Message"/>, <see cref="UpdateType.CallbackQuery"/>
+    /// and etc. )
     /// into different parent folders.
     /// </item>
     /// <item>
-    /// Parent name should match the update type name, eg: <c>Messages</c> for <see cref="UpdateType.Message"/>
+    /// Parent name should match the update type name,
+    /// eg: <c>Messages</c> for <see cref="UpdateType.Message"/>
     /// </item>
     /// </list>
-    /// Eg: <paramref name="handlersParentNamespace"/>/Messages/MyScopedMessageHandler
+    /// Eg: <paramref name="handlersParentNamespace"/>
+    /// /Messages/MyScopedMessageHandler
     /// </remarks>
     /// <returns></returns>
     public static IUpdater AutoCollectScopedHandlers(
@@ -89,9 +96,9 @@ public static class UpdaterExtensions
         if (entryAssembly is null)
             throw new ApplicationException("Can't find entry assembly.");
 
-        var assemplyName = entryAssembly.GetName().Name;
+        var assemblyName = entryAssembly.GetName().Name;
 
-        var handlerNs = $"{assemplyName}.{handlersParentNamespace}";
+        var handlerNs = $"{assemblyName}.{handlersParentNamespace}";
 
         // All types in *handlersParentNamespace*
         var scopedHandlersTypes = entryAssembly.GetTypes()
@@ -103,7 +110,8 @@ public static class UpdaterExtensions
 
         foreach (var scopedType in scopedHandlersTypes)
         {
-            if (!TryResovleNamespaceToUpdateType(scopedType.Namespace!, out var updateType))
+            if (!TryResolveNamespaceToUpdateType(
+                scopedType.Namespace!, out var updateType))
             {
                 continue;
             }
@@ -120,7 +128,8 @@ public static class UpdaterExtensions
 
             if (container is null) continue;
 
-            updater.Logger.LogInformation("Scoped handler collected! ( {Name} )", scopedType.Name);
+            updater.Logger.LogInformation(
+                "Scoped handler collected! ( {Name} )", scopedType.Name);
             updater.AddScopedUpdateHandler(container);
         }
 
@@ -128,7 +137,8 @@ public static class UpdaterExtensions
     }
 
     /// <summary>
-    /// Use this to start writing updates ( using a simple update writer ) to the updater. ( Blocking )
+    /// Use this to start writing updates ( using a simple update writer )
+    /// to the updater. ( Blocking )
     /// </summary>
     /// <param name="cancellationToken">To cancel the job manually,</param>
     /// <param name="updater">The updater.</param>
@@ -140,7 +150,9 @@ public static class UpdaterExtensions
 
     /// <summary>
     /// Set commands from your filter using method
-    /// <see cref="TelegramBotClientExtensions.SetMyCommandsAsync(ITelegramBotClient, IEnumerable{BotCommand}, BotCommandScope?, string?, CancellationToken)"/>.
+    /// <see cref="TelegramBotClientExtensions.SetMyCommandsAsync(
+    /// ITelegramBotClient, IEnumerable{BotCommand},
+    /// BotCommandScope?, string?, CancellationToken)"/>.
     /// </summary>
     /// <param name="updater"></param>
     /// <returns></returns>

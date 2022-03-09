@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using TelegramUpdater.RainbowUtlities;
+using TelegramUpdater.RainbowUtilities;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
 
 namespace TelegramUpdater.UpdateContainer;

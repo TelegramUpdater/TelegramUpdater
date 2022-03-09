@@ -7,7 +7,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.Attributes
     /// Place this attribute on any method to create an
     /// <see cref="ISingletonUpdateHandler"/> using that method
     /// as <see cref="IUpdateHandler.HandleAsync(
-    /// IUpdater, RainbowUtlities.ShiningInfo{long, Update})"/>.
+    /// IUpdater, RainbowUtilities.ShiningInfo{long, Update})"/>.
     /// <para>You can apply filter attributes on the method.</para>
     /// </summary>
     /// <remarks>

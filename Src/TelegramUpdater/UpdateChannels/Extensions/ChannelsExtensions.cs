@@ -1,5 +1,5 @@
 ﻿using TelegramUpdater.Filters;
-using TelegramUpdater.RainbowUtlities;
+using TelegramUpdater.RainbowUtilities;
 using TelegramUpdater.UpdateChannels;
 using TelegramUpdater.UpdateChannels.ReadyToUse;
 using TelegramUpdater.UpdateContainer.UpdateContainers;

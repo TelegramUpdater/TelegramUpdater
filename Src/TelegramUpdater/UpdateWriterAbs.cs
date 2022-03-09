@@ -6,21 +6,22 @@ namespace TelegramUpdater;
 /// Use this class to create an update writer ( to the updater ).
 /// </summary>
 /// <remarks>
-/// If you're not using an <see cref="IServiceProvider"/>, the subclass you're building
-/// Should have parameterless constructor.
+/// If you're not using an <see cref="IServiceProvider"/>, the subclass
+/// you're building Should have parameterless constructor.
 /// <para>
-/// In case of <see cref="IServiceProvider"/>, This type and parameters should exists in service collection.
+/// In case of <see cref="IServiceProvider"/>, This type and parameters
+/// should exists in service collection.
 /// </para>
 /// </remarks>
 public abstract class UpdateWriterAbs
 {
     /// <summary>
-    /// Create a default instanse of update writer.
+    /// Create a default instance of update writer.
     /// </summary>
     protected UpdateWriterAbs() { }
 
     /// <summary>
-    /// Create a default instanse of update writer.
+    /// Create a default instance of update writer.
     /// </summary>
     /// <param name="updater">The updater.</param>
     protected UpdateWriterAbs(IUpdater updater)
@@ -67,7 +68,8 @@ public abstract class UpdateWriterAbs
     /// <param name="update">The update.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    protected async ValueTask EnqueueUpdateAsync(Update update, CancellationToken cancellationToken)
+    protected async ValueTask EnqueueUpdateAsync(
+        Update update, CancellationToken cancellationToken)
     {
         await Updater.WriteAsync(update, cancellationToken);
     }
@@ -79,7 +81,8 @@ public abstract class UpdateWriterAbs
             typeof(TWriter), new object[] { updater });
 
         if (writer == null)
-            throw new InvalidOperationException($"Can't create {typeof(TWriter)}");
+            throw new InvalidOperationException(
+                $"Can't create {typeof(TWriter)}");
         return writer;
     }
 }

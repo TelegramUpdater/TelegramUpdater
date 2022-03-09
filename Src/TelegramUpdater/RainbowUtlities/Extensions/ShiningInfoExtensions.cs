@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace TelegramUpdater.RainbowUtlities
+namespace TelegramUpdater.RainbowUtilities
 {
     /// <summary>
     /// A set of extension methods for shining info.

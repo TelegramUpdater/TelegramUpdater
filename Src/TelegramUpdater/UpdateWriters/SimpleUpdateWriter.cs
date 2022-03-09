@@ -9,7 +9,8 @@ namespace TelegramUpdater.UpdateWriters
             if (UpdaterOptions.FlushUpdatesQueue)
             {
                 Logger.LogInformation("Flushing updates.");
-                await BotClient.GetUpdatesAsync(-1, 1, 0, cancellationToken: stoppingToken);
+                await BotClient.GetUpdatesAsync(
+                    -1, 1, 0, cancellationToken: stoppingToken);
             }
 
             var offset = 0;
@@ -19,9 +20,10 @@ namespace TelegramUpdater.UpdateWriters
             {
                 try
                 {
-                    var updates = await BotClient.GetUpdatesAsync(offset, 100, timeOut,
-                                                                  allowedUpdates: UpdaterOptions.AllowedUpdates,
-                                                                  cancellationToken: stoppingToken);
+                    var updates = await BotClient.GetUpdatesAsync(
+                        offset, 100, timeOut,
+                        allowedUpdates: UpdaterOptions.AllowedUpdates,
+                        cancellationToken: stoppingToken);
 
                     foreach (var update in updates)
                     {
@@ -31,7 +33,9 @@ namespace TelegramUpdater.UpdateWriters
                 }
                 catch (Exception e)
                 {
-                    Logger.LogCritical(exception: e, "Auto update writer stopped due to an ecxeption.");
+                    Logger.LogCritical(
+                        exception: e,
+                        "Auto update writer stopped due to an exception.");
                     Updater.EmergencyCancel();
                     break;
                 }

@@ -1,4 +1,4 @@
-﻿namespace TelegramUpdater.RainbowUtlities
+﻿namespace TelegramUpdater.RainbowUtilities
 {
     /// <summary>
     /// Information about an owner of a queue.

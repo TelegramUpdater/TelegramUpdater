@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
-namespace TelegramUpdater.RainbowUtlities
+namespace TelegramUpdater.RainbowUtilities
 {
     /// <summary>
     /// Queues different objects in parallel.

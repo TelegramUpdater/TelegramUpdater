@@ -32,7 +32,8 @@ public sealed class ApplyFilterAttribute : AbstractFilterAttribute
     {
         var filter = Activator.CreateInstance(FilterType);
         if (filter == null)
-            throw new InvalidOperationException($"Cannot initialize filter of type {FilterType}");
+            throw new InvalidOperationException(
+                $"Cannot initialize filter of type {FilterType}");
         return filter;
     }
 }

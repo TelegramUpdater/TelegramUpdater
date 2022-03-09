@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
-using TelegramUpdater.RainbowUtlities;
+using TelegramUpdater.RainbowUtilities;
 
 namespace TelegramUpdater.UpdateContainer.UpdateContainers;
 

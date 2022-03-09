@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Telegram.Bot.Args;
 using TelegramUpdater.ExceptionHandlers;
-using TelegramUpdater.RainbowUtlities;
+using TelegramUpdater.RainbowUtilities;
 using TelegramUpdater.UpdateHandlers;
 using TelegramUpdater.UpdateHandlers.Scoped;
 using TelegramUpdater.UpdateHandlers.Singleton;
@@ -164,7 +164,7 @@ public sealed class Updater : IUpdater
             {
                 var tryAfterSeconds = int.Parse(match.Groups["tryAfter"].Value);
 
-                Logger.LogWarning("A wait of {seconds} is required! cuased by {method}",
+                Logger.LogWarning("A wait of {seconds} is required! caused by {method}",
                     tryAfterSeconds, args.ApiRequestEventArgs.MethodName);
                 await Task.Delay(tryAfterSeconds * 1000, cancellationToken);
             }

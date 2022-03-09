@@ -1,4 +1,4 @@
-﻿using TelegramUpdater.RainbowUtlities;
+﻿using TelegramUpdater.RainbowUtilities;
 
 namespace TelegramUpdater.UpdateHandlers;
 

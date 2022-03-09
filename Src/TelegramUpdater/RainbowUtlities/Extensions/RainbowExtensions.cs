@@ -1,4 +1,4 @@
-﻿namespace TelegramUpdater.RainbowUtlities
+﻿namespace TelegramUpdater.RainbowUtilities
 {
     /// <summary>
     /// Extension methods for rainbow.
