@@ -43,7 +43,7 @@
         /// <summary>
         /// Command prefix ( mainly '/' )
         /// </summary>
-        public char Prefix { get; }
+        public char Prefix { get; } = '/';
 
         /// <summary>
         /// Command filter options.

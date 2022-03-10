@@ -6,6 +6,11 @@
 public enum ArgumentsMode
 {
     /// <summary>
+    /// If you don't care about your command filter arguments
+    /// </summary>
+    Idc = 0,
+
+    /// <summary>
     /// If your command filter should have arguments
     /// </summary>
     Require,
@@ -13,12 +18,7 @@ public enum ArgumentsMode
     /// <summary>
     /// If your command filter should not have arguments
     /// </summary>
-    NoArgs,
-
-    /// <summary>
-    /// If you don't care about your command filter arguments
-    /// </summary>
-    Idc
+    NoArgs
 }
 
 /// <summary>
