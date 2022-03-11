@@ -23,6 +23,7 @@ public sealed class Updater : IUpdater
     private readonly List<IExceptionHandler> _exceptionHandlers;
     private readonly ILogger<IUpdater> _logger;
     private readonly Type? _preUpdateProcessorType;
+    private readonly Dictionary<string, object> _extraData;
     private UpdaterOptions _updaterOptions;
     private User? _me = null;
 
@@ -78,6 +79,7 @@ public sealed class Updater : IUpdater
     {
         _botClient = botClient ??
             throw new ArgumentNullException(nameof(botClient));
+        _extraData = new();
 
         if (outgoingRateControl)
             _botClient.OnApiResponseReceived += OnApiResponseReceived;
@@ -221,6 +223,23 @@ public sealed class Updater : IUpdater
 
     /// <inheritdoc/>
     public IEnumerable<ISingletonUpdateHandler> SingletonUpdateHandlers => _updateHandlers;
+
+    /// <inheritdoc/>
+    public object this[string key]
+    {
+        get => _extraData[key];
+        set => _extraData.Add(key, value);
+    }
+
+    /// <inheritdoc/>
+    public void EmergencyCancel()
+    {
+        _logger.LogWarning("Emergency cancel triggered.");
+        _emergencyCancel?.Cancel();
+    }
+
+    /// <inheritdoc/>
+    public bool ContainsKey(string key) => _extraData.ContainsKey(key);
 
     /// <inheritdoc/>
     public Updater AddSingletonUpdateHandler(ISingletonUpdateHandler updateHandler)
@@ -542,12 +561,5 @@ public sealed class Updater : IUpdater
         }
 
         return true;
-    }
-
-    /// <inheritdoc/>
-    public void EmergencyCancel()
-    {
-        _logger.LogWarning("Emergency cancel triggered.");
-        _emergencyCancel?.Cancel();
     }
 }
