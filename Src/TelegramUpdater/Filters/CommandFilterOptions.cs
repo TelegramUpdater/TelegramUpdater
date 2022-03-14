@@ -43,7 +43,7 @@ public readonly struct CommandFilterOptions
     /// <param name="setCommandPriorities">
     /// Commands are ordered based on the when setting them.
     /// </param>
-    /// <param name="botUsername">Username of the bot. will catch commands like /start@{username}.</param>
+    /// <param name="botUsername">Username of the bot ( without @ ). will catch commands like /start@{username}.</param>
     public CommandFilterOptions(
         ArgumentsMode argumentsMode = ArgumentsMode.Idc,
         char separator = ' ',
@@ -99,7 +99,7 @@ public readonly struct CommandFilterOptions
     public int[]? SetCommandPriorities { get; } = default;
 
     /// <summary>
-    /// Username of the bot. will catch commands like /start@{username}.
+    /// Username of the bot ( without @ ). will catch commands like /start@{username}.
     /// </summary>
     /// <value></value>
     public string? BotUsername { get; } = default;
