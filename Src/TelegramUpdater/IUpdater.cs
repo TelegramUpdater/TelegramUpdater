@@ -101,4 +101,19 @@ public interface IUpdater
     /// <param name="cancellationToken">To cancel the job manually,</param>
     public Task StartAsync<TWriter>(CancellationToken cancellationToken = default)
         where TWriter : UpdateWriterAbs, new();
+
+    /// <summary>
+    /// Use this to set or get extra data you may want to access everywhere
+    /// <see cref="IUpdater"/> exists.
+    /// </summary>
+    /// <param name="key">The key.</param>
+    /// <returns></returns>
+    public object this[string key] { get; set; }
+
+    /// <summary>
+    /// Check if an <see cref="string"/> key exists in updater extra data.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public bool ContainsKey(string key);
 }

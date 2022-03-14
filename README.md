@@ -27,15 +27,12 @@ using TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse;
 
 namespace ConsoleApp;
 
-[Command("test")]
+[Command("test"), Private]
 internal class MyScopedMessageHandler : ScopedMessageHandler
 {
-    public MyScopedMessageHandler() : base(group: 0)
-    { }
-
     protected override async Task HandleAsync(UpdateContainerAbs<Message> container)
     {
-        await container.Response("Tested!");
+        await ResponseAsync("Tested!");
     }
 }
 ```
@@ -43,15 +40,13 @@ internal class MyScopedMessageHandler : ScopedMessageHandler
 - Simple setup
 - Useful options
 ```cs
-updater = new Updater(new TelegramBotClient("BotToken"),
+updater = new Updater("BotToken",
     new UpdaterOptions(
         maxDegreeOfParallelism: 10, // maximum update process tasks count at the same time
                                     // Eg: first 10 updates are answers quickly, but others should wait
                                     // for any of that 10 to be done.
-
-        allowedUpdates: new[] { UpdateType.Message, UpdateType.CallbackQuery }))
-
-    .AddScopedMessage<MyScopedMessageHandler>(); // Scoped handler;
+                                    
+    .AddScopedUpdateHandler<MyScopedMessageHandler, Message>(); // Scoped handler;
 
 await updater.StartAsync(); // 🔥 Fire up and block!
 ```
@@ -121,8 +116,7 @@ If you're looking for a quick basic example:
 // See https://aka.ms/new-console-template for more information
 using TelegramUpdater;
 
-var updater = new UpdaterBuilder(
-    "BOT_TOKEN")
+var updater = new UpdaterBuilder("BOT_TOKEN")
 
     .StepOne()
 
