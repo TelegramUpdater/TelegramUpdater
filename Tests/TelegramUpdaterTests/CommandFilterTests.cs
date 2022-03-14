@@ -42,29 +42,10 @@ namespace TelegramUpdaterTests
         }
 
         [Theory]
-        [InlineData("/test")]
-        [InlineData("/Test")]
-        [InlineData("/Test hello world")]
-        [InlineData("/test@testbot")]
-        [InlineData("/test@TestBot")]
-        [InlineData("/test@BlahBot")]
-        [InlineData("/test@TestBot hello world")]
-        public void Test_Command_With_Username_2(string command)
-        {
-            var filter = new CommandFilter(
-                "test",
-                new CommandFilterOptions());
-
-            var message = new Message { Text = command };
-
-            Assert.True(filter.TheyShellPass(message));
-        }
-
-        [Theory]
         [InlineData("/test@testbot2")]
         [InlineData("!test@TestBot")]
         [InlineData("/test@TestBothello world")]
-        public void Test_Command_With_Username_3(string command)
+        public void Test_Command_With_Username_2(string command)
         {
             var filter = new CommandFilter(
                 "test",
@@ -73,6 +54,25 @@ namespace TelegramUpdaterTests
             var message = new Message { Text = command };
 
             Assert.False(filter.TheyShellPass(message));
+        }
+
+        [Theory]
+        [InlineData("/test")]
+        [InlineData("/Test")]
+        [InlineData("/Test hello world")]
+        [InlineData("/test@testbot")]
+        [InlineData("/test@TestBot")]
+        [InlineData("/test@BlahBot")]
+        [InlineData("/test@TestBot hello world")]
+        public void Test_Command_With_No_Username_1(string command)
+        {
+            var filter = new CommandFilter(
+                "test",
+                new CommandFilterOptions());
+
+            var message = new Message { Text = command };
+
+            Assert.True(filter.TheyShellPass(message));
         }
     }
 }
