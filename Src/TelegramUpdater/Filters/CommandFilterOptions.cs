@@ -43,13 +43,15 @@ public readonly struct CommandFilterOptions
     /// <param name="setCommandPriorities">
     /// Commands are ordered based on the when setting them.
     /// </param>
+    /// <param name="botUsername">Username of the bot. will catch commands like /start@{username}.</param>
     public CommandFilterOptions(
         ArgumentsMode argumentsMode = ArgumentsMode.Idc,
         char separator = ' ',
         int? joinArgsFormIndex = default,
         string[]? descriptions = default,
         BotCommandScope? botCommandScop = default,
-        int[]? setCommandPriorities = default)
+        int[]? setCommandPriorities = default,
+        string? botUsername = default)
     {
         ArgumentsMode = argumentsMode;
         Separator = separator;
@@ -57,6 +59,7 @@ public readonly struct CommandFilterOptions
         Descriptions = descriptions;
         BotCommandScope = botCommandScop;
         SetCommandPriorities = setCommandPriorities;
+        BotUsername = botUsername;
     }
 
     /// <summary>
@@ -94,4 +97,10 @@ public readonly struct CommandFilterOptions
     /// string?, CancellationToken)"/>.
     /// </summary>
     public int[]? SetCommandPriorities { get; } = default;
+
+    /// <summary>
+    /// Username of the bot. will catch commands like /start@{username}.
+    /// </summary>
+    /// <value></value>
+    public string? BotUsername { get; } = default;
 }

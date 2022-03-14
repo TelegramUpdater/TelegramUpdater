@@ -17,7 +17,7 @@
         /// Text of the command, 1-32 characters. Can contain only lowercase English letters,
         /// digits and underscores.
         /// </remarks>
-        public string[] Commands 
+        public string[] Commands
         {
             get => _commands!;
             private set
@@ -165,7 +165,7 @@
 
             var args = input.Text.Split(Options.Separator);
 
-            var command = args[0].ToLower();
+            var command = args[0].ToLower().Trim();
 
             if (Options.ArgumentsMode == ArgumentsMode.Require &&
                 args.Length < 2) return false;
@@ -185,7 +185,14 @@
             }
 
             AddOrUpdateData("args", nakedArgs);
-            return Commands.Any(x => Prefix + x == command);
+            if (!string.IsNullOrEmpty(Options.BotUsername))
+            {
+                return Commands.Any(x => $"{Prefix}{x}@{Options.BotUsername}" == command);
+            }
+            else
+            {
+                return Commands.Any(x => command.StartsWith($"{Prefix}{x}"));
+            }
         }
 
         /// <summary>
@@ -213,7 +220,7 @@
             {
                 setPriorities = Options.SetCommandPriorities;
             }
-                
+
 
             if (Commands.Length != Options.Descriptions.Length)
                 throw new InvalidOperationException(

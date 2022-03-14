@@ -147,6 +147,8 @@ public sealed class CommandAttribute : AbstractFilterAttribute
     /// <param name="joinArgsFormIndex">The index that args should join from.</param>
     /// <param name="botCommandScopeType">Scope type for the commands</param>
     /// <param name="setCommandPriorities">Commands are ordered based on the when setting them.</param>
+    /// <param name="checkUsername">If the username should be checked.</param>
+    /// <param name="botUsername">Username of the bot. will catch commands like /start@{username}.</param>    
     /// <exception cref="Exception"></exception>
     public CommandAttribute(
         string[] commands,
@@ -157,6 +159,8 @@ public sealed class CommandAttribute : AbstractFilterAttribute
         char separator = ' ',
         bool joinArgs = false,
         int joinArgsFormIndex = 0,
+        bool checkUsername = false,
+        string botUsername = default!,
         BotCommandScopeType botCommandScopeType = BotCommandScopeType.Default)
     {
         Filter = new CommandFilter(commands, prefix,
@@ -166,7 +170,8 @@ public sealed class CommandAttribute : AbstractFilterAttribute
                 joinArgs ? joinArgsFormIndex : null,
                 descriptions,
                 ToBotCommandScope(botCommandScopeType),
-                setCommandPriorities));
+                setCommandPriorities,
+                checkUsername ? botUsername : null));
     }
 
     /// <summary>
@@ -181,6 +186,8 @@ public sealed class CommandAttribute : AbstractFilterAttribute
     /// <param name="joinArgsFormIndex">The index that args should join from.</param>
     /// <param name="botCommandScopeType">Scope type for the commands</param>
     /// <param name="setCommandPriority">Commands are ordered based on the when setting them.</param>
+    /// <param name="checkUsername">If the username should be checked.</param>
+    /// <param name="botUsername">Username of the bot. will catch commands like /start@{username}.</param>
     public CommandAttribute(
          string command,
          string description,
@@ -190,6 +197,8 @@ public sealed class CommandAttribute : AbstractFilterAttribute
          char separator = ' ',
          bool joinArgs = false,
          int joinArgsFormIndex = 0,
+         bool checkUsername = false,
+         string botUsername = default!,
          BotCommandScopeType botCommandScopeType = BotCommandScopeType.Default)
     {
         Filter = new CommandFilter(new[] { command }, prefix,
@@ -199,7 +208,8 @@ public sealed class CommandAttribute : AbstractFilterAttribute
                 joinArgs ? joinArgsFormIndex : null,
                 new[] { description },
                 ToBotCommandScope(botCommandScopeType),
-                new[] { setCommandPriority }));
+                new[] { setCommandPriority },
+                checkUsername ? botUsername : null));
     }
 
     /// <inheritdoc/>
