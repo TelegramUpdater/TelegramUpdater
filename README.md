@@ -2,11 +2,12 @@
 
 ** !! Preview !! **
 
-This is your telegram updater package written in C# and dotnet core 3.1
+This is your telegram updater package written in C# and .NET 6
 
 The updater is supposed to fetch and handle new updates coming from bot api server
 
-The updater is written on top of [TelegramBots/Telegram.Bot: .NET Client for Telegram Bot API](https://github.com/TelegramBots/Telegram.Bot) package
+The updater is written on top of 
+[TelegramBots/Telegram.Bot: .NET Client for Telegram Bot API](https://github.com/TelegramBots/Telegram.Bot) package
 
 ## More support
 
@@ -30,7 +31,7 @@ namespace ConsoleApp;
 [Command("test"), Private]
 internal class MyScopedMessageHandler : ScopedMessageHandler
 {
-    protected override async Task HandleAsync(UpdateContainerAbs<Message> container)
+    protected override async Task HandleAsync(IContainer<Message> _)
     {
         await ResponseAsync("Tested!");
     }
@@ -57,19 +58,24 @@ await updater.StartAsync(); // 🔥 Fire up and block!
 As instance `ChannelUserClick` is an helper method for `OpenChannel` that waits for a user click.
 
 ```cs
-var msg = await container.Response($"Are you ok? answer quick!",
-    replyMarkup: new InlineKeyboardMarkup(
-        InlineKeyboardButton.WithCallbackData("Yes i'm OK!", "ok")));
+[Command("start"), Private]
+internal sealed class MyMessageHandler : MessageHandler
+{
+    protected override async Task HandleAsync(IContainer<Message> _)
+    {
+        await AwaitButtonClickAsync(
+            TimeSpan.FromSeconds(10), new CallbackQueryRegex("^hello"))
 
-await container.ChannelUserClick(TimeSpan.FromSeconds(5), "ok")
-    .IfNotNull(async answer =>
-    {
-        await answer.Edit(text: "Well ...");
-    })
-    .Else(async _ =>
-    {
-        await container.Response("Slow", sendAsReply: false);
-    });
+        .IfNotNull(async answer =>
+        {
+            await answer.EditAsync(text: "Well ...");
+        })
+        .Else(async _ =>
+        {
+            await ResponseAsync("Slow");
+        });
+    }
+}
 ```
 
 - `ExceptionHandler`s, handle exceptions like a pro with highly customizable exceptions handlers. you specify exception type, message match, handler type and ...
