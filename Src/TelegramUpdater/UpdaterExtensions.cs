@@ -66,8 +66,9 @@ public static class UpdaterExtensions
     }
 
     /// <summary>
-    /// Automatically collects all classes that are marked as scoped handlers
-    /// And adds them to the <see cref="IUpdater"/> instance.
+    /// Iter over all <see cref="IScopedUpdateHandler"/> with their type of update ( Eg: <see cref="Message"/>, ... )
+    /// that can be collected.
+    /// <para>You can add these to service collection to manually enable DI inside your scoped handlers.</para>
     /// </summary>
     /// <remarks>
     /// <b>Considerations:</b>
@@ -87,8 +88,8 @@ public static class UpdaterExtensions
     /// /Messages/MyScopedMessageHandler
     /// </remarks>
     /// <returns></returns>
-    public static IUpdater AutoCollectScopedHandlers(
-        this IUpdater updater,
+    public static IEnumerable<(Type update, Type handler)> IterCollectedScopedUpdateHandlerTypes(
+        this IUpdater _,
         string handlersParentNamespace = "UpdateHandlers")
     {
         var entryAssembly = Assembly.GetEntryAssembly();
@@ -114,22 +115,89 @@ public static class UpdaterExtensions
                 scopedType.Namespace!, out var updateType))
             {
                 continue;
-            }
+            };
 
+            yield return (updateType, scopedType);
+        }
+    }
+
+    /// <summary>
+    /// Iter over all <see cref="IScopedUpdateHandlerContainer"/> that can be collected.
+    /// </summary>
+    /// <remarks>
+    /// <b>Considerations:</b>
+    /// <list type="number">
+    /// <item>
+    /// You should place handlers of different update types
+    /// ( <see cref="UpdateType.Message"/>, <see cref="UpdateType.CallbackQuery"/>
+    /// and etc. )
+    /// into different parent folders.
+    /// </item>
+    /// <item>
+    /// Parent name should match the update type name,
+    /// eg: <c>Messages</c> for <see cref="UpdateType.Message"/>
+    /// </item>
+    /// </list>
+    /// Eg: <paramref name="handlersParentNamespace"/>
+    /// /Messages/MyScopedMessageHandler
+    /// </remarks>
+    /// <returns></returns>
+    public static IEnumerable<IScopedUpdateHandlerContainer> IterCollectedScopedContainers(
+        this IUpdater updater,
+        string handlersParentNamespace = "UpdateHandlers")
+    {
+        foreach ((Type update, Type handler) scopedType in updater
+            .IterCollectedScopedUpdateHandlerTypes(handlersParentNamespace))
+        {
             var containerGeneric = typeof(ScopedUpdateHandlerContainerBuilder<,>)
-                .MakeGenericType(scopedType, updateType);
+                .MakeGenericType(scopedType.handler, scopedType.update);
 
             var container = (IScopedUpdateHandlerContainer?)Activator.CreateInstance(
                 containerGeneric,
                 new object?[]
                 {
-                        Enum.Parse<UpdateType>(updateType.Name), null, null
+                    Enum.Parse<UpdateType>(scopedType.update.Name), null, null
                 });
 
             if (container is null) continue;
 
+            yield return container;
+        }
+    }
+
+    /// <summary>
+    /// Automatically collects all classes that are marked as scoped handlers
+    /// And adds them to the <see cref="IUpdater"/> instance.
+    /// </summary>
+    /// <remarks>
+    /// <b>Considerations:</b>
+    /// <list type="number">
+    /// <item>
+    /// You should place handlers of different update types
+    /// ( <see cref="UpdateType.Message"/>, <see cref="UpdateType.CallbackQuery"/>
+    /// and etc. )
+    /// into different parent folders.
+    /// </item>
+    /// <item>
+    /// Parent name should match the update type name,
+    /// eg: <c>Messages</c> for <see cref="UpdateType.Message"/>
+    /// </item>
+    /// </list>
+    /// Eg: <paramref name="handlersParentNamespace"/>
+    /// /Messages/MyScopedMessageHandler
+    /// </remarks>
+    /// <returns></returns>
+    public static IUpdater AutoCollectScopedHandlers(
+        this IUpdater updater,
+        string handlersParentNamespace = "UpdateHandlers")
+    {
+        foreach (var container in updater
+            .IterCollectedScopedContainers(handlersParentNamespace))
+        {
+            if (container is null) continue;
+
             updater.Logger.LogInformation(
-                "Scoped handler collected! ( {Name} )", scopedType.Name);
+                "Scoped handler collected! ( {Name} )", container.ScopedHandlerType.Name);
             updater.AddScopedUpdateHandler(container);
         }
 
