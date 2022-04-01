@@ -14,8 +14,8 @@ public static class ChannelsExtensions
     /// <summary>
     /// Open a channel an wait for an specified update from user.
     /// </summary>
-    /// <typeparam name="T">Update type you're excpecting.</typeparam>
-    /// <typeparam name="K">Current container update type.</typeparam>
+    /// <typeparam name="TExp">Update type you're excpecting.</typeparam>
+    /// <typeparam name="TCur">Current container update type.</typeparam>
     /// <param name="container">The container itself.</param>
     /// <param name="updateChannel">
     /// Your channel to choose the right update.
@@ -25,14 +25,14 @@ public static class ChannelsExtensions
     /// </param>
     /// <param name="cancellationToken">To cancell the job.</param>
     /// <returns></returns>
-    public static async ValueTask<IContainer<T>?> OpenChannelAsync<T, K>(
-        this IContainer<K> container,
-        IGenericUpdateChannel<T> updateChannel,
+    public static async ValueTask<IContainer<TExp>?> OpenChannelAsync<TExp, TCur>(
+        this IContainer<TCur> container,
+        IGenericUpdateChannel<TExp> updateChannel,
         Func<
             IUpdater, ShiningInfo<long, Update>,
             Task>? onUnrelatedUpdate = default,
         CancellationToken cancellationToken = default)
-        where T : class where K : class
+        where TExp : class where TCur : class
     {
         if (container == null)
             throw new ArgumentNullException(nameof(container));
@@ -62,7 +62,7 @@ public static class ChannelsExtensions
 
                 if (updateChannel.ShouldChannel(update.Value))
                 {
-                    return new AnyContainer<T>(
+                    return new AnyContainer<TExp>(
                         updateChannel.GetActualUpdate,
                         container.Updater,
                         update,
@@ -94,7 +94,7 @@ public static class ChannelsExtensions
     /// A callback function to be called if an unrelated update from comes.
     /// </param>
     /// <param name="cancellationToken">To cancell the job.</param>
-    public static async Task<IContainer<Message>?> ChannelMessage<K>(
+    public static async Task<IContainer<Message>?> ChannelMessageAsync<K>(
         this IContainer<K> updateContainer,
         Filter<Message>? filter,
         TimeSpan? timeOut,
@@ -122,6 +122,7 @@ public static class ChannelsExtensions
     /// A callback function to be called if an unrelated update from comes.
     /// </param>
     /// <param name="cancellationToken">To cancell the job.</param>
+    [Obsolete("Use ChannelMessageAsync.")]
     public static async Task<IContainer<Message>?> ChannelUserResponse(
         this IContainer<Message> updateContainer,
         TimeSpan timeOut,
@@ -131,7 +132,7 @@ public static class ChannelsExtensions
         Filter<Message>? filter = default,
         CancellationToken cancellationToken = default)
     {
-        return await updateContainer.ChannelMessage(
+        return await updateContainer.ChannelMessageAsync(
             filter, timeOut, onUnrelatedUpdate, cancellationToken);
     }
 
@@ -139,7 +140,7 @@ public static class ChannelsExtensions
     /// Waits for the user to click on an inline button.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public static async Task<IContainer<CallbackQuery>?> ChannelUserClick<T>(
+    public static async Task<IContainer<CallbackQuery>?> ChannelButtonClickAsync<T>(
         this IContainer<T> updateContainer,
         TimeSpan timeOut,
         CallbackQueryRegex callbackQueryRegex,
