@@ -21,10 +21,10 @@ Take a look at code below describing a handler:
 
 ```csharp
 using Telegram.Bot.Types;
-using TelegramUpdater;
-using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.FilterAttributes.Attributes;
-using TelegramUpdater.UpdateHandlers.ScopedHandlers.ReadyToUse;
+using TelegramUpdater.Filters;
+using TelegramUpdater.UpdateContainer;
+using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
 namespace ConsoleApp;
 
