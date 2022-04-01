@@ -187,7 +187,12 @@
             AddOrUpdateData("args", nakedArgs);
             if (!string.IsNullOrEmpty(Options.BotUsername))
             {
-                return Commands.Any(x => $"{Prefix}{x}@{Options.BotUsername}" == command);
+                var fullCommandBuilder = (string x) => $"{Prefix}{x}@{Options.BotUsername.ToLower()}";
+                var liteCommandBuilder = (string x) => $"{Prefix}{x}";
+
+                return Commands.Any(
+                    x => fullCommandBuilder(x) == command ||
+                    liteCommandBuilder(x) == command);
             }
             else
             {
