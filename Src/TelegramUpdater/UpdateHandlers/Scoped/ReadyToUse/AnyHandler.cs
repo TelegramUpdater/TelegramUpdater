@@ -94,7 +94,7 @@ public abstract class AnyHandler<T> : AbstractScopedUpdateHandler<T>
             ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
         CancellationToken cancellationToken = default)
     {
-        return await Container.ChannelUserClick(
+        return await Container.ChannelButtonClickAsync(
             timeOut, callbackQueryRegex, onUnrelatedUpdate, cancellationToken);
     }
     #endregion
