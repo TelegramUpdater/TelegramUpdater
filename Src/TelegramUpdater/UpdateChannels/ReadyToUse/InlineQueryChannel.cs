@@ -1,15 +1,16 @@
 ﻿namespace TelegramUpdater.UpdateChannels.ReadyToUse;
 
 /// <summary>
-/// A channel for <see cref="Update.InlineQuery"/>.
+/// An <see cref="IGenericUpdateChannel{T}"/> for <see cref="UpdateType.InlineQuery"/>.
 /// </summary>
 public sealed class InlineQueryChannel : AnyChannel<InlineQuery>
 {
     /// <summary>
-    /// Create an instance of inline query channel.
+    /// Initialize a new instance of <see cref="InlineQueryChannel"/>
+    /// to use as <see cref="IGenericUpdateChannel{T}"/>.
     /// </summary>
-    /// <param name="timeOut">Waiting for update timeout.</param>
-    /// <param name="filter">A filter to select the right update.</param>
+    /// <param name="timeOut">Timeout to wait for channel.</param>
+    /// <param name="filter">Filter suitable update to channel within <paramref name="timeOut"/>.</param>
     public InlineQueryChannel(TimeSpan timeOut,
                               IFilter<InlineQuery>? filter)
         : base(UpdateType.InlineQuery,

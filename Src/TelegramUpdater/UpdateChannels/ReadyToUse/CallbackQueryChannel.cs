@@ -1,16 +1,16 @@
 ﻿namespace TelegramUpdater.UpdateChannels.ReadyToUse;
 
 /// <summary>
-/// A channel for <see cref="Update.CallbackQuery"/>.
+/// An <see cref="IGenericUpdateChannel{T}"/> for <see cref="UpdateType.CallbackQuery"/>.
 /// </summary>
 public sealed class CallbackQueryChannel : AnyChannel<CallbackQuery>
 {
     /// <summary>
-    /// Create an instance of update channels for
-    /// <see cref="Update.CallbackQuery"/>.
+    /// Initialize a new instance of <see cref="CallbackQueryChannel"/>
+    /// to use as <see cref="IGenericUpdateChannel{T}"/>.
     /// </summary>
-    /// <param name="timeOut">Waiting for update timeout.</param>
-    /// <param name="filter">A filter to select the right update.</param>
+    /// <param name="timeOut">Timeout to wait for channel.</param>
+    /// <param name="filter">Filter suitable update to channel within <paramref name="timeOut"/>.</param>
     public CallbackQueryChannel(TimeSpan timeOut,
                                 IFilter<CallbackQuery>? filter = default)
         : base(UpdateType.CallbackQuery,
