@@ -133,7 +133,6 @@ public static class UpdaterExtensions
     /// </remarks>
     /// <returns></returns>
     public static IEnumerable<(UpdateType updateType, Type update, Type handler)> IterCollectedScopedUpdateHandlerTypes(
-        this IUpdater _,
         string handlersParentNamespace = "UpdateHandlers")
     {
         var entryAssembly = Assembly.GetEntryAssembly();
@@ -187,11 +186,10 @@ public static class UpdaterExtensions
     /// </remarks>
     /// <returns></returns>
     public static IEnumerable<IScopedUpdateHandlerContainer> IterCollectedScopedContainers(
-        this IUpdater updater,
         string handlersParentNamespace = "UpdateHandlers")
     {
-        foreach ((UpdateType updateType, Type update, Type handler) in updater
-            .IterCollectedScopedUpdateHandlerTypes(handlersParentNamespace))
+        foreach ((UpdateType updateType, Type update, Type handler) in
+            IterCollectedScopedUpdateHandlerTypes(handlersParentNamespace))
         {
             var containerGeneric = typeof(ScopedUpdateHandlerContainerBuilder<,>)
                 .MakeGenericType(handler, update);
@@ -232,8 +230,7 @@ public static class UpdaterExtensions
         this IUpdater updater,
         string handlersParentNamespace = "UpdateHandlers")
     {
-        foreach (var container in updater
-            .IterCollectedScopedContainers(handlersParentNamespace))
+        foreach (var container in IterCollectedScopedContainers(handlersParentNamespace))
         {
             if (container is null) continue;
 
