@@ -29,7 +29,7 @@ using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 namespace ConsoleApp;
 
 [Command("test"), Private]
-internal class MyScopedMessageHandler : ScopedMessageHandler
+internal class MyScopedMessageHandler : MessageHandler
 {
     protected override async Task HandleAsync(IContainer<Message> _)
     {
