@@ -108,8 +108,8 @@ namespace TelegramUpdater.RainbowUtilities
         /// <summary>
         /// Write a new object to the rainbow for queuing
         /// </summary>
-        public async ValueTask EnqueueAsync(TValue value,
-                                     CancellationToken cancellationToken = default)
+        public async ValueTask EnqueueAsync(
+            TValue value, CancellationToken cancellationToken = default)
         {
             if (value == null)
                 return;
@@ -551,7 +551,8 @@ namespace TelegramUpdater.RainbowUtilities
             await Task.WhenAny(tasksToWait);
         }
 
-        private async Task Processor(ushort id, CancellationToken cancellationToken = default)
+        private async Task Processor(
+            ushort id, CancellationToken cancellationToken = default)
         {
             // Not null here!
             var myChannel = _availableQueues[id]!;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Telegram.Bot.Types.Payments;
 using TelegramUpdater.Filters;
 using TelegramUpdater.UpdateHandlers.Scoped;
 using TelegramUpdater.UpdateHandlers.Singleton;
@@ -46,22 +47,65 @@ public static class UpdaterExtensions
     }
 
     private static bool TryResolveNamespaceToUpdateType(
-        string currentNs, [NotNullWhen(true)] out Type? type)
+        string currentNs,
+        [NotNullWhen(true)] out UpdateType? updateType,
+        [NotNullWhen(true)] out Type? type)
     {
         var nsParts = currentNs.Split('.');
         if (nsParts.Length < 3)
             throw new Exception("Namespace is invalid.");
 
-        type = nsParts[2] switch
+        updateType = nsParts[2] switch
         {
-            "Messages" => typeof(Message),
-            "CallbackQueries" => typeof(CallbackQuery),
-            "InlineQueries" => typeof(InlineQuery),
+            "Messages" => UpdateType.Message,
+            "EditedChannelPosts" => UpdateType.EditedChannelPost,
+            "EditedMessages" => UpdateType.EditedMessage,
+            "ChannelPosts" => UpdateType.ChannelPost,
+            "CallbackQueries" => UpdateType.CallbackQuery,
+            "InlineQueries" => UpdateType.InlineQuery,
+            "ChosenInlineResults" => UpdateType.ChosenInlineResult,
+            "ShippingQueries" => UpdateType.ShippingQuery,
+            "PreCheckoutQueries" => UpdateType.PreCheckoutQuery,
+            "Polls" => UpdateType.Poll,
+            "PollAnswers" => UpdateType.PollAnswer,
+            "ChatMembers" => UpdateType.ChatMember,
+            "MyChatMembers" => UpdateType.MyChatMember,
+            "ChatJoinRequests" => UpdateType.ChatJoinRequest,
+            _ => null
+        };
+
+        if (updateType is null)
+        {
+            type = null;
+            return false;
+        }
+
+        type = updateType switch
+        {
+            UpdateType.Message => typeof(Message),
+            UpdateType.InlineQuery => typeof(InlineQuery),
+            UpdateType.ChosenInlineResult => typeof(ChosenInlineResult),
+            UpdateType.CallbackQuery => typeof(CallbackQuery),
+            UpdateType.EditedMessage => typeof(Message),
+            UpdateType.ChannelPost => typeof(Message),
+            UpdateType.EditedChannelPost => typeof(Message),
+            UpdateType.ShippingQuery => typeof(ShippingQuery),
+            UpdateType.PreCheckoutQuery => typeof(PreCheckoutQuery),
+            UpdateType.Poll => typeof(Poll),
+            UpdateType.PollAnswer => typeof(PollAnswer),
+            UpdateType.MyChatMember => typeof(ChatMemberUpdated),
+            UpdateType.ChatMember => typeof(ChatMemberUpdated),
+            UpdateType.ChatJoinRequest => typeof(ChatJoinRequest),
             _ => null
         };
 
         if (type is null)
+        {
+            updateType = null;
+            type = null;
             return false;
+        }
+
         return true;
     }
 
@@ -88,7 +132,7 @@ public static class UpdaterExtensions
     /// /Messages/MyScopedMessageHandler
     /// </remarks>
     /// <returns></returns>
-    public static IEnumerable<(Type update, Type handler)> IterCollectedScopedUpdateHandlerTypes(
+    public static IEnumerable<(UpdateType updateType, Type update, Type handler)> IterCollectedScopedUpdateHandlerTypes(
         this IUpdater _,
         string handlersParentNamespace = "UpdateHandlers")
     {
@@ -112,12 +156,12 @@ public static class UpdaterExtensions
         foreach (var scopedType in scopedHandlersTypes)
         {
             if (!TryResolveNamespaceToUpdateType(
-                scopedType.Namespace!, out var updateType))
+                scopedType.Namespace!, out var updateType1, out var type))
             {
                 continue;
             };
 
-            yield return (updateType, scopedType);
+            yield return (updateType1.Value, type, scopedType);
         }
     }
 
@@ -146,18 +190,15 @@ public static class UpdaterExtensions
         this IUpdater updater,
         string handlersParentNamespace = "UpdateHandlers")
     {
-        foreach ((Type update, Type handler) scopedType in updater
+        foreach ((UpdateType updateType, Type update, Type handler) in updater
             .IterCollectedScopedUpdateHandlerTypes(handlersParentNamespace))
         {
             var containerGeneric = typeof(ScopedUpdateHandlerContainerBuilder<,>)
-                .MakeGenericType(scopedType.handler, scopedType.update);
+                .MakeGenericType(handler, update);
 
             var container = (IScopedUpdateHandlerContainer?)Activator.CreateInstance(
                 containerGeneric,
-                new object?[]
-                {
-                    Enum.Parse<UpdateType>(scopedType.update.Name), null, null
-                });
+                new object?[] { updateType, null, null });
 
             if (container is null) continue;
 

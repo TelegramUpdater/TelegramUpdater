@@ -38,13 +38,13 @@ public abstract class AnyHandler<T> : AbstractScopedUpdateHandler<T>
     protected void ContinuePropagation() => Container.ContinuePropagation();
 
     /// <inheritdoc cref="ChannelsExtensions.OpenChannelAsync{TExp, TCur}(IContainer{TCur}, IGenericUpdateChannel{TExp}, Func{IUpdater, ShiningInfo{long, Update}, Task}?, CancellationToken)"/>
-    public async ValueTask<IContainer<TExp>?> OpenChannelAsync<TExp, TCur>(
+    public async ValueTask<IContainer<TExp>?> OpenChannelAsync<TExp>(
         IGenericUpdateChannel<TExp> updateChannel,
         Func<
             IUpdater, ShiningInfo<long, Update>,
             Task>? onUnrelatedUpdate = default,
         CancellationToken cancellationToken = default)
-        where TExp : class where TCur : class
+        where TExp : class
     {
         return await Container.OpenChannelAsync(
             updateChannel, onUnrelatedUpdate, cancellationToken);
