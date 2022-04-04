@@ -13,8 +13,9 @@ namespace TelegramUpdater
         /// Indicates if an input of type <typeparamref name="T"/> can pass this filter
         /// </summary>
         /// <param name="input">The input value to check</param>
+        /// <param name="updater">The updater instance.</param>
         /// <returns></returns>
-        public bool TheyShellPass(T input);
+        public bool TheyShellPass(IUpdater updater, T input);
 
         /// <summary>
         /// A dictionary of extra data produced by this filter.
@@ -82,7 +83,7 @@ namespace TelegramUpdater
     /// <typeparam name="T">Object type that filter is gonna apply to</typeparam>
     public class Filter<T> : IFilter<T>
     {
-        private readonly Func<T, bool>? _filter;
+        private readonly Func<IUpdater, T, bool>? _filter;
         private Dictionary<string, object>? _extraData;
 
         /// <inheritdoc/>
@@ -92,7 +93,7 @@ namespace TelegramUpdater
         /// Creates a simple basic filter
         /// </summary>
         /// <param name="filter">A function to check the input and return a boolean</param>
-        public Filter(Func<T, bool>? filter = default)
+        public Filter(Func<IUpdater, T, bool>? filter = default)
         {
             _filter = filter;
         }
@@ -110,26 +111,23 @@ namespace TelegramUpdater
                 _extraData.Add(key, value);
         }
 
-        /// <summary>
-        /// Indicates if an input of type <typeparamref name="T"/> can pass this filter
-        /// </summary>
-        /// <param name="input">The input value to check</param>
-        /// <returns></returns>
-        public virtual bool TheyShellPass(T input)
-            => input != null && (_filter is null || _filter(input));
+        /// <inheritdoc/>
+        public virtual bool TheyShellPass(IUpdater updater, T input)
+            => input != null && (_filter is null || _filter(updater, input));
 
         /// <summary>
         /// Converts a <paramref name="filter"/> to <see cref="Filter{T}"/>
         /// </summary>
         /// <param name="filter"></param>
 
-        public static implicit operator Filter<T>(Func<T, bool> filter) => new(filter);
+        public static implicit operator Filter<T>(Func<IUpdater, T, bool> filter)
+            => new(filter);
 
         /// <summary>
         /// Converts a filter to a function.
         /// </summary>
         /// <param name="filter"></param>
-        public static implicit operator Func<T, bool>(Filter<T> filter)
+        public static implicit operator Func<IUpdater, T, bool>(Filter<T> filter)
             => filter.TheyShellPass;
 
         /// <summary>
@@ -184,7 +182,7 @@ namespace TelegramUpdater
         /// Creates a reverse filter ( Like not filter ), use not operator
         /// </summary>
         public ReverseFilter(IFilter<T> filter1)
-            : base(x => !filter1.TheyShellPass(x))
+            : base((u, x) => !filter1.TheyShellPass(u, x))
         { }
     }
 
@@ -214,13 +212,14 @@ namespace TelegramUpdater
         /// Check if the filters are passed here.
         /// </summary>
         /// <param name="input"></param>
+        /// <param name="updater">The updater instance.</param>
         /// <returns></returns>
-        protected abstract bool InnerTheyShellPass(T input);
+        protected abstract bool InnerTheyShellPass(IUpdater updater, T input);
 
         /// <inheritdoc/>
-        public bool TheyShellPass(T input)
+        public bool TheyShellPass(IUpdater updater, T input)
         {
-            var shellPass = InnerTheyShellPass(input);
+            var shellPass = InnerTheyShellPass(updater, input);
             _extraData = Filters.Where(x => x.ExtraData is not null)
                 .SelectMany(x => x.ExtraData!) // extra data not null here.
                 .DistinctBy(x => x.Key) // Is it required ?
@@ -242,9 +241,10 @@ namespace TelegramUpdater
         { }
 
         /// <inheritdoc/>
-        protected override bool InnerTheyShellPass(T input)
+        protected override bool InnerTheyShellPass(IUpdater updater, T input)
         {
-            return Filters[0].TheyShellPass(input) && Filters[1].TheyShellPass(input);
+            return Filters[0].TheyShellPass(updater, input) &&
+                Filters[1].TheyShellPass(updater, input);
         }
     }
 
@@ -261,9 +261,10 @@ namespace TelegramUpdater
         { }
 
         /// <inheritdoc/>
-        protected override bool InnerTheyShellPass(T input)
+        protected override bool InnerTheyShellPass(IUpdater updater, T input)
         {
-            return Filters[0].TheyShellPass(input) || Filters[1].TheyShellPass(input);
+            return Filters[0].TheyShellPass(updater, input) ||
+                Filters[1].TheyShellPass(updater, input);
         }
     }
 

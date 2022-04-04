@@ -12,7 +12,7 @@
             Users = users;
         }
 
-        public override bool TheyShellPass(T input)
+        public override bool TheyShellPass(IUpdater _, T input)
         {
             var user = _userSelector(input);
             if (user is null) return false;

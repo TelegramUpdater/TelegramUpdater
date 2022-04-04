@@ -55,12 +55,13 @@ public abstract class AbstractSingletonUpdateHandler<T> : IGenericSingletonUpdat
     /// To apply a custom filter.
     /// </summary>
     /// <param name="input">Actual update.</param>
+    /// <param name="updater">The updater instance.</param>
     /// <returns></returns>
-    protected virtual bool ShouldHandle(T input)
+    protected virtual bool ShouldHandle(IUpdater updater, T input)
     {
         if (Filter is null) return true;
 
-        return Filter.TheyShellPass(input);
+        return Filter.TheyShellPass(updater, input);
     }
 
     /// <inheritdoc/>
@@ -69,7 +70,7 @@ public abstract class AbstractSingletonUpdateHandler<T> : IGenericSingletonUpdat
         => await HandleAsync(ContainerBuilder(updater, shiningInfo));
 
     /// <inheritdoc/>
-    public bool ShouldHandle(Update update)
+    public bool ShouldHandle(IUpdater updater, Update update)
     {
         if (update.Type != UpdateType) return false;
 
@@ -77,7 +78,7 @@ public abstract class AbstractSingletonUpdateHandler<T> : IGenericSingletonUpdat
 
         if (insider == null) return false;
 
-        return ShouldHandle(insider);
+        return ShouldHandle(updater, insider);
     }
 
     /// <summary>

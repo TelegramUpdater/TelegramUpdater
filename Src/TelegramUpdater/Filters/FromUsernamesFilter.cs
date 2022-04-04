@@ -13,7 +13,7 @@
             Usernames = usernames;
         }
 
-        public override bool TheyShellPass(T input)
+        public override bool TheyShellPass(IUpdater _, T input)
         {
             var username = _usernameSelector(input);
             if (username == null) return false;

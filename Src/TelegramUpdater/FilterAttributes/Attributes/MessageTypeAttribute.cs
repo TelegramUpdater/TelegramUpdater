@@ -11,7 +11,7 @@ public sealed class MessageTypeAttribute : FilterAttributeBuilder
     /// <param name="messageType">Message type to filter.</param>
     public MessageTypeAttribute(MessageType messageType)
         : base(builder => builder.AddFilterForUpdate<Message>(
-            new(message => message.Type == messageType)))
+            new((_, message) => message.Type == messageType)))
     {
     }
 }

@@ -9,7 +9,7 @@
         /// A filter on <see cref="Message.Text"/>
         /// </summary>
         public MessageTextFilter(Func<string, bool> filter)
-            : base((x) => x.Text != null && filter(x.Text))
+            : base((_, x) => x.Text != null && filter(x.Text))
         { }
     }
 }

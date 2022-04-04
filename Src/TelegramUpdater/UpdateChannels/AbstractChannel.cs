@@ -52,17 +52,17 @@ public abstract class AbstractChannel<T> : IGenericUpdateChannel<T>
     public T? GetActualUpdate(Update update) => _getT(update);
 
     /// <inheritdoc/>
-    private bool ShouldChannel(T t)
+    private bool ShouldChannel(IUpdater updater, T t)
     {
         if (_filter is null) return true;
 
-        return _filter.TheyShellPass(t);
+        return _filter.TheyShellPass(updater, t);
     }
 
     /// <summary>
     /// If this update should be channeled.
     /// </summary>
-    public bool ShouldChannel(Update update)
+    public bool ShouldChannel(IUpdater updater, Update update)
     {
         if (update.Type != UpdateType) return false;
 
@@ -70,6 +70,6 @@ public abstract class AbstractChannel<T> : IGenericUpdateChannel<T>
 
         if (insider == null) return false;
 
-        return ShouldChannel(insider);
+        return ShouldChannel(updater, insider);
     }
 }

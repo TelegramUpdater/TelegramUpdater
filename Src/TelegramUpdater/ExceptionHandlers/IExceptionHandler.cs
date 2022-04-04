@@ -49,13 +49,13 @@ namespace TelegramUpdater.ExceptionHandlers
         /// <summary>
         /// Checks if a message is matched.
         /// </summary>
-        internal bool MessageMatched(string message)
+        internal bool MessageMatched(IUpdater updater, string message)
         {
             if (MessageMatch == null) return true;
 
             if (message == null) return false;
 
-            return MessageMatch.TheyShellPass(message);
+            return MessageMatch.TheyShellPass(updater, message);
         }
 
         /// <summary>

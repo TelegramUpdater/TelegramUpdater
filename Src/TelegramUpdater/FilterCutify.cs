@@ -12,13 +12,13 @@ public static class FilterCutify
     /// <summary>
     /// The handler will always be triggered on specified update type of <typeparamref name="T"/>
     /// </summary>
-    public static Filter<T> Always<T>() => new((_) => true);
+    public static Filter<T> Always<T>() => new((_, __) => true);
 
     /// <summary>
     /// The handler will be triggered when <paramref name="func"/> returns true
     /// on specified update type of <typeparamref name="T"/>
     /// </summary>
-    public static Filter<T> When<T>(Func<T, bool> func) => new(func);
+    public static Filter<T> When<T>(Func<IUpdater, T, bool> func) => new(func);
 
     /// <summary>
     /// The handler will be triggered when <paramref name="func"/> passes
@@ -86,7 +86,7 @@ public static class FilterCutify
     /// <param name="selector">Function to select a property out of <typeparamref name="T"/></param>
     /// <returns></returns>
     public static Filter<K> NotNullFilter<K, T>(Func<K, T?> selector)
-        where T : class => new(x => selector(x) != null);
+        where T : class => new((_, x) => selector(x) != null);
 
     /// <summary>
     /// Filters text messages.
@@ -115,7 +115,7 @@ public static class FilterCutify
     /// <param name="chatTypeFlags">Chat type flags.</param>
     /// <returns></returns>
     public static Filter<Message> InChatType(ChatTypeFlags chatTypeFlags)
-        => new(x => x.Chat.Type.IsCorrect(chatTypeFlags));
+        => new((_, x) => x.Chat.Type.IsCorrect(chatTypeFlags));
 
     /// <summary>
     /// Filter messages of type <paramref name="messageType"/>.
@@ -123,6 +123,6 @@ public static class FilterCutify
     /// <param name="messageType">Type of the message - text, video ...</param>
     /// <returns></returns>
     public static Filter<Message> MessageTypeOf(MessageType messageType)
-        => new(x => x.Type == messageType);
+        => new((_, x) => x.Type == messageType);
 
 }
