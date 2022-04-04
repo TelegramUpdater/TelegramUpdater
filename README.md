@@ -29,7 +29,7 @@ using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 namespace ConsoleApp;
 
 [Command("test"), Private]
-internal class MyScopedMessageHandler : ScopedMessageHandler
+internal class MyScopedMessageHandler : MessageHandler
 {
     protected override async Task HandleAsync(IContainer<Message> _)
     {
@@ -169,14 +169,6 @@ IHost host = Host.CreateDefaultBuilder(args)
 
 await host.RunAsync();
 ```
-
-### Webhook app ( Asp .NET )
-
-Webhook app is similar to IHosting app where Update Writer is external! ( Updates are written to updater from webhook Controller )
-
-Use this [nuget package](https://www.nuget.org/packages/TelegramUpdater.Asp/1.0.1) for a full set of extensions for webhook aps.
-
-And take a look at this [webhook example](https://github.com/TelegramUpdater/TelegramUpdater/tree/master/Examples/WebhookApp).
 
 ## Road Map
 
