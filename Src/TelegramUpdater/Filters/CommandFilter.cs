@@ -249,13 +249,15 @@ namespace TelegramUpdater.Filters
                 Options.ExactArgs is not null &&
                 Options.ArgumentsMode == ArgumentsMode.Require)
             {
+                if (Options.ExactArgs.Length > nakedArgs.Length) return false;
+
                 if (Options.CaseSensitive)
                 {
-                    return nakedArgs.SequenceEqual(Options.ExactArgs);
+                    return nakedArgs[..Options.ExactArgs.Length].SequenceEqual(Options.ExactArgs);
                 }
                 else
                 {
-                    return nakedArgs.Select(x=> x.ToLower())
+                    return nakedArgs[..Options.ExactArgs.Length].Select(x=> x.ToLower())
                         .SequenceEqual(Options.ExactArgs.Select(x=> x.ToLower()));
                 }
             }

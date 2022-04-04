@@ -97,15 +97,35 @@ namespace TelegramUpdaterTests
         [Theory]
         [InlineData("/start test", true)]
         [InlineData("/start Test", true)]
+        [InlineData("/start Test world", true)]
         [InlineData("/start", false)]
         [InlineData("/start smth", false)]
-        public void Test_Command_Exact_Args(string command, bool shouldMatch)
+        public void Test_Command_Exact_Args_1(string command, bool shouldMatch)
         {
             var filter = new CommandFilter(
                 "start",
                 new CommandFilterOptions(
                     ArgumentsMode.Require,
                     exactArgs: new[] { "test" }));
+
+            var message = new Message { Text = command };
+
+            Assert.Equal(filter.TheyShellPass(message), shouldMatch);
+        }
+
+        [Theory]
+        [InlineData("/start test you me", true)]
+        [InlineData("/start Test you", true)]
+        [InlineData("/start Test world", false)]
+        [InlineData("/start test", false)]
+        [InlineData("/start smth", false)]
+        public void Test_Command_Exact_Args_2(string command, bool shouldMatch)
+        {
+            var filter = new CommandFilter(
+                "start",
+                new CommandFilterOptions(
+                    ArgumentsMode.Require,
+                    exactArgs: new[] { "test", "you" }));
 
             var message = new Message { Text = command };
 
