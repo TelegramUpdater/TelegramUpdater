@@ -352,76 +352,104 @@ namespace TelegramUpdater
             }
         }
 
-        internal static IFilter<T> GetFilterAttributes<T>(this Type type)
-            where T : class
+        private static List<List<AbstractFilterAttribute>> BatchifyFilterAttributes(
+            this IEnumerable<AbstractFilterAttribute> filterAttributes)
+        {
+            var batches = new List<List<AbstractFilterAttribute>>
+            {
+                new()
+            };
+
+            foreach (var filterAttribute in filterAttributes)
+            {
+                if ((filterAttribute.BatchStart && !batches[^1].Any()) ||
+                    !filterAttribute.BatchStart)
+                {
+                    batches[^1].Add(filterAttribute);
+                }
+                else
+                {
+                    batches.Add(new() { filterAttribute });
+                }
+            }
+
+            return batches;
+        }
+
+        private static IFilter<T> AppendFilter<T>(
+            this IFilter<T>? cur, IFilter<T> toAppend, bool asOr, bool reverse)
+        {
+            if (reverse)
+            {
+                toAppend = ~toAppend; // Reverse the filter.
+            }
+
+            if (cur == null)
+            {
+                cur = toAppend;
+            }
+            else
+            {
+                if (asOr)
+                {
+                    cur |= toAppend;
+                }
+                else
+                {
+                    cur &= toAppend;
+                }
+            }
+
+            return cur;
+        }
+
+        private static (IFilter<T> filter, bool asOr, bool reverse) JoinFilterAttributes<T>(
+            this IEnumerable<AbstractFilterAttribute> filterAttributes)
         {
             IFilter<T> filter = null!;
-            var applied = type.GetCustomAttributes<AbstractFilterAttribute>();
-            foreach (var item in applied)
+            foreach (var item in filterAttributes)
             {
                 var f = (IFilter<T>?)item.GetFilterTypeOf(typeof(T));
                 if (f != null)
                 {
-                    if (item.Reverse)
-                    {
-                        f = ~f; // Reverse the filter.
-                    }
+                    filter = filter.AppendFilter(f, item.ApplyAsOr, item.Reverse);
+                }
+            }
 
-                    if (filter == null)
-                    {
-                        filter = f;
-                    }
-                    else
-                    {
-                        if (item.ApplyAsOr)
-                        {
-                            filter |= f;
-                        }
-                        else
-                        {
-                            filter &= f;
-                        }
-                    }
+            var batchStart = filterAttributes.ElementAt(0);
+            return (filter, batchStart.OrBatch, batchStart.ReverseBatch);
+        }
+
+        private static IFilter<T> JoinFilterAttributes<T>(
+            this IEnumerable<IEnumerable<AbstractFilterAttribute>> filterAttributes)
+        {
+            IFilter<T> filter = null!;
+            foreach (var batch in filterAttributes)
+            {
+                (IFilter<T> f, bool asOr, bool reverse) = batch.JoinFilterAttributes<T>(); 
+
+                if (f is not null)
+                {
+                    filter = filter.AppendFilter(
+                        f, asOr, reverse);
                 }
             }
 
             return filter;
         }
 
-        internal static IFilter<T> GetFilterAttributes<T>(this MethodInfo method)
-            where T : class
+        internal static IFilter<T> GetFilterAttributes<T>(this Type type)
         {
-            IFilter<T> filter = null!;
+            var applied = type.GetCustomAttributes<AbstractFilterAttribute>();
+            var batches = applied.BatchifyFilterAttributes();
+            return batches.JoinFilterAttributes<T>();
+        }
+
+        internal static IFilter<T> GetFilterAttributes<T>(this MethodInfo method)
+        {
             var applied = method.GetCustomAttributes<AbstractFilterAttribute>();
-            foreach (var item in applied)
-            {
-                var f = (IFilter<T>?)item.GetFilterTypeOf(typeof(T));
-                if (f != null)
-                {
-                    if (item.Reverse)
-                    {
-                        f = ~f; // Reverse the filter.
-                    }
-
-                    if (filter == null)
-                    {
-                        filter = f;
-                    }
-                    else
-                    {
-                        if (item.ApplyAsOr)
-                        {
-                            filter |= f;
-                        }
-                        else
-                        {
-                            filter &= f;
-                        }
-                    }
-                }
-            }
-
-            return filter;
+            var batches = applied.BatchifyFilterAttributes();
+            return batches.JoinFilterAttributes<T>();
         }
     }
 }

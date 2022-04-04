@@ -46,5 +46,20 @@
         /// Defaults to <see langword="false"/>.
         /// </remarks>
         public bool Reverse { get; set; } = false;
+
+        /// <summary>
+        /// Indicates if this filter is the start of a new batch of filters
+        /// </summary>
+        public bool BatchStart { get; set; } = false;
+
+        /// <summary>
+        /// Indicates if this batch should append as OR.
+        /// </summary>
+        public bool ReverseBatch { get; set; } = false;
+
+        /// <summary>
+        /// Indicates if this batch should be reversed.
+        /// </summary>
+        public bool OrBatch { get; set; } = false;
     }
 }
