@@ -65,7 +65,7 @@ public abstract class InlineQueryHandler
     /// account' button above the results, or even before showing any. The user presses the button, switches
     /// to a private chat with the bot and, in doing so, passes a start parameter that instructs the bot to
     /// return an oauth link. Once done, the bot can offer a
-    /// <see cref="Types.ReplyMarkups.InlineKeyboardButton.SwitchInlineQuery"/> button so that the user can
+    /// <see cref="Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.SwitchInlineQuery"/> button so that the user can
     /// easily return to the chat where they wanted to use the bot's inline capabilities
     /// </para>
     /// </param>

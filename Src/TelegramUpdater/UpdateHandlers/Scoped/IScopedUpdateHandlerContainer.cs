@@ -24,8 +24,9 @@ public interface IScopedUpdateHandlerContainer
     /// of type <see cref="ScopedHandlerType"/>.
     /// </summary>
     /// <param name="update">The update.</param>
+    /// <param name="updater">The updater instance.</param>
     /// <returns></returns>
-    public bool ShouldHandle(Update update);
+    public bool ShouldHandle(IUpdater updater, Update update);
 
     /// <summary>
     /// Initialize an instance of <see cref="ScopedHandlerType"/>.

@@ -9,7 +9,7 @@
         /// Initializes a new instance of the <see cref="PrivateMessageFilter"/> class.
         /// </summary>
         public PrivateMessageFilter()
-            : base(c => c.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Private)
+            : base((_, c) => c.Chat.Type == ChatType.Private)
         {
         }
     }

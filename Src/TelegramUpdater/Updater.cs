@@ -409,7 +409,6 @@ public sealed class Updater : IUpdater
     {
         try
         {
-
             if (_serviceDescriptors == null)
                 throw new InvalidOperationException(
                     "Can't ProcessUpdateFromServices when" +
@@ -421,7 +420,7 @@ public sealed class Updater : IUpdater
             }
 
             var scopedHandlers = _scopedHandlerContainers
-                .Where(x => x.ShouldHandle(shiningInfo.Value));
+                .Where(x => x.ShouldHandle(this, shiningInfo.Value));
 
             if (!scopedHandlers.Any())
             {
@@ -471,11 +470,11 @@ public sealed class Updater : IUpdater
             }
 
             var singletonhandlers = _updateHandlers
-                .Where(x => x.ShouldHandle(shiningInfo.Value))
+                .Where(x => x.ShouldHandle(this, shiningInfo.Value))
                 .Select(x => (IUpdateHandler)x);
 
             var scopedHandlers = _scopedHandlerContainers
-                .Where(x => x.ShouldHandle(shiningInfo.Value))
+                .Where(x => x.ShouldHandle(this, shiningInfo.Value))
                 .Select(x => x.CreateInstance())
                 .Where(x => x != null)
                 .Cast<IScopedUpdateHandler>()
@@ -545,7 +544,7 @@ public sealed class Updater : IUpdater
             var exHandlers = _exceptionHandlers
                 .Where(x => x.TypeIsMatched(ex.GetType()))
                 .Where(x => x.IsAllowedHandler(handler.GetType()))
-                .Where(x => x.MessageMatched(ex.Message));
+                .Where(x => x.MessageMatched(this, ex.Message));
 
             foreach (var exHandler in exHandlers)
             {

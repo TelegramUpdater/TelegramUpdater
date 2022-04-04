@@ -188,7 +188,7 @@ namespace TelegramUpdater.Filters
         }
 
         /// <inheritdoc/>
-        public override bool TheyShellPass(Message input)
+        public override bool TheyShellPass(IUpdater _, Message input)
         {
             if (string.IsNullOrEmpty(input.Text)) return false;
 

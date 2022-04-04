@@ -9,7 +9,7 @@
         /// Initializes a new instance of the <see cref="MessageRepliedFilter"/> class.
         /// </summary>
         public MessageRepliedFilter()
-            : base(x => x.ReplyToMessage != null)
+            : base((_, x) => x.ReplyToMessage != null)
         {
         }
     }

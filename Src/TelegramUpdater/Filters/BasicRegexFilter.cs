@@ -47,7 +47,7 @@ namespace TelegramUpdater.Filters
         }
 
         /// <inheritdoc/>
-        public override bool TheyShellPass(T input)
+        public override bool TheyShellPass(IUpdater _, T input)
         {
             var text = _getText(input);
 

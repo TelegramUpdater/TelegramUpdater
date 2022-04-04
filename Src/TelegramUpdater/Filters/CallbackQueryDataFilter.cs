@@ -9,7 +9,7 @@
         /// A filter on <see cref="CallbackQuery.Data"/>
         /// </summary>
         public CallbackQueryDataFilter(Func<string, bool> filter)
-            : base((x) => x.Data != null && filter(x.Data))
+            : base((_, x) => x.Data != null && filter(x.Data))
         { }
     }
 }

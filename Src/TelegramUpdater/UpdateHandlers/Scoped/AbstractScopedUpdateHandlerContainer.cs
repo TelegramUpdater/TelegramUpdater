@@ -47,12 +47,13 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     /// Checks if an update can be handled in a handler of type <see cref="ScopedHandlerType"/>.
     /// </summary>
     /// <param name="t">The inner update.</param>
+    /// <param name="updater">The updater instance.</param>
     /// <returns></returns>
-    private bool ShouldHandle(TUpdate t)
+    private bool ShouldHandle(IUpdater updater, TUpdate t)
     {
         if (Filter is null) return true;
 
-        return Filter.TheyShellPass(t);
+        return Filter.TheyShellPass(updater, t);
     }
 
     /// <summary>
@@ -63,7 +64,7 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     internal protected abstract TUpdate? GetT(Update update);
 
     /// <inheritdoc/>
-    public bool ShouldHandle(Update update)
+    public bool ShouldHandle(IUpdater updater, Update update)
     {
         if (update.Type != UpdateType) return false;
 
@@ -71,6 +72,6 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
 
         if (insider == null) return false;
 
-        return ShouldHandle(insider);
+        return ShouldHandle(updater, insider);
     }
 }
