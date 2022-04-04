@@ -53,12 +53,12 @@
         public bool BatchStart { get; set; } = false;
 
         /// <summary>
-        /// Indicates if this batch should append as OR.
+        /// Indicates if this batch should be reversed.
         /// </summary>
         public bool ReverseBatch { get; set; } = false;
 
         /// <summary>
-        /// Indicates if this batch should be reversed.
+        /// Indicates if this batch should append as OR.
         /// </summary>
         public bool OrBatch { get; set; } = false;
     }
