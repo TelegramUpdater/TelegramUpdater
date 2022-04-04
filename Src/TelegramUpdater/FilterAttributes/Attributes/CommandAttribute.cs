@@ -148,7 +148,7 @@ public sealed class CommandAttribute : AbstractFilterAttribute
     /// <param name="botCommandScopeType">Scope type for the commands</param>
     /// <param name="setCommandPriorities">Commands are ordered based on the when setting them.</param>
     /// <param name="botUsername">Username of the bot ( without @ ). will catch commands like /start@{username}.</param>    
-    /// <exception cref="Exception"></exception>
+    /// <param name="caseSensitive">If command filter checks should be Case Sensitive.</param>
     public CommandAttribute(
         string[] commands,
         string[] descriptions,
@@ -159,7 +159,8 @@ public sealed class CommandAttribute : AbstractFilterAttribute
         bool joinArgs = false,
         int joinArgsFormIndex = 0,
         string botUsername = default!,
-        BotCommandScopeType botCommandScopeType = BotCommandScopeType.Default)
+        BotCommandScopeType botCommandScopeType = BotCommandScopeType.Default,
+        bool caseSensitive = default)
     {
         Filter = new CommandFilter(commands, prefix,
             new CommandFilterOptions(
@@ -169,7 +170,8 @@ public sealed class CommandAttribute : AbstractFilterAttribute
                 descriptions,
                 ToBotCommandScope(botCommandScopeType),
                 setCommandPriorities,
-                botUsername));
+                botUsername,
+                caseSensitive));
     }
 
     /// <summary>
@@ -185,6 +187,7 @@ public sealed class CommandAttribute : AbstractFilterAttribute
     /// <param name="botCommandScopeType">Scope type for the commands</param>
     /// <param name="setCommandPriority">Commands are ordered based on the when setting them.</param>
     /// <param name="botUsername">Username of the bot ( without @ ). will catch commands like /start@{username}.</param>
+    /// <param name="caseSensitive">If command filter checks should be Case Sensitive.</param>
     public CommandAttribute(
          string command,
          string description,
@@ -195,7 +198,8 @@ public sealed class CommandAttribute : AbstractFilterAttribute
          bool joinArgs = false,
          int joinArgsFormIndex = 0,
          string botUsername = default!,
-         BotCommandScopeType botCommandScopeType = BotCommandScopeType.Default)
+         BotCommandScopeType botCommandScopeType = BotCommandScopeType.Default,
+         bool caseSensitive = default)
     {
         Filter = new CommandFilter(new[] { command }, prefix,
             new CommandFilterOptions(
@@ -205,7 +209,31 @@ public sealed class CommandAttribute : AbstractFilterAttribute
                 new[] { description },
                 ToBotCommandScope(botCommandScopeType),
                 new[] { setCommandPriority },
-                botUsername));
+                botUsername,
+                caseSensitive));
+    }
+
+    /// <summary>
+    /// Create a DeepLinking filter attribute.
+    /// </summary>
+    /// <param name="joinArgs">Indicates if the trailing args should join.</param>
+    /// <param name="deepLinkArg">
+    /// Deep link argument:
+    /// <para>https://t.me/botusername?start={<paramref name="deepLinkArg"/>}</para>
+    /// <para><c>/start {<paramref name="deepLinkArg"/>}</c></para>
+    /// </param>
+    /// <param name="joinArgsFormIndex">
+    /// If not null, the trailing augments starting this index are joined together
+    /// using the <see cref="CommandFilterOptions.Separator"/>.
+    /// </param>
+    /// <param name="caseSensitive">If command filter checks should be Case Sensitive.</param>
+    public CommandAttribute(
+        string deepLinkArg,
+        bool joinArgs = false,
+        int joinArgsFormIndex = 0,
+        bool caseSensitive = default)
+    {
+        Filter = new(deepLinkArg, joinArgs? joinArgsFormIndex: null, caseSensitive);
     }
 
     /// <inheritdoc/>

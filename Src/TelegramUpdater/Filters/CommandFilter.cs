@@ -158,6 +158,33 @@
             Options = options;
         }
 
+        /// <summary>
+        /// Create a DeepLinking filter.
+        /// </summary>
+        /// <param name="deepLinkArg">
+        /// Deep link argument:
+        /// <para>https://t.me/botusername?start={<paramref name="deepLinkArg"/>}</para>
+        /// <para><c>/start {<paramref name="deepLinkArg"/>}</c></para>
+        /// </param>
+        /// <param name="joinArgsFormIndex">
+        /// If not null, the trailing augments starting this index are joined together
+        /// using the <see cref="CommandFilterOptions.Separator"/>.
+        /// </param>
+        /// <param name="caseSensitive">If command filter checks should be Case Sensitive.</param>
+        public CommandFilter(
+            string deepLinkArg,
+            int? joinArgsFormIndex = default,
+            bool caseSensitive = default)
+        {
+            Commands = new[] { "start" };
+            Prefix = '/';
+            Options = new CommandFilterOptions(
+                ArgumentsMode.Require,
+                joinArgsFormIndex: joinArgsFormIndex,
+                caseSensitive: caseSensitive,
+                exactArgs: new[] { deepLinkArg });
+        }
+
         /// <inheritdoc/>
         public override bool TheyShellPass(Message input)
         {
