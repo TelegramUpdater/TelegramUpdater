@@ -403,9 +403,11 @@ namespace TelegramUpdater
             return cur;
         }
 
-        private static (IFilter<T> filter, bool asOr, bool reverse) JoinFilterAttributes<T>(
+        private static (IFilter<T>? filter, bool asOr, bool reverse) JoinFilterAttributes<T>(
             this IEnumerable<AbstractFilterAttribute> filterAttributes)
         {
+            if (!filterAttributes.Any()) return (null, false, false);
+
             IFilter<T> filter = null!;
             foreach (var item in filterAttributes)
             {
@@ -420,13 +422,13 @@ namespace TelegramUpdater
             return (filter, batchStart.OrBatch, batchStart.ReverseBatch);
         }
 
-        private static IFilter<T> JoinFilterAttributes<T>(
+        private static IFilter<T>? JoinFilterAttributes<T>(
             this IEnumerable<IEnumerable<AbstractFilterAttribute>> filterAttributes)
         {
-            IFilter<T> filter = null!;
+            IFilter<T>? filter = null;
             foreach (var batch in filterAttributes)
             {
-                (IFilter<T> f, bool asOr, bool reverse) = batch.JoinFilterAttributes<T>(); 
+                (IFilter<T>? f, bool asOr, bool reverse) = batch.JoinFilterAttributes<T>(); 
 
                 if (f is not null)
                 {
@@ -438,14 +440,14 @@ namespace TelegramUpdater
             return filter;
         }
 
-        internal static IFilter<T> GetFilterAttributes<T>(this Type type)
+        internal static IFilter<T>? GetFilterAttributes<T>(this Type type)
         {
             var applied = type.GetCustomAttributes<AbstractFilterAttribute>();
             var batches = applied.BatchifyFilterAttributes();
             return batches.JoinFilterAttributes<T>();
         }
 
-        internal static IFilter<T> GetFilterAttributes<T>(this MethodInfo method)
+        internal static IFilter<T>? GetFilterAttributes<T>(this MethodInfo method)
         {
             var applied = method.GetCustomAttributes<AbstractFilterAttribute>();
             var batches = applied.BatchifyFilterAttributes();
