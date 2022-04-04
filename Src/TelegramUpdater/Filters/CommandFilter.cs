@@ -165,7 +165,7 @@
 
             var args = input.Text.Split(Options.Separator);
 
-            var command = args[0].ToLower().Trim();
+            var command = args[0].Trim();
 
             if (Options.ArgumentsMode == ArgumentsMode.Require &&
                 args.Length < 2) return false;
@@ -190,13 +190,27 @@
                 var fullCommandBuilder = (string x) => $"{Prefix}{x}@{Options.BotUsername.ToLower()}";
                 var liteCommandBuilder = (string x) => $"{Prefix}{x}";
 
-                return Commands.Any(
-                    x => fullCommandBuilder(x) == command ||
-                    liteCommandBuilder(x) == command);
+                if (Options.CaseSensitive)
+                {
+                    return Commands.Any(
+                        x => fullCommandBuilder(x) == command ||
+                        liteCommandBuilder(x) == command);
+                }
+                else
+                {
+                    command = command.ToLower();
+                    return Commands.Any(
+                        x => fullCommandBuilder(x).ToLower() == command ||
+                        liteCommandBuilder(x).ToLower() == command);
+                }
             }
             else
             {
-                return Commands.Any(x => command.StartsWith($"{Prefix}{x}"));
+                if (Options.CaseSensitive)
+                    return Commands.Any(x => command.StartsWith($"{Prefix}{x}"));
+                else
+                    return Commands.Any(
+                        x => command.ToLower().StartsWith($"{Prefix}{x}".ToLower()));
             }
         }
 
