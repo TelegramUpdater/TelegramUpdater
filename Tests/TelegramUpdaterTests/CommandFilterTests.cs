@@ -74,5 +74,61 @@ namespace TelegramUpdaterTests
 
             Assert.True(filter.TheyShellPass(message));
         }
+
+        [Theory]
+        [InlineData("/test", true)]
+        [InlineData("/Test", false)]
+        [InlineData("/Test hello world", false)]
+        [InlineData("/test@testbot", true)]
+        [InlineData("/test@TestBot", true)]
+        [InlineData("/test@BlahBot", true)]
+        [InlineData("/test@TestBot hello world", true)]
+        public void Test_Command_Case_Sensetive(string command, bool shouldMatch)
+        {
+            var filter = new CommandFilter(
+                "test",
+                new CommandFilterOptions(caseSensitive: true));
+
+            var message = new Message { Text = command };
+
+            Assert.Equal(filter.TheyShellPass(message), shouldMatch);
+        }
+
+        [Theory]
+        [InlineData("/start test", true)]
+        [InlineData("/start Test", true)]
+        [InlineData("/start", false)]
+        [InlineData("/start smth", false)]
+        public void Test_Command_Exact_Args(string command, bool shouldMatch)
+        {
+            var filter = new CommandFilter(
+                "start",
+                new CommandFilterOptions(
+                    ArgumentsMode.Require,
+                    exactArgs: new[] { "test" }));
+
+            var message = new Message { Text = command };
+
+            Assert.Equal(filter.TheyShellPass(message), shouldMatch);
+        }
+
+        [Theory]
+        [InlineData("/start test", true)]
+        [InlineData("/start Test", false)]
+        [InlineData("/start", false)]
+        [InlineData("/start smth", false)]
+        public void Test_Command_Exact_Args_Case_Sensetive(string command, bool shouldMatch)
+        {
+            var filter = new CommandFilter(
+                "start",
+                new CommandFilterOptions(
+                    ArgumentsMode.Require,
+                    caseSensitive: true,
+                    exactArgs: new[] { "test" }));
+
+            var message = new Message { Text = command };
+
+            Assert.Equal(filter.TheyShellPass(message), shouldMatch);
+        }
     }
 }

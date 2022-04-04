@@ -185,6 +185,8 @@
             }
 
             AddOrUpdateData("args", nakedArgs);
+            var commandMatch = false;
+
             if (!string.IsNullOrEmpty(Options.BotUsername))
             {
                 var fullCommandBuilder = (string x) => $"{Prefix}{x}@{Options.BotUsername.ToLower()}";
@@ -192,14 +194,14 @@
 
                 if (Options.CaseSensitive)
                 {
-                    return Commands.Any(
+                    commandMatch = Commands.Any(
                         x => fullCommandBuilder(x) == command ||
                         liteCommandBuilder(x) == command);
                 }
                 else
                 {
                     command = command.ToLower();
-                    return Commands.Any(
+                    commandMatch = Commands.Any(
                         x => fullCommandBuilder(x).ToLower() == command ||
                         liteCommandBuilder(x).ToLower() == command);
                 }
@@ -207,11 +209,29 @@
             else
             {
                 if (Options.CaseSensitive)
-                    return Commands.Any(x => command.StartsWith($"{Prefix}{x}"));
+                    commandMatch = Commands.Any(x => command.StartsWith($"{Prefix}{x}"));
                 else
-                    return Commands.Any(
+                    commandMatch = Commands.Any(
                         x => command.ToLower().StartsWith($"{Prefix}{x}".ToLower()));
             }
+
+            // Check for exact arguments match
+            if (commandMatch &&
+                Options.ExactArgs is not null &&
+                Options.ArgumentsMode == ArgumentsMode.Require)
+            {
+                if (Options.CaseSensitive)
+                {
+                    return nakedArgs.SequenceEqual(Options.ExactArgs);
+                }
+                else
+                {
+                    return nakedArgs.Select(x=> x.ToLower())
+                        .SequenceEqual(Options.ExactArgs.Select(x=> x.ToLower()));
+                }
+            }
+
+            return commandMatch;
         }
 
         /// <summary>

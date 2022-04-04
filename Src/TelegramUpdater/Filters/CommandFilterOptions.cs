@@ -45,6 +45,7 @@ public readonly struct CommandFilterOptions
     /// </param>
     /// <param name="botUsername">Username of the bot ( without @ ). will catch commands like /start@{username}.</param>
     /// <param name="caseSensitive">If command filter checks should be Case Sensitive.</param>
+    /// <param name="exactArgs">An array of argumants that the command should have ( in order ).</param>
     public CommandFilterOptions(
         ArgumentsMode argumentsMode = ArgumentsMode.Idc,
         char separator = ' ',
@@ -53,7 +54,8 @@ public readonly struct CommandFilterOptions
         BotCommandScope? botCommandScop = default,
         int[]? setCommandPriorities = default,
         string? botUsername = default,
-        bool caseSensitive = false)
+        bool caseSensitive = default,
+        string[]? exactArgs = default)
     {
         ArgumentsMode = argumentsMode;
         Separator = separator;
@@ -63,6 +65,7 @@ public readonly struct CommandFilterOptions
         SetCommandPriorities = setCommandPriorities;
         BotUsername = botUsername;
         CaseSensitive = caseSensitive;
+        ExactArgs = exactArgs;
     }
 
     /// <summary>
@@ -111,4 +114,9 @@ public readonly struct CommandFilterOptions
     /// </summary>
     /// <value></value>
     public string? BotUsername { get; } = default;
+
+    /// <summary>
+    /// An array of argumants that the command should have ( in order ).
+    /// </summary>
+    public string[]? ExactArgs { get; } = default;
 }
