@@ -1,4 +1,6 @@
-﻿namespace TelegramUpdater.Filters
+﻿using TelegramUpdater.Exceptions;
+
+namespace TelegramUpdater.Filters
 {
     /// <summary>
     /// Filters messages with specified command
@@ -273,8 +275,7 @@
         public IEnumerable<(int priority, BotCommand command)> ToBotCommand()
         {
             if (Options.Descriptions is null)
-                throw new InvalidOperationException(
-                    "Commands should have a description to convert to BotCommand");
+                throw new CommandDescriptionNotProvided();
 
             int[] setPriorities;
             if (Options.SetCommandPriorities is null ||

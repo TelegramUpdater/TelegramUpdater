@@ -292,7 +292,9 @@ public static class UpdaterExtensions
             var commandScope = scope.First().Options.BotCommandScope;
 
             await updater.BotClient.SetMyCommandsAsync(
-                scope.SelectMany(x => x.ToBotCommand())
+                scope
+                    .Where(x=> x.Options.Descriptions is not null)
+                    .SelectMany(x => x.ToBotCommand())
                     .OrderBy(x=> x.priority)
                     .Select(x=> x.command),
                 commandScope);
