@@ -1,4 +1,5 @@
 ﻿using Telegram.Bot.Types.ReplyMarkups;
+using TelegramUpdater.RainbowUtilities;
 
 namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
@@ -89,6 +90,43 @@ public abstract class MessageHandler : AnyHandler<Message>
     protected async Task DeleteAsync(CancellationToken cancellationToken = default)
     {
         await BotClient.DeleteMessageAsync(Chat.Id, Id, cancellationToken);
+    }
+
+    /// <summary>
+    /// Asks a user to input an text message and waits for it.
+    /// </summary>
+    public async Task<string?> AwaitTextInputAsync(
+        TimeSpan timeOut,
+        string text,
+        ParseMode? parseMode = default,
+        IEnumerable<MessageEntity>? entities = default,
+        bool? disableWebPagePreview = default,
+        bool? disableNotification = default,
+        bool? sendMessageAsReply = default,
+        bool? allowSendingWithoutReply = default,
+        IReplyMarkup? replyMarkup = default,
+        Func<CancellationToken, Task>? onTimeOut = default,
+        Func<
+            IUpdater,
+            ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
+        CancellationToken cancellationToken = default)
+    {
+        if (text is not null)
+            await ResponseAsync(
+                text, parseMode, entities, disableWebPagePreview,
+                disableNotification, sendMessageAsReply, allowSendingWithoutReply,
+                replyMarkup, cancellationToken: cancellationToken);
+
+        var update = await AwaitMessageAsync(
+            FilterCutify.Text(), timeOut, onUnrelatedUpdate, cancellationToken);
+        if (update == null)
+        {
+            if (onTimeOut is not null)
+                await onTimeOut(cancellationToken);
+            return null;
+        }
+
+        return update.Update.Text;
     }
     #endregion
 }
