@@ -1,4 +1,5 @@
-﻿using TelegramUpdater.Exceptions;
+﻿using System.Diagnostics.CodeAnalysis;
+using TelegramUpdater.Exceptions;
 using TelegramUpdater.StateKeeping;
 using TelegramUpdater.StateKeeping.StateKeepers.NumericStateKeepers;
 
@@ -52,6 +53,32 @@ public static class Extensions
     }
 
     /// <summary>
+    /// Tries to get a <see cref="IStateKeeper{TState, TFrom}"/> that you register before using
+    /// <see cref="AddStateKeeper{TState, TFrom}(IUpdater, string, IStateKeeper{TState, TFrom})"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="name">The name of state keeper.</param>
+    /// <param name="stateKeeper">The state keeper.</param>
+    /// <returns></returns>
+    /// <exception cref="StateKeeperNotRegistried"></exception>
+    public static bool TryGetStateKeeper<TState, TFrom>(
+        this IUpdater updater, string name,
+        [NotNullWhen(true)] out IStateKeeper<TState, TFrom>? stateKeeper)
+        where TState : IEquatable<TState>
+    {
+        var key = "StateKeeper_" + name;
+
+        if (updater.ContainsKey(key))
+        {
+            stateKeeper = (IStateKeeper<TState, TFrom>)updater[key];
+            return true;
+        }
+
+        stateKeeper = default;
+        return false;
+    }
+
+    /// <summary>
     /// Register a <see cref="UserNumericStateKeeper"/> on <see cref="IUpdater"/>.
     /// </summary>
     /// <param name="updater">The updater.</param>
@@ -75,5 +102,28 @@ public static class Extensions
          this IUpdater updater, string name)
     {
         return (UserNumericStateKeeper)updater.GetStateKeeper<int, User>(name);
+    }
+
+    /// <summary>
+    /// Tries to get a <see cref="UserNumericStateKeeper"/> that you register before using
+    /// <see cref="AddUserNumericStateKeeper(IUpdater, string)"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="name">The name of state keeper.</param>
+    /// <param name="stateKeeper">The numeric state keeper.</param>
+    /// <returns></returns>
+    /// <exception cref="KeyNotFoundException"></exception>
+    public static bool TryGetUserNumericStateKeeper(
+         this IUpdater updater, string name,
+         [NotNullWhen(true)] out UserNumericStateKeeper? stateKeeper)
+    {
+        if (TryGetStateKeeper<int, User>(updater, name, out var keeper))
+        {
+            stateKeeper = (UserNumericStateKeeper)keeper;
+            return true;
+        }
+
+        stateKeeper = default;
+        return false;
     }
 }
