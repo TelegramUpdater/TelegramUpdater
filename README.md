@@ -1,181 +1,179 @@
-# Here is **Updater**
+# TelegramUpdater (Preview)
 
-** !! Preview !! **
+This project aims creating telegram bots in a simplest and more straight way
+with DRY.
+( _TelegramUpdater aims .NET 6 and above._ )
 
-This is your telegram updater package written in C# and .NET 6
+The package ( should ) handles following:
 
-The updater is supposed to fetch and handle new updates coming from bot api server
-
-The updater is written on top of 
-[TelegramBots/Telegram.Bot: .NET Client for Telegram Bot API](https://github.com/TelegramBots/Telegram.Bot) package
-
-## More support
-
-We can talk through [@TUTalkings](https://t.me/TUTalkings) if you want to.
-
-## Why use this?
-
-- Updater uses update handlers which are a great help to write clean, simple to write and read and more powerful code base.
-- Updater provides `Filter<T>` class that helps you to easily choose the right handler for incoming updates.
-Take a look at code below describing a handler:
-
-```csharp
-using Telegram.Bot.Types;
-using TelegramUpdater.FilterAttributes.Attributes;
-using TelegramUpdater.Filters;
-using TelegramUpdater.UpdateContainer;
-using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
-
-namespace ConsoleApp;
-
-[Command("test"), Private]
-internal class MyScopedMessageHandler : MessageHandler
-{
-    protected override async Task HandleAsync(IContainer<Message> _)
-    {
-        await ResponseAsync("Tested!");
-    }
-}
-```
-
-- Simple setup
-- Useful options
-```cs
-updater = new Updater("BotToken",
-    new UpdaterOptions(
-        maxDegreeOfParallelism: 10, // maximum update process tasks count at the same time
-                                    // Eg: first 10 updates are answers quickly, but others should wait
-                                    // for any of that 10 to be done.
-                                    
-    .AddScopedUpdateHandler<MyScopedMessageHandler, Message>(); // Scoped handler;
-
-await updater.StartAsync(); // 🔥 Fire up and block!
-```
-
-- `OpenChannel` Method! You can use this to wait for a user response.
-- Batch of extension methods to increase speed and make cleaner code.
-
-As instance `ChannelUserClick` is an helper method for `OpenChannel` that waits for a user click.
-
-```cs
-[Command("start"), Private]
-internal sealed class MyMessageHandler : MessageHandler
-{
-    protected override async Task HandleAsync(IContainer<Message> _)
-    {
-        await AwaitButtonClickAsync(
-            TimeSpan.FromSeconds(10), new CallbackQueryRegex("^hello"))
-
-        .IfNotNull(async answer =>
-        {
-            await answer.EditAsync(text: "Well ...");
-        })
-        .Else(async _ =>
-        {
-            await ResponseAsync("Slow");
-        });
-    }
-}
-```
-
-- `ExceptionHandler`s, handle exceptions like a pro with highly customizable exceptions handlers. you specify exception type, message match, handler type and ...
-
-```cs
-    .StepTwo(CommonExceptions.ParsingException(
-        (updater, ex) =>
-        {
-            updater.Logger.LogWarning(exception: ex, "Handler has entity parsing error!");
-            return Task.CompletedTask;
-        },
-        allowedHandlers: new[]
-        {
-            typeof(AboutMessageHandler),
-            typeof(MyScopedMessageHandler)
-        }))
-```
-
-- Supports DI and batch of extension methods for hosted or webhook apps ( thanks to Telegram.Bot webhook example )
-- Updater has a lot of base classes, interfaces and generic types to make everything highly customizable.
-- More ...
+1. Getting updates from telegram ( Customizable )
+2. Ensures updates are processed in parallel.
+3. Ensures updates are processed sequential pre each user.
+4. Ensures a limited count of updates are processed in parallel. ( This count
+is specified as `MaxDegreeOfParallelism`, this ensures that parallel running
+tasks should not be more than `MaxDegreeOfParallelism`. )
+5. Queuing updates per each user and allows you to semi manage them.
+6. Handle updates based on created handlers and filters.
+7. Handle exceptions occurred while handling updates.
+8. Applies DI ( Dependency Injection ) inside `scoped update Handlers` where an
+`IServiceProvider` is available.
+9. Enable waiting for other updates while handling an update.
+10. Handle overlapping handlers.
+11. Some extension methods and properties ( especially in scoped handlers ) to
+make faster to develop.
+12. Handle some low level staff like handling commands, deep-links and etc.
+13. (_Recently_) Helps you keep state of a user in a simplest way.
 
 ## Getting Started
 
-Here are starting pack for common SDKs in .NET
+Let's get started with this package and learn how to implement some of above
+features.
 
-> TelegramUpdater in available in [nuget](https://www.nuget.org/packages/TelegramUpdater/), Install it first.
+### Installation
 
-### Basic
+The package is available inside
+[Nuget](https://www.nuget.org/packages/TelegramUpdater/).
 
-If you're using a console app with no Hosting and `IServiceCollection` then it's your choice
-**And even if you don't, you're suggested to!**
+TelegramUpdater uses
+[Telegram.Bot: .NET Client for Telegram Bot API](https://github.com/TelegramBots/Telegram.Bot)
+package as an C# wrapper over Telegram bot api.
 
-Base class of this package is `Updater`, but there's a helper class in case of basic apps called `UpdaterBuilder` which helps you
-get familiar with the package.
+### Setup
 
-`UpdaterBuilder` helps you build `Updater` in steps with fully documented methods.
-See [UpdaterProduction](https://github.com/TelegramUpdater/TelegramUpdater/tree/master/Examples/UpdaterProduction) and
-[ConsoleApp](https://github.com/TelegramUpdater/TelegramUpdater/tree/master/Examples/ConsoleApp) for instance.
-
-If you're looking for a quick basic example:
+Assume you have an empty console application. Put following inside `Program.cs`.
 
 ```csharp
-// See https://aka.ms/new-console-template for more information
 using TelegramUpdater;
 
-var updater = new UpdaterBuilder("BOT_TOKEN")
+// Initialize a new instance of Updater using your bot token
+var updater = new Updater("<BOT_TOKEN>");
 
-    .StepOne()
+updater.AutoCollectScopedHandlers();
+updater.AddDefaultExceptionHandler();
 
-    .StepTwo(inherit: false) // Add default exception handler
-
-    .StepThree( // Quick handler
-        async container => await container.Response("Started!"),
-        FilterCutify.OnCommand("start"));
-
-// ---------- Start! ----------
-
-await updater.StartAsync(); // 🔥 Fire up and block!
+await updater.StartAsync();
 ```
 
-Of course this can be even less, but these're required for production! For instance `StepTwo` adds a default exception handler ( Take a look at methods docs! )
+Let's explain above code.
 
-### IHost apps
+1. Initialize `Updater`
 
-It maybe better if you use `Updater` in a app where `IServiceCollection` and `IServiceProvider` are available. Like WorkerService!
+    To do this you need a Telegram bot token. You can create a bot and get it's
+    token from [@BotFather](https://t.me/BotFather).
 
-Use [this package](https://www.nuget.org/packages/TelegramUpdater.Hosting/1.0.1) for a set of useful extensions for IHosting apps.
+    Then replace you own token with `<BOT_TOKEN>`.
 
-Take a look at two examples of worker services
+2. Add you update handlers
 
-- [WorkerService](https://github.com/TelegramUpdater/TelegramUpdater/tree/master/Examples/WorkerService), A worker service with default updater service.
-- [ManualWriterWorkerService](https://github.com/TelegramUpdater/TelegramUpdater/tree/master/Examples/ManualWriterWorker), A worker service that gets updates for a custom external service. In this example i used [PollingExtension](https://github.com/TelegramBots/Telegram.Bot.Extensions.Polling) as an external updater writer.
+    While you can add the update handlers manually using following methods:
+    - `updater.AddSingletonUpdateHandler()`
+    - `updater.AddScopedUpdaterHandler()`
 
-A quick worker service
+    But it's better to let's updater fetch them automatically for some reasons:
 
-```csharp
-using WorkerService;
+    1. You won't miss a handler in case you forgot to add it.
+    2. You will have all your handler in one place and their right place.
+    ...
 
-IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices(services =>
+    **NOTE:**
+    - By default, updater will look for handler inside `UpdaterHandlers` namespace
+      followed by updater name.
+
+      Eg: `UpdateHandler/Messages` for message handlers.
+
+    - This method looks only for `ScopedUpdateHandler`.
+
+3. Add exception handler
+
+    Method `updater.AddDefaultExceptionHandler()` will add a default `ExceptionHandler`
+    that handles all exceptions occurred while handling updates.
+
+4. Start the updater using a default `UpdateWriter`.
+
+    `UpdateWriter` is a class that manages receiving updates from Telegram and
+    writing them to the updater.
+
+    You can create your own writer by inheriting from `UpdateWriterAbs`, then
+    use `await updater.StartAsync<MyUpdateWriter>()`
+
+Now, if you run the app, you will see some logs and nothing else. Since you should
+add some update handlers yet.
+
+### Create update handlers
+
+Let's create a command handler for `/start`.
+
+1. Since we are using `AutoCollectScopedHandlers`, you should create a folder named
+`UpdateHandler` ( you can change this naming ) and another folder named `Messages`
+inside it.
+
+2. Inside `UpdateHandler/Messages` create a file name `StartCommand.cs`.
+
+    Inside `StartCommand.cs` should be like this:
+
+    ```csharp
+    namespace MyApp.UpdateHandlers.Messages;
+
+    internal class StartCommand
     {
-        services.AddTelegramUpdater(
-            "BOT_TOKEN",
-            default,
-            (builder) => builder
-                .AddMessageHandler<SimpleMessageHandler>()
-        );
-    })
-    .Build();
 
-await host.RunAsync();
-```
+    }
+    ```
 
-## Road Map
+3. Convert your class to an `Scoped message handler`
 
-- [ ] Add ready to use handlers for all updates
-- [ ] Tests
-- [ ] Add more filters
+    Your class should inherit from `MessageHandler`
+    ( from `TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse` namespace )
 
-## Next?!
+    ```csharp
+    using Telegram.Bot.Types;
+    using TelegramUpdater.UpdateContainer;
+    using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
-Find documents under https://telegramupdater.github.io/Docs/ ( Yet Working on it ... )
+    namespace YouKnowIKnowYou.UpdateHandlers.Messages;
+
+    internal class StartCommand : MessageHandler
+    {
+        protected override Task HandleAsync(IContainer<Message> cntr)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    ```
+
+4. Our implementation to handle the update goes inside `HandleAsync` method.
+
+    For now let's just send a message to the user.
+
+    ```csharp
+    protected override async Task HandleAsync(IContainer<Message> _)
+    {
+        await ResponseAsync("Started from TelegramUpdater");
+    }
+    ```
+
+5. Add a filter to look for `/start` commands only.
+
+    For scoped update handlers, we use `FilterAttributes` to apply filters.
+
+    ```csharp
+    using Telegram.Bot.Types;
+    using TelegramUpdater.FilterAttributes.Attributes;
+    using TelegramUpdater.UpdateContainer;
+    using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
+
+    namespace YouKnowIKnowYou.UpdateHandlers.Messages;
+
+    [Command(command: "start"), Private]
+    internal class StartCommand : MessageHandler
+    {
+        protected override async Task HandleAsync(IContainer<Message> _)
+        {
+            await ResponseAsync("Started from TelegramUpdater");
+        }
+    }
+    ```
+
+    This is how a real scoped update handler look like.
+
+Now if you run the app and send `/start` to the bot, you'll have a response.
