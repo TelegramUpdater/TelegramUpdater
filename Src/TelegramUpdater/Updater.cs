@@ -167,7 +167,7 @@ public sealed class Updater : IUpdater
                 var tryAfterSeconds = int.Parse(match.Groups["tryAfter"].Value);
 
                 Logger.LogWarning("A wait of {seconds} is required! caused by {method}",
-                    tryAfterSeconds, args.ApiRequestEventArgs.MethodName);
+                    tryAfterSeconds, args.ApiRequestEventArgs.Request.MethodName);
                 await Task.Delay(tryAfterSeconds * 1000, cancellationToken);
             }
         }
