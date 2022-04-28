@@ -46,6 +46,7 @@ public abstract class MessageHandler : AnyHandler<Message>
         IEnumerable<MessageEntity>? entities = default,
         bool? disableWebPagePreview = default,
         bool? disableNotification = default,
+        bool? protectContents = default,
         bool? sendMessageAsReply = default,
         bool? allowSendingWithoutReply = default,
         IReplyMarkup? replyMarkup = default,
@@ -56,6 +57,7 @@ public abstract class MessageHandler : AnyHandler<Message>
                                                 entities,
                                                 disableWebPagePreview,
                                                 disableNotification,
+                                                protectContents,
                                                 (sendMessageAsReply ?? false) ? Id : 0,
                                                 allowSendingWithoutReply,
                                                 replyMarkup,
@@ -70,6 +72,7 @@ public abstract class MessageHandler : AnyHandler<Message>
         IEnumerable<MessageEntity>? entities = default,
         bool? disableWebPagePreview = default,
         bool? disableNotification = default,
+        bool? protectContents = default,
         int? replyToMessageId = default,
         bool? allowSendingWithoutReply = default,
         IReplyMarkup? replyMarkup = default,
@@ -80,6 +83,7 @@ public abstract class MessageHandler : AnyHandler<Message>
                                                 entities,
                                                 disableWebPagePreview,
                                                 disableNotification,
+                                                protectContents,
                                                 replyToMessageId,
                                                 allowSendingWithoutReply,
                                                 replyMarkup,
@@ -102,6 +106,7 @@ public abstract class MessageHandler : AnyHandler<Message>
         IEnumerable<MessageEntity>? entities = default,
         bool? disableWebPagePreview = default,
         bool? disableNotification = default,
+        bool? protectContents = default,
         bool? sendMessageAsReply = default,
         bool? allowSendingWithoutReply = default,
         IReplyMarkup? replyMarkup = default,
@@ -114,7 +119,7 @@ public abstract class MessageHandler : AnyHandler<Message>
         if (text is not null)
             await ResponseAsync(
                 text, parseMode, entities, disableWebPagePreview,
-                disableNotification, sendMessageAsReply, allowSendingWithoutReply,
+                disableNotification, protectContents, sendMessageAsReply, allowSendingWithoutReply,
                 replyMarkup, cancellationToken: cancellationToken);
 
         var update = await AwaitMessageAsync(
