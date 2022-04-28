@@ -12,7 +12,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/TelegramUpdater/TelegramUpdater</RepositoryUrl>
     <PackageTags>telegram; telegram-bot; bot-api; csharp; framework</PackageTags>
-    <PackageReleaseNotes>Watch out! lots of breaking changes.</PackageReleaseNotes>
+    <PackageReleaseNotes>Updated to Telegram.Bot 18.0.0-alpha2, use polling by default.</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
