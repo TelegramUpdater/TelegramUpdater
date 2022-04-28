@@ -178,4 +178,4 @@ inside it.
 
 Now if you run the app and send `/start` to the bot, you'll have a response.
 
-Read more at [Wiki](wiki)
+Read more at [Wiki](https://github.com/TelegramUpdater/TelegramUpdater/wiki/1.-Home).
