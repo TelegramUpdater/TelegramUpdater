@@ -177,3 +177,5 @@ inside it.
     This is how a real scoped update handler look like.
 
 Now if you run the app and send `/start` to the bot, you'll have a response.
+
+Read more at [Wiki](wiki)
