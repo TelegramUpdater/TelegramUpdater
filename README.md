@@ -177,3 +177,9 @@ inside it.
     This is how a real scoped update handler look like.
 
 Now if you run the app and send `/start` to the bot, you'll have a response.
+
+Read more at [Wiki](https://github.com/TelegramUpdater/TelegramUpdater/wiki/1.-Home).
+
+## What's Next ?!
+
+There're plenty of various examples available at [Examples](https://github.com/TelegramUpdater/TelegramUpdater.Examples)
