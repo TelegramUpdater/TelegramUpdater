@@ -38,10 +38,12 @@ namespace TelegramUpdaterTests
 
     public class DetectAllowedUpdatesTest
     {
+        private readonly string FakeBotToken = "123456789:ABCdefghij8kLM2nQrisT7_v4TMAKdiHm9T0";
+
         [Fact]
         public async Task Test_1Async()
         {
-            var testUpdater = new Updater(new TelegramBotClient(""));
+            var testUpdater = new Updater(new TelegramBotClient(FakeBotToken));
 
             testUpdater.AddScopedUpdateHandler<MyMessageHandler, Message>();
             testUpdater.AddScopedUpdateHandler<MyCallbackQueryHandler, CallbackQuery>();
@@ -52,19 +54,19 @@ namespace TelegramUpdaterTests
             await testUpdater.StartAsync<FakeWriter>();
 
             Assert.True(testUpdater.AllowedUpdates.SequenceEqual(
-                new[] { UpdateType.Message, UpdateType.CallbackQuery }));
+                [UpdateType.Message, UpdateType.CallbackQuery]));
         }
 
         [Fact]
         public async Task Test_2Async()
         {
-            var testUpdater = new Updater(new TelegramBotClient(""),
-                new UpdaterOptions(allowedUpdates: new[] { UpdateType.Message, UpdateType.CallbackQuery }));
+            var testUpdater = new Updater(new TelegramBotClient(FakeBotToken),
+                new UpdaterOptions(allowedUpdates: [UpdateType.Message, UpdateType.CallbackQuery]));
 
             await testUpdater.StartAsync<FakeWriter>();
 
             Assert.True(testUpdater.AllowedUpdates.SequenceEqual(
-                new[] { UpdateType.Message, UpdateType.CallbackQuery }));
+                [UpdateType.Message, UpdateType.CallbackQuery]));
         }
 
         private Task _T(IContainer<Message> arg)
