@@ -26,7 +26,14 @@ public abstract class AbstractEnumStateKeeper<TEnum, TFrom> : AbstractStateKeepe
         if (HasAnyState(stateOf))
         {
             var currentState = GetState(stateOf);
+
+#if NET8_0_OR_GREATER
             var enumValues = Enum.GetValues<TEnum>();
+#else
+            var enumValues = Enum.GetValues(typeof(TEnum))
+                .Cast<TEnum>()
+                .ToArray();
+#endif
             var currentIndex = Array.IndexOf(enumValues, currentState);
             var newIndex = currentIndex + 1;
 
@@ -58,7 +65,13 @@ public abstract class AbstractEnumStateKeeper<TEnum, TFrom> : AbstractStateKeepe
         if (HasAnyState(stateOf))
         {
             var currentState = GetState(stateOf);
+#if NET8_0_OR_GREATER
             var enumValues = Enum.GetValues<TEnum>();
+#else
+            var enumValues = Enum.GetValues(typeof(TEnum))
+                .Cast<TEnum>()
+                .ToArray();
+#endif
             var currentIndex = Array.IndexOf(enumValues, currentState);
             var newIndex = currentIndex - 1;
 

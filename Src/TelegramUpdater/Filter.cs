@@ -203,7 +203,11 @@ public abstract class JoinedFilter<T>(params IFilter<T>[] filters)
         var shellPass = InnerTheyShellPass(updater, input);
         _extraData = Filters.Where(x => x.ExtraData is not null)
             .SelectMany(x => x.ExtraData!) // extra data not null here.
+#if NET8_0_OR_GREATER
             .DistinctBy(x => x.Key) // Is it required ?
+#else
+            .GroupBy(x => x.Key, StringComparer.Ordinal).Select(x => x.First())
+#endif
             .ToDictionary(x => x.Key, x => x.Value, StringComparer.Ordinal);
         return shellPass;
     }

@@ -34,7 +34,12 @@ public static class ChannelsExtensions
         CancellationToken cancellationToken = default)
         where TExp : class where TCur : class
     {
+#if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(container);
+#else
+        if (container is null)
+            throw new ArgumentNullException(nameof(container));
+#endif
 
         if (updateChannel == null)
         {

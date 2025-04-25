@@ -24,16 +24,21 @@ public class CommandFilter : Filter<Message>
         get => _commands!;
         private set
         {
+#if NET8_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(value);
+#else
+        if (value is null)
+            throw new ArgumentNullException(nameof(value));
+#endif
 
             if (value.Length == 0)
-                throw new ArgumentException($"Don't use empty collection as Commands");
+                throw new ArgumentException($"Don't use empty collection as Commands", nameof(value));
 
             foreach (var command in value)
             {
                 if (string.IsNullOrEmpty(command))
                 {
-                    throw new ArgumentException("Commands should not be null or empty.");
+                    throw new ArgumentException("Commands should not be null or empty.", nameof(value));
                 }
             }
 
@@ -216,30 +221,20 @@ public class CommandFilter : Filter<Message>
 
         if (!string.IsNullOrEmpty(Options.BotUsername))
         {
-            string fullCommandBuilder(string x) => $"{Prefix}{x}@{Options.BotUsername.ToLower()}";
+            string fullCommandBuilder(string x) => $"{Prefix}{x}@{Options.BotUsername}";
             string liteCommandBuilder(string x) => $"{Prefix}{x}";
 
-            if (Options.CaseSensitive)
-            {
-                commandMatch = Commands.Any(
-                    x => string.Equals(fullCommandBuilder(x), command, StringComparison.Ordinal) ||
-                        string.Equals(liteCommandBuilder(x), command, StringComparison.Ordinal));
-            }
-            else
-            {
-                command = command.ToLower();
-                commandMatch = Commands.Any(
-                    x => fullCommandBuilder(x).ToLower() == command ||
-                    liteCommandBuilder(x).ToLower() == command);
-            }
+            commandMatch = Commands.Any(
+                x => string.Equals(fullCommandBuilder(x), command, Options.CaseSensitive? StringComparison.Ordinal: StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(liteCommandBuilder(x), command, Options.CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase));
         }
         else
         {
             if (Options.CaseSensitive)
-                commandMatch = Commands.Any(x => command.StartsWith($"{Prefix}{x}"));
+                commandMatch = Commands.Any(x => command.StartsWith($"{Prefix}{x}", StringComparison.Ordinal));
             else
                 commandMatch = Commands.Any(
-                    x => command.ToLower().StartsWith($"{Prefix}{x}".ToLower()));
+                    x => command.StartsWith($"{Prefix}{x}", StringComparison.OrdinalIgnoreCase));
         }
 
         // Check for exact arguments match
@@ -251,13 +246,11 @@ public class CommandFilter : Filter<Message>
 
             if (Options.CaseSensitive)
             {
-                return nakedArgs[..Options.ExactArgs.Length].SequenceEqual(Options.ExactArgs);
+                return nakedArgs[..Options.ExactArgs.Length].SequenceEqual(Options.ExactArgs, StringComparer.Ordinal);
             }
-            else
-            {
-                return nakedArgs[..Options.ExactArgs.Length].Select(x=> x.ToLower())
-                    .SequenceEqual(Options.ExactArgs.Select(x=> x.ToLower()));
-            }
+
+            return nakedArgs[..Options.ExactArgs.Length]
+                .SequenceEqual(Options.ExactArgs, StringComparer.OrdinalIgnoreCase);
         }
 
         return commandMatch;
@@ -293,12 +286,15 @@ public class CommandFilter : Filter<Message>
             throw new InvalidOperationException(
                 "Descriptions count dose not match commands count");
 
-        var commands = Commands.Zip(Options.Descriptions).Select(x => new BotCommand
+        var commands = Commands.Zip(Options.Descriptions, (first, second) =>
         {
-            Command = x.First,
-            Description = x.Second,
+            return new BotCommand
+            {
+                Command = first,
+                Description = second,
+            };
         });
 
-        return setPriorities.Zip(commands);
+        return setPriorities.Zip(commands, (first, second) => (first, second));
     }
 }

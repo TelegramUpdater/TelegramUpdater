@@ -53,7 +53,12 @@ public sealed class UsersAttribute : AbstractFilterAttribute
     /// <inheritdoc/>
     protected internal override object GetFilterTypeOf(Type requestedType)
     {
+#if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(requestedType);
+#else
+        if (requestedType is null)
+            throw new ArgumentNullException(nameof(requestedType));
+#endif
 
         if (requestedType == typeof(Message))
         {

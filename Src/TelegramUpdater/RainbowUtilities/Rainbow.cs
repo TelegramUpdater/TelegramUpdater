@@ -64,9 +64,12 @@ public sealed class Rainbow<TId, TValue> where TId : struct
         _exceptionHandler = exceptionHandler;
         _handler = callback ?? throw new ArgumentNullException(nameof(callback));
 
+#if NET8_0_OR_GREATER
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumParallel);
+#else
         if (maximumParallel <= 0)
             throw new ArgumentOutOfRangeException(nameof(maximumParallel));
-
+#endif
         if (logger == null)
         {
             using var _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
@@ -99,7 +102,7 @@ public sealed class Rainbow<TId, TValue> where TId : struct
             "Initializing {maximumParallel} queues in parallel.", maximumParallel);
         foreach (ushort number in Enumerable.Range(0, maximumParallel).Select(v => (ushort)v))
         {
-            if (!_availableQueues.TryAdd(number, null))
+            if (!_availableQueues.TryAdd(number, value: null))
             {
                 throw new InvalidOperationException("?");
             }
@@ -122,7 +125,7 @@ public sealed class Rainbow<TId, TValue> where TId : struct
             var alreadyQueue = _availableQueues[foundValue.QueueId];
 
             // Cannot be null here!
-            await alreadyQueue!.Writer.WriteAsync(value, cancellationToken);
+            await alreadyQueue!.Writer.WriteAsync(value, cancellationToken).ConfigureAwait(false);
         }
         else
         {
@@ -142,7 +145,7 @@ public sealed class Rainbow<TId, TValue> where TId : struct
                     });
                     _logger.LogInformation("Started a new waiting task.");
 
-                    await _waitingList.Writer.WriteAsync(value, cancellationToken);
+                    await _waitingList.Writer.WriteAsync(value, cancellationToken).ConfigureAwait(false);
                     _waitlistTask = WaitingQueuer(cancellationToken);
                 }
                 else
@@ -163,11 +166,11 @@ public sealed class Rainbow<TId, TValue> where TId : struct
                 }
 
                 var queue = Channel.CreateUnbounded<TValue>();
-                await queue.Writer.WriteAsync(value, cancellationToken);
+                await queue.Writer.WriteAsync(value, cancellationToken).ConfigureAwait(false);
                 _availableQueues[queueId.Value] = queue;
 
                 // ---- Create reading background task ----
-                var t = Task.Run(() => Processor(queueId.Value), cancellationToken);
+                var t = Task.Run(() => Processor(queueId.Value, cancellationToken), cancellationToken);
                 if (!_workingTasks.TryAdd(queueId.Value, t))
                 {
                     _workingTasks[queueId.Value] = t;
@@ -183,10 +186,10 @@ public sealed class Rainbow<TId, TValue> where TId : struct
                 _ownerIdMapping.AddOrUpdate(ownerId, ownerInfo, (_, __) => ownerInfo);
                 _logger.LogInformation(
                     "Queue {id}'s owner changed to {owner}", queueId.Value, ownerId);
-                var t = Task.Run(() => Processor(queueId.Value), cancellationToken);
+                var t = Task.Run(() => Processor(queueId.Value, cancellationToken), cancellationToken);
                 _workingTasks[queueId.Value] = t;
 
-                await availableQueue.Writer.WriteAsync(value, cancellationToken);
+                await availableQueue.Writer.WriteAsync(value, cancellationToken).ConfigureAwait(false);
             }
         }
     }
@@ -236,10 +239,8 @@ public sealed class Rainbow<TId, TValue> where TId : struct
 
             return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
     /// <summary>
@@ -261,11 +262,9 @@ public sealed class Rainbow<TId, TValue> where TId : struct
             count = channel.Reader.Count;
             return true;
         }
-        else
-        {
-            count = default;
-            return false;
-        }
+
+        count = default;
+        return false;
     }
 
     /// <summary>
@@ -310,7 +309,7 @@ public sealed class Rainbow<TId, TValue> where TId : struct
 
         try
         {
-            var result = await channel.Reader.ReadAsync(linkedCts.Token);
+            var result = await channel.Reader.ReadAsync(linkedCts.Token).ConfigureAwait(false);
 
             var ownerAgain = GetQueueOwner(queueId);
 
@@ -318,10 +317,8 @@ public sealed class Rainbow<TId, TValue> where TId : struct
             {
                 return new ShiningInfo<TId, TValue>(result, this, queueId);
             }
-            else
-            {
-                return default;
-            }
+
+            return default;
         }
         catch (OperationCanceledException)
         {
@@ -348,7 +345,7 @@ public sealed class Rainbow<TId, TValue> where TId : struct
 
         if (currentOwner == null) yield break;
 
-        await foreach (var item in channel.Reader.ReadAllAsync(cancellationToken))
+        await foreach (var item in channel.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
         {
             yield return new ShiningInfo<TId, TValue>(item, this, queueId);
         }
@@ -403,10 +400,8 @@ public sealed class Rainbow<TId, TValue> where TId : struct
 
             return null;
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
     private async Task WaitingQueuer(CancellationToken cancellationToken = default)
@@ -423,7 +418,7 @@ public sealed class Rainbow<TId, TValue> where TId : struct
 
             try
             {
-                TValue? update = await _waitingList!.Reader.ReadAsync(linkedCts.Token);
+                TValue? update = await _waitingList!.Reader.ReadAsync(linkedCts.Token).ConfigureAwait(false);
 
                 var ownerId = _idResolver(update);
 
@@ -432,7 +427,7 @@ public sealed class Rainbow<TId, TValue> where TId : struct
                     var alreadyQueue = _availableQueues[value.QueueId];
 
                     // Cannot be null here!
-                    await alreadyQueue!.Writer.WriteAsync(update, cancellationToken);
+                    await alreadyQueue!.Writer.WriteAsync(update, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -443,7 +438,7 @@ public sealed class Rainbow<TId, TValue> where TId : struct
                     {
                         // block till any slots available
                         _logger.LogInformation("Waiting for a release...");
-                        await WaitForFreeQueue();
+                        await WaitForFreeQueue().ConfigureAwait(false);
 
                         _logger.LogInformation("Free slots found.");
                         queueId = GetAvailableQueue();
@@ -461,11 +456,11 @@ public sealed class Rainbow<TId, TValue> where TId : struct
                         }
 
                         var queue = Channel.CreateUnbounded<TValue>();
-                        await queue.Writer.WriteAsync(update, cancellationToken);
+                        await queue.Writer.WriteAsync(update, cancellationToken).ConfigureAwait(false);
                         _availableQueues[queueId.Value] = queue;
 
                         // ---- Create reading background task ----
-                        var t = Task.Run(() => Processor(queueId.Value), cancellationToken);
+                        var t = Task.Run(() => Processor(queueId.Value, cancellationToken), cancellationToken);
                         if (!_workingTasks.TryAdd(queueId.Value, t))
                         {
                             _workingTasks[queueId.Value] = t;
@@ -482,10 +477,10 @@ public sealed class Rainbow<TId, TValue> where TId : struct
                         _ownerIdMapping.AddOrUpdate(ownerId, ownerInfo, (_, __) => ownerInfo);
                         _logger.LogInformation(
                             "Queue {id}'s owner changed to {owner}", queueId.Value, ownerId);
-                        var t = Task.Run(() => Processor(queueId.Value), cancellationToken);
+                        var t = Task.Run(() => Processor(queueId.Value, cancellationToken), cancellationToken);
                         _workingTasks[queueId.Value] = t;
 
-                        await availableQueue.Writer.WriteAsync(update, cancellationToken);
+                        await availableQueue.Writer.WriteAsync(update, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
@@ -543,7 +538,7 @@ public sealed class Rainbow<TId, TValue> where TId : struct
             }
         }
 
-        await Task.WhenAny(tasksToWait);
+        await Task.WhenAny(tasksToWait).ConfigureAwait(false);
     }
 
     private async Task Processor(
@@ -556,12 +551,12 @@ public sealed class Rainbow<TId, TValue> where TId : struct
         {
             try
             {
-                var update = await myChannel.Reader.ReadAsync(cancellationToken);
+                var update = await myChannel.Reader.ReadAsync(cancellationToken).ConfigureAwait(false);
 
                 try
                 {
                     await _handler!(
-                        new ShiningInfo<TId, TValue>(update, this, id), cancellationToken);
+                        new ShiningInfo<TId, TValue>(update, this, id), cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -569,7 +564,7 @@ public sealed class Rainbow<TId, TValue> where TId : struct
                     {
                         try
                         {
-                            await _exceptionHandler(ex, cancellationToken);
+                            await _exceptionHandler(ex, cancellationToken).ConfigureAwait(false);
                         }
                         catch { }
                     }
@@ -603,7 +598,7 @@ public sealed class Rainbow<TId, TValue> where TId : struct
                 {
                     try
                     {
-                        await _exceptionHandler(ex, cancellationToken);
+                        await _exceptionHandler(ex, cancellationToken).ConfigureAwait(false);
                     }
                     catch { }
                 }

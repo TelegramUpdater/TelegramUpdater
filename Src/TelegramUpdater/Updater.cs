@@ -148,9 +148,13 @@ public sealed class Updater : IUpdater
     {
         if (args.ResponseMessage.StatusCode == HttpStatusCode.TooManyRequests)
         {
+#if NET8_0_OR_GREATER
             var failedApiResponseMessage = await args.ResponseMessage.Content
                 .ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-
+#else
+            var failedApiResponseMessage = await args.ResponseMessage.Content
+                .ReadAsStreamAsync().ConfigureAwait(false);
+#endif
             var jsonObject = await JsonDocument.ParseAsync(
                 failedApiResponseMessage, cancellationToken: cancellationToken).ConfigureAwait(false);
 
