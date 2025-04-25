@@ -9,9 +9,14 @@ namespace TelegramUpdater.StateKeeping.StateKeepers;
 /// The propagation is based on enum values, definition order. NOT their numeric values.
 /// </remarks>
 /// <typeparam name="TEnum">The enum.</typeparam>
-/// <typeparam name="TFrom">The master object to extract state key from.</typeparam>
-public abstract class AbstractEnumStateKeeper<TEnum, TFrom> : AbstractStateKeeper<TEnum, TFrom>
+/// <typeparam name="TKey">The key.</typeparam>
+/// <typeparam name="TFrom">
+/// The master object to extract key from.
+/// </typeparam>
+public abstract class AbstractEnumStateKeeper<TKey, TEnum, TFrom>
+    : AbstractStateKeeper<TKey, TEnum, TFrom>
     where TEnum : struct, Enum
+    where TKey : notnull
 {
     /// <summary>
     /// Tries to move to the next enum state.

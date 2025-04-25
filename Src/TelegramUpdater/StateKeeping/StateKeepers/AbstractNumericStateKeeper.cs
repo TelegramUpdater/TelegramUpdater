@@ -5,10 +5,15 @@ namespace TelegramUpdater.StateKeeping.StateKeepers;
 /// <summary>
 /// A numeric state keeper that increases and decreases an <see cref="int"/> state.
 /// </summary>
-/// <typeparam name="TFrom">
-/// A container object that is used to extract an unique <see cref="long"/> from.
+/// <typeparam name="TKey">
+/// The key.
 /// </typeparam>
-public abstract class AbstractNumericStateKeeper<TFrom> : AbstractStateKeeper<int, TFrom>
+/// <typeparam name="TFrom">
+/// The master object to extract key from.
+/// </typeparam>
+public abstract class AbstractNumericStateKeeper<TKey, TFrom>
+    : AbstractStateKeeper<TKey, int, TFrom>
+    where TKey : notnull
 {
     /// <summary>
     /// Defines the acceptable range of state.

@@ -9,7 +9,7 @@
 /// will not be acceptable.
 /// </param>
 public sealed class UserNumericStateKeeper(Range? range = null)
-    : AbstractNumericStateKeeper<User>
+    : AbstractNumericStateKeeper<long, User>
 {
     /// <inheritdoc/>
     protected override Func<User, long> KeyResolver => (user) => user.Id;

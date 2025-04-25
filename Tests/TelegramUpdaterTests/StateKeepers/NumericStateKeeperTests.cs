@@ -6,12 +6,12 @@ namespace TelegramUpdaterTests.StateKeepers;
 
 public class NumericStateKeeperTests
 {
-    internal class NumericStateKeeperUnbound : AbstractNumericStateKeeper<long>
+    internal class NumericStateKeeperUnbound : AbstractNumericStateKeeper<long, long>
     {
         protected override Func<long, long> KeyResolver => x => x;
     }
 
-    internal class NumericStateKeeperBound : AbstractNumericStateKeeper<long>
+    internal class NumericStateKeeperBound : AbstractNumericStateKeeper<long, long>
     {
         public NumericStateKeeperBound(Range stateRange)
         {

@@ -2,7 +2,8 @@
 
 
 /// <inheritdoc/>
-public class UserEnumStateKeeper<TEnum> : AbstractEnumStateKeeper<TEnum, User>
+public class UserEnumStateKeeper<TEnum>
+    : AbstractEnumStateKeeper<long, TEnum, User>
     where TEnum : struct, Enum
 {
     /// <inheritdoc/>

@@ -7,19 +7,20 @@ using TelegramUpdater.StateKeeping.StateKeepers.NumericStateKeepers;
 namespace TelegramUpdater;
 
 /// <summary>
-/// Extension methods for <see cref="IStateKeeper{TState, TFrom}"/>.
+/// Extension methods for <see cref="IStateKeeper{TKey, TState}"/>.
 /// </summary>
 public static class Extensions
 {
     /// <summary>
-    /// Register an <see cref="IStateKeeper{TState, TFrom}"/> on <see cref="IUpdater"/>.
+    /// Register an <see cref="IStateKeeper{TKey, TState}"/> on <see cref="IUpdater"/>.
     /// </summary>
     /// <param name="updater">The updater.</param>
     /// <param name="name">A name for state keeper.</param>
     /// <param name="stateKeeper">The state keeper to add.</param>
     /// <returns></returns>
-    public static IUpdater AddStateKeeper<TState, TFrom>(
-        this IUpdater updater, string name, IStateKeeper<TState, TFrom> stateKeeper)
+    public static IUpdater AddStateKeeper<TKey, TState>(
+        this IUpdater updater, string name, IStateKeeper<TKey, TState> stateKeeper)
+        where TKey : notnull
     {
         var key = "StateKeeper_" + name;
 
@@ -31,44 +32,46 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Get a <see cref="IStateKeeper{TState, TFrom}"/> that you register before using
-    /// <see cref="AddStateKeeper{TState, TFrom}(IUpdater, string, IStateKeeper{TState, TFrom})"/>.
+    /// Get a <see cref="IStateKeeper{TKey, TState}"/> that you register before using
+    /// <see cref="AddStateKeeper{TKey, TState}(IUpdater, string, IStateKeeper{TKey, TState})"/>.
     /// </summary>
     /// <param name="updater">The updater.</param>
     /// <param name="name">The name of state keeper.</param>
     /// <returns></returns>
     /// <exception cref="StateKeeperNotRegistried"></exception>
-    public static IStateKeeper<TState, TFrom> GetStateKeeper<TState, TFrom>(
+    public static IStateKeeper<TKey, TState> GetStateKeeper<TKey, TState>(
         this IUpdater updater, string name)
+        where TKey : notnull
     {
         var key = "StateKeeper_" + name;
 
         if (updater.ContainsKey(key))
         {
-            return (IStateKeeper<TState, TFrom>)updater[key];
+            return (IStateKeeper<TKey, TState>)updater[key];
         }
 
         throw new StateKeeperNotRegistried(name);
     }
 
     /// <summary>
-    /// Tries to get a <see cref="IStateKeeper{TState, TFrom}"/> that you register before using
-    /// <see cref="AddStateKeeper{TState, TFrom}(IUpdater, string, IStateKeeper{TState, TFrom})"/>.
+    /// Tries to get a <see cref="IStateKeeper{TKey, TState}"/> that you register before using
+    /// <see cref="AddStateKeeper{TKey, TState}(IUpdater, string, IStateKeeper{TKey, TState})"/>.
     /// </summary>
     /// <param name="updater">The updater.</param>
     /// <param name="name">The name of state keeper.</param>
     /// <param name="stateKeeper">The state keeper.</param>
     /// <returns></returns>
     /// <exception cref="StateKeeperNotRegistried"></exception>
-    public static bool TryGetStateKeeper<TState, TFrom>(
+    public static bool TryGetStateKeeper<TKey, TState>(
         this IUpdater updater, string name,
-        [NotNullWhen(true)] out IStateKeeper<TState, TFrom>? stateKeeper)
+        [NotNullWhen(true)] out IStateKeeper<TKey, TState>? stateKeeper)
+        where TKey : notnull
     {
         var key = "StateKeeper_" + name;
 
         if (updater.ContainsKey(key))
         {
-            stateKeeper = (IStateKeeper<TState, TFrom>)updater[key];
+            stateKeeper = (IStateKeeper<TKey, TState>)updater[key];
             return true;
         }
 
@@ -85,7 +88,7 @@ public static class Extensions
     public static IUpdater AddUserNumericStateKeeper(
         this IUpdater updater, string name)
     {
-        return updater.AddStateKeeper(name, new UserNumericStateKeeper());
+        return updater.AddStateKeeper<long, int>(name, new UserNumericStateKeeper());
     }
 
     /// <summary>
@@ -99,7 +102,7 @@ public static class Extensions
     public static UserNumericStateKeeper GetUserNumericStateKeeper(
          this IUpdater updater, string name)
     {
-        return (UserNumericStateKeeper)updater.GetStateKeeper<int, User>(name);
+        return (UserNumericStateKeeper)updater.GetStateKeeper<long, int>(name);
     }
 
     /// <summary>
@@ -115,7 +118,7 @@ public static class Extensions
          this IUpdater updater, string name,
          [NotNullWhen(true)] out UserNumericStateKeeper? stateKeeper)
     {
-        if (TryGetStateKeeper<int, User>(updater, name, out var keeper))
+        if (TryGetStateKeeper<long, int>(updater, name, out var keeper))
         {
             stateKeeper = (UserNumericStateKeeper)keeper;
             return true;
@@ -135,7 +138,7 @@ public static class Extensions
         this IUpdater updater, string name)
         where TEnum : struct, Enum
     {
-        return updater.AddStateKeeper(name, new UserEnumStateKeeper<TEnum>());
+        return updater.AddStateKeeper<long, TEnum>(name, new UserEnumStateKeeper<TEnum>());
     }
 
     /// <summary>
@@ -150,7 +153,7 @@ public static class Extensions
         this IUpdater updater, string name)
         where TEnum : struct, Enum
     {
-        return (UserEnumStateKeeper<TEnum>)updater.GetStateKeeper<int, User>(name);
+        return (UserEnumStateKeeper<TEnum>)updater.GetStateKeeper<long, TEnum>(name);
     }
 
     /// <summary>
@@ -166,7 +169,7 @@ public static class Extensions
          [NotNullWhen(true)] out UserEnumStateKeeper<TEnum>? stateKeeper)
         where TEnum : struct, Enum
     {
-        if (TryGetStateKeeper<int, User>(updater, name, out var keeper))
+        if (TryGetStateKeeper<long, TEnum>(updater, name, out var keeper))
         {
             stateKeeper = (UserEnumStateKeeper<TEnum>)keeper;
             return true;

@@ -6,7 +6,7 @@ namespace TelegramUpdaterTests.StateKeepers
 {
     public class EnumStateKeeperTests
     {
-        internal sealed class EnumStateKeeper<TEnum> : AbstractEnumStateKeeper<TEnum, long>
+        internal sealed class EnumStateKeeper<TEnum> : AbstractEnumStateKeeper<long, TEnum, long>
             where TEnum : struct, Enum
         {
             protected override Func<long, long> KeyResolver => x => x;

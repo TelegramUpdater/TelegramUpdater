@@ -2,13 +2,15 @@
 
 namespace TelegramUpdater.StateKeeping;
 
-/// <inheritdoc cref="IStateKeeper{TState, TFrom}"/>
-public abstract class AbstractStateKeeper<TState, TFrom> : IStateKeeper<TState, TFrom>
+/// <inheritdoc cref="IStateKeeper{TState, TKey}"/>
+public abstract class AbstractStateKeeper<TKey, TState, TFrom>
+    : IStateKeeper<TKey, TState>
+    where TKey: notnull
 {
-    private readonly Dictionary<long, TState> _state;
+    private readonly Dictionary<TKey, TState> _state;
 
     /// <summary>
-    /// Initialize <see cref="AbstractStateKeeper{TState, TFrom}"/>
+    /// Initialize <see cref="AbstractStateKeeper{TState, TKey, TFrom}"/>
     /// </summary>
     protected AbstractStateKeeper()
     {
@@ -17,25 +19,25 @@ public abstract class AbstractStateKeeper<TState, TFrom> : IStateKeeper<TState, 
 
     /// <summary>
     /// A function to extract a unique <see cref="long"/> key from 
-    /// container object <typeparamref name="TFrom"/>.
+    /// container object <typeparamref name="TKey"/>.
     /// </summary>
-    protected abstract Func<TFrom, long> KeyResolver { get; }
+    protected abstract Func<TFrom, TKey> KeyResolver { get; }
 
     /// <inheritdoc/>
     public abstract bool CheckStateValidity(TState newState);
 
     /// <inheritdoc/>
-    public bool HasAnyState(TFrom stateOf) => _state.ContainsKey(KeyResolver(stateOf));
+    bool IStateKeeper<TKey, TState>.HasAnyState(TKey stateOf) => _state.ContainsKey(stateOf);
 
     /// <inheritdoc/>
-    public TState GetState(TFrom stateOf) => _state[KeyResolver(stateOf)];
+    TState IStateKeeper<TKey, TState>.GetState(TKey stateOf) => _state[stateOf];
 
     /// <inheritdoc/>
-    public bool TryGetState(TFrom stateOf, [NotNullWhen(true)] out TState? theState)
+    bool IStateKeeper<TKey, TState>.TryGetState(TKey stateOf, [NotNullWhen(true)] out TState? theState)
     {
-        if (HasAnyState(stateOf))
+        if ((this as IStateKeeper<TKey, TState>).HasAnyState(stateOf))
         {
-            theState = GetState(stateOf)!;
+            theState = (this as IStateKeeper<TKey, TState>).GetState(stateOf)!;
             return true;
         }
 
@@ -44,32 +46,51 @@ public abstract class AbstractStateKeeper<TState, TFrom> : IStateKeeper<TState, 
     }
 
     /// <inheritdoc/>
-    public void SetState(TFrom stateOf, TState theState)
+    void IStateKeeper<TKey, TState>.SetState(TKey stateOf, TState theState)
     {
         if (!CheckStateValidity(theState))
             return;
 
-        if (HasAnyState(stateOf))
-            _state[KeyResolver(stateOf)] = theState;
+        if ((this as IStateKeeper<TKey, TState>).HasAnyState(stateOf))
+            _state[stateOf] = theState;
         else
-            _state.Add(KeyResolver(stateOf), theState);
+            _state.Add(stateOf, theState);
     }
 
     /// <inheritdoc/>
-    public bool HasState(TFrom stateOf, TState theState)
+    bool IStateKeeper<TKey, TState>.HasState(TKey stateOf, TState theState)
     {
-        if (!HasAnyState(stateOf)) return false;
-        return GetState(stateOf)!.Equals(theState);
+        if (!(this as IStateKeeper<TKey, TState>).HasAnyState(stateOf)) return false;
+        return (this as IStateKeeper<TKey, TState>).GetState(stateOf)!.Equals(theState);
     }
 
     /// <inheritdoc/>
-    public bool DeleteState(TFrom stateOf)
+    bool IStateKeeper<TKey, TState>.DeleteState(TKey stateOf)
     {
-        if (HasAnyState(stateOf))
+        if ((this as IStateKeeper<TKey, TState>).HasAnyState(stateOf))
         {
-            return _state.Remove(KeyResolver(stateOf));
+            return _state.Remove(stateOf);
         }
 
         return false;
     }
+
+    /// <inheritdoc cref="IStateKeeper{TKey, TState}.HasAnyState(TKey)"/>
+    public bool HasAnyState(TFrom stateOf) => (this as IStateKeeper<TKey, TState>).HasAnyState(KeyResolver(stateOf));
+
+    /// <inheritdoc cref="IStateKeeper{TKey, TState}.GetState(TKey)"/>
+    public TState GetState(TFrom stateOf) => (this as IStateKeeper<TKey, TState>).GetState(KeyResolver(stateOf));
+
+    /// <inheritdoc cref="IStateKeeper{TKey, TState}.TryGetState(TKey, out TState)" />
+    public bool TryGetState(TFrom stateOf, [NotNullWhen(true)] out TState? theState)
+        => (this as IStateKeeper<TKey, TState>).TryGetState(KeyResolver(stateOf), out theState);
+
+    /// <inheritdoc cref="IStateKeeper{TKey, TState}.SetState(TKey, TState)"/>
+    public void SetState(TFrom stateOf, TState theState) => (this as IStateKeeper<TKey, TState>).SetState(KeyResolver(stateOf), theState);
+
+    /// <inheritdoc cref="IStateKeeper{TKey, TState}.HasState(TKey, TState)"/>
+    public bool HasState(TFrom stateOf, TState theState) => (this as IStateKeeper<TKey, TState>).HasState(KeyResolver(stateOf), theState);
+
+    /// <inheritdoc cref="IStateKeeper{TKey, TState}.DeleteState(TKey)"/>
+    public bool DeleteState(TFrom stateOf) => (this as IStateKeeper<TKey, TState>).DeleteState(KeyResolver(stateOf));
 }
