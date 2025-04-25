@@ -11,16 +11,11 @@ public class NumericStateKeeperTests
         protected override Func<long, long> KeyResolver => x => x;
     }
 
-    internal class NumericStateKeeperBound : AbstractNumericStateKeeper<long, long>
+    internal class NumericStateKeeperBound(Range stateRange) : AbstractNumericStateKeeper<long, long>
     {
-        public NumericStateKeeperBound(Range stateRange)
-        {
-            StateRange = stateRange;
-        }
-
         protected override Func<long, long> KeyResolver => x => x;
 
-        public override Range? StateRange { get; }
+        public override Range? StateRange { get; } = stateRange;
     }
 
     [Fact]

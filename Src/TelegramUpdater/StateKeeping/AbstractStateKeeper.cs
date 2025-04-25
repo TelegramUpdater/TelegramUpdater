@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using TelegramUpdater.StateKeeping.Storages;
 
 namespace TelegramUpdater.StateKeeping;
 
@@ -7,15 +8,12 @@ public abstract class AbstractStateKeeper<TKey, TState, TFrom>
     : IStateKeeper<TKey, TState>
     where TKey: notnull
 {
-    private readonly Dictionary<TKey, TState> _state;
+    private readonly DictionaryStorage<TKey, TState> _storage = new();
 
     /// <summary>
-    /// Initialize <see cref="AbstractStateKeeper{TState, TKey, TFrom}"/>
+    /// The storage used to fetch states.
     /// </summary>
-    protected AbstractStateKeeper()
-    {
-        _state = [];
-    }
+    public DictionaryStorage<TKey, TState> Storage => _storage;
 
     /// <summary>
     /// A function to extract a unique <see cref="long"/> key from 
@@ -27,10 +25,10 @@ public abstract class AbstractStateKeeper<TKey, TState, TFrom>
     public abstract bool CheckStateValidity(TState newState);
 
     /// <inheritdoc/>
-    bool IStateKeeper<TKey, TState>.HasAnyState(TKey stateOf) => _state.ContainsKey(stateOf);
+    bool IStateKeeper<TKey, TState>.HasAnyState(TKey stateOf) => Storage.Exists(stateOf);
 
     /// <inheritdoc/>
-    TState IStateKeeper<TKey, TState>.GetState(TKey stateOf) => _state[stateOf];
+    TState? IStateKeeper<TKey, TState>.GetState(TKey stateOf) => Storage.Read(stateOf);
 
     /// <inheritdoc/>
     bool IStateKeeper<TKey, TState>.TryGetState(TKey stateOf, [NotNullWhen(true)] out TState? theState)
@@ -52,9 +50,9 @@ public abstract class AbstractStateKeeper<TKey, TState, TFrom>
             return;
 
         if ((this as IStateKeeper<TKey, TState>).HasAnyState(stateOf))
-            _state[stateOf] = theState;
+            Storage.Update(stateOf, theState);
         else
-            _state.Add(stateOf, theState);
+            Storage.Create(stateOf, theState);
     }
 
     /// <inheritdoc/>
@@ -69,7 +67,8 @@ public abstract class AbstractStateKeeper<TKey, TState, TFrom>
     {
         if ((this as IStateKeeper<TKey, TState>).HasAnyState(stateOf))
         {
-            return _state.Remove(stateOf);
+            Storage.Delete(stateOf);
+            return true;
         }
 
         return false;
@@ -79,7 +78,7 @@ public abstract class AbstractStateKeeper<TKey, TState, TFrom>
     public bool HasAnyState(TFrom stateOf) => (this as IStateKeeper<TKey, TState>).HasAnyState(KeyResolver(stateOf));
 
     /// <inheritdoc cref="IStateKeeper{TKey, TState}.GetState(TKey)"/>
-    public TState GetState(TFrom stateOf) => (this as IStateKeeper<TKey, TState>).GetState(KeyResolver(stateOf));
+    public TState? GetState(TFrom stateOf) => (this as IStateKeeper<TKey, TState>).GetState(KeyResolver(stateOf));
 
     /// <inheritdoc cref="IStateKeeper{TKey, TState}.TryGetState(TKey, out TState)" />
     public bool TryGetState(TFrom stateOf, [NotNullWhen(true)] out TState? theState)

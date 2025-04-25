@@ -1,5 +1,10 @@
 ﻿namespace TelegramUpdater.StateKeeping;
 
+/// <summary>
+/// Storage for state keepers.
+/// </summary>
+/// <typeparam name="TKey"></typeparam>
+/// <typeparam name="TState"></typeparam>
 public interface IStateKeeperStorage<TKey, TState>
     where TKey: notnull
 {

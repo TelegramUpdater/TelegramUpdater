@@ -25,7 +25,7 @@ public interface IStateKeeper<TKey, TState> where TKey: notnull
     /// The key to get state for.
     /// </param>
     /// <returns></returns>
-    public TState GetState(TKey stateOf);
+    public TState? GetState(TKey stateOf);
 
     /// <summary>
     /// Tries to get the state for <paramref name="stateOf"/>.
