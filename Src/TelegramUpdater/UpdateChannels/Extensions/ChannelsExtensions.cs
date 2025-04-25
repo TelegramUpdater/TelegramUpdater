@@ -14,7 +14,7 @@ public static class ChannelsExtensions
     /// <summary>
     /// Open a channel an wait for an specified update from user.
     /// </summary>
-    /// <typeparam name="TExp">Update type you're excpecting.</typeparam>
+    /// <typeparam name="TExp">Update type you're expecting.</typeparam>
     /// <typeparam name="TCur">Current container update type.</typeparam>
     /// <param name="container">The container itself.</param>
     /// <param name="updateChannel">
@@ -23,7 +23,7 @@ public static class ChannelsExtensions
     /// <param name="onUnrelatedUpdate">
     /// A callback function to be called if an unrelated update from comes.
     /// </param>
-    /// <param name="cancellationToken">To cancell the job.</param>
+    /// <param name="cancellationToken">To cancel the job.</param>
     /// <returns></returns>
     public static async ValueTask<IContainer<TExp>?> OpenChannelAsync<TExp, TCur>(
         this IContainer<TCur> container,
@@ -34,8 +34,7 @@ public static class ChannelsExtensions
         CancellationToken cancellationToken = default)
         where TExp : class where TCur : class
     {
-        if (container == null)
-            throw new ArgumentNullException(nameof(container));
+        ArgumentNullException.ThrowIfNull(container);
 
         if (updateChannel == null)
         {
@@ -43,7 +42,7 @@ public static class ChannelsExtensions
                 "abstractChannel and updateResolver both can't be null");
         }
 
-        // A secondary timeOut, cuz ReadNextAsync'timeout will reset on unrelated update.
+        // A secondary timeOut, because ReadNextAsync'timeout will reset on unrelated update.
         var timeOutCts = new CancellationTokenSource();
         timeOutCts.CancelAfter(updateChannel.TimeOut);
 
@@ -55,7 +54,7 @@ public static class ChannelsExtensions
             try
             {
                 var update = await container.ShiningInfo.ReadNextAsync(
-                    updateChannel.TimeOut, linkedCts.Token);
+                    updateChannel.TimeOut, linkedCts.Token).ConfigureAwait(false);
 
                 if (update == null)
                     return null;
@@ -72,7 +71,7 @@ public static class ChannelsExtensions
 
                 if (onUnrelatedUpdate != null)
                 {
-                    await onUnrelatedUpdate(container.Updater, update);
+                    await onUnrelatedUpdate(container.Updater, update).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException)
@@ -93,7 +92,7 @@ public static class ChannelsExtensions
     /// <param name="onUnrelatedUpdate">
     /// A callback function to be called if an unrelated update from comes.
     /// </param>
-    /// <param name="cancellationToken">To cancell the job.</param>
+    /// <param name="cancellationToken">To cancel the job.</param>
     public static async Task<IContainer<Message>?> ChannelMessageAsync<K>(
         this IContainer<K> updateContainer,
         Filter<Message>? filter,
@@ -106,7 +105,7 @@ public static class ChannelsExtensions
         return await updateContainer.OpenChannelAsync(
             new MessageChannel(timeOut ?? TimeSpan.FromSeconds(30), filter),
             onUnrelatedUpdate,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
 
@@ -121,7 +120,7 @@ public static class ChannelsExtensions
     /// <param name="onUnrelatedUpdate">
     /// A callback function to be called if an unrelated update from comes.
     /// </param>
-    /// <param name="cancellationToken">To cancell the job.</param>
+    /// <param name="cancellationToken">To cancel the job.</param>
     [Obsolete("Use ChannelMessageAsync.")]
     public static async Task<IContainer<Message>?> ChannelUserResponse(
         this IContainer<Message> updateContainer,
@@ -133,7 +132,7 @@ public static class ChannelsExtensions
         CancellationToken cancellationToken = default)
     {
         return await updateContainer.ChannelMessageAsync(
-            filter, timeOut, onUnrelatedUpdate, cancellationToken);
+            filter, timeOut, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -154,6 +153,6 @@ public static class ChannelsExtensions
                 timeOut,
                 callbackQueryRegex),
             onUnrelatedUpdate,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 }

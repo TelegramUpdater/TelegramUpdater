@@ -34,7 +34,7 @@ public sealed class Updater : IUpdater
     // If it's present, then DI will be available inside scoped handlers
     private readonly IServiceProvider? _serviceDescriptors;
 
-    // This the main class responseable for queueing updates
+    // This the main class responsible for queuing updates
     // It handles everything related to process priority and more
     private readonly Rainbow<long, Update> _rainbow;
 
@@ -79,7 +79,7 @@ public sealed class Updater : IUpdater
     {
         _botClient = botClient ??
             throw new ArgumentNullException(nameof(botClient));
-        _extraData = new();
+        _extraData = [];
 
         if (outgoingRateControl)
             _botClient.OnApiResponseReceived += OnApiResponseReceived;
@@ -113,9 +113,9 @@ public sealed class Updater : IUpdater
 
         _serviceDescriptors = serviceDescriptors;
 
-        _updateHandlers = new List<ISingletonUpdateHandler>();
-        _exceptionHandlers = new List<IExceptionHandler>();
-        _scopedHandlerContainers = new List<IScopedUpdateHandlerContainer>();
+        _updateHandlers = [];
+        _exceptionHandlers = [];
+        _scopedHandlerContainers = [];
 
         _rainbow = new Rainbow<long, Update>(
             updaterOptions.MaxDegreeOfParallelism ??
@@ -149,10 +149,10 @@ public sealed class Updater : IUpdater
         if (args.ResponseMessage.StatusCode == HttpStatusCode.TooManyRequests)
         {
             var failedApiResponseMessage = await args.ResponseMessage.Content
-                .ReadAsStreamAsync(cancellationToken);
+                .ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
 
             var jsonObject = await JsonDocument.ParseAsync(
-                failedApiResponseMessage, cancellationToken: cancellationToken);
+                failedApiResponseMessage, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             var description = jsonObject.RootElement.GetProperty("description")
                 .GetString();
@@ -168,7 +168,7 @@ public sealed class Updater : IUpdater
 
                 Logger.LogWarning("A wait of {seconds} is required! caused by {method}",
                     tryAfterSeconds, args.ApiRequestEventArgs.Request.MethodName);
-                await Task.Delay(tryAfterSeconds * 1000, cancellationToken);
+                await Task.Delay(tryAfterSeconds * 1000, cancellationToken).ConfigureAwait(false);
             }
         }
     }
@@ -270,11 +270,9 @@ public sealed class Updater : IUpdater
     }
 
     /// <inheritdoc/>
-    public async ValueTask WriteAsync(
+    public ValueTask WriteAsync(
         Update update, CancellationToken cancellationToken = default)
-    {
-        await Rainbow.EnqueueAsync(update, cancellationToken);
-    }
+        => Rainbow.EnqueueAsync(update, cancellationToken);
 
     /// <inheritdoc/>
     public async Task StartAsync<TWriter>(
@@ -293,11 +291,11 @@ public sealed class Updater : IUpdater
         {
             // I need to recreate the options since it's readonly.
             _updaterOptions = new UpdaterOptions(
-                UpdaterOptions.MaxDegreeOfParallelism,
-                UpdaterOptions.Logger,
-                UpdaterOptions.CancellationToken,
-                UpdaterOptions.FlushUpdatesQueue,
-                DetectAllowedUpdates()); // Auto detect allowed updates
+                maxDegreeOfParallelism: UpdaterOptions.MaxDegreeOfParallelism,
+                logger: UpdaterOptions.Logger,
+                flushUpdatesQueue: UpdaterOptions.FlushUpdatesQueue,
+                allowedUpdates: DetectAllowedUpdates(),
+                cancellationToken: UpdaterOptions.CancellationToken); // Auto detect allowed updates
 
             _logger.LogInformation(
                 "Detected allowed updates automatically {allowed}",
@@ -315,16 +313,14 @@ public sealed class Updater : IUpdater
 
         _logger.LogInformation(
             "Start reading updates from {writer}", typeof(TWriter));
-        await writer.ExecuteAsync(liked.Token);
+        await writer.ExecuteAsync(liked.Token).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
     public async Task<User> GetMeAsync()
     {
-        if (_me == null)
-        {
-            _me = await _botClient.GetMeAsync();
-        }
+        _me ??= await _botClient.GetMe(cancellationToken: UpdaterOptions.CancellationToken)
+            .ConfigureAwait(false);
 
         return _me;
     }
@@ -374,10 +370,13 @@ public sealed class Updater : IUpdater
             AbstractPreUpdateProcessor processor;
             if (servicesAvailabe)
             {
-                using var scope = _serviceDescriptors!.CreateScope();
-                processor = (AbstractPreUpdateProcessor)scope
+                var scope = _serviceDescriptors!.CreateAsyncScope();
+                await using (scope.ConfigureAwait(false))
+                {
+                    processor = (AbstractPreUpdateProcessor)scope
                     .ServiceProvider
                     .GetRequiredService(_preUpdateProcessorType);
+                }
             }
             else
             {
@@ -386,7 +385,7 @@ public sealed class Updater : IUpdater
                 processor.SetUpdater(this);
             }
 
-            if (!await processor.PreProcessor(shiningInfo))
+            if (!await processor.PreProcessor(shiningInfo).ConfigureAwait(false))
             {
                 return;
             }
@@ -395,11 +394,11 @@ public sealed class Updater : IUpdater
         if (servicesAvailabe)
         {
             await ProcessUpdateFromServices(
-                shiningInfo, cancellationToken);
+                shiningInfo, cancellationToken).ConfigureAwait(false);
         }
         else
         {
-            await ProcessUpdate(shiningInfo, cancellationToken);
+            await ProcessUpdate(shiningInfo, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -437,16 +436,18 @@ public sealed class Updater : IUpdater
                     break;
                 }
 
-                using var scope = _serviceDescriptors.CreateScope();
-
-                var handler = container.CreateInstance(scope);
-
-                if (handler != null)
+                var scope = _serviceDescriptors.CreateAsyncScope();
+                await using (scope.ConfigureAwait(false))
                 {
-                    if (!await HandleHandler(
-                        shiningInfo, handler, cancellationToken))
+                    var handler = container.CreateInstance(scope);
+
+                    if (handler != null)
                     {
-                        break;
+                        if (!await HandleHandler(
+                            shiningInfo, handler, cancellationToken).ConfigureAwait(false))
+                        {
+                            break;
+                        }
                     }
                 }
             }
@@ -471,14 +472,14 @@ public sealed class Updater : IUpdater
 
             var singletonhandlers = _updateHandlers
                 .Where(x => x.ShouldHandle(this, shiningInfo.Value))
-                .Select(x => (IUpdateHandler)x);
+                .Cast<IUpdateHandler>();
 
             var scopedHandlers = _scopedHandlerContainers
                 .Where(x => x.ShouldHandle(this, shiningInfo.Value))
                 .Select(x => x.CreateInstance())
                 .Where(x => x != null)
                 .Cast<IScopedUpdateHandler>()
-                .Select(x => (IUpdateHandler)x);
+                .Cast<IUpdateHandler>();
 
             var handlers = singletonhandlers.Concat(scopedHandlers)
                 .OrderBy(x => x.Group);
@@ -499,7 +500,7 @@ public sealed class Updater : IUpdater
                 }
 
                 if (!await HandleHandler(
-                    shiningInfo, handler, cancellationToken))
+                    shiningInfo, handler, cancellationToken).ConfigureAwait(false))
                 {
                     break;
                 }
@@ -527,14 +528,14 @@ public sealed class Updater : IUpdater
         // Handle the shit.
         try
         {
-            await handler.HandleAsync(this, shiningInfo);
+            await handler.HandleAsync(this, shiningInfo).ConfigureAwait(false);
         }
         // Cut handlers chain.
-        catch (StopPropagation)
+        catch (StopPropagationException)
         {
             return false;
         }
-        catch (ContinuePropagation)
+        catch (ContinuePropagationException)
         {
             return true;
         }
@@ -542,13 +543,11 @@ public sealed class Updater : IUpdater
         {
             // Do exception handlers
             var exHandlers = _exceptionHandlers
-                .Where(x => x.TypeIsMatched(ex.GetType()))
-                .Where(x => x.IsAllowedHandler(handler.GetType()))
-                .Where(x => x.MessageMatched(this, ex.Message));
+                .Where(x => x.TypeIsMatched(ex.GetType()) && x.IsAllowedHandler(handler.GetType()) && x.MessageMatched(this, ex.Message));
 
             foreach (var exHandler in exHandlers)
             {
-                await exHandler.Callback(this, ex);
+                await exHandler.Callback(this, ex).ConfigureAwait(false);
             }
         }
         finally

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿// Ignore Spelling: Iter
+
+using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Telegram.Bot.Types.Payments;
@@ -21,7 +23,7 @@ public static class UpdaterExtensions
                 $"Can't resolve Update of Type {update.Type}");
 
         return typeof(Update).GetProperty(update.Type.ToString())?
-            .GetValue(update, null)?? throw new InvalidOperationException(
+            .GetValue(update, index: null)?? throw new InvalidOperationException(
                 $"Inner update is null for {update.Type}");
     }
 
@@ -32,7 +34,7 @@ public static class UpdaterExtensions
                 $"Can't resolve Update of Type {update.Type}");
 
         return (T)(typeof(Update).GetProperty(update.Type.ToString())?
-            .GetValue(update, null)?? throw new InvalidOperationException(
+            .GetValue(update, index: null)?? throw new InvalidOperationException(
                 $"Inner update is null for {update.Type}"));
     }
 
@@ -71,7 +73,7 @@ public static class UpdaterExtensions
             "ChatMembers" => UpdateType.ChatMember,
             "MyChatMembers" => UpdateType.MyChatMember,
             "ChatJoinRequests" => UpdateType.ChatJoinRequest,
-            _ => null
+            _ => null,
         };
 
         if (updateType is null)
@@ -96,7 +98,7 @@ public static class UpdaterExtensions
             UpdateType.MyChatMember => typeof(ChatMemberUpdated),
             UpdateType.ChatMember => typeof(ChatMemberUpdated),
             UpdateType.ChatJoinRequest => typeof(ChatJoinRequest),
-            _ => null
+            _ => null,
         };
 
         if (type is null)
@@ -135,22 +137,15 @@ public static class UpdaterExtensions
     public static IEnumerable<(UpdateType updateType, Type update, Type handler)> IterCollectedScopedUpdateHandlerTypes(
         string handlersParentNamespace = "UpdateHandlers")
     {
-        var entryAssembly = Assembly.GetEntryAssembly();
-
-        if (entryAssembly is null)
-            throw new ApplicationException("Can't find entry assembly.");
-
+        var entryAssembly = Assembly.GetEntryAssembly() ?? throw new ApplicationException("Can't find entry assembly.");
         var assemblyName = entryAssembly.GetName().Name;
 
         var handlerNs = $"{assemblyName}.{handlersParentNamespace}";
 
         // All types in *handlersParentNamespace*
         var scopedHandlersTypes = entryAssembly.GetTypes()
-            .Where(x =>
-                x.Namespace is not null &&
-                x.Namespace.StartsWith(handlerNs))
-            .Where(x => x.IsClass)
-            .Where(x => typeof(IScopedUpdateHandler).IsAssignableFrom(x));
+            .Where(x => x.Namespace is not null &&
+                x.Namespace.StartsWith(handlerNs, StringComparison.Ordinal) && x.IsClass && typeof(IScopedUpdateHandler).IsAssignableFrom(x));
 
         foreach (var scopedType in scopedHandlersTypes)
         {
@@ -158,7 +153,7 @@ public static class UpdaterExtensions
                 scopedType.Namespace!, out var updateType1, out var type))
             {
                 continue;
-            };
+            }
 
             yield return (updateType1.Value, type, scopedType);
         }
@@ -196,7 +191,7 @@ public static class UpdaterExtensions
 
             var container = (IScopedUpdateHandlerContainer?)Activator.CreateInstance(
                 containerGeneric,
-                new object?[] { updateType, null, null });
+                [updateType, null, null]);
 
             if (container is null) continue;
 
@@ -219,7 +214,7 @@ public static class UpdaterExtensions
     /// </item>
     /// <item>
     /// Parent name should match the update type name,
-    /// eg: <c>Messages</c> for <see cref="UpdateType.Message"/>
+    /// Eg: <c>Messages</c> for <see cref="UpdateType.Message"/>
     /// </item>
     /// </list>
     /// Eg: <paramref name="handlersParentNamespace"/>
@@ -251,14 +246,12 @@ public static class UpdaterExtensions
     public static async Task StartAsync(
         this IUpdater updater, CancellationToken cancellationToken = default)
     {
-        await updater.StartAsync<SimpleUpdateWriter>(cancellationToken);
+        await updater.StartAsync<SimpleUpdateWriter>(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
     /// Set commands from your filter using method
-    /// <see cref="TelegramBotClientExtensions.SetMyCommandsAsync(
-    /// ITelegramBotClient, IEnumerable{BotCommand},
-    /// BotCommandScope?, string?, CancellationToken)"/>.
+    /// <see cref="TelegramBotClientExtensions.SetMyCommands(ITelegramBotClient, IEnumerable{BotCommand}, BotCommandScope?, string?, CancellationToken)"/>.
     /// </summary>
     /// <param name="updater"></param>
     /// <returns></returns>
@@ -291,13 +284,12 @@ public static class UpdaterExtensions
         {
             var commandScope = scope.First().Options.BotCommandScope;
 
-            await updater.BotClient.SetMyCommandsAsync(
-                scope
+            await updater.BotClient.SetMyCommands(scope
                     .Where(x=> x.Options.Descriptions is not null)
                     .SelectMany(x => x.ToBotCommand())
                     .OrderBy(x=> x.priority)
                     .Select(x=> x.command),
-                commandScope);
+                commandScope, cancellationToken: updater.UpdaterOptions.CancellationToken).ConfigureAwait(false);
 
             updater.Logger.LogInformation(
                 "Set {count} commands to scope {scope}.",

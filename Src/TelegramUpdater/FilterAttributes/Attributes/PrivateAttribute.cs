@@ -1,16 +1,15 @@
-﻿namespace TelegramUpdater.FilterAttributes.Attributes
+﻿namespace TelegramUpdater.FilterAttributes.Attributes;
+
+/// <summary>
+/// Filter private messages.
+/// </summary>
+public sealed class PrivateAttribute : FilterAttributeBuilder
 {
     /// <summary>
-    /// Filter private messages.
+    /// Initialize a new instance of <see cref="PrivateAttribute"/>.
     /// </summary>
-    public sealed class PrivateAttribute : FilterAttributeBuilder
+    public PrivateAttribute()
+        : base(x => x.AddFilterForUpdate(FilterCutify.PM()))
     {
-        /// <summary>
-        /// Initialize a new instance of <see cref="PrivateAttribute"/>.
-        /// </summary>
-        public PrivateAttribute()
-            : base(x => x.AddFilterForUpdate(FilterCutify.PM()))
-        {
-        }
     }
 }

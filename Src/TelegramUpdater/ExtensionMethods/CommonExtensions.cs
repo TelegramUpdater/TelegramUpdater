@@ -16,7 +16,7 @@ public static class CommonExtensions
     internal static async Task<IContainer<T>> WrapAsync<T>(
         this Task<T> t, Expression<Func<Update, T?>> insiderResovler, IUpdater updater) where T : class
     {
-        var result = await t;
+        var result = await t.ConfigureAwait(false);
         return AnyLiteContainer<T>.CreateLiteContainer(insiderResovler, result, updater);
     }
 
@@ -29,6 +29,6 @@ public static class CommonExtensions
     internal static async Task<IContainer<Message>> WrapMessageAsync(
         this Task<Message> t, IUpdater updater)
     {
-        return await t.WrapAsync(x => x.Message, updater);
+        return await t.WrapAsync(x => x.Message, updater).ConfigureAwait(false);
     }
 }

@@ -71,18 +71,16 @@ public abstract class UpdateWriterAbs
     protected async ValueTask EnqueueUpdateAsync(
         Update update, CancellationToken cancellationToken)
     {
-        await Updater.WriteAsync(update, cancellationToken);
+        await Updater.WriteAsync(update, cancellationToken).ConfigureAwait(false);
     }
 
     internal static UpdateWriterAbs Create<TWriter>(IUpdater updater)
         where TWriter : UpdateWriterAbs
     {
         var writer = (UpdateWriterAbs?)Activator.CreateInstance(
-            typeof(TWriter), new object[] { updater });
+            typeof(TWriter), [updater]);
 
-        if (writer == null)
-            throw new InvalidOperationException(
+        return writer ?? throw new InvalidOperationException(
                 $"Can't create {typeof(TWriter)}");
-        return writer;
     }
 }

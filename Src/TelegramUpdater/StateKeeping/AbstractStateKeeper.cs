@@ -2,14 +2,17 @@
 
 namespace TelegramUpdater.StateKeeping;
 
+/// <inheritdoc cref="IStateKeeper{TState, TFrom}"/>
 public abstract class AbstractStateKeeper<TState, TFrom> : IStateKeeper<TState, TFrom>
-    where TState : IEquatable<TState>
 {
     private readonly Dictionary<long, TState> _state;
 
+    /// <summary>
+    /// Initialize <see cref="AbstractStateKeeper{TState, TFrom}"/>
+    /// </summary>
     protected AbstractStateKeeper()
     {
-        _state = new();
+        _state = [];
     }
 
     /// <summary>
@@ -17,6 +20,9 @@ public abstract class AbstractStateKeeper<TState, TFrom> : IStateKeeper<TState, 
     /// container object <typeparamref name="TFrom"/>.
     /// </summary>
     protected abstract Func<TFrom, long> KeyResolver { get; }
+
+    /// <inheritdoc/>
+    public abstract bool CheckStateValidity(TState newState);
 
     /// <inheritdoc/>
     public bool HasAnyState(TFrom stateOf) => _state.ContainsKey(KeyResolver(stateOf));
@@ -29,7 +35,7 @@ public abstract class AbstractStateKeeper<TState, TFrom> : IStateKeeper<TState, 
     {
         if (HasAnyState(stateOf))
         {
-            theState = _state[KeyResolver(stateOf)];
+            theState = GetState(stateOf)!;
             return true;
         }
 
@@ -40,6 +46,9 @@ public abstract class AbstractStateKeeper<TState, TFrom> : IStateKeeper<TState, 
     /// <inheritdoc/>
     public void SetState(TFrom stateOf, TState theState)
     {
+        if (!CheckStateValidity(theState))
+            return;
+
         if (HasAnyState(stateOf))
             _state[KeyResolver(stateOf)] = theState;
         else
@@ -50,7 +59,7 @@ public abstract class AbstractStateKeeper<TState, TFrom> : IStateKeeper<TState, 
     public bool HasState(TFrom stateOf, TState theState)
     {
         if (!HasAnyState(stateOf)) return false;
-        return _state[KeyResolver(stateOf)].Equals(theState);
+        return GetState(stateOf)!.Equals(theState);
     }
 
     /// <inheritdoc/>

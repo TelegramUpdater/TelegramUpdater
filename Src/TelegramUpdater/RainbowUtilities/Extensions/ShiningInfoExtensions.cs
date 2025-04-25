@@ -56,7 +56,7 @@ namespace TelegramUpdater.RainbowUtilities
                 shiningInfo.ProcessId, cancellationToken))
             {
                 yield return item;
-            };
+            }
         }
     }
 }

@@ -27,7 +27,7 @@ public interface IUpdater
     UpdaterOptions UpdaterOptions { get; }
 
     /// <summary>
-    /// Rainbow instance. resposeable for parallel queuing.
+    /// Rainbow instance. responsible for parallel queuing.
     /// </summary>
     public Rainbow<long, Update> Rainbow { get; }
 

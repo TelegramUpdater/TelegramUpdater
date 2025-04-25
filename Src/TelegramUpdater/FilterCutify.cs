@@ -39,14 +39,14 @@ public static class FilterCutify
         => new CommandFilter(prefix, commands);
 
     /// <summary>
-    /// The handler will be triggered when a regex matchs its text.
+    /// The handler will be triggered when a regex matches its text.
     /// </summary>
     public static Filter<Message> TextMatchs(
         string pattern, bool catchCaption = false, RegexOptions? regexOptions = default)
             => new MessageTextRegex(pattern, catchCaption, regexOptions);
 
     /// <summary>
-    /// The handler will be triggered when a regex matchs its data.
+    /// The handler will be triggered when a regex matches its data.
     /// </summary>
     public static Filter<CallbackQuery> DataMatches(
         string pattern, RegexOptions? regexOptions = default)

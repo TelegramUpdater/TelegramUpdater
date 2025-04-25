@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿// Ignore Spelling: api
+
+using Microsoft.Extensions.Logging;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers;
@@ -13,7 +15,7 @@ namespace TelegramUpdater;
 public sealed class UpdaterBuilder
 {
     private readonly ITelegramBotClient _botClient;
-    private IUpdater? _updater;
+    private Updater? _updater;
 
     /// <summary>
     /// - <b>Step zero</b>: Create and Add <see cref="ITelegramBotClient"/>.
@@ -64,7 +66,7 @@ public sealed class UpdaterBuilder
     /// <summary>
     /// - <b>Step one</b>: Setup updater options using <see cref="UpdaterOptions"/>
     /// <para>
-    /// There're several options that you can configure for <see cref="Updater"/>.
+    /// There are several options that you can configure for <see cref="Updater"/>.
     /// If you're not sure or you're not in mode just call it with no inputs.
     /// </para>
     /// </summary>
@@ -82,7 +84,7 @@ public sealed class UpdaterBuilder
     /// and shut things down.
     /// </param>
     /// <param name="flushUpdatesQueue">
-    /// By enabling this, old updates that came when the bot was offline will be ignored!
+    /// By enabling this, old updates that came when the bot was off will be ignored!
     /// And updater will start from updates that come since now.
     /// </param>
     /// <param name="allowedUpdates">
@@ -97,11 +99,12 @@ public sealed class UpdaterBuilder
                                   bool flushUpdatesQueue = false,
                                   UpdateType[]? allowedUpdates = default)
     {
-        var updaterOptions = new UpdaterOptions(maxDegreeOfParallelism,
-                                                logger,
-                                                cancellationToken,
-                                                flushUpdatesQueue,
-                                                allowedUpdates);
+        var updaterOptions = new UpdaterOptions(
+            maxDegreeOfParallelism: maxDegreeOfParallelism,
+            logger: logger,                  
+            flushUpdatesQueue: flushUpdatesQueue,
+            allowedUpdates: allowedUpdates,
+            cancellationToken: cancellationToken);
         _updater = new Updater(_botClient, updaterOptions);
         return this;
     }

@@ -20,7 +20,7 @@ namespace TelegramUpdater.Helpers
         public GridCollection(int? rowCapacity = default)
         {
             RowCapacity = rowCapacity;
-            _grid = new() { rowCapacity == null ? new() : new(rowCapacity.Value) };
+            _grid = [rowCapacity == null ? new() : new(rowCapacity.Value)];
         }
 
         /// <summary>
