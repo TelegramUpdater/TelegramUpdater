@@ -1,4 +1,6 @@
-﻿using Telegram.Bot.Types.ReplyMarkups;
+﻿// Ignore Spelling: Webpage
+
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegramUpdater.UpdateContainer;
 
@@ -15,10 +17,12 @@ public static class MessageContainerExtensions
     public static User? Sender(this IContainer<Message> simpleContext)
         => simpleContext.Update.From;
 
-    /// <inheritdoc cref="TelegramBotClientExtensions.DeleteMessageAsync(ITelegramBotClient, ChatId, int, CancellationToken)"/>
-    public static async Task Delete(this IContainer<Message> simpleContext)
-        => await simpleContext.BotClient.DeleteMessageAsync(
-            simpleContext.Update.Chat.Id, simpleContext.Update.MessageId);
+    /// <inheritdoc cref="TelegramBotClientExtensions.DeleteMessage(ITelegramBotClient, ChatId, int, CancellationToken)"/>
+    public static async Task Delete(this IContainer<Message> simpleContext, CancellationToken cancellationToken = default)
+        => await simpleContext.BotClient.DeleteMessage(
+            chatId: simpleContext.Update.Chat.Id,
+            messageId: simpleContext.Update.MessageId,
+            cancellationToken: cancellationToken);
 
     /// <summary>
     /// Updates a <see cref="Message"/> of your own with removing it and sending a new message.
@@ -26,67 +30,98 @@ public static class MessageContainerExtensions
     public static async Task<IContainer<Message>> ForceUpdateAsync(
         this IContainer<Message> simpleContext,
         string text,
-        bool sendAsReply = true,
-        ParseMode? parseMode = default,
+        ParseMode parseMode = default,
         IEnumerable<MessageEntity>? messageEntities = default,
         bool? disableWebpagePreview = default,
-        bool? disableNotification = default,
-        IReplyMarkup? replyMarkup = default)
+        int? messageThreadId = default,
+        bool disableNotification = default,
+        ReplyMarkup? replyMarkup = default,
+        bool protectContent = default,
+        string? messageEffectId = default,
+        string? businessConnectionId = default,
+        bool allowPaidBroadcast = default,
+        CancellationToken cancellationToken = default)
     {
         if (simpleContext.Update.From?.Id != simpleContext.BotClient.BotId)
             throw new InvalidOperationException("The message should be for the bot it self.");
 
-        await simpleContext.Delete();
-        return await simpleContext.BotClient.SendTextMessageAsync(
-            simpleContext.Update.Chat.Id,
-            text, parseMode, messageEntities,
-            disableWebpagePreview, disableNotification,
-            replyToMessageId: sendAsReply ? simpleContext.Update.MessageId : 0,
-            allowSendingWithoutReply: true,
-            replyMarkup: replyMarkup)
-            .WrapMessageAsync(simpleContext.Updater);
+        await simpleContext.Delete(cancellationToken: cancellationToken);
+        return await simpleContext.BotClient.SendMessage(
+            chatId: simpleContext.Update.Chat.Id,
+            text: text,
+            parseMode: parseMode,
+            replyParameters: new ReplyParameters(),
+            replyMarkup: replyMarkup,
+            linkPreviewOptions: disableWebpagePreview,
+            messageThreadId: messageThreadId,
+            entities: messageEntities,
+            disableNotification: disableNotification,
+            protectContent: protectContent,
+            messageEffectId: messageEffectId,
+            businessConnectionId: businessConnectionId,
+            allowPaidBroadcast: allowPaidBroadcast,
+            cancellationToken: cancellationToken)
+        .WrapMessageAsync(simpleContext.Updater);
     }
 
-    /// <inheritdoc cref="TelegramBotClientExtensions.SendTextMessageAsync(
-    /// ITelegramBotClient, ChatId, string, ParseMode?,
-    /// IEnumerable{MessageEntity}?, bool?, bool?, int?,
-    /// bool?, IReplyMarkup?, CancellationToken)"/>
+    /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)"/>
     public static async Task<IContainer<Message>> ResponseAsync(
         this IContainer<Message> simpleContext,
         string text,
         bool sendAsReply = true,
-        ParseMode? parseMode = default,
+        ParseMode parseMode = default,
         IEnumerable<MessageEntity>? messageEntities = default,
         bool? disableWebpagePreview = default,
-        bool? disableNotification = default,
-        IReplyMarkup? replyMarkup = default)
-        => await simpleContext.BotClient.SendTextMessageAsync(
-            simpleContext.Update.Chat.Id,
-            text, parseMode, messageEntities,
-            disableWebpagePreview, disableNotification,
-            replyToMessageId: sendAsReply ? simpleContext.Update.MessageId : 0,
-            allowSendingWithoutReply: true,
-            replyMarkup: replyMarkup)
+        int? messageThreadId = default,
+        bool disableNotification = default,
+        ReplyMarkup? replyMarkup = default,
+        bool protectContent = default,
+        string? messageEffectId = default,
+        string? businessConnectionId = default,
+        bool allowPaidBroadcast = default,
+        bool allowSendingWithoutReply = true,
+        CancellationToken cancellationToken = default)
+        => await simpleContext.BotClient.SendMessage(
+            chatId: simpleContext.Update.Chat.Id,
+            text: text,
+            parseMode: parseMode,
+            replyParameters: new ReplyParameters()
+            {
+                AllowSendingWithoutReply = allowSendingWithoutReply,
+                MessageId = sendAsReply ? simpleContext.Update.MessageId : 0,
+            },
+            replyMarkup: replyMarkup,
+            linkPreviewOptions: disableWebpagePreview,
+            messageThreadId: messageThreadId,
+            entities: messageEntities,
+            disableNotification: disableNotification,
+            protectContent: protectContent,
+            messageEffectId: messageEffectId,
+            businessConnectionId: businessConnectionId,
+            allowPaidBroadcast: allowPaidBroadcast,
+            cancellationToken: cancellationToken)
         .WrapMessageAsync(simpleContext.Updater);
 
-    /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageTextAsync(
-    /// ITelegramBotClient, ChatId, int, string, ParseMode?,
-    /// IEnumerable{MessageEntity}?, bool?, InlineKeyboardMarkup?,
-    /// CancellationToken)"/>
+    /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageText(ITelegramBotClient, ChatId, int, string, ParseMode, IEnumerable{MessageEntity}?, LinkPreviewOptions?, InlineKeyboardMarkup?, string?, CancellationToken)"/>
     public static async Task<IContainer<Message>?> EditAsync(
         this IContainer<Message> simpleContext,
-        string text, ParseMode? parseMode = default,
+        string text, ParseMode parseMode = default,
         IEnumerable<MessageEntity>? messageEntities = default,
         bool? disableWebpagePreview = default,
-        InlineKeyboardMarkup? inlineKeyboardMarkup = default,
+        InlineKeyboardMarkup? replyMarkup = default,
+        string? businessConnectionId = default,
         CancellationToken cancellationToken = default)
     {
-        return await simpleContext.BotClient.EditMessageTextAsync(
-            simpleContext.Update.Chat.Id,
-            simpleContext.Update.MessageId,
-            text, parseMode, messageEntities,
-            disableWebpagePreview, inlineKeyboardMarkup,
-            cancellationToken)
+        return await simpleContext.BotClient.EditMessageText(
+            chatId: simpleContext.Update.Chat.Id,
+            messageId: simpleContext.Update.MessageId,
+            text: text,
+            parseMode: parseMode,
+            entities: messageEntities,
+            linkPreviewOptions:disableWebpagePreview,
+            replyMarkup: replyMarkup,
+            businessConnectionId: businessConnectionId,
+            cancellationToken: cancellationToken)
             .WrapMessageAsync(simpleContext.Updater);
     }
 

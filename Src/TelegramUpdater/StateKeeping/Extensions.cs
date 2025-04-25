@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using TelegramUpdater.Exceptions;
 using TelegramUpdater.StateKeeping;
+using TelegramUpdater.StateKeeping.StateKeepers.EnumStateKeepers;
 using TelegramUpdater.StateKeeping.StateKeepers.NumericStateKeepers;
 
 namespace TelegramUpdater;
@@ -19,7 +20,6 @@ public static class Extensions
     /// <returns></returns>
     public static IUpdater AddStateKeeper<TState, TFrom>(
         this IUpdater updater, string name, IStateKeeper<TState, TFrom> stateKeeper)
-        where TState : IEquatable<TState>
     {
         var key = "StateKeeper_" + name;
 
@@ -40,7 +40,6 @@ public static class Extensions
     /// <exception cref="StateKeeperNotRegistried"></exception>
     public static IStateKeeper<TState, TFrom> GetStateKeeper<TState, TFrom>(
         this IUpdater updater, string name)
-        where TState : IEquatable<TState>
     {
         var key = "StateKeeper_" + name;
 
@@ -64,7 +63,6 @@ public static class Extensions
     public static bool TryGetStateKeeper<TState, TFrom>(
         this IUpdater updater, string name,
         [NotNullWhen(true)] out IStateKeeper<TState, TFrom>? stateKeeper)
-        where TState : IEquatable<TState>
     {
         var key = "StateKeeper_" + name;
 
@@ -120,6 +118,57 @@ public static class Extensions
         if (TryGetStateKeeper<int, User>(updater, name, out var keeper))
         {
             stateKeeper = (UserNumericStateKeeper)keeper;
+            return true;
+        }
+
+        stateKeeper = default;
+        return false;
+    }
+
+    /// <summary>
+    /// Register a <see cref="UserEnumStateKeeper{TEnum}"/> on <see cref="IUpdater"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="name">A name for state keeper.</param>
+    /// <returns></returns>
+    public static IUpdater AddUserEnumStateKeeper<TEnum>(
+        this IUpdater updater, string name)
+        where TEnum : struct, Enum
+    {
+        return updater.AddStateKeeper(name, new UserEnumStateKeeper<TEnum>());
+    }
+
+    /// <summary>
+    /// Get a <see cref="UserEnumStateKeeper{TEnum}"/> that you register before using
+    /// <see cref="AddUserEnumStateKeeper(IUpdater, string)"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="name">The name of state keeper.</param>
+    /// <returns></returns>
+    /// <exception cref="KeyNotFoundException"></exception>
+    public static UserEnumStateKeeper<TEnum> GetUserEnumStateKeeper<TEnum>(
+        this IUpdater updater, string name)
+        where TEnum : struct, Enum
+    {
+        return (UserEnumStateKeeper<TEnum>)updater.GetStateKeeper<int, User>(name);
+    }
+
+    /// <summary>
+    /// Tries to get a <see cref="UserEnumStateKeeper{TEnum}"/> that you register before using
+    /// <see cref="AddUserEnumStateKeeper(IUpdater, string)"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="name">The name of state keeper.</param>
+    /// <param name="stateKeeper">The enum state keeper.</param>
+    /// <returns></returns>
+    public static bool TryGetUserEnumStateKeeper<TEnum>(
+         this IUpdater updater, string name,
+         [NotNullWhen(true)] out UserEnumStateKeeper<TEnum>? stateKeeper)
+        where TEnum : struct, Enum
+    {
+        if (TryGetStateKeeper<int, User>(updater, name, out var keeper))
+        {
+            stateKeeper = (UserEnumStateKeeper<TEnum>)keeper;
             return true;
         }
 

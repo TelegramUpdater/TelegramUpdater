@@ -38,7 +38,7 @@
     public static class ChatTypeExtensions
     {
         /// <summary>
-        /// Converts a normal <see cref="ChatType"/> to a flagable version.
+        /// Converts a normal <see cref="ChatType"/> to a flag-able version.
         /// </summary>
         /// <param name="chatType">The chat type.</param>
         /// <returns></returns>
@@ -52,12 +52,12 @@
                 ChatType.Channel => ChatTypeFlags.Channel,
                 ChatType.Supergroup => ChatTypeFlags.SuperGroup,
                 ChatType.Sender => ChatTypeFlags.Sender,
-                _ => throw new InvalidOperationException("Invalid chat type.")
+                _ => throw new InvalidOperationException("Invalid chat type."),
             };
         }
 
         /// <summary>
-        /// Checks if a flagable version of <see cref="ChatType"/> ( <see cref="ChatTypeFlags"/> )
+        /// Checks if a flag-able version of <see cref="ChatType"/> ( <see cref="ChatTypeFlags"/> )
         /// is in <paramref name="flags"/>.
         /// </summary>
         /// <param name="chatType">The chat type.</param>

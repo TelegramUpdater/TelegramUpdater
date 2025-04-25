@@ -27,16 +27,15 @@ public abstract class CallbackQueryHandler
     protected string Id => ActualUpdate.Id;
 
     /// <inheritdoc cref="TelegramBotClientExtensions
-    /// .AnswerCallbackQueryAsync(ITelegramBotClient, string, string?,
-    /// bool?, string?, int?, CancellationToken)"/>.
+    /// .AnswerCallbackQuery(ITelegramBotClient, string, string?, bool, string?, int?, CancellationToken)"/>.
     protected async Task AnswerAsync(
         string? text = default,
-        bool? showAlert = default,
+        bool showAlert = default,
         string? url = default,
         int? cacheTime = default,
         CancellationToken cancellationToken = default)
     {
-        await BotClient.AnswerCallbackQueryAsync(
+        await BotClient.AnswerCallbackQuery(
             Id, text, showAlert, url, cacheTime, cancellationToken);
     }
     #endregion

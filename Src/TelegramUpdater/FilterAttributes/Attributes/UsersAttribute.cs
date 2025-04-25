@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿// Ignore Spelling: usernames
+
+using System.Diagnostics.CodeAnalysis;
 using TelegramUpdater.Filters;
 
 namespace TelegramUpdater.FilterAttributes.Attributes;
@@ -8,8 +10,8 @@ namespace TelegramUpdater.FilterAttributes.Attributes;
 /// </summary>
 public sealed class UsersAttribute : AbstractFilterAttribute
 {
-    [MemberNotNullWhen(true, "UserIds")]
-    [MemberNotNullWhen(false, "Usernames")]
+    [MemberNotNullWhen(true, nameof(UserIds))]
+    [MemberNotNullWhen(false, nameof(Usernames))]
     private bool OnIds { get; }
 
     /// <summary>
@@ -24,7 +26,7 @@ public sealed class UsersAttribute : AbstractFilterAttribute
             throw new ArgumentNullException(nameof(usernames));
         foreach (var user in usernames)
             if (string.IsNullOrEmpty(user))
-                throw new ArgumentException("One of your usernames is null or empty.");
+                throw new ArgumentException("One of your usernames is null or empty.", nameof(usernames));
 
         Usernames = usernames;
         OnIds = false;
@@ -51,28 +53,24 @@ public sealed class UsersAttribute : AbstractFilterAttribute
     /// <inheritdoc/>
     protected internal override object GetFilterTypeOf(Type requestedType)
     {
-        if (requestedType == null)
-            throw new ArgumentNullException(nameof(requestedType));
+        ArgumentNullException.ThrowIfNull(requestedType);
 
         if (requestedType == typeof(Message))
         {
             return OnIds ? FromUsersFilter.Messages(UserIds) :
                 FromUsernamesFilter.Messages(Usernames);
         }
-        else if (requestedType == typeof(CallbackQuery))
+
+        if (requestedType == typeof(CallbackQuery))
         {
             return OnIds ? FromUsersFilter.CallbackQueries(UserIds) :
                 FromUsernamesFilter.CallbackQueries(Usernames);
         }
-        else if (requestedType == typeof(InlineQuery))
-        {
-            return OnIds ? FromUsersFilter.InlineQueries(UserIds) :
-                FromUsernamesFilter.InlineQueries(Usernames);
-        }
-        else
-        {
-            throw new ArgumentException(
-                $"Users filter attribute is not supported for {requestedType}");
-        }
+
+        return requestedType == typeof(InlineQuery)
+            ? (object)(OnIds ? FromUsersFilter.InlineQueries(UserIds) :
+                        FromUsernamesFilter.InlineQueries(Usernames))
+            : throw new ArgumentException(
+                        $"Users filter attribute is not supported for {requestedType}", nameof(requestedType));
     }
 }

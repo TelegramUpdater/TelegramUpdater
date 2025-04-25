@@ -1,18 +1,17 @@
-﻿namespace TelegramUpdater.UpdateChannels.ReadyToUse;
+﻿// Ignore Spelling: Inline
+
+namespace TelegramUpdater.UpdateChannels.ReadyToUse;
 
 /// <summary>
 /// An <see cref="IGenericUpdateChannel{T}"/> for <see cref="UpdateType.ChosenInlineResult"/>.
 /// </summary>
-public sealed class ChosenInlineResultChannel : AnyChannel<ChosenInlineResult>
+/// <remarks>
+/// Initialize a new instance of <see cref="ChosenInlineResultChannel"/>
+/// to use as <see cref="IGenericUpdateChannel{T}"/>.
+/// </remarks>
+/// <param name="timeOut">Timeout to wait for channel.</param>
+/// <param name="filter">Filter suitable update to channel within <paramref name="timeOut"/>.</param>
+public sealed class ChosenInlineResultChannel(TimeSpan timeOut, IFilter<ChosenInlineResult>? filter)
+    : AnyChannel<ChosenInlineResult>(UpdateType.ChosenInlineResult, x => x.ChosenInlineResult, timeOut, filter)
 {
-    /// <summary>
-    /// Initialize a new instance of <see cref="ChosenInlineResultChannel"/>
-    /// to use as <see cref="IGenericUpdateChannel{T}"/>.
-    /// </summary>
-    /// <param name="timeOut">Timeout to wait for channel.</param>
-    /// <param name="filter">Filter suitable update to channel within <paramref name="timeOut"/>.</param>
-    public ChosenInlineResultChannel(TimeSpan timeOut, IFilter<ChosenInlineResult>? filter)
-        : base(UpdateType.ChosenInlineResult, x => x.ChosenInlineResult, timeOut, filter)
-    {
-    }
 }

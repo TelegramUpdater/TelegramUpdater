@@ -58,11 +58,9 @@ namespace TelegramUpdater.UpdateContainer
                     return false;
                 }
             }
-            else
-            {
-                data = default;
-                return false;
-            }
+
+            data = default;
+            return false;
         }
 
         /// <summary>

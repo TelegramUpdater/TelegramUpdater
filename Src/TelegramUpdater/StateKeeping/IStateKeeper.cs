@@ -2,7 +2,12 @@
 
 namespace TelegramUpdater.StateKeeping;
 
-public interface IStateKeeper<TState, TFrom> where TState : IEquatable<TState>
+/// <summary>
+/// Interface for state keepers.
+/// </summary>
+/// <typeparam name="TState">The state itself which must implement <see cref="IEquatable{TState}"/></typeparam>
+/// <typeparam name="TFrom">The master object which we extract the state key from</typeparam>
+public interface IStateKeeper<TState, TFrom>
 {
     /// <summary>
     /// Check if <paramref name="stateOf"/> has any <typeparamref name="TState"/>.
@@ -59,4 +64,11 @@ public interface IStateKeeper<TState, TFrom> where TState : IEquatable<TState>
     /// </param>    
     /// <returns></returns>
     public bool DeleteState(TFrom stateOf);
+
+    /// <summary>
+    /// Checks if a new state is valid to be set.
+    /// </summary>
+    /// <param name="newState">The state to check against.</param>
+    /// <returns></returns>
+    public bool CheckStateValidity(TState newState);
 }
