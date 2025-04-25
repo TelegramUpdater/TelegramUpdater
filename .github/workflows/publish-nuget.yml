@@ -13,7 +13,7 @@ jobs:
     # Publish NuGet Packages
     - name: Publish NuGet Packages
       id: publish_nuget
-      uses: tedd/publish-nuget-neo@v2
+      uses: tedd/publish-nuget-neo@v4
       with:
         # NuGet API key to authenticate on the NuGet server.
         # Use GitHub secrets to pass your API key, e.g. ${{secrets.NUGET_API_KEY}}.
