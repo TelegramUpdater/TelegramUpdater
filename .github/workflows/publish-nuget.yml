@@ -1,0 +1,62 @@
+name: Publish to Nuget
+
+on:
+  release:
+    types: [published]
+    branches: [ master, dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Publish NuGet Packages
+    - name: Publish NuGet Packages
+      id: publish_nuget
+      uses: tedd/publish-nuget-neo@v2
+      with:
+        # NuGet API key to authenticate on the NuGet server.
+        # Use GitHub secrets to pass your API key, e.g. ${{secrets.NUGET_API_KEY}}.
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+    
+        # PROJECT_FILE_PATH can be:
+        # - A single project file path as a string.
+        # - A JSON array of project file paths.
+        # If not specified, the action will search for the first project that has 
+        # <GeneratePackageOnBuild&gt;true&lt;/GeneratePackageOnBuild&gt;.
+        PROJECT_FILE_PATH: Src/TelegramUpdater/TelegramUpdater.csproj
+        # PROJECT_FILE_PATH: '["src/Project1/Project1.csproj", "src/Project2/Project2.csproj"]'
+    
+        # Set PUBLISH_ALL_PROJECTS to true to search for and publish all projects
+        # with <GeneratePackageOnBuild&gt;true&lt;/GeneratePackageOnBuild&gt; in the repository. Default is false.
+        PUBLISH_ALL_PROJECTS: false
+    
+        # URL to the NuGet server. (Default: https://api.nuget.org)
+        NUGET_SOURCE: https://api.nuget.org
+    
+        # Add symbols to NuGet package. (Default: false)
+        INCLUDE_SYMBOLS: false
+    
+        # Create and push a Git tag upon successful publish. (Default: false)
+        TAG_COMMIT: false
+    
+        # Git tag format. An asterisk (*) will be replaced with the version number. (Default: v*)
+        TAG_FORMAT: v*
+    
+        # NuGet package name. If not specified, the package name will be extracted from the project file name.
+        # PACKAGE_NAME:
+    
+        # Static version string. If specified, VERSION_FILE_PATH and VERSION_REGEX are ignored.
+        # VERSION_STATIC: ${{env.VERSION}}
+    
+        # Path to a file containing the version number. (Default: uses the project file)
+        # VERSION_FILE_PATH:
+    
+        # Regex pattern to extract the version info. (Default: ^\\s*<Version>(.*)<\\/Version>\\s*$)
+        VERSION_REGEX: ^\\s*<Version>(.*)<\\/Version>\\s*$
+    
+        # Rebuild project in release mode? (Default: true)
+        REBUILD_PROJECT: true
+    
+        # Logging verbosity (DEBUG, INFO, or WARN). (Default: DEBUG)
+        LOG_LEVEL: DEBUG
