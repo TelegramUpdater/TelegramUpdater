@@ -39,50 +39,38 @@ public static class SingletonAttributesExtensions
         int group) where T : class
     {
         var filters = method.GetFilterAttributes<T>();
-        var callback = (Func<IContainer<T>, Task>)Delegate
-            .CreateDelegate(typeof(Func<IContainer<T>, Task>), method);
 
-        return new AnyHandler<T>(updateType, resolver, callback, filters, group);
+        try
+        {
+            var callback = (Func<IContainer<T>, Task>)Delegate
+                .CreateDelegate(typeof(Func<IContainer<T>, Task>), method);
+
+            return new AnyHandler<T>(updateType, resolver, callback, filters, group);
+        }
+        catch (ArgumentException)
+        {
+            //var message = $"Expected: IContainer<{typeof(T)}>, but found {method.GetParameters()[0].ParameterType}.";
+            // TODO: Log the message or handle it as needed
+            // Console.WriteLine(message);
+            return null;
+        }
     }
 
     internal static ISingletonUpdateHandler? GetSingletonUpdateHandler(
-        MethodInfo method, UpdateType updateType, int group)
+       MethodInfo method, UpdateType updateType, int group)
     {
-        return updateType switch
-        {
-            UpdateType.Message
-                => CreateHandlerOfType(updateType, x => x.Message, method, group),
-            UpdateType.InlineQuery
-                => CreateHandlerOfType(updateType, x => x.InlineQuery, method, group),
-            UpdateType.ChosenInlineResult
-                => CreateHandlerOfType(updateType, x => x.ChosenInlineResult, method, group),
-            UpdateType.CallbackQuery
-                => CreateHandlerOfType(updateType, x => x.CallbackQuery, method, group),
-            UpdateType.EditedMessage
-                => CreateHandlerOfType(updateType, x => x.EditedMessage, method, group),
-            UpdateType.ChannelPost
-                => CreateHandlerOfType(updateType, x => x.ChannelPost, method, group),
-            UpdateType.EditedChannelPost
-                => CreateHandlerOfType(updateType, x => x.EditedChannelPost, method, group),
-            UpdateType.ShippingQuery
-                => CreateHandlerOfType(updateType, x => x.ShippingQuery, method, group),
-            UpdateType.PreCheckoutQuery
-                => CreateHandlerOfType(updateType, x => x.PreCheckoutQuery, method, group),
-            UpdateType.Poll
-                => CreateHandlerOfType(updateType, x => x.Poll, method, group),
-            UpdateType.PollAnswer
-                => CreateHandlerOfType(updateType, x => x.PollAnswer, method, group),
-            UpdateType.MyChatMember
-                => CreateHandlerOfType(updateType, x => x.MyChatMember, method, group),
-            UpdateType.ChatMember
-                => CreateHandlerOfType(updateType, x => x.ChatMember, method, group),
-            UpdateType.ChatJoinRequest
-                => CreateHandlerOfType(updateType, x => x.ChatJoinRequest, method, group),
+        var propertyInfo = typeof(Update).GetProperty(updateType.ToString());
+        if (propertyInfo == null)
+            return null;
 
-            // TODO: add new updates
+        var resolverType = typeof(Func<,>).MakeGenericType(typeof(Update), propertyInfo.PropertyType);
+        var resolver = Delegate.CreateDelegate(resolverType, propertyInfo.GetGetMethod()!);
 
-            _ => null,
-        };
+        var createHandlerMethod = typeof(SingletonAttributesExtensions)
+            .GetMethod(nameof(CreateHandlerOfType), BindingFlags.NonPublic | BindingFlags.Static)!
+            .MakeGenericMethod(propertyInfo.PropertyType!);
+
+        return (ISingletonUpdateHandler?)createHandlerMethod.Invoke(null, new object[] { updateType, resolver, method, group });
     }
 
     /// <summary>
