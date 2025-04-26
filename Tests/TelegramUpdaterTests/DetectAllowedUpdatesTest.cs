@@ -12,7 +12,7 @@ using Xunit;
 
 namespace TelegramUpdaterTests
 {
-    class FakeWriter : UpdateWriterAbs
+    class FakeWriter : AbstractUpdateWriter
     {
         public override Task ExecuteAsync(CancellationToken stoppingToken)
         {

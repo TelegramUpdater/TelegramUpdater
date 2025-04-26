@@ -281,7 +281,7 @@ public sealed class Updater : IUpdater
     /// <inheritdoc/>
     public async Task StartAsync<TWriter>(
         CancellationToken cancellationToken = default)
-        where TWriter : UpdateWriterAbs, new()
+        where TWriter : AbstractUpdateWriter, new()
     {
         if (cancellationToken == default)
         {

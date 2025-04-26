@@ -3,7 +3,7 @@ using Telegram.Bot.Polling;
 
 namespace TelegramUpdater.UpdateWriters;
 
-internal class SimpleUpdateWriter : UpdateWriterAbs
+internal class SimpleUpdateWriter : AbstractUpdateWriter
 {
     async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {

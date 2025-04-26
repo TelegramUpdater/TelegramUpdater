@@ -97,10 +97,10 @@ public interface IUpdater
     /// </summary>
     /// <typeparam name="TWriter">
     /// Your custom update writer. a sub-class of
-    /// <see cref="UpdateWriterAbs"/>.</typeparam>
+    /// <see cref="AbstractUpdateWriter"/>.</typeparam>
     /// <param name="cancellationToken">To cancel the job manually,</param>
     public Task StartAsync<TWriter>(CancellationToken cancellationToken = default)
-        where TWriter : UpdateWriterAbs, new();
+        where TWriter : AbstractUpdateWriter, new();
 
     /// <summary>
     /// Use this to set or get extra data you may want to access everywhere

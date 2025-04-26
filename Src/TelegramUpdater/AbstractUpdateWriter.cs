@@ -13,18 +13,18 @@ namespace TelegramUpdater;
 /// should exists in service collection.
 /// </para>
 /// </remarks>
-public abstract class UpdateWriterAbs
+public abstract class AbstractUpdateWriter
 {
     /// <summary>
     /// Create a default instance of update writer.
     /// </summary>
-    protected UpdateWriterAbs() { }
+    protected AbstractUpdateWriter() { }
 
     /// <summary>
     /// Create a default instance of update writer.
     /// </summary>
     /// <param name="updater">The updater.</param>
-    protected UpdateWriterAbs(IUpdater updater)
+    protected AbstractUpdateWriter(IUpdater updater)
     {
         Updater = updater ?? throw new ArgumentNullException(nameof(updater));
     }
@@ -74,10 +74,10 @@ public abstract class UpdateWriterAbs
         await Updater.WriteAsync(update, cancellationToken).ConfigureAwait(false);
     }
 
-    internal static UpdateWriterAbs Create<TWriter>(IUpdater updater)
-        where TWriter : UpdateWriterAbs
+    internal static AbstractUpdateWriter Create<TWriter>(IUpdater updater)
+        where TWriter : AbstractUpdateWriter
     {
-        var writer = (UpdateWriterAbs?)Activator.CreateInstance(
+        var writer = (AbstractUpdateWriter?)Activator.CreateInstance(
             typeof(TWriter), [updater]);
 
         return writer ?? throw new InvalidOperationException(
