@@ -1,3 +1,5 @@
+using Telegram.Bot.Types.Payments;
+
 namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
 /// <summary>
