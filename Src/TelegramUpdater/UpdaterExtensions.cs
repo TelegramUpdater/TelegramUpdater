@@ -16,36 +16,40 @@ namespace TelegramUpdater;
 /// </summary>
 public static class UpdaterExtensions
 {
-    internal static object GetInnerUpdate(this Update update)
+    /// <summary>
+    /// Extract the actual inner update from <see cref="Update"/>
+    /// </summary>
+    /// <param name="update">The update.</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException">In case of Unknown update type.</exception>
+    /// <exception cref="InvalidOperationException">In case of null inner update.</exception>
+    public static object GetInnerUpdate(this Update update)
     {
         if (update.Type == UpdateType.Unknown)
             throw new ArgumentException(
-                $"Can't resolve Update of Type {update.Type}");
+                $"Can't resolve Update of Type {update.Type}", nameof(update));
 
         return typeof(Update).GetProperty(update.Type.ToString())?
             .GetValue(update, index: null)?? throw new InvalidOperationException(
                 $"Inner update is null for {update.Type}");
     }
 
-    internal static T GetInnerUpdate<T>(this Update update)
+    /// <summary>
+    /// Extract the actual inner update from <see cref="Update"/>
+    /// </summary>
+    /// <param name="update">The update.</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException">In case of Unknown update type.</exception>
+    /// <exception cref="InvalidOperationException">In case of null or invalid(type) inner update.</exception>
+    public static T GetInnerUpdate<T>(this Update update)
     {
         if (update.Type == UpdateType.Unknown)
             throw new ArgumentException(
-                $"Can't resolve Update of Type {update.Type}");
+                $"Can't resolve Update of Type {update.Type}", nameof(update));
 
-        return (T)(typeof(Update).GetProperty(update.Type.ToString())?
+        return (T)(typeof(Update).GetProperty(update.Type.ToString(), typeof(T))?
             .GetValue(update, index: null)?? throw new InvalidOperationException(
                 $"Inner update is null for {update.Type}"));
-    }
-
-    internal static UpdateType? GetUpdateType<T>()
-    {
-        if (Enum.TryParse(typeof(T).Name, out UpdateType result))
-        {
-            return result;
-        }
-
-        return null;
     }
 
     private static bool TryResolveNamespaceToUpdateType(
@@ -57,24 +61,7 @@ public static class UpdaterExtensions
         if (nsParts.Length < 3)
             throw new Exception("Namespace is invalid.");
 
-        updateType = nsParts[2] switch
-        {
-            "Messages" => UpdateType.Message,
-            "EditedChannelPosts" => UpdateType.EditedChannelPost,
-            "EditedMessages" => UpdateType.EditedMessage,
-            "ChannelPosts" => UpdateType.ChannelPost,
-            "CallbackQueries" => UpdateType.CallbackQuery,
-            "InlineQueries" => UpdateType.InlineQuery,
-            "ChosenInlineResults" => UpdateType.ChosenInlineResult,
-            "ShippingQueries" => UpdateType.ShippingQuery,
-            "PreCheckoutQueries" => UpdateType.PreCheckoutQuery,
-            "Polls" => UpdateType.Poll,
-            "PollAnswers" => UpdateType.PollAnswer,
-            "ChatMembers" => UpdateType.ChatMember,
-            "MyChatMembers" => UpdateType.MyChatMember,
-            "ChatJoinRequests" => UpdateType.ChatJoinRequest,
-            _ => null,
-        };
+        updateType = DictionaryNameToUpdateType(nsParts[^1]);
 
         if (updateType is null)
         {
@@ -82,7 +69,29 @@ public static class UpdaterExtensions
             return false;
         }
 
-        type = updateType switch
+        type = updateType.ToObjectType();
+
+        if (type is null)
+        {
+            updateType = null;
+            type = null;
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Get the type of inner update that this update type referees to.
+    /// </summary>
+    /// <remarks>
+    /// As instance, both <see cref="UpdateType.Message"/> and <see cref="UpdateType.EditedMessage"/> resolves to <see cref="Message"/>.
+    /// </remarks>
+    /// <param name="updateType"></param>
+    /// <returns></returns>
+    public static Type? ToObjectType(this UpdateType updateType)
+    {
+        return updateType switch
         {
             UpdateType.Message => typeof(Message),
             UpdateType.InlineQuery => typeof(InlineQuery),
@@ -98,17 +107,66 @@ public static class UpdaterExtensions
             UpdateType.MyChatMember => typeof(ChatMemberUpdated),
             UpdateType.ChatMember => typeof(ChatMemberUpdated),
             UpdateType.ChatJoinRequest => typeof(ChatJoinRequest),
+
+            // New updates
+            UpdateType.MessageReaction => typeof(MessageReactionUpdated),
+            UpdateType.MessageReactionCount => typeof(MessageReactionCountUpdated),
+            UpdateType.ChatBoost => typeof(ChatBoostUpdated),
+            UpdateType.RemovedChatBoost => typeof(ChatBoostRemoved),
+            UpdateType.BusinessConnection => typeof(BusinessConnection),
+            UpdateType.BusinessMessage => typeof(Message),
+            UpdateType.EditedBusinessMessage => typeof(Message),
+            UpdateType.DeletedBusinessMessages => typeof(BusinessMessagesDeleted),
+            UpdateType.PurchasedPaidMedia => typeof(PaidMediaPurchased),
+
+            // Default case
             _ => null,
         };
+    }
 
-        if (type is null)
+    /// <summary>
+    /// Get the type of inner update that this update type referees to.
+    /// </summary>
+    /// <remarks>
+    /// As instance, both <see cref="UpdateType.Message"/> and <see cref="UpdateType.EditedMessage"/> resolves to <see cref="Message"/>.
+    /// </remarks>
+    /// <param name="updateType"></param>
+    /// <returns></returns>
+    public static Type? ToObjectType(this UpdateType? updateType)
+        => updateType.HasValue ? updateType.Value.ToObjectType() : null;
+
+    internal static UpdateType? DictionaryNameToUpdateType(this string name)
+    {
+        return name switch
         {
-            updateType = null;
-            type = null;
-            return false;
-        }
+            "Messages" => UpdateType.Message,
+            "EditedChannelPosts" => UpdateType.EditedChannelPost,
+            "EditedMessages" => UpdateType.EditedMessage,
+            "ChannelPosts" => UpdateType.ChannelPost,
+            "CallbackQueries" => UpdateType.CallbackQuery,
+            "InlineQueries" => UpdateType.InlineQuery,
+            "ChosenInlineResults" => UpdateType.ChosenInlineResult,
+            "ShippingQueries" => UpdateType.ShippingQuery,
+            "PreCheckoutQueries" => UpdateType.PreCheckoutQuery,
+            "Polls" => UpdateType.Poll,
+            "PollAnswers" => UpdateType.PollAnswer,
+            "ChatMembers" => UpdateType.ChatMember,
+            "MyChatMembers" => UpdateType.MyChatMember,
+            "ChatJoinRequests" => UpdateType.ChatJoinRequest,
 
-        return true;
+            // New updates
+            "MessageReactions" => UpdateType.MessageReaction,
+            "MessageReactionCounts" => UpdateType.MessageReactionCount,
+            "ChatBoosts" => UpdateType.ChatBoost,
+            "RemovedChatBoosts" => UpdateType.RemovedChatBoost,
+            "BusinessConnections" => UpdateType.BusinessConnection,
+            "BusinessMessages" => UpdateType.BusinessMessage,
+            "EditedBusinessMessages" => UpdateType.EditedBusinessMessage,
+            "DeletedBusinessMessagess" => UpdateType.DeletedBusinessMessages,
+            "PurchasedPaidMedia" => UpdateType.PurchasedPaidMedia,
+
+            _ => null,
+        };
     }
 
     /// <summary>
@@ -127,17 +185,17 @@ public static class UpdaterExtensions
     /// </item>
     /// <item>
     /// Parent name should match the update type name,
-    /// eg: <c>Messages</c> for <see cref="UpdateType.Message"/>
+    /// Eg: <c>Messages</c> for <see cref="UpdateType.Message"/>
     /// </item>
     /// </list>
-    /// Eg: <paramref name="handlersParentNamespace"/>
-    /// /Messages/MyScopedMessageHandler
+    /// Eg: <code><paramref name="handlersParentNamespace"/>/Messages/MyScopedMessageHandler</code>
     /// </remarks>
     /// <returns></returns>
     public static IEnumerable<(UpdateType updateType, Type update, Type handler)> IterCollectedScopedUpdateHandlerTypes(
         string handlersParentNamespace = "UpdateHandlers")
     {
-        var entryAssembly = Assembly.GetEntryAssembly() ?? throw new ApplicationException("Can't find entry assembly.");
+        var entryAssembly = Assembly.GetEntryAssembly()
+            ?? throw new InvalidOperationException("Can't find entry assembly.");
         var assemblyName = entryAssembly.GetName().Name;
 
         var handlerNs = $"{assemblyName}.{handlersParentNamespace}";

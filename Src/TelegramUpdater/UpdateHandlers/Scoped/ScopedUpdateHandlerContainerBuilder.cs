@@ -45,9 +45,7 @@ public sealed class ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>
         {
             return update.GetInnerUpdate<TUpdate>();
         }
-        else
-        {
-            return _getT(update);
-        }
+
+        return _getT(update);
     }
 }

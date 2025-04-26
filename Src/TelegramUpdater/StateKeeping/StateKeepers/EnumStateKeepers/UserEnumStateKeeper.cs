@@ -1,6 +1,5 @@
 ﻿namespace TelegramUpdater.StateKeeping.StateKeepers.EnumStateKeepers;
 
-
 /// <inheritdoc/>
 public class UserEnumStateKeeper<TEnum>
     : AbstractEnumStateKeeper<long, TEnum, User>
