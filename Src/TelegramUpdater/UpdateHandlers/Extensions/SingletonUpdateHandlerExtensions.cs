@@ -77,8 +77,10 @@ public static class SingletonUpdateHandlerExtensions
                     => new ChannelPostHandler(callback, filter, group),
                 UpdateType.EditedChannelPost
                     => new EditedChannelPostHandler(callback, filter, group),
-
-                // TODO: Add other messages.
+                UpdateType.BusinessMessage
+                    => new BusinessMessageHandler(callback, filter, group),
+                UpdateType.EditedBusinessMessage
+                    => new EditedBusinessMessageHandler(callback, filter, group),
 
                 _ => throw new ArgumentException(
                     $"Update type {updateType} is not a Message.",
@@ -272,5 +274,144 @@ public static class SingletonUpdateHandlerExtensions
         => updater.AddSingletonUpdateHandler(
             new ShippingQueryHandler(callback, filter, group));
 
-    // TODO: add other updates
+    // UpdateType.MessageReaction => typeof(MessageReactionUpdated)
+    /// <summary>
+    /// Adds a handler for <see cref="UpdateType.MessageReaction"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="group">
+    /// Handling priority group, The lower the sooner to process.
+    /// </param>
+    public static IUpdater AddSingletonUpdateHandler(
+        this IUpdater updater,
+        Func<IContainer<MessageReactionUpdated>, Task> callback,
+        Filter<MessageReactionUpdated>? filter = default,
+        int group = default)
+        => updater.AddSingletonUpdateHandler(
+            new MessageReactionHandler(callback, filter, group));
+
+    // UpdateType.MessageReactionCount => typeof(MessageReactionCountUpdated)
+    /// <summary>
+    /// Adds a handler for <see cref="UpdateType.MessageReactionCount"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="group">
+    /// Handling priority group, The lower the sooner to process.
+    /// </param>
+    public static IUpdater AddSingletonUpdateHandler(
+        this IUpdater updater,
+        Func<IContainer<MessageReactionCountUpdated>, Task> callback,
+        Filter<MessageReactionCountUpdated>? filter = default,
+        int group = default)
+        => updater.AddSingletonUpdateHandler(
+            new MessageReactionCountHandler(callback, filter, group));
+
+    // UpdateType.ChatBoost => typeof(ChatBoostUpdated)
+    /// <summary>
+    /// Adds a handler for <see cref="UpdateType.ChatBoost"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="group">
+    /// Handling priority group, The lower the sooner to process.
+    /// </param>
+    public static IUpdater AddSingletonUpdateHandler(
+        this IUpdater updater,
+        Func<IContainer<ChatBoostUpdated>, Task> callback,
+        Filter<ChatBoostUpdated>? filter = default,
+        int group = default)
+        => updater.AddSingletonUpdateHandler(
+            new ChatBoostHandler(callback, filter, group));
+
+    // UpdateType.RemovedChatBoost => typeof(ChatBoostRemoved)
+    /// <summary>
+    /// Adds a handler for <see cref="UpdateType.RemovedChatBoost"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="group">
+    /// Handling priority group, The lower the sooner to process.
+    /// </param>
+    public static IUpdater AddSingletonUpdateHandler(
+        this IUpdater updater,
+        Func<IContainer<ChatBoostRemoved>, Task> callback,
+        Filter<ChatBoostRemoved>? filter = default,
+        int group = default)
+        => updater.AddSingletonUpdateHandler(
+            new RemovedChatBoostHandler(callback, filter, group));
+
+    // UpdateType.BusinessConnection => typeof(BusinessConnection)
+    /// <summary>
+    /// Adds a handler for <see cref="UpdateType.BusinessConnection"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="group">
+    /// Handling priority group, The lower the sooner to process.
+    /// </param>
+    public static IUpdater AddSingletonUpdateHandler(
+        this IUpdater updater,
+        Func<IContainer<BusinessConnection>, Task> callback,
+        Filter<BusinessConnection>? filter = default,
+        int group = default)
+        => updater.AddSingletonUpdateHandler(
+            new BusinessConnectionHandler(callback, filter, group));
+
+    // UpdateType.DeletedBusinessMessages => typeof(BusinessMessagesDeleted)
+    /// <summary>
+    /// Adds a handler for <see cref="UpdateType.DeletedBusinessMessages"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="group">
+    /// Handling priority group, The lower the sooner to process.
+    /// </param>
+    public static IUpdater AddSingletonUpdateHandler(
+        this IUpdater updater,
+        Func<IContainer<BusinessMessagesDeleted>, Task> callback,
+        Filter<BusinessMessagesDeleted>? filter = default,
+        int group = default)
+        => updater.AddSingletonUpdateHandler(
+            new DeletedBusinessMessagesHandler(callback, filter, group));
+
+    // UpdateType.PurchasedPaidMedia => typeof(PaidMediaPurchased)
+    /// <summary>
+    /// Adds a handler for <see cref="UpdateType.PurchasedPaidMedia"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="group">
+    /// Handling priority group, The lower the sooner to process.
+    /// </param>
+    public static IUpdater AddSingletonUpdateHandler(
+        this IUpdater updater,
+        Func<IContainer<PaidMediaPurchased>, Task> callback,
+        Filter<PaidMediaPurchased>? filter = default,
+        int group = default)
+        => updater.AddSingletonUpdateHandler(
+            new PurchasedPaidMediaHandler(callback, filter, group));
+
 }

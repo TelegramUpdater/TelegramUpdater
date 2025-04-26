@@ -70,7 +70,7 @@ public static class SingletonAttributesExtensions
             .GetMethod(nameof(CreateHandlerOfType), BindingFlags.NonPublic | BindingFlags.Static)!
             .MakeGenericMethod(propertyInfo.PropertyType!);
 
-        return (ISingletonUpdateHandler?)createHandlerMethod.Invoke(null, new object[] { updateType, resolver, method, group });
+        return (ISingletonUpdateHandler?)createHandlerMethod.Invoke(null, [updateType, resolver, method, group]);
     }
 
     /// <summary>

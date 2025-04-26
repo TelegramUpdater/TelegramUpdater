@@ -135,7 +135,9 @@ public static class ScopedUpdateHandlersExtensions
                 UpdateType.ChannelPost => x => x.ChannelPost,
                 UpdateType.EditedChannelPost => x => x.EditedChannelPost,
 
-                // TODO: add other messages
+                // New updates
+                UpdateType.BusinessMessage => x => x.BusinessMessage,
+                UpdateType.EditedBusinessMessage => x => x.EditedBusinessMessage,
 
                 _ => throw new ArgumentException(
                     $"Update type {updateType} is not a Message.",
@@ -319,5 +321,136 @@ public static class ScopedUpdateHandlersExtensions
         => updater.AddScopedUpdateHandler<THandler, ShippingQuery>(
             filter, UpdateType.ShippingQuery, x => x.ShippingQuery);
 
-    // TODO: add other updates
+    // UpdateType.MessageReaction => typeof(MessageReactionUpdated),
+    /// <summary>
+    /// Adds an scoped update handler to the updater
+    /// for updates of type <see cref="UpdateType.MessageReaction"/>.
+    /// </summary>
+    /// <remarks>
+    /// This method will add filter attributes if
+    /// <paramref name="filter"/> is <see langword="null"/>.
+    /// </remarks>
+    /// <typeparam name="THandler">Handler type.</typeparam>
+    /// <param name="updater">The updater.</param>
+    /// <param name="filter">The filter.</param>
+    public static IUpdater AddScopedUpdateHandler<THandler>(
+        this IUpdater updater,
+        Filter<MessageReactionUpdated>? filter = default)
+        where THandler : IScopedUpdateHandler
+        => updater.AddScopedUpdateHandler<THandler, MessageReactionUpdated>(
+            filter, UpdateType.MessageReaction, x => x.MessageReaction);
+
+    // UpdateType.MessageReactionCount => typeof(MessageReactionCountUpdated),
+    /// <summary>
+    /// Adds an scoped update handler to the updater
+    /// for updates of type <see cref="UpdateType.MessageReactionCount"/>.
+    /// </summary>
+    /// <remarks>
+    /// This method will add filter attributes if
+    /// <paramref name="filter"/> is <see langword="null"/>.
+    /// </remarks>
+    /// <typeparam name="THandler">Handler type.</typeparam>
+    /// <param name="updater">The updater.</param>
+    /// <param name="filter">The filter.</param>
+    public static IUpdater AddScopedUpdateHandler<THandler>(
+        this IUpdater updater,
+        Filter<MessageReactionCountUpdated>? filter = default)
+        where THandler : IScopedUpdateHandler
+        => updater.AddScopedUpdateHandler<THandler, MessageReactionCountUpdated>(
+            filter, UpdateType.MessageReactionCount, x => x.MessageReactionCount);
+
+    // UpdateType.ChatBoost => typeof(ChatBoostUpdated),
+    /// <summary>
+    /// Adds an scoped update handler to the updater
+    /// for updates of type <see cref="UpdateType.ChatBoost"/>.
+    /// </summary>
+    /// <remarks>
+    /// This method will add filter attributes if
+    /// <paramref name="filter"/> is <see langword="null"/>.
+    /// </remarks>
+    /// <typeparam name="THandler">Handler type.</typeparam>
+    /// <param name="updater">The updater.</param>
+    /// <param name="filter">The filter.</param>
+    public static IUpdater AddScopedUpdateHandler<THandler>(
+        this IUpdater updater,
+        Filter<ChatBoostUpdated>? filter = default)
+        where THandler : IScopedUpdateHandler
+        => updater.AddScopedUpdateHandler<THandler, ChatBoostUpdated>(
+            filter, UpdateType.ChatBoost, x => x.ChatBoost);
+
+    // UpdateType.RemovedChatBoost => typeof(ChatBoostRemoved),
+    /// <summary>
+    /// Adds an scoped update handler to the updater
+    /// for updates of type <see cref="UpdateType.RemovedChatBoost"/>.
+    /// </summary>
+    /// <remarks>
+    /// This method will add filter attributes if
+    /// <paramref name="filter"/> is <see langword="null"/>.
+    /// </remarks>
+    /// <typeparam name="THandler">Handler type.</typeparam>
+    /// <param name="updater">The updater.</param>
+    /// <param name="filter">The filter.</param>
+    public static IUpdater AddScopedUpdateHandler<THandler>(
+        this IUpdater updater,
+        Filter<ChatBoostRemoved>? filter = default)
+        where THandler : IScopedUpdateHandler
+        => updater.AddScopedUpdateHandler<THandler, ChatBoostRemoved>(
+            filter, UpdateType.RemovedChatBoost, x => x.RemovedChatBoost);
+
+    // UpdateType.BusinessConnection => typeof(BusinessConnection),
+    /// <summary>
+    /// Adds an scoped update handler to the updater
+    /// for updates of type <see cref="UpdateType.BusinessConnection"/>.
+    /// </summary>
+    /// <remarks>
+    /// This method will add filter attributes if
+    /// <paramref name="filter"/> is <see langword="null"/>.
+    /// </remarks>
+    /// <typeparam name="THandler">Handler type.</typeparam>
+    /// <param name="updater">The updater.</param>
+    /// <param name="filter">The filter.</param>
+    public static IUpdater AddScopedUpdateHandler<THandler>(
+        this IUpdater updater,
+        Filter<BusinessConnection>? filter = default)
+        where THandler : IScopedUpdateHandler
+        => updater.AddScopedUpdateHandler<THandler, BusinessConnection>(
+            filter, UpdateType.BusinessConnection, x => x.BusinessConnection);
+
+    // UpdateType.DeletedBusinessMessages => typeof(BusinessMessagesDeleted),
+    /// <summary>
+    /// Adds an scoped update handler to the updater
+    /// for updates of type <see cref="UpdateType.DeletedBusinessMessages"/>.
+    /// </summary>
+    /// <remarks>
+    /// This method will add filter attributes if
+    /// <paramref name="filter"/> is <see langword="null"/>.
+    /// </remarks>
+    /// <typeparam name="THandler">Handler type.</typeparam>
+    /// <param name="updater">The updater.</param>
+    /// <param name="filter">The filter.</param>
+    public static IUpdater AddScopedUpdateHandler<THandler>(
+        this IUpdater updater,
+        Filter<BusinessMessagesDeleted>? filter = default)
+        where THandler : IScopedUpdateHandler
+        => updater.AddScopedUpdateHandler<THandler, BusinessMessagesDeleted>(
+            filter, UpdateType.DeletedBusinessMessages, x => x.DeletedBusinessMessages);
+
+    // UpdateType.PurchasedPaidMedia => typeof(PaidMediaPurchased),
+    /// <summary>
+    /// Adds an scoped update handler to the updater
+    /// for updates of type <see cref="UpdateType.PurchasedPaidMedia"/>.
+    /// </summary>
+    /// <remarks>
+    /// This method will add filter attributes if
+    /// <paramref name="filter"/> is <see langword="null"/>.
+    /// </remarks>
+    /// <typeparam name="THandler">Handler type.</typeparam>
+    /// <param name="updater">The updater.</param>
+    /// <param name="filter">The filter.</param>
+    public static IUpdater AddScopedUpdateHandler<THandler>(
+        this IUpdater updater,
+        Filter<PaidMediaPurchased>? filter = default)
+        where THandler : IScopedUpdateHandler
+        => updater.AddScopedUpdateHandler<THandler, PaidMediaPurchased>(
+            filter, UpdateType.PurchasedPaidMedia, x => x.PurchasedPaidMedia);
 }
