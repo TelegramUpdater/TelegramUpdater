@@ -32,5 +32,5 @@ public static class ShiningInfoContainerExtensions
         this IContainer<T> container,
         TimeSpan timeOut,
         CancellationToken cancellationToken = default) where T : class
-        => await container.ReadNextAsync(timeOut, cancellationToken);
+        => await container.ReadNextAsync(timeOut, cancellationToken).ConfigureAwait(false);
 }

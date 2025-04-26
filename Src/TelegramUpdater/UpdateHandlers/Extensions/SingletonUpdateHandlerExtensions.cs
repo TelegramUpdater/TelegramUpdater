@@ -77,9 +77,13 @@ public static class SingletonUpdateHandlerExtensions
                     => new ChannelPostHandler(callback, filter, group),
                 UpdateType.EditedChannelPost
                     => new EditedChannelPostHandler(callback, filter, group),
+
+                // TODO: Add other messages.
+
                 _ => throw new ArgumentException(
-                    $"Update type {updateType} is not a Message."
-                )
+                    $"Update type {updateType} is not a Message.",
+                    nameof(updateType)
+                ),
             });
 
     /// <summary>
@@ -110,9 +114,10 @@ public static class SingletonUpdateHandlerExtensions
                     => new ChatMemberHandler(callback, filter, group),
                 UpdateType.MyChatMember
                     => new MyChatMemberHandler(callback, filter, group),
+
                 _ => throw new ArgumentException(
-                    $"Update type {updateType} is not a ChatMemberUpdated."
-                )
+                    $"Update type {updateType} is not a ChatMemberUpdated.", nameof(updateType)
+                ),
             });
 
     /// <summary>
@@ -266,4 +271,6 @@ public static class SingletonUpdateHandlerExtensions
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new ShippingQueryHandler(callback, filter, group));
+
+    // TODO: add other updates
 }

@@ -6,7 +6,7 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers;
 /// Create an update container for any type of update.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class AnyContainer<T> : UpdateContainerAbs<T> where T : class
+public class AnyContainer<T> : AbstractUpdateContainer<T> where T : class
 {
     internal AnyContainer(
         Func<Update, T?> insiderResolver,

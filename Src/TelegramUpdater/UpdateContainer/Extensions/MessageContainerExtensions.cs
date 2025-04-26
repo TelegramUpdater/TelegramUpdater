@@ -22,7 +22,7 @@ public static class MessageContainerExtensions
         => await simpleContext.BotClient.DeleteMessage(
             chatId: simpleContext.Update.Chat.Id,
             messageId: simpleContext.Update.MessageId,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
 
     /// <summary>
     /// Updates a <see cref="Message"/> of your own with removing it and sending a new message.
@@ -45,7 +45,7 @@ public static class MessageContainerExtensions
         if (simpleContext.Update.From?.Id != simpleContext.BotClient.BotId)
             throw new InvalidOperationException("The message should be for the bot it self.");
 
-        await simpleContext.Delete(cancellationToken: cancellationToken);
+        await simpleContext.Delete(cancellationToken: cancellationToken).ConfigureAwait(false);
         return await simpleContext.BotClient.SendMessage(
             chatId: simpleContext.Update.Chat.Id,
             text: text,
@@ -61,7 +61,7 @@ public static class MessageContainerExtensions
             businessConnectionId: businessConnectionId,
             allowPaidBroadcast: allowPaidBroadcast,
             cancellationToken: cancellationToken)
-        .WrapMessageAsync(simpleContext.Updater);
+        .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
     }
 
     /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)"/>
@@ -100,7 +100,7 @@ public static class MessageContainerExtensions
             businessConnectionId: businessConnectionId,
             allowPaidBroadcast: allowPaidBroadcast,
             cancellationToken: cancellationToken)
-        .WrapMessageAsync(simpleContext.Updater);
+        .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageText(ITelegramBotClient, ChatId, int, string, ParseMode, IEnumerable{MessageEntity}?, LinkPreviewOptions?, InlineKeyboardMarkup?, string?, CancellationToken)"/>
     public static async Task<IContainer<Message>?> EditAsync(
@@ -122,7 +122,7 @@ public static class MessageContainerExtensions
             replyMarkup: replyMarkup,
             businessConnectionId: businessConnectionId,
             cancellationToken: cancellationToken)
-            .WrapMessageAsync(simpleContext.Updater);
+            .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
     }
 
     /// <inheritdoc cref="ChatType.Private"/>

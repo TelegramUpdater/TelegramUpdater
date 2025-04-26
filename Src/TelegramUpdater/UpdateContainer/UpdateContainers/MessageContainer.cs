@@ -5,7 +5,7 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers;
 /// <summary>
 /// An update container for <see cref="Update.Message"/> only.
 /// </summary>
-public sealed class MessageContainer : UpdateContainerAbs<Message>
+public sealed class MessageContainer : AbstractUpdateContainer<Message>
 {
     internal MessageContainer(
         IUpdater updater,

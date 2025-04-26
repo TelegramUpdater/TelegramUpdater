@@ -10,7 +10,18 @@ namespace TelegramUpdater.UpdateHandlers.Singleton;
 public abstract class AbstractSingletonUpdateHandler<T> : IGenericSingletonUpdateHandler<T>
     where T : class
 {
-    internal AbstractSingletonUpdateHandler(
+    // TODO: use internal protected for GetT like scoped.
+
+    /// <summary>
+    /// Create a new instance of <see cref="AbstractSingletonUpdateHandler{T}"/>
+    /// </summary>
+    /// <param name="updateType">Target update type.</param>
+    /// <param name="getT">To extract this update from <see cref="Update"/></param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="group">Priority of handling.</param>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentNullException"></exception>
+    protected AbstractSingletonUpdateHandler(
         UpdateType updateType,
         Func<Update, T?> getT,
         IFilter<T>? filter,
@@ -18,7 +29,7 @@ public abstract class AbstractSingletonUpdateHandler<T> : IGenericSingletonUpdat
     {
         if (updateType == UpdateType.Unknown)
             throw new ArgumentException(
-                $"There's nothing unknown here! {nameof(updateType)}");
+                $"There's nothing unknown here! {nameof(updateType)}", nameof(updateType));
 
         Filter = filter;
         GetActualUpdate = getT ?? throw new ArgumentNullException(nameof(getT));
@@ -67,7 +78,7 @@ public abstract class AbstractSingletonUpdateHandler<T> : IGenericSingletonUpdat
     /// <inheritdoc/>
     async Task IUpdateHandler.HandleAsync(IUpdater updater,
                                   ShiningInfo<long, Update> shiningInfo)
-        => await HandleAsync(ContainerBuilder(updater, shiningInfo));
+        => await HandleAsync(ContainerBuilder(updater, shiningInfo)).ConfigureAwait(false);
 
     /// <inheritdoc/>
     public bool ShouldHandle(IUpdater updater, Update update)

@@ -7,13 +7,21 @@ namespace TelegramUpdater.UpdateContainer;
 /// <typeparamref name="T"/> as your update.
 /// </summary>
 /// <typeparam name="T">Update type.</typeparam>
-public abstract class UpdateContainerAbs<T> : IContainer<T>
+public abstract class AbstractUpdateContainer<T> : IContainer<T>
     where T : class
 {
     private readonly Func<Update, T?> _insiderResolver;
     private readonly IReadOnlyDictionary<string, object> _extraObjects;
 
-    internal UpdateContainerAbs(
+    /// <summary>
+    /// Create a new instance of <see cref="AbstractUpdateContainer{T}"/>
+    /// </summary>
+    /// <param name="insiderResolver"></param>
+    /// <param name="updater"></param>
+    /// <param name="shiningInsider"></param>
+    /// <param name="extraObjects"></param>
+    /// <exception cref="ArgumentNullException"></exception>
+    protected AbstractUpdateContainer(
         Func<Update, T?> insiderResolver,
         IUpdater updater,
         ShiningInfo<long, Update> shiningInsider,
@@ -26,10 +34,17 @@ public abstract class UpdateContainerAbs<T> : IContainer<T>
         BotClient = updater.BotClient;
         _insiderResolver = insiderResolver ??
             throw new ArgumentNullException(nameof(insiderResolver));
-        _extraObjects = extraObjects ?? new Dictionary<string, object>();
+        _extraObjects = extraObjects ?? new Dictionary<string, object>(StringComparer.Ordinal);
     }
 
-    internal UpdateContainerAbs(
+    /// <summary>
+    /// Create a new instance of <see cref="AbstractUpdateContainer{T}"/>
+    /// </summary>
+    /// <param name="insiderResolver"></param>
+    /// <param name="updater"></param>
+    /// <param name="insider"></param>
+    /// <param name="extraObjects"></param>
+    protected AbstractUpdateContainer(
         Func<Update, T?> insiderResolver,
         IUpdater updater,
         Update insider,
@@ -40,7 +55,7 @@ public abstract class UpdateContainerAbs<T> : IContainer<T>
         Container = insider;
         BotClient = updater.BotClient;
         _insiderResolver = insiderResolver;
-        _extraObjects = extraObjects ?? new Dictionary<string, object>();
+        _extraObjects = extraObjects ?? new Dictionary<string, object>(StringComparer.Ordinal);
     }
 
     /// <inheritdoc/>
@@ -55,12 +70,9 @@ public abstract class UpdateContainerAbs<T> : IContainer<T>
         {
             var inner = _insiderResolver(Container);
 
-            if (inner == null)
-                throw new InvalidOperationException(
+            return inner ?? throw new InvalidOperationException(
                     $"Inner update should not be null!" +
-                    "Excpected {typeof(T)} is {GetType()}");
-
-            return inner;
+                    "Expected {typeof(T)} is {GetType()}");
         }
     }
 

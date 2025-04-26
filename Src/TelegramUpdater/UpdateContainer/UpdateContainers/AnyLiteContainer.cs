@@ -6,10 +6,10 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers;
 
 /// <summary>
 /// Lite container to use for updates that are received
-/// outside of updaters. Eg: the result of requests.
+/// outside of updater. Eg: the result of requests.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class AnyLiteContainer<T> : UpdateContainerAbs<T> where T : class
+public class AnyLiteContainer<T> : AbstractUpdateContainer<T> where T : class
 {
     /// <summary>
     /// Create a lite container.
@@ -35,7 +35,7 @@ public class AnyLiteContainer<T> : UpdateContainerAbs<T> where T : class
     /// <inheritdoc/>
     public override ShiningInfo<long, Update> ShiningInfo
         => throw new InvalidOperationException(
-            "Lite contianers have no ShiningInfo, since they're not received from updater.");
+            "Lite containers have no ShiningInfo, since they're not received from updater.");
 
     internal static IContainer<U> CreateLiteContainer<U>(
         Expression<Func<Update, U?>> insiderResolver,

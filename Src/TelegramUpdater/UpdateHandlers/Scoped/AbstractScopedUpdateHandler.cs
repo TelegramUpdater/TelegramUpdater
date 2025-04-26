@@ -7,21 +7,21 @@ namespace TelegramUpdater.UpdateHandlers.Scoped;
 /// Abstract base for <see cref="IScopedUpdateHandler"/>s.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public abstract class AbstractScopedUpdateHandler<T> : IScopedUpdateHandler
+/// <remarks>
+/// Create a new instance of <see cref="AbstractScopedUpdateHandler{T}"/>.
+/// </remarks>
+/// <param name="getT">Extract actual update from <see cref="Update"/>.</param>
+/// <param name="group">Handling priority.</param>
+/// <exception cref="ArgumentNullException"></exception>
+public abstract class AbstractScopedUpdateHandler<T>(Func<Update, T?> getT, int group) : IScopedUpdateHandler
     where T : class
 {
-    private readonly Func<Update, T?> _getT;
+    private readonly Func<Update, T?> _getT = getT ?? throw new ArgumentNullException(nameof(getT));
     private IReadOnlyDictionary<string, object>? _extraData;
     private IContainer<T> _container = default!;
 
-    internal AbstractScopedUpdateHandler(Func<Update, T?> getT, int group)
-    {
-        Group = group;
-        _getT = getT ?? throw new ArgumentNullException(nameof(getT));
-    }
-
     /// <inheritdoc/>
-    public int Group { get; }
+    public int Group { get; } = group;
 
     /// <summary>
     /// Bot client instance.
@@ -61,7 +61,7 @@ public abstract class AbstractScopedUpdateHandler<T> : IScopedUpdateHandler
     /// <inheritdoc/>
     async Task IUpdateHandler.HandleAsync(
         IUpdater updater, ShiningInfo<long, Update> shiningInfo)
-        => await HandleAsync(ContainerBuilderWrapper(updater, shiningInfo));
+        => await HandleAsync(ContainerBuilderWrapper(updater, shiningInfo)).ConfigureAwait(false);
 
     void IScopedUpdateHandler.SetExtraData(
         IReadOnlyDictionary<string, object>? extraData)

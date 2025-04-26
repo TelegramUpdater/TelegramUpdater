@@ -6,7 +6,7 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers;
 /// A container for <see cref="Update.CallbackQuery"/> only.
 /// </summary>
 public sealed class CallbackQueryContainer
-    : UpdateContainerAbs<CallbackQuery>
+    : AbstractUpdateContainer<CallbackQuery>
 {
     internal CallbackQueryContainer(
         IUpdater updater,

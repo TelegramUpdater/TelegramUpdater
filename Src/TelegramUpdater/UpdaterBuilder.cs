@@ -326,7 +326,7 @@ public sealed class UpdaterBuilderStep3
     /// After an update verified and passed the filters, it's time to handle it.
     /// Handling updates are done in callback functions.
     /// <para>
-    /// Callback function gives you an instance of <see cref="UpdateContainerAbs{T}"/>
+    /// Callback function gives you an instance of <see cref="AbstractUpdateContainer{T}"/>
     /// as argument. and this is all you need! with a large set of Extension methods.
     /// </para>
     /// </description>
@@ -384,7 +384,7 @@ public sealed class UpdaterBuilderStep3
     /// After an update verified and passed the filters, it's time to handle it.
     /// Handling updates are done in callback functions.
     /// <para>
-    /// Callback function gives you an instance of <see cref="UpdateContainerAbs{T}"/>
+    /// Callback function gives you an instance of <see cref="AbstractUpdateContainer{T}"/>
     /// as argument. and this is all you need! with a large set of Extension methods.
     /// </para>
     /// </description>
@@ -441,7 +441,7 @@ public sealed class UpdaterBuilderStep3
     /// After an update verified and passed the filters, it's time to handle it.
     /// Handling updates are done in callback functions.
     /// <para>
-    /// Callback function gives you an instance of <see cref="UpdateContainerAbs{T}"/>
+    /// Callback function gives you an instance of <see cref="AbstractUpdateContainer{T}"/>
     /// as argument. and this is all you need! with a large set of Extension methods.
     /// </para>
     /// </description>
@@ -500,7 +500,7 @@ public sealed class UpdaterBuilderStep3
     /// After an update verified and passed the filters, it's time to handle it.
     /// Handling updates are done in callback functions.
     /// <para>
-    /// Callback function gives you an instance of <see cref="UpdateContainerAbs{T}"/>
+    /// Callback function gives you an instance of <see cref="AbstractUpdateContainer{T}"/>
     /// as argument. and this is all you need! with a large set of Extension methods.
     /// </para>
     /// </description>

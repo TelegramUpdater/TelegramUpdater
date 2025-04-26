@@ -39,7 +39,7 @@ namespace TelegramUpdater.RainbowUtilities
             CancellationToken cancellationToken = default)
             where TId : struct
             => await shiningInfo.Rainbow.ReadNextAsync(
-                shiningInfo.ProcessId, timeOut, cancellationToken);
+                shiningInfo.ProcessId, timeOut, cancellationToken).ConfigureAwait(false);
 
         /// <summary>
         /// Yields all <typeparamref name="TValue"/>s from given queueId.
@@ -53,7 +53,7 @@ namespace TelegramUpdater.RainbowUtilities
             where TId : struct
         {
             await foreach (var item in shiningInfo.Rainbow.YieldAsync(
-                shiningInfo.ProcessId, cancellationToken))
+                shiningInfo.ProcessId, cancellationToken).ConfigureAwait(false))
             {
                 yield return item;
             }

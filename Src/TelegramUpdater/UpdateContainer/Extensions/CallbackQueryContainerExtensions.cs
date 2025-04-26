@@ -57,12 +57,10 @@ public static class CallbackQueryContainerExtensions
                 businessConnectionId: businessConnectionId,
                 allowPaidBroadcast: allowPaidBroadcast,
                 cancellationToken: cancellationToken)
-            .WrapMessageAsync(simpleContext.Updater);
+            .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
         }
-        else
-        {
-            throw new InvalidOperationException("Can't send message for inline message calls.");
-        }
+
+        throw new InvalidOperationException("Can't send message for inline message calls.");
     }
 
     /// <inheritdoc cref="TelegramBotClientExtensions.AnswerCallbackQuery(ITelegramBotClient, string, string?, bool, string?, int?, CancellationToken)"/>
@@ -77,7 +75,7 @@ public static class CallbackQueryContainerExtensions
             showAlert: showAlert,
             url: url,
             cacheTime: cacheTime,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageText(ITelegramBotClient, ChatId, int, string, ParseMode, IEnumerable{MessageEntity}?, LinkPreviewOptions?, InlineKeyboardMarkup?, string?, CancellationToken)"/>
     public static async Task<IContainer<Message>?> EditAsync(
@@ -100,10 +98,11 @@ public static class CallbackQueryContainerExtensions
                 linkPreviewOptions: disableWebpagePreview,
                 replyMarkup: inlineKeyboardMarkup,
                 businessConnectionId: businessConnectionId,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
             return null;
         }
-        else if (simpleContext.Update.Message != null)
+
+        if (simpleContext.Update.Message != null)
         {
             return await simpleContext.BotClient.EditMessageText(
                 chatId: simpleContext.Update.Message.Chat.Id,
@@ -115,7 +114,7 @@ public static class CallbackQueryContainerExtensions
                 replyMarkup: inlineKeyboardMarkup,
                 businessConnectionId: businessConnectionId,
                 cancellationToken: cancellationToken)
-            .WrapMessageAsync(simpleContext.Updater);
+            .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
         }
 
         throw new InvalidOperationException("InlineMessageId and Message are both null!");
@@ -146,10 +145,11 @@ public static class CallbackQueryContainerExtensions
                 proximityAlertRadius: proximityAlertRadius,
                 replyMarkup: replyMarkup,
                 businessConnectionId: businessConnectionId,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
             return null;
         }
-        else if (simpleContext.Update.Message != null)
+
+        if (simpleContext.Update.Message != null)
         {
             return await simpleContext.BotClient.EditMessageLiveLocation(
                 chatId: simpleContext.Update.Message.Chat.Id,
@@ -163,7 +163,7 @@ public static class CallbackQueryContainerExtensions
                 replyMarkup: replyMarkup,
                 businessConnectionId: businessConnectionId,
                 cancellationToken: cancellationToken)
-            .WrapMessageAsync(simpleContext.Updater);
+            .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
         }
 
         throw new InvalidOperationException("InlineMessageId and Message are both null!");
@@ -184,10 +184,11 @@ public static class CallbackQueryContainerExtensions
                 media: inputMedia,
                 replyMarkup: inlineKeyboardMarkup,
                 businessConnectionId: businessConnectionId,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
             return null;
         }
-        else if (simpleContext.Update.Message != null)
+
+        if (simpleContext.Update.Message != null)
         {
             return await simpleContext.BotClient.EditMessageMedia(
                 chatId: simpleContext.Update.Message.Chat.Id,
@@ -196,7 +197,7 @@ public static class CallbackQueryContainerExtensions
                 replyMarkup: inlineKeyboardMarkup,
                 businessConnectionId: businessConnectionId,
                 cancellationToken: cancellationToken)
-            .WrapMessageAsync(simpleContext.Updater);
+            .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
         }
 
         throw new InvalidOperationException("InlineMessageId and Message are both null!");
@@ -221,10 +222,11 @@ public static class CallbackQueryContainerExtensions
                 captionEntities: captionEntities,
                 replyMarkup: inlineKeyboardMarkup,
                 businessConnectionId: businessConnectionId,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
             return null;
         }
-        else if (simpleContext.Update.Message != null)
+
+        if (simpleContext.Update.Message != null)
         {
             return await simpleContext.BotClient.EditMessageCaption(
                 chatId: simpleContext.Update.Message.Chat.Id,
@@ -235,7 +237,7 @@ public static class CallbackQueryContainerExtensions
                 replyMarkup: inlineKeyboardMarkup,
                 businessConnectionId: businessConnectionId,
                 cancellationToken: cancellationToken)
-            .WrapMessageAsync(simpleContext.Updater);
+            .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
         }
 
         throw new InvalidOperationException("InlineMessageId and Message are both null!");
@@ -254,10 +256,11 @@ public static class CallbackQueryContainerExtensions
                 inlineMessageId: simpleContext.Update.InlineMessageId,
                 replyMarkup: inlineKeyboardMarkup,
                 businessConnectionId: businessConnectionId,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
             return null;
         }
-        else if (simpleContext.Update.Message != null)
+
+        if (simpleContext.Update.Message != null)
         {
             return await simpleContext.BotClient.EditMessageReplyMarkup(
                 chatId: simpleContext.Update.Message.Chat.Id,
@@ -265,7 +268,7 @@ public static class CallbackQueryContainerExtensions
                 replyMarkup: inlineKeyboardMarkup,
                 businessConnectionId: businessConnectionId,
                 cancellationToken: cancellationToken)
-            .WrapMessageAsync(simpleContext.Updater);
+            .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
         }
 
         throw new InvalidOperationException("InlineMessageId and Message are both null!");

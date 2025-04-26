@@ -16,7 +16,7 @@
         /// </remarks>
         public FilterAttributeBuilder(Action<FilterAttributeBuilder> builder)
         {
-            _filtersPerUpdateType = new();
+            _filtersPerUpdateType = [];
 
             builder(this);
         }
@@ -45,12 +45,12 @@
         /// <inheritdoc/>
         protected internal override object GetFilterTypeOf(Type requestedType)
         {
-            if (!_filtersPerUpdateType.ContainsKey(requestedType))
+            if (!_filtersPerUpdateType.TryGetValue(requestedType, out object? value))
             {
                 throw new InvalidOperationException($"{GetType()} dose not support {requestedType}");
             }
 
-            return _filtersPerUpdateType[requestedType];
+            return value;
         }
     }
 }

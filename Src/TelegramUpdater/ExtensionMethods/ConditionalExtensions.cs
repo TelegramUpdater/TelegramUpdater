@@ -221,7 +221,7 @@ public static class ConditionalExtensions
     }
 
     /// <summary>
-    /// If this <see cref="UpdateContainerAbs{T}"/> is not null
+    /// If this <see cref="AbstractUpdateContainer{T}"/> is not null
     /// </summary>
     public static async Task<MatchContext<T>> IfNotNull<T>(this IContainer<T>? simpleContext,
                                                            Func<IContainer<T>, Task> func) where T : class
@@ -236,7 +236,7 @@ public static class ConditionalExtensions
     }
 
     /// <summary>
-    /// If this <see cref="UpdateContainerAbs{T}"/> is not null
+    /// If this <see cref="AbstractUpdateContainer{T}"/> is not null
     /// </summary>
     public static async Task<MatchContext<T>> IfNotNull<T>(this Task<IContainer<T>?> simpleContext,
                                                            Func<IContainer<T>, Task> func) where T : class

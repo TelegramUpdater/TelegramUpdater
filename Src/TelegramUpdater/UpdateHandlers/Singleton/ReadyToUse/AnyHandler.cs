@@ -44,6 +44,6 @@ public class AnyHandler<T> : AbstractSingletonUpdateHandler<T> where T : class
     protected override async Task HandleAsync(
         IContainer<T> updateContainer)
     {
-        await _handleAsync(updateContainer);
+        await _handleAsync(updateContainer).ConfigureAwait(false);
     }
 }

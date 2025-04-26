@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿// Ignore Spelling: Cutify
+
+using System.Text.RegularExpressions;
 using TelegramUpdater.Filters;
 using TelegramUpdater.Helpers;
 
@@ -41,7 +43,7 @@ public static class FilterCutify
     /// <summary>
     /// The handler will be triggered when a regex matches its text.
     /// </summary>
-    public static Filter<Message> TextMatchs(
+    public static Filter<Message> TextMatches(
         string pattern, bool catchCaption = false, RegexOptions? regexOptions = default)
             => new MessageTextRegex(pattern, catchCaption, regexOptions);
 

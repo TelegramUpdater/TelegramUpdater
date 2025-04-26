@@ -3,13 +3,11 @@
 /// <summary>
 /// Abstract scoped update handler for <see cref="UpdateType.ChannelPost"/>.
 /// </summary>
-public abstract class ChannelPostHandler : AnyHandler<Message>
+/// <remarks>
+/// Set handling priority of this handler.
+/// </remarks>
+/// <param name="group">Handling priority group, The lower the sooner to process.</param>
+public abstract class ChannelPostHandler(int group)
+    : AnyHandler<Message>(x => x.ChannelPost, group)
 {
-    /// <summary>
-    /// Set handling priority of this handler.
-    /// </summary>
-    /// <param name="group">Handling priority group, The lower the sooner to process.</param>
-    protected ChannelPostHandler(int group) : base(x => x.ChannelPost, group)
-    {
-    }
 }

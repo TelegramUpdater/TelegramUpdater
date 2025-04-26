@@ -43,6 +43,6 @@ public abstract class InlineQueryHandler(int group = default)
             isPersonal,
             nextOffset,
             button,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
     #endregion
 }

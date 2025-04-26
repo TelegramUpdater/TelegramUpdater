@@ -90,7 +90,7 @@ public sealed class Updater : IUpdater
         if (_preUpdateProcessorType is not null)
         {
             if (!typeof(AbstractPreUpdateProcessor)
-                .IsAssignableFrom(preUpdateProcessorType))
+                .IsAssignableFrom(_preUpdateProcessorType))
             {
                 throw new InvalidOperationException(
                     $"Input type for preUpdateProcessorType " +
@@ -100,7 +100,7 @@ public sealed class Updater : IUpdater
 
             if (serviceDescriptors is null)
             {
-                if (preUpdateProcessorType
+                if (_preUpdateProcessorType
                     .GetConstructor(Type.EmptyTypes) == null)
                 {
                     throw new InvalidOperationException(

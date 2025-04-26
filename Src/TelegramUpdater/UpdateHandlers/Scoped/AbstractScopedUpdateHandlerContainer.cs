@@ -12,23 +12,26 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     where THandler : IScopedUpdateHandler
     where TUpdate : class
 {
-    internal AbstractScopedUpdateHandlerContainer(
+    /// <summary>
+    /// Create a new instance of <see cref="AbstractScopedUpdateHandler{T}"/>.
+    /// </summary>
+    /// <param name="updateType">Type of update.</param>
+    /// <param name="filter">The filter.</param>
+    /// <exception cref="ArgumentException"></exception>
+    protected AbstractScopedUpdateHandlerContainer(
         UpdateType updateType, IFilter<TUpdate>? filter = default)
     {
         if (updateType == UpdateType.Unknown)
             throw new ArgumentException(
-                $"There's nothing unknown here! {nameof(updateType)}");
+                $"There's nothing unknown here! {nameof(updateType)}", nameof(updateType));
 
         UpdateType = updateType;
         ScopedHandlerType = typeof(THandler);
 
         Filter = filter;
 
-        if (Filter == null)
-        {
-            // Check for attributes
-            Filter = ScopedHandlerType.GetFilterAttributes<TUpdate>();
-        }
+        // Check for attributes
+        Filter ??= ScopedHandlerType.GetFilterAttributes<TUpdate>();
     }
 
     IReadOnlyDictionary<string, object>? IScopedUpdateHandlerContainer.ExtraData

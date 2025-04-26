@@ -3,19 +3,13 @@
 /// <summary>
 /// Abstract scoped update handler for <see cref="UpdateType.CallbackQuery"/>.
 /// </summary>
-public abstract class CallbackQueryHandler
-    : AnyHandler<CallbackQuery>
+/// <remarks>
+/// Set handling priority of this handler.
+/// </remarks>
+/// <param name="group">Handling priority group, The lower the sooner to process.</param>
+public abstract class CallbackQueryHandler(int group = 0)
+    : AnyHandler<CallbackQuery>(x => x.CallbackQuery, group)
 {
-    /// <summary>
-    /// Set handling priority of this handler.
-    /// </summary>
-    /// <param name="group">Handling priority group, The lower the sooner to process.</param>
-    protected CallbackQueryHandler(int group = 0)
-        : base(x => x.CallbackQuery, group)
-    {
-    }
-
-
     #region Extension Methods
     /// <inheritdoc cref="CallbackQuery.From"/>.
     protected User From => ActualUpdate.From;
@@ -36,7 +30,7 @@ public abstract class CallbackQueryHandler
         CancellationToken cancellationToken = default)
     {
         await BotClient.AnswerCallbackQuery(
-            Id, text, showAlert, url, cacheTime, cancellationToken);
+            Id, text, showAlert, url, cacheTime, cancellationToken).ConfigureAwait(false);
     }
     #endregion
 }

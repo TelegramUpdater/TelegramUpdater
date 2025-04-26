@@ -8,7 +8,7 @@ namespace TelegramUpdater.UpdateContainer;
 public interface IUpdateContainer
 {
     /// <summary>
-    /// <see cref="TelegramUpdater.Updater"/> instance which is resposeable
+    /// <see cref="TelegramUpdater.Updater"/> instance which is responsible.
     /// for this container.
     /// </summary>
     public IUpdater Updater { get; }
@@ -24,7 +24,7 @@ public interface IUpdateContainer
     ShiningInfo<long, Update> ShiningInfo { get; }
 
     /// <summary>
-    /// <see cref="ITelegramBotClient"/> which is resposeable for this container.
+    /// <see cref="ITelegramBotClient"/> which is responsible for this container.
     /// </summary>
     public ITelegramBotClient BotClient { get; }
 

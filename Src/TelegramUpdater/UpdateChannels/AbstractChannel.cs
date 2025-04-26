@@ -27,11 +27,11 @@ public abstract class AbstractChannel<T> : IGenericUpdateChannel<T>
         IFilter<T>? filter)
     {
         if (timeOut == default)
-            throw new ArgumentException("Use a valid time out.");
+            throw new ArgumentException("Use a valid time out.", nameof(timeOut));
 
         if (updateType == UpdateType.Unknown)
             throw new ArgumentException(
-                $"There's nothing unknown here! {nameof(updateType)}");
+                $"There's nothing unknown here! {nameof(updateType)}", nameof(updateType));
 
         TimeOut = timeOut;
         _filter = filter;

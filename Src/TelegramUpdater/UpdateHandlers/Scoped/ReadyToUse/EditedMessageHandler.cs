@@ -3,14 +3,7 @@
 /// <summary>
 /// Abstract scoped update handler for <see cref="UpdateType.EditedMessage"/>.
 /// </summary>
-public abstract class EditedMessageHandler : AnyHandler<Message>
+public abstract class EditedMessageHandler(int group = default)
+    : AnyHandler<Message>(x => x.EditedMessage, group)
 {
-    /// <summary>
-    /// Set handling priority of this handler.
-    /// </summary>
-    /// <param name="group">Handling priority group, The lower the sooner to process.</param>
-    public EditedMessageHandler(int group = default)
-        : base(x => x.EditedMessage, group)
-    {
-    }
 }

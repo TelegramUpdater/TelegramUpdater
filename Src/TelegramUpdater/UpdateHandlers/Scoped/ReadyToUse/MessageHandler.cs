@@ -36,7 +36,7 @@ public abstract class MessageHandler(int group = default)
     protected bool IsReplied => RepliedTo is not null;
 
     /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)"/>.
-    /// <remarks>This methos sends a message to the <see cref="Message.Chat"/></remarks>
+    /// <remarks>This methods sends a message to the <see cref="Message.Chat"/></remarks>
     protected async Task<Message> ResponseAsync(
         string text,
         bool sendAsReply = false,
@@ -64,7 +64,7 @@ public abstract class MessageHandler(int group = default)
             messageEffectId: messageEffectId,
             businessConnectionId: businessConnectionId,
             allowPaidBroadcast: allowPaidBroadcast,
-            cancellationToken: cancellationToken))
+            cancellationToken: cancellationToken).ConfigureAwait(false))
         .Update;
 
     /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)"/>.
@@ -97,12 +97,12 @@ public abstract class MessageHandler(int group = default)
             messageEffectId: messageEffectId,
             businessConnectionId: businessConnectionId,
             allowPaidBroadcast: allowPaidBroadcast,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
 
     /// <inheritdoc cref="TelegramBotClientExtensions.DeleteMessage(ITelegramBotClient, ChatId, int, CancellationToken)"/>
     protected async Task DeleteAsync(CancellationToken cancellationToken = default)
     {
-        await BotClient.DeleteMessage(Chat.Id, Id, cancellationToken);
+        await BotClient.DeleteMessage(Chat.Id, Id, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -134,14 +134,14 @@ public abstract class MessageHandler(int group = default)
                 disableNotification: disableNotification,
                 protectContent: protectContents,
                 replyMarkup: replyMarkup,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
 
         var update = await AwaitMessageAsync(
-            FilterCutify.Text(), timeOut, onUnrelatedUpdate, cancellationToken);
+            FilterCutify.Text(), timeOut, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
         if (update == null)
         {
             if (onTimeOut is not null)
-                await onTimeOut(cancellationToken);
+                await onTimeOut(cancellationToken).ConfigureAwait(false);
             return null;
         }
 

@@ -52,24 +52,22 @@ public static class ScopedUpdateHandlersExtensions
             typeOfScopedHandler, _t);
 
         var container = (IScopedUpdateHandlerContainer?)Activator.CreateInstance(
-            containerGeneric, new object?[] { updateType.Value, filter, getT });
+            containerGeneric, [updateType.Value, filter, getT]);
 
         if (container != null)
         {
             return updater.AddScopedUpdateHandler(container);
         }
-        else
-        {
-            updater.Logger.LogWarning(
-                "{type} not added to the Scoped Handlers! The instance of it is null.",
-                typeOfScopedHandler);
-            throw new InvalidOperationException(
-                "Handler not added to the Scoped Handlers! The instance of it is null.");
-        }
+
+        updater.Logger.LogWarning(
+            "{type} not added to the Scoped Handlers! The instance of it is null.",
+            typeOfScopedHandler);
+        throw new InvalidOperationException(
+            "Handler not added to the Scoped Handlers! The instance of it is null.");
     }
 
     /// <summary>
-    /// Adds an scoped handler to the updater. ( Use this if you'r not sure. )
+    /// Adds an scoped handler to the updater. ( Use this if you're not sure. )
     /// </summary>
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <typeparam name="TUpdate">Update type.</typeparam>
@@ -136,9 +134,13 @@ public static class ScopedUpdateHandlersExtensions
                 UpdateType.EditedMessage => x => x.EditedMessage,
                 UpdateType.ChannelPost => x => x.ChannelPost,
                 UpdateType.EditedChannelPost => x => x.EditedChannelPost,
+
+                // TODO: add other messages
+
                 _ => throw new ArgumentException(
-                    $"Update type {updateType} is not a Message."
-                )
+                    $"Update type {updateType} is not a Message.",
+                    nameof(updateType)
+                ),
             });
 
     /// <summary>
@@ -166,9 +168,11 @@ public static class ScopedUpdateHandlersExtensions
             {
                 UpdateType.ChatMember => x => x.ChatMember,
                 UpdateType.MyChatMember => x => x.MyChatMember,
+
                 _ => throw new ArgumentException(
-                    $"Update type {updateType} is not a ChatMemberUpdated."
-                )
+                    $"Update type {updateType} is not a ChatMemberUpdated.",
+                    nameof(updateType)
+                ),
             });
 
     /// <summary>
@@ -314,4 +318,6 @@ public static class ScopedUpdateHandlersExtensions
         where THandler : IScopedUpdateHandler
         => updater.AddScopedUpdateHandler<THandler, ShippingQuery>(
             filter, UpdateType.ShippingQuery, x => x.ShippingQuery);
+
+    // TODO: add other updates
 }

@@ -10,13 +10,14 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// Creates an <see cref="IScopedUpdateHandler"/> for any type of update.
 /// </summary>
 /// <typeparam name="T">Update type.</typeparam>
-public abstract class AnyHandler<T> : AbstractScopedUpdateHandler<T>
+/// <remarks>
+/// Create a new instance of <see cref="AnyHandler{T}"/>.
+/// </remarks>
+/// <param name="getT">To extract <typeparamref name="T"/> from <see cref="Update"/>.</param>
+/// <param name="group">Handling priority.</param>
+public abstract class AnyHandler<T>(Func<Update, T?> getT, int group) : AbstractScopedUpdateHandler<T>(getT, group)
     where T : class
 {
-    internal AnyHandler(Func<Update, T?> getT, int group)
-        : base(getT, group)
-    {
-    }
 
     /// <inheritdoc/>
     internal protected sealed override IContainer<T> ContainerBuilder(
@@ -47,7 +48,7 @@ public abstract class AnyHandler<T> : AbstractScopedUpdateHandler<T>
         where TExp : class
     {
         return await Container.OpenChannelAsync(
-            updateChannel, onUnrelatedUpdate, cancellationToken);
+            updateChannel, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -59,7 +60,7 @@ public abstract class AnyHandler<T> : AbstractScopedUpdateHandler<T>
     /// <param name="onUnrelatedUpdate">
     /// A callback function to be called if an unrelated update from comes.
     /// </param>
-    /// <param name="cancellationToken">To cancell the job.</param>
+    /// <param name="cancellationToken">To cancel the job.</param>
     /// <returns></returns>
     public async ValueTask<IContainer<Message>?> AwaitMessageAsync(
         Filter<Message>? filter,
@@ -70,7 +71,7 @@ public abstract class AnyHandler<T> : AbstractScopedUpdateHandler<T>
         CancellationToken cancellationToken = default)
     {
         return await Container.ChannelMessageAsync(
-            filter, timeOut, onUnrelatedUpdate, cancellationToken);
+            filter, timeOut, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -84,7 +85,7 @@ public abstract class AnyHandler<T> : AbstractScopedUpdateHandler<T>
     /// <param name="onUnrelatedUpdate">
     /// A callback function to be called if an unrelated update from comes.
     /// </param>
-    /// <param name="cancellationToken">To cancell the job.</param>
+    /// <param name="cancellationToken">To cancel the job.</param>
     /// <returns></returns>
     public async Task<IContainer<CallbackQuery>?> AwaitButtonClickAsync(
         TimeSpan timeOut,
@@ -95,7 +96,7 @@ public abstract class AnyHandler<T> : AbstractScopedUpdateHandler<T>
         CancellationToken cancellationToken = default)
     {
         return await Container.ChannelButtonClickAsync(
-            timeOut, callbackQueryRegex, onUnrelatedUpdate, cancellationToken);
+            timeOut, callbackQueryRegex, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
     }
     #endregion
 }
