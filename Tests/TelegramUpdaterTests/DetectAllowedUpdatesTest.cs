@@ -38,12 +38,10 @@ namespace TelegramUpdaterTests
 
     public class DetectAllowedUpdatesTest
     {
-        private readonly string FakeBotToken = "123456789:ABCdefghij8kLM2nQrisT7_v4TMAKdiHm9T0";
-
         [Fact]
         public async Task Test_1Async()
         {
-            var testUpdater = new Updater(new TelegramBotClient(FakeBotToken));
+            var testUpdater = new Updater(new TelegramBotClient(Extensions.FakeBotToken));
 
             testUpdater.AddScopedUpdateHandler<MyMessageHandler, Message>();
             testUpdater.AddScopedUpdateHandler<MyCallbackQueryHandler, CallbackQuery>();
@@ -60,7 +58,7 @@ namespace TelegramUpdaterTests
         [Fact]
         public async Task Test_2Async()
         {
-            var testUpdater = new Updater(new TelegramBotClient(FakeBotToken),
+            var testUpdater = new Updater(new TelegramBotClient(Extensions.FakeBotToken),
                 new UpdaterOptions(allowedUpdates: [UpdateType.Message, UpdateType.CallbackQuery]));
 
             await testUpdater.StartAsync<FakeWriter>();
