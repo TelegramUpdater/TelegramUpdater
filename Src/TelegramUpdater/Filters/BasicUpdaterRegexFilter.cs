@@ -2,6 +2,7 @@
 
 namespace TelegramUpdater.Filters;
 
+
 /// <summary>
 /// A basic regex filter.
 /// </summary>
@@ -9,7 +10,7 @@ namespace TelegramUpdater.Filters;
 /// <b>Extra data:</b> <see cref="MatchCollection"/> "matches".
 /// </remarks>
 /// <typeparam name="T">Type to apply filter on.</typeparam>
-public class BasicRegexFilter<T> : Filter<T>
+public class BasicUpdaterRegexFilter<T> : UpdaterFilter<T>
 {
     private readonly Func<T, string?> _getText;
     private readonly Regex _regex;
@@ -21,7 +22,7 @@ public class BasicRegexFilter<T> : Filter<T>
     /// <param name="pattern">Regex pattern.</param>
     /// <param name="regexOptions">Regex options.</param>
     /// <param name="matchTimeout">Timeout for regex matching.</param>
-    public BasicRegexFilter(
+    public BasicUpdaterRegexFilter(
         Func<T, string?> getText,
         string pattern,
         RegexOptions? regexOptions = default,
@@ -38,7 +39,7 @@ public class BasicRegexFilter<T> : Filter<T>
     /// </summary>
     /// <param name="getText">A function to extract text from <typeparamref name="T"/>.</param>
     /// <param name="regex">Regex compiled object.</param>
-    public BasicRegexFilter(
+    public BasicUpdaterRegexFilter(
         Func<T, string?> getText,
         Regex regex)
     {
@@ -47,9 +48,9 @@ public class BasicRegexFilter<T> : Filter<T>
     }
 
     /// <inheritdoc/>
-    public override bool TheyShellPass(IUpdater _, T input)
+    public override bool TheyShellPass(UpdaterFilterInputs<T> inputs)
     {
-        var text = _getText(input);
+        var text = _getText(inputs.Input);
 
         if (string.IsNullOrEmpty(text)) return false;
 
@@ -68,13 +69,13 @@ public class BasicRegexFilter<T> : Filter<T>
 /// <summary>
 /// A regex filter on any <see cref="string"/>.
 /// </summary>
-public sealed class StringRegex : BasicRegexFilter<string>
+public sealed class UpdaterStringRegex : BasicUpdaterRegexFilter<string>
 {
     /// <summary>
     /// Create an <see cref="string"/> regex filter.
     /// </summary>
     /// <param name="regex">Regex compiled object.</param>
-    public StringRegex(Regex regex) : base(x=> x, regex)
+    public UpdaterStringRegex(Regex regex) : base(x=> x, regex)
     {
     }
 
@@ -84,7 +85,7 @@ public sealed class StringRegex : BasicRegexFilter<string>
     /// <param name="pattern">Regex pattern.</param>
     /// <param name="regexOptions">Regex options.</param>
     /// <param name="matchTimeout">Timeout for regex matching.</param>
-    public StringRegex(string pattern, RegexOptions? regexOptions = null, TimeSpan? matchTimeout = null)
+    public UpdaterStringRegex(string pattern, RegexOptions? regexOptions = null, TimeSpan? matchTimeout = null)
         : base(x=> x, pattern, regexOptions, matchTimeout)
     {
     }
@@ -93,7 +94,7 @@ public sealed class StringRegex : BasicRegexFilter<string>
 /// <summary>
 /// A regex filter applied on <see cref="CallbackQuery"/>(es).
 /// </summary>
-public sealed class CallbackQueryRegex : BasicRegexFilter<CallbackQuery>
+public sealed class CallbackQueryRegex : BasicUpdaterRegexFilter<CallbackQuery>
 {
     /// <summary>
     /// Create an <see cref="CallbackQuery.Data"/> regex filter.
@@ -118,7 +119,7 @@ public sealed class CallbackQueryRegex : BasicRegexFilter<CallbackQuery>
 /// <summary>
 /// A regex filter applied on <see cref="Message"/>s.
 /// </summary>
-public sealed class MessageTextRegex : BasicRegexFilter<Message>
+public sealed class MessageTextRegex : BasicUpdaterRegexFilter<Message>
 {
     /// <summary>
     /// Create an <see cref="Message"/> regex filter.

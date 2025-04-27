@@ -63,7 +63,7 @@ public abstract class AnyHandler<T>(Func<Update, T?> getT, int group) : Abstract
     /// <param name="cancellationToken">To cancel the job.</param>
     /// <returns></returns>
     public async ValueTask<IContainer<Message>?> AwaitMessageAsync(
-        Filter<Message>? filter,
+        Filter<UpdaterFilterInputs<Message>>? filter,
         TimeSpan? timeOut,
         Func<
             IUpdater,

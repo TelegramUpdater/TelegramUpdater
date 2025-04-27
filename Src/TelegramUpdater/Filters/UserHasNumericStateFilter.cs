@@ -17,7 +17,7 @@ using StateKeeping.StateKeepers.NumericStateKeepers;
 public abstract class UserHasNumericStateFilter<T>(
     Func<T, User?> userResolver,
     string stateKeeperName,
-    int state = default) : Filter<T>((updater, update) =>
+    int state = default) : UpdaterFilter<T>((updater, update) =>
     {
         var keeper = updater.GetUserNumericStateKeeper(stateKeeperName);
 

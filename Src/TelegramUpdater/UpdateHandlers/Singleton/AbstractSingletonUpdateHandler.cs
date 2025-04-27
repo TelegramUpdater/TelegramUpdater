@@ -7,7 +7,8 @@ namespace TelegramUpdater.UpdateHandlers.Singleton;
 /// Abstract base to create update handlers.
 /// </summary>
 /// <typeparam name="T">Update type.</typeparam>
-public abstract class AbstractSingletonUpdateHandler<T> : IGenericSingletonUpdateHandler<T>
+public abstract class AbstractSingletonUpdateHandler<T>
+    : IGenericSingletonUpdateHandler<T>
     where T : class
 {
     // TODO: use internal protected for GetT like scoped.
@@ -24,7 +25,7 @@ public abstract class AbstractSingletonUpdateHandler<T> : IGenericSingletonUpdat
     protected AbstractSingletonUpdateHandler(
         UpdateType updateType,
         Func<Update, T?> getT,
-        IFilter<T>? filter,
+        IFilter<UpdaterFilterInputs<T>>? filter,
         int group)
     {
         if (updateType == UpdateType.Unknown)
@@ -47,7 +48,7 @@ public abstract class AbstractSingletonUpdateHandler<T> : IGenericSingletonUpdat
     public int Group { get; }
 
     /// <inheritdoc/>
-    public IFilter<T>? Filter { get; }
+    public IFilter<UpdaterFilterInputs<T>>? Filter { get; }
 
     /// <inheritdoc/>
     public Func<Update, T?> GetActualUpdate { get; }
@@ -65,14 +66,12 @@ public abstract class AbstractSingletonUpdateHandler<T> : IGenericSingletonUpdat
     /// You can override this method instead of using filters.
     /// To apply a custom filter.
     /// </summary>
-    /// <param name="input">Actual update.</param>
-    /// <param name="updater">The updater instance.</param>
     /// <returns></returns>
-    protected virtual bool ShouldHandle(IUpdater updater, T input)
+    protected virtual bool ShouldHandle(UpdaterFilterInputs<T> inputs)
     {
         if (Filter is null) return true;
 
-        return Filter.TheyShellPass(updater, input);
+        return Filter.TheyShellPass(inputs);
     }
 
     /// <inheritdoc/>
@@ -81,15 +80,15 @@ public abstract class AbstractSingletonUpdateHandler<T> : IGenericSingletonUpdat
         => await HandleAsync(ContainerBuilder(updater, shiningInfo)).ConfigureAwait(false);
 
     /// <inheritdoc/>
-    public bool ShouldHandle(IUpdater updater, Update update)
+    public bool ShouldHandle(UpdaterFilterInputs<Update> inputs)
     {
-        if (update.Type != UpdateType) return false;
+        if (inputs.Input.Type != UpdateType) return false;
 
-        var insider = GetT(update);
+        var insider = GetT(inputs.Input);
 
         if (insider == null) return false;
 
-        return ShouldHandle(updater, insider);
+        return ShouldHandle(new UpdaterFilterInputs<T>(inputs.Updater, insider));
     }
 
     /// <summary>

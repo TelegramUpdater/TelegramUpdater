@@ -24,7 +24,7 @@ public sealed class CallbackQueryHandler : AnyHandler<CallbackQuery>
     /// </param>
     public CallbackQueryHandler(
         Func<IContainer<CallbackQuery>, Task> callback,
-        IFilter<CallbackQuery>? filter = default,
+        IFilter<UpdaterFilterInputs<CallbackQuery>>? filter = default,
         int group = default)
         : base(UpdateType.CallbackQuery,
                x => x.CallbackQuery,

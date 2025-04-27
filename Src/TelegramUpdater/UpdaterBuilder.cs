@@ -162,7 +162,7 @@ public sealed class UpdaterBuilderStep2
     /// An <see cref="string"/> filter on <see cref="Exception.Message"/>.
     /// Use this if you target the Exceptions with an specified message.
     /// <para>
-    /// You can use <see cref="Filters.StringRegex"/> to create your filter.
+    /// You can use <see cref="Filters.UpdaterStringRegex"/> to create your filter.
     /// </para>
     /// </param>
     /// <param name="allowedHandlers">
@@ -208,7 +208,7 @@ public sealed class UpdaterBuilderStep2
     /// An <see cref="string"/> filter on <see cref="Exception.Message"/>.
     /// Use this if you target the Exceptions with an specified message.
     /// <para>
-    /// You can use <see cref="Filters.StringRegex"/> to create your filter.
+    /// You can use <see cref="Filters.UpdaterStringRegex"/> to create your filter.
     /// </para>
     /// </param>
     /// <remarks>
@@ -354,7 +354,7 @@ public sealed class UpdaterBuilderStep3
     /// </remarks>
     public IUpdater StepThree(
         Func<IContainer<Message>, Task> callback,
-        Filter<Message>? filter)
+        UpdaterFilter<Message>? filter)
     {
         if (_updater == null)
             throw new InvalidOperationException("Please go step by step, you missed StepTwo ?");

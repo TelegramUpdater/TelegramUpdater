@@ -23,10 +23,8 @@ public interface IScopedUpdateHandlerContainer
     /// Checks if an update can be handled in a handler
     /// of type <see cref="ScopedHandlerType"/>.
     /// </summary>
-    /// <param name="update">The update.</param>
-    /// <param name="updater">The updater instance.</param>
     /// <returns></returns>
-    public bool ShouldHandle(IUpdater updater, Update update);
+    public bool ShouldHandle(UpdaterFilterInputs<Update> inputs);
 
     /// <summary>
     /// Initialize an instance of <see cref="ScopedHandlerType"/>.

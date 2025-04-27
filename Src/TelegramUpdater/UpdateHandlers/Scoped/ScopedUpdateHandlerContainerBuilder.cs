@@ -22,7 +22,7 @@
 /// </param>
 public sealed class ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
     UpdateType updateType,
-    IFilter<TUpdate>? filter = default,
+    IFilter<UpdaterFilterInputs<TUpdate>>? filter = default,
     Func<Update, TUpdate?>? getT = default)
     : AbstractScopedUpdateHandlerContainer<THandler, TUpdate>(updateType, filter)
     where THandler : IScopedUpdateHandler

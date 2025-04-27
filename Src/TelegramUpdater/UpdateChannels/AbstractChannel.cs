@@ -8,7 +8,7 @@ public abstract class AbstractChannel<T> : IGenericUpdateChannel<T>
     where T : class
 {
     private readonly Func<Update, T?> _getT;
-    private readonly IFilter<T>? _filter;
+    private readonly IFilter<UpdaterFilterInputs<T>>? _filter;
 
     /// <summary>
     /// An abstract class for channel updates.
@@ -24,7 +24,7 @@ public abstract class AbstractChannel<T> : IGenericUpdateChannel<T>
         UpdateType updateType,
         Func<Update, T?> getT,
         TimeSpan timeOut,
-        IFilter<T>? filter)
+        IFilter<UpdaterFilterInputs<T>>? filter)
     {
         if (timeOut == default)
             throw new ArgumentException("Use a valid time out.", nameof(timeOut));
@@ -52,24 +52,24 @@ public abstract class AbstractChannel<T> : IGenericUpdateChannel<T>
     public T? GetActualUpdate(Update update) => _getT(update);
 
     /// <inheritdoc/>
-    private bool ShouldChannel(IUpdater updater, T t)
+    private bool ShouldChannel(UpdaterFilterInputs<T> inputs)
     {
         if (_filter is null) return true;
 
-        return _filter.TheyShellPass(updater, t);
+        return _filter.TheyShellPass(inputs);
     }
 
     /// <summary>
     /// If this update should be channeled.
     /// </summary>
-    public bool ShouldChannel(IUpdater updater, Update update)
+    public bool ShouldChannel(UpdaterFilterInputs<Update> inputs)
     {
-        if (update.Type != UpdateType) return false;
+        if (inputs.Input.Type != UpdateType) return false;
 
-        var insider = GetActualUpdate(update);
+        var insider = GetActualUpdate(inputs.Input);
 
         if (insider == null) return false;
 
-        return ShouldChannel(updater, insider);
+        return ShouldChannel(new UpdaterFilterInputs<T>(inputs.Updater, insider));
     }
 }

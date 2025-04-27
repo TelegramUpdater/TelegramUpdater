@@ -9,7 +9,7 @@
 /// <param name="stateKeeperName">The name of state keeper. Must be added to the updater before.</param>
 /// <param name="state">The specified state.</param>
 public class UserHasEnumStateFilter<TEnum, T>(Func<T, User?> userResolver, string stateKeeperName, TEnum state = default)
-    : Filter<T>((updater, update) =>
+    : UpdaterFilter<T>((updater, update) =>
         {
             var keeper = updater.GetUserEnumStateKeeper<TEnum>(stateKeeperName);
             var user = userResolver(update);

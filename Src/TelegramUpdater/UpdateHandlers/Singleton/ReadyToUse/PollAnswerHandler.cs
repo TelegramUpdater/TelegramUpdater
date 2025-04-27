@@ -22,7 +22,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// </param>
 public sealed class PollAnswerHandler(
     Func<IContainer<PollAnswer>, Task> callback,
-    IFilter<PollAnswer>? filter,
+    IFilter<UpdaterFilterInputs<PollAnswer>>? filter,
     int group) : AnyHandler<PollAnswer>(UpdateType.PollAnswer, x=> x.PollAnswer, callback, filter, group)
 {
 }

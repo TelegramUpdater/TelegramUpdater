@@ -14,8 +14,6 @@ public interface ISingletonUpdateHandler : IUpdateHandler
     /// Checks if an update can be handled in this
     /// <see cref="ISingletonUpdateHandler"/>.
     /// </summary>
-    /// <param name="update">The update.</param>
-    /// <param name="updater">The updater instance.</param>
     /// <returns></returns>
-    public bool ShouldHandle(IUpdater updater, Update update);
+    public bool ShouldHandle(UpdaterFilterInputs<Update> inputs);
 }

@@ -13,9 +13,8 @@ public interface IFilter<T>
     /// Indicates if an input of type <typeparamref name="T"/> can pass this filter
     /// </summary>
     /// <param name="input">The input value to check</param>
-    /// <param name="updater">The updater instance.</param>
     /// <returns></returns>
-    public bool TheyShellPass(IUpdater updater, T input);
+    public bool TheyShellPass(T input);
 
     /// <summary>
     /// A dictionary of extra data produced by this filter.
@@ -85,9 +84,9 @@ public interface IJoinedFilter<T> : IFilter<T>
 /// Creates a simple basic filter
 /// </remarks>
 /// <param name="filter">A function to check the input and return a boolean</param>
-public class Filter<T>(Func<IUpdater, T, bool>? filter = default) : IFilter<T>
+public class Filter<T>(Func<T, bool>? filter = default) : IFilter<T>
 {
-    private readonly Func<IUpdater, T, bool>? _filter = filter;
+    private readonly Func<T, bool>? _filter = filter;
     private Dictionary<string, object>? _extraData;
 
     /// <inheritdoc/>
@@ -102,22 +101,22 @@ public class Filter<T>(Func<IUpdater, T, bool>? filter = default) : IFilter<T>
     }
 
     /// <inheritdoc/>
-    public virtual bool TheyShellPass(IUpdater updater, T input)
-        => input != null && (_filter is null || _filter(updater, input));
+    public virtual bool TheyShellPass(T input)
+        => input != null && (_filter is null || _filter(input));
 
     /// <summary>
     /// Converts a <paramref name="filter"/> to <see cref="Filter{T}"/>
     /// </summary>
     /// <param name="filter"></param>
 
-    public static implicit operator Filter<T>(Func<IUpdater, T, bool> filter)
+    public static implicit operator Filter<T>(Func<T, bool> filter)
         => new(filter);
 
     /// <summary>
     /// Converts a filter to a function.
     /// </summary>
     /// <param name="filter"></param>
-    public static implicit operator Func<IUpdater, T, bool>(Filter<T> filter)
+    public static implicit operator Func<T, bool>(Filter<T> filter)
         => filter.TheyShellPass;
 
     /// <summary>
@@ -170,7 +169,7 @@ public class Filter<T>(Func<IUpdater, T, bool>? filter = default) : IFilter<T>
 /// Creates a reverse filter ( Like not filter ), use not operator
 /// </remarks>
 public class ReverseFilter<T>(IFilter<T> filter1)
-    : Filter<T>((u, x) => !filter1.TheyShellPass(u, x))
+    : Filter<T>((x) => !filter1.TheyShellPass(x))
 {
 }
 
@@ -193,14 +192,13 @@ public abstract class JoinedFilter<T>(params IFilter<T>[] filters)
     /// Check if the filters are passed here.
     /// </summary>
     /// <param name="input"></param>
-    /// <param name="updater">The updater instance.</param>
     /// <returns></returns>
-    protected abstract bool InnerTheyShellPass(IUpdater updater, T input);
+    protected abstract bool InnerTheyShellPass(T input);
 
     /// <inheritdoc/>
-    public bool TheyShellPass(IUpdater updater, T input)
+    public bool TheyShellPass(T input)
     {
-        var shellPass = InnerTheyShellPass(updater, input);
+        var shellPass = InnerTheyShellPass(input);
         _extraData = Filters.Where(x => x.ExtraData is not null)
             .SelectMany(x => x.ExtraData!) // extra data not null here.
 #if NET8_0_OR_GREATER
@@ -223,10 +221,10 @@ public class AndFilter<T>(IFilter<T> filter1, IFilter<T> filter2)
     : JoinedFilter<T>(filter1, filter2)
 {
     /// <inheritdoc/>
-    protected override bool InnerTheyShellPass(IUpdater updater, T input)
+    protected override bool InnerTheyShellPass(T input)
     {
-        return Filters[0].TheyShellPass(updater, input) &&
-            Filters[1].TheyShellPass(updater, input);
+        return Filters[0].TheyShellPass(input) &&
+            Filters[1].TheyShellPass(input);
     }
 }
 
@@ -240,10 +238,37 @@ public class OrFilter<T>(IFilter<T> filter1, IFilter<T> filter2)
     : JoinedFilter<T>(filter1, filter2)
 {
     /// <inheritdoc/>
-    protected override bool InnerTheyShellPass(IUpdater updater, T input)
+    protected override bool InnerTheyShellPass(T input)
     {
-        return Filters[0].TheyShellPass(updater, input) ||
-            Filters[1].TheyShellPass(updater, input);
+        return Filters[0].TheyShellPass(input) ||
+            Filters[1].TheyShellPass(input);
+    }
+}
+
+public class UpdaterFilterInputs<T>(IUpdater updater, T input)
+{
+    public IUpdater Updater { get; } = updater;
+    public T Input { get; } = input;
+}
+
+public class UpdaterFilter<T> : Filter<UpdaterFilterInputs<T>>
+{
+    public UpdaterFilter() : base()
+    {
+    }
+
+    public UpdaterFilter(Func<UpdaterFilterInputs<T>, bool> filter) : base(filter)
+    {
+    }
+
+    public UpdaterFilter(Func<T, bool> filter)
+        : base((input) => filter(input.Input))
+    {
+    }
+
+    public UpdaterFilter(Func<IUpdater, T, bool> filter)
+        : base((input) => filter(input.Updater, input.Input))
+    {
     }
 }
 
@@ -434,3 +459,4 @@ public static class FiltersExtensions
         return batches.JoinFilterAttributes<T>();
     }
 }
+

@@ -22,7 +22,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// </param>
 public sealed class MyChatMemberHandler(
     Func<IContainer<ChatMemberUpdated>, Task> callback,
-    IFilter<ChatMemberUpdated>? filter,
+    IFilter<UpdaterFilterInputs<ChatMemberUpdated>>? filter,
     int group) : AnyHandler<ChatMemberUpdated>(UpdateType.MyChatMember, x=> x.MyChatMember, callback, filter, group)
 {
 }

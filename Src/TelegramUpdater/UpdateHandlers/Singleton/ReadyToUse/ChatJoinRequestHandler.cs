@@ -22,7 +22,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// </param>
 public sealed class ChatJoinRequestHandler(
     Func<IContainer<ChatJoinRequest>, Task> callback,
-    IFilter<ChatJoinRequest>? filter,
+    IFilter<UpdaterFilterInputs<ChatJoinRequest>>? filter,
     int group) : AnyHandler<ChatJoinRequest>(UpdateType.ChatJoinRequest, x=> x.ChatJoinRequest, callback, filter, group)
 {
 }

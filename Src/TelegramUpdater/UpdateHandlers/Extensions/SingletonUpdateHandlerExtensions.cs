@@ -29,7 +29,7 @@ public static class SingletonUpdateHandlerExtensions
         this IUpdater updater,
         Func<Update, T?> updateSelector,
         Func<IContainer<T>, Task> callback,
-        Filter<T>? filter = default,
+        UpdaterFilter<T>? filter = default,
         int group = 0)
         where T : class
     {
@@ -64,7 +64,7 @@ public static class SingletonUpdateHandlerExtensions
         this IUpdater updater,
         UpdateType updateType,
         Func<IContainer<Message>, Task> callback,
-        Filter<Message>? filter = default,
+        UpdaterFilter<Message>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             updateType switch
@@ -107,7 +107,7 @@ public static class SingletonUpdateHandlerExtensions
         this IUpdater updater,
         UpdateType updateType,
         Func<IContainer<ChatMemberUpdated>, Task> callback,
-        Filter<ChatMemberUpdated>? filter = default,
+        UpdaterFilter<ChatMemberUpdated>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             updateType switch
@@ -136,7 +136,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<CallbackQuery>, Task> callback,
-        Filter<CallbackQuery>? filter = default,
+        UpdaterFilter<CallbackQuery>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new CallbackQueryHandler(callback, filter, group));
@@ -155,7 +155,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<InlineQuery>, Task> callback,
-        Filter<InlineQuery>? filter = default,
+        UpdaterFilter<InlineQuery>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new InlineQueryHandler(callback, filter, group));
@@ -174,7 +174,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<ChosenInlineResult>, Task> callback,
-        Filter<ChosenInlineResult>? filter = default,
+        UpdaterFilter<ChosenInlineResult>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new ChosenInlineResultHandler(callback, filter, group));
@@ -193,7 +193,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<ChatJoinRequest>, Task> callback,
-        Filter<ChatJoinRequest>? filter = default,
+        UpdaterFilter<ChatJoinRequest>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new ChatJoinRequestHandler(callback, filter, group));
@@ -212,7 +212,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<Poll>, Task> callback,
-        Filter<Poll>? filter = default,
+        UpdaterFilter<Poll>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new PollHandler(callback, filter, group));
@@ -231,7 +231,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<PollAnswer>, Task> callback,
-        Filter<PollAnswer>? filter = default,
+        UpdaterFilter<PollAnswer>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new PollAnswerHandler(callback, filter, group));
@@ -250,7 +250,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<PreCheckoutQuery>, Task> callback,
-        Filter<PreCheckoutQuery>? filter = default,
+        UpdaterFilter<PreCheckoutQuery>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new PreCheckoutQueryHandler(callback, filter, group));
@@ -269,7 +269,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<ShippingQuery>, Task> callback,
-        Filter<ShippingQuery>? filter = default,
+        UpdaterFilter<ShippingQuery>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new ShippingQueryHandler(callback, filter, group));
@@ -289,7 +289,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<MessageReactionUpdated>, Task> callback,
-        Filter<MessageReactionUpdated>? filter = default,
+        UpdaterFilter<MessageReactionUpdated>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new MessageReactionHandler(callback, filter, group));
@@ -309,7 +309,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<MessageReactionCountUpdated>, Task> callback,
-        Filter<MessageReactionCountUpdated>? filter = default,
+        UpdaterFilter<MessageReactionCountUpdated>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new MessageReactionCountHandler(callback, filter, group));
@@ -329,7 +329,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<ChatBoostUpdated>, Task> callback,
-        Filter<ChatBoostUpdated>? filter = default,
+        UpdaterFilter<ChatBoostUpdated>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new ChatBoostHandler(callback, filter, group));
@@ -349,7 +349,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<ChatBoostRemoved>, Task> callback,
-        Filter<ChatBoostRemoved>? filter = default,
+        UpdaterFilter<ChatBoostRemoved>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new RemovedChatBoostHandler(callback, filter, group));
@@ -369,7 +369,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<BusinessConnection>, Task> callback,
-        Filter<BusinessConnection>? filter = default,
+        UpdaterFilter<BusinessConnection>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new BusinessConnectionHandler(callback, filter, group));
@@ -389,7 +389,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<BusinessMessagesDeleted>, Task> callback,
-        Filter<BusinessMessagesDeleted>? filter = default,
+        UpdaterFilter<BusinessMessagesDeleted>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new DeletedBusinessMessagesHandler(callback, filter, group));
@@ -409,7 +409,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<PaidMediaPurchased>, Task> callback,
-        Filter<PaidMediaPurchased>? filter = default,
+        UpdaterFilter<PaidMediaPurchased>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
             new PurchasedPaidMediaHandler(callback, filter, group));

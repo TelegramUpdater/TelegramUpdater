@@ -7,7 +7,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// </summary>
 public sealed class MessageReactionHandler(
     Func<IContainer<MessageReactionUpdated>, Task> callback,
-    Filter<MessageReactionUpdated>? filter = default,
+    Filter<UpdaterFilterInputs<MessageReactionUpdated>>? filter = default,
     int group = 0) : AnyHandler<MessageReactionUpdated>(UpdateType.MessageReaction, x => x.MessageReaction, callback, filter, group)
 {
 }

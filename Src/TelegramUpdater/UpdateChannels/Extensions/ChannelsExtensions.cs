@@ -64,7 +64,7 @@ public static class ChannelsExtensions
                 if (update == null)
                     return null;
 
-                if (updateChannel.ShouldChannel(container.Updater, update.Value))
+                if (updateChannel.ShouldChannel(new(container.Updater, update.Value)))
                 {
                     return new AnyContainer<TExp>(
                         updateChannel.GetActualUpdate,
@@ -100,7 +100,7 @@ public static class ChannelsExtensions
     /// <param name="cancellationToken">To cancel the job.</param>
     public static async Task<IContainer<Message>?> ChannelMessageAsync<K>(
         this IContainer<K> updateContainer,
-        Filter<Message>? filter,
+        Filter<UpdaterFilterInputs<Message>>? filter,
         TimeSpan? timeOut,
         Func<
             IUpdater,
@@ -133,7 +133,7 @@ public static class ChannelsExtensions
         Func<
             IUpdater,
             ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
-        Filter<Message>? filter = default,
+        Filter<UpdaterFilterInputs<Message>>? filter = default,
         CancellationToken cancellationToken = default)
     {
         return await updateContainer.ChannelMessageAsync(

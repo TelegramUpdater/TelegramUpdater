@@ -38,7 +38,7 @@ public static class SingletonAttributesExtensions
         MethodInfo method,
         int group) where T : class
     {
-        var filters = method.GetFilterAttributes<T>();
+        var filters = method.GetFilterAttributes<UpdaterFilterInputs<T>>();
 
         try
         {

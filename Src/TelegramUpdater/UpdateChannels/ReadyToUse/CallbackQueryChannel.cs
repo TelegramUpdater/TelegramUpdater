@@ -11,7 +11,7 @@
 /// <param name="filter">Filter suitable update to channel within <paramref name="timeOut"/>.</param>
 public sealed class CallbackQueryChannel(
     TimeSpan timeOut,
-    IFilter<CallbackQuery>? filter = default)
+    IFilter<UpdaterFilterInputs<CallbackQuery>>? filter = default)
     : AnyChannel<CallbackQuery>(
         UpdateType.CallbackQuery,
         x => x.CallbackQuery,

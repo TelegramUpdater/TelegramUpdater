@@ -8,7 +8,7 @@ namespace TelegramUpdater.Filters;
 /// <remarks>
 /// <b>Extra data:</b> <see cref="IEnumerable{String}"/> "args".
 /// </remarks>
-public class CommandFilter : Filter<Message>
+public class CommandFilter : UpdaterFilter<Message>
 {
     private string[]? _commands;
 
@@ -192,8 +192,9 @@ public class CommandFilter : Filter<Message>
     }
 
     /// <inheritdoc/>
-    public override bool TheyShellPass(IUpdater _, Message input)
+    public override bool TheyShellPass(UpdaterFilterInputs<Message> inputs)
     {
+        var input = inputs.Input;
         if (string.IsNullOrEmpty(input.Text)) return false;
 
         var args = input.Text.Split(Options.Separator);

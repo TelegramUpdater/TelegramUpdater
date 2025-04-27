@@ -7,7 +7,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// </summary>
 public sealed class DeletedBusinessMessagesHandler(
     Func<IContainer<BusinessMessagesDeleted>, Task> callback,
-    Filter<BusinessMessagesDeleted>? filter = default,
+    Filter<UpdaterFilterInputs<BusinessMessagesDeleted>>? filter = default,
     int group = 0) : AnyHandler<BusinessMessagesDeleted>(UpdateType.DeletedBusinessMessages, x => x.DeletedBusinessMessages, callback, filter, group)
 {
 }

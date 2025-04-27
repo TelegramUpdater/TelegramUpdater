@@ -3,13 +3,13 @@
 /// <summary>
 /// A filter that checks if the message is a reply to another message.
 /// </summary>
-public class MessageRepliedFilter : Filter<Message>
+public class MessageRepliedFilter : UpdaterFilter<Message>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="MessageRepliedFilter"/> class.
     /// </summary>
     public MessageRepliedFilter()
-        : base((_, x) => x.ReplyToMessage != null)
+        : base((x) => x.ReplyToMessage != null)
     {
     }
 }

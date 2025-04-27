@@ -10,7 +10,7 @@ public interface IGenericSingletonUpdateHandler<T> : ISingletonUpdateHandler
     /// <summary>
     /// Filter for this handler.
     /// </summary>
-    public IFilter<T>? Filter { get; }
+    public IFilter<UpdaterFilterInputs<T>>? Filter { get; }
 
     /// <summary>
     /// A function to extract actual update from <see cref="Update"/>.

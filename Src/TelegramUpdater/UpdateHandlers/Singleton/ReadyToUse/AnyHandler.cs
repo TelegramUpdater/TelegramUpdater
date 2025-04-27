@@ -28,7 +28,7 @@ public class AnyHandler<T> : AbstractSingletonUpdateHandler<T> where T : class
     internal AnyHandler(UpdateType updateType,
                         Func<Update, T?> getT,
                         Func<IContainer<T>, Task> callback,
-                        IFilter<T>? filter,
+                        IFilter<UpdaterFilterInputs<T>>? filter,
                         int group)
         : base(updateType, getT, filter, group)
     {

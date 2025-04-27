@@ -9,5 +9,5 @@ public interface IGenericScopedUpdateHandlerContainer<T> : IScopedUpdateHandlerC
     /// <summary>
     /// Filter for this handler.
     /// </summary>
-    public IFilter<T>? Filter { get; }
+    public IFilter<UpdaterFilterInputs<T>>? Filter { get; }
 }

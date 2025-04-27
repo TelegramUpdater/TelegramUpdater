@@ -23,7 +23,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// </param>
 public sealed class ShippingQueryHandler(
     Func<IContainer<ShippingQuery>, Task> callback,
-    IFilter<ShippingQuery>? filter,
+    IFilter<UpdaterFilterInputs<ShippingQuery>>? filter,
     int group) : AnyHandler<ShippingQuery>(UpdateType.ShippingQuery, x=> x.ShippingQuery, callback, filter, group)
 {
 }

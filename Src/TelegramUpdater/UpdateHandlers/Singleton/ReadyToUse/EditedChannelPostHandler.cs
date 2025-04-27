@@ -22,7 +22,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// </param>
 public sealed class EditedChannelPostHandler(
     Func<IContainer<Message>, Task> callback,
-    IFilter<Message>? filter,
+    IFilter<UpdaterFilterInputs<Message>>? filter,
     int group) : AnyHandler<Message>(UpdateType.EditedChannelPost, x=> x.EditedChannelPost, callback, filter, group)
 {
 }

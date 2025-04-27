@@ -423,7 +423,7 @@ public sealed class Updater : IUpdater
             }
 
             var scopedHandlers = _scopedHandlerContainers
-                .Where(x => x.ShouldHandle(this, shiningInfo.Value));
+                .Where(x => x.ShouldHandle(new(this, shiningInfo.Value)));
 
             if (!scopedHandlers.Any())
             {
@@ -475,11 +475,11 @@ public sealed class Updater : IUpdater
             }
 
             var singletonhandlers = _updateHandlers
-                .Where(x => x.ShouldHandle(this, shiningInfo.Value))
+                .Where(x => x.ShouldHandle(new(this, shiningInfo.Value)))
                 .Cast<IUpdateHandler>();
 
             var scopedHandlers = _scopedHandlerContainers
-                .Where(x => x.ShouldHandle(this, shiningInfo.Value))
+                .Where(x => x.ShouldHandle(new(this, shiningInfo.Value)))
                 .Select(x => x.CreateInstance())
                 .Where(x => x != null)
                 .Cast<IScopedUpdateHandler>()
@@ -547,7 +547,7 @@ public sealed class Updater : IUpdater
         {
             // Do exception handlers
             var exHandlers = _exceptionHandlers
-                .Where(x => x.TypeIsMatched(ex.GetType()) && x.IsAllowedHandler(handler.GetType()) && x.MessageMatched(this, ex.Message));
+                .Where(x => x.TypeIsMatched(ex.GetType()) && x.IsAllowedHandler(handler.GetType()) && x.MessageMatched(ex.Message));
 
             foreach (var exHandler in exHandlers)
             {
