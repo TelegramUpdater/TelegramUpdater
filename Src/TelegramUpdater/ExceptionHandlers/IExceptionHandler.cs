@@ -53,7 +53,7 @@ namespace TelegramUpdater.ExceptionHandlers
 
             if (message == null) return false;
 
-            return MessageMatch.TheyShellPass(message);
+            return MessageMatch.Evaluate(message);
         }
 
         /// <summary>

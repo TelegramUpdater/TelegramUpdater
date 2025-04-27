@@ -2,7 +2,6 @@
 
 namespace TelegramUpdater.Filters;
 
-
 /// <summary>
 /// A basic regex filter.
 /// </summary>
@@ -48,7 +47,7 @@ public class BasicUpdaterRegexFilter<T> : UpdaterFilter<T>
     }
 
     /// <inheritdoc/>
-    public override bool TheyShellPass(UpdaterFilterInputs<T> inputs)
+    protected override bool TheyShellPass(UpdaterFilterInputs<T> inputs)
     {
         var text = _getText(inputs.Input);
 

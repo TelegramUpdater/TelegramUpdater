@@ -1,4 +1,5 @@
-﻿using TelegramUpdater.RainbowUtilities;
+﻿using System.Collections.ObjectModel;
+using TelegramUpdater.RainbowUtilities;
 using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateHandlers.Singleton;
@@ -39,7 +40,11 @@ public abstract class AbstractSingletonUpdateHandler<T>
     }
 
     internal IReadOnlyDictionary<string, object>? ExtraData
-        => Filter?.ExtraData;
+#if NET8_0_OR_GREATER
+        => Filter?.ExtraData?.AsReadOnly();
+#else
+        => Filter?.ExtraData is null? null: new ReadOnlyDictionary<string, object>(Filter?.ExtraData);
+#endif
 
     /// <inheritdoc/>
     public UpdateType UpdateType { get; }
@@ -71,7 +76,7 @@ public abstract class AbstractSingletonUpdateHandler<T>
     {
         if (Filter is null) return true;
 
-        return Filter.TheyShellPass(inputs);
+        return Filter.Evaluate(inputs);
     }
 
     /// <inheritdoc/>

@@ -13,13 +13,19 @@ public interface IFilter<T>
     /// Indicates if an input of type <typeparamref name="T"/> can pass this filter
     /// </summary>
     /// <param name="input">The input value to check</param>
+    /// <param name="eye">The eye!</param>
     /// <returns></returns>
-    public bool TheyShellPass(T input);
+    public bool Evaluate(T input, FilterEye? eye = default);
 
     /// <summary>
     /// A dictionary of extra data produced by this filter.
     /// </summary>
-    public IReadOnlyDictionary<string, object>? ExtraData { get; }
+    public IDictionary<string, object>? ExtraData { get; protected set; }
+
+    /// <summary>
+    /// Indicates if this filter can be used along with <see cref="FilterEye"/>.
+    /// </summary>
+    public bool EyeAssistant => false;
 
     /// <summary>
     /// Returns an <see cref="AndFilter{T}"/> version.
@@ -62,6 +68,35 @@ public interface IFilter<T>
     /// </summary>
     public static IFilter<T> operator ~(IFilter<T> a)
         => new ReverseFilter<T>(a);
+
+    /// <summary>
+    /// Evaluate a filter using <see cref="FilterEye"/>.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="eye"></param>
+    /// <param name="rawEvaluate"></param>
+    /// <returns></returns>
+    public bool EvaluateWithEye(
+        T input,
+        FilterEye? eye,
+        Func<T, bool> rawEvaluate)
+    {
+        if (EyeAssistant && eye is not null)
+        {
+            var filterType = GetType();
+            if (eye.CachedResults.TryGetValue(filterType, out var info))
+            {
+                ExtraData = info.ExtraData;
+                return info.Passed;
+            }
+
+            var result = rawEvaluate(input);
+            eye.CachedResults.Add(filterType, new(result, ExtraData));
+            return result;
+        }
+
+        return rawEvaluate(input);
+    }
 }
 
 /// <summary>
@@ -84,24 +119,33 @@ public interface IJoinedFilter<T> : IFilter<T>
 /// Creates a simple basic filter
 /// </remarks>
 /// <param name="filter">A function to check the input and return a boolean</param>
-public class Filter<T>(Func<T, bool>? filter = default) : IFilter<T>
+/// <param name="eyeAssistant"></param>
+public class Filter<T>(Func<T, bool>? filter = default, bool eyeAssistant = false) : IFilter<T>
 {
     private readonly Func<T, bool>? _filter = filter;
-    private Dictionary<string, object>? _extraData;
 
     /// <inheritdoc/>
-    public virtual IReadOnlyDictionary<string, object>? ExtraData => _extraData;
+    public virtual IDictionary<string, object>? ExtraData { get; set; }
+
+    /// <inheritdoc/>
+    public virtual bool EyeAssistant { get; } = eyeAssistant;
 
     internal void AddOrUpdateData(string key, object value)
     {
-        _extraData ??= new Dictionary<string, object>(StringComparer.Ordinal);
+        ExtraData ??= new Dictionary<string, object>(StringComparer.Ordinal);
 
-        if (!_extraData.TryAdd(key, value))
-            _extraData[key] = value;
+        if (!ExtraData.TryAdd(key, value))
+            ExtraData[key] = value;
     }
 
     /// <inheritdoc/>
-    public virtual bool TheyShellPass(T input)
+    public bool Evaluate(T input, FilterEye? eye = default)
+    {
+        return (this as IFilter<T>).EvaluateWithEye(input, eye, TheyShellPass);
+    }
+
+    /// <inheritdoc/>
+    protected virtual bool TheyShellPass(T input)
         => input != null && (_filter is null || _filter(input));
 
     /// <summary>
@@ -158,7 +202,7 @@ public class Filter<T>(Func<T, bool>? filter = default) : IFilter<T>
     /// <summary>
     /// Creates a reversed version of this <see cref="Filter{T}"/>
     /// </summary>
-    public static Filter<T> operator ~(Filter<T> a)
+    public static IFilter<T> operator ~(Filter<T> a)
         => new ReverseFilter<T>(a);
 }
 
@@ -168,9 +212,14 @@ public class Filter<T>(Func<T, bool>? filter = default) : IFilter<T>
 /// <remarks>
 /// Creates a reverse filter ( Like not filter ), use not operator
 /// </remarks>
-public class ReverseFilter<T>(IFilter<T> filter1)
-    : Filter<T>((x) => !filter1.TheyShellPass(x))
+public class ReverseFilter<T>(IFilter<T> filter1) : IFilter<T>
+//: Filter<T>((x) => !filter1.Evaluate(x))
 {
+    /// <inheritdoc/>
+    public IDictionary<string, object>? ExtraData { get; set; }
+
+    /// <inheritdoc/>
+    public bool Evaluate(T input, FilterEye? eye = null) => !filter1.Evaluate(input, eye);
 }
 
 /// <summary>
@@ -180,26 +229,24 @@ public class ReverseFilter<T>(IFilter<T> filter1)
 public abstract class JoinedFilter<T>(params IFilter<T>[] filters)
     : IJoinedFilter<T>
 {
-    private Dictionary<string, object>? _extraData;
-
     /// <inheritdoc/>
     public IFilter<T>[] Filters { get; } = filters;
 
     /// <inheritdoc/>
-    public IReadOnlyDictionary<string, object>? ExtraData => _extraData;
+    public IDictionary<string, object>? ExtraData { get; set; }
 
     /// <summary>
     /// Check if the filters are passed here.
     /// </summary>
     /// <param name="input"></param>
+    /// <param name="eye">The eye!</param>
     /// <returns></returns>
-    protected abstract bool InnerTheyShellPass(T input);
+    protected abstract bool InnerTheyShellPass(T input, FilterEye? eye);
 
-    /// <inheritdoc/>
-    public bool TheyShellPass(T input)
+    private bool TheyShellPass(T input, FilterEye? eye = default)
     {
-        var shellPass = InnerTheyShellPass(input);
-        _extraData = Filters.Where(x => x.ExtraData is not null)
+        var shellPass = InnerTheyShellPass(input, eye);
+        ExtraData = Filters.Where(x => x.ExtraData is not null)
             .SelectMany(x => x.ExtraData!) // extra data not null here.
 #if NET8_0_OR_GREATER
             .DistinctBy(x => x.Key) // Is it required ?
@@ -209,6 +256,8 @@ public abstract class JoinedFilter<T>(params IFilter<T>[] filters)
             .ToDictionary(x => x.Key, x => x.Value, StringComparer.Ordinal);
         return shellPass;
     }
+
+    bool IFilter<T>.Evaluate(T input, FilterEye? eye) => TheyShellPass(input, eye);
 }
 
 /// <summary>
@@ -221,10 +270,10 @@ public class AndFilter<T>(IFilter<T> filter1, IFilter<T> filter2)
     : JoinedFilter<T>(filter1, filter2)
 {
     /// <inheritdoc/>
-    protected override bool InnerTheyShellPass(T input)
+    protected override bool InnerTheyShellPass(T input, FilterEye? eye)
     {
-        return Filters[0].TheyShellPass(input) &&
-            Filters[1].TheyShellPass(input);
+        return Filters[0].Evaluate(input, eye) &&
+            Filters[1].Evaluate(input, eye);
     }
 }
 
@@ -238,36 +287,66 @@ public class OrFilter<T>(IFilter<T> filter1, IFilter<T> filter2)
     : JoinedFilter<T>(filter1, filter2)
 {
     /// <inheritdoc/>
-    protected override bool InnerTheyShellPass(T input)
+    protected override bool InnerTheyShellPass(T input, FilterEye? eye)
     {
-        return Filters[0].TheyShellPass(input) ||
-            Filters[1].TheyShellPass(input);
+        return Filters[0].Evaluate(input, eye) ||
+            Filters[1].Evaluate(input, eye);
     }
 }
 
+/// <summary>
+/// Inputs for a filter inside <see cref="IUpdater"/>.
+/// </summary>
+/// <typeparam name="T"></typeparam>
+/// <param name="updater"></param>
+/// <param name="input"></param>
 public class UpdaterFilterInputs<T>(IUpdater updater, T input)
 {
+    /// <summary>
+    /// The updater.
+    /// </summary>
     public IUpdater Updater { get; } = updater;
+
+    /// <summary>
+    /// The input.
+    /// </summary>
     public T Input { get; } = input;
 }
 
+/// <summary>
+/// A filter specialized to be used with <see cref="IUpdater"/>.
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public class UpdaterFilter<T> : Filter<UpdaterFilterInputs<T>>
 {
-    public UpdaterFilter() : base()
+    /// <summary>
+    /// Create a new instance of <see cref="UpdaterFilter{T}"/>
+    /// </summary>
+    public UpdaterFilter(bool eyeAssistant = false) : base(eyeAssistant: eyeAssistant)
     {
     }
 
-    public UpdaterFilter(Func<UpdaterFilterInputs<T>, bool> filter) : base(filter)
+    /// <summary>
+    /// Create a new instance of <see cref="UpdaterFilter{T}"/>
+    /// </summary>
+    public UpdaterFilter(Func<UpdaterFilterInputs<T>, bool> filter, bool eyeAssistant = false)
+        : base(filter, eyeAssistant)
     {
     }
 
-    public UpdaterFilter(Func<T, bool> filter)
-        : base((input) => filter(input.Input))
+    /// <summary>
+    /// Create a new instance of <see cref="UpdaterFilter{T}"/>
+    /// </summary>
+    public UpdaterFilter(Func<T, bool> filter, bool eyeAssistant = false)
+        : base((input) => filter(input.Input), eyeAssistant)
     {
     }
 
-    public UpdaterFilter(Func<IUpdater, T, bool> filter)
-        : base((input) => filter(input.Updater, input.Input))
+    /// <summary>
+    /// Create a new instance of <see cref="UpdaterFilter{T}"/>
+    /// </summary>
+    public UpdaterFilter(Func<IUpdater, T, bool> filter, bool eyeAssistant = false)
+        : base((input) => filter(input.Updater, input.Input), eyeAssistant)
     {
     }
 }

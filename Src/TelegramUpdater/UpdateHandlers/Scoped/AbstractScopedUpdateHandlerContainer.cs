@@ -1,4 +1,6 @@
-﻿namespace TelegramUpdater.UpdateHandlers.Scoped;
+﻿using System.Collections.ObjectModel;
+
+namespace TelegramUpdater.UpdateHandlers.Scoped;
 
 /// <summary>
 /// Abstract base for <see cref="IScopedUpdateHandler"/> containers.
@@ -35,7 +37,11 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     }
 
     IReadOnlyDictionary<string, object>? IScopedUpdateHandlerContainer.ExtraData
-        => Filter?.ExtraData;
+#if NET8_0_OR_GREATER
+        => Filter?.ExtraData?.AsReadOnly();
+#else
+        => Filter?.ExtraData is null ? null : new ReadOnlyDictionary<string, object>(Filter?.ExtraData);
+#endif
 
     /// <inheritdoc/>
     public Type ScopedHandlerType { get; }
@@ -54,7 +60,7 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     {
         if (Filter is null) return true;
 
-        return Filter.TheyShellPass(inputs);
+        return Filter.Evaluate(inputs);
     }
 
     /// <summary>

@@ -192,7 +192,7 @@ public class CommandFilter : UpdaterFilter<Message>
     }
 
     /// <inheritdoc/>
-    public override bool TheyShellPass(UpdaterFilterInputs<Message> inputs)
+    protected override bool TheyShellPass(UpdaterFilterInputs<Message> inputs)
     {
         var input = inputs.Input;
         if (string.IsNullOrEmpty(input.Text)) return false;

@@ -1,4 +1,6 @@
-﻿namespace TelegramUpdater.UpdateChannels;
+﻿using System.Collections.ObjectModel;
+
+namespace TelegramUpdater.UpdateChannels;
 
 /// <summary>
 /// An abstract class for channel updates.
@@ -46,7 +48,11 @@ public abstract class AbstractChannel<T> : IGenericUpdateChannel<T>
     public TimeSpan TimeOut { get; }
 
     IReadOnlyDictionary<string, object>? IGenericUpdateChannel<T>.ExtraData
-        => _filter?.ExtraData;
+#if NET8_0_OR_GREATER
+        => _filter?.ExtraData?.AsReadOnly();
+#else
+        => _filter?.ExtraData is null? null: new ReadOnlyDictionary<string, object>(_filter?.ExtraData);
+#endif
 
     /// <inheritdoc/>
     public T? GetActualUpdate(Update update) => _getT(update);
@@ -56,7 +62,7 @@ public abstract class AbstractChannel<T> : IGenericUpdateChannel<T>
     {
         if (_filter is null) return true;
 
-        return _filter.TheyShellPass(inputs);
+        return _filter.Evaluate(inputs);
     }
 
     /// <summary>

@@ -35,7 +35,7 @@ namespace TelegramUpdaterTests
         {
             var filter = new Filter<int>((x) => true) & new Filter<int>((x) => false);
 
-            Assert.False(filter.TheyShellPass(0));
+            Assert.False(filter.Evaluate(0));
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace TelegramUpdaterTests
         {
             var filter = new Filter<int>((x) => true) & new Filter<int>((x) => true);
 
-            Assert.True(filter.TheyShellPass(0));
+            Assert.True(filter.Evaluate(0));
         }
 
         [Fact]
@@ -59,7 +59,7 @@ namespace TelegramUpdaterTests
         {
             var filter = new Filter<int>((x) => true) | new Filter<int>((x) => false);
 
-            Assert.True(filter.TheyShellPass(0));
+            Assert.True(filter.Evaluate(0));
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace TelegramUpdaterTests
         {
             var filter = new Filter<int>((x) => true) | new Filter<int>((x) => false);
 
-            Assert.True(filter.TheyShellPass(0));
+            Assert.True(filter.Evaluate(0));
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace TelegramUpdaterTests
         {
             var filter = new Filter<int>((x) => false) | new Filter<int>((x) => false);
 
-            Assert.False(filter.TheyShellPass(0));
+            Assert.False(filter.Evaluate(0));
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace TelegramUpdaterTests
             var filter = new Filter<int>((x) => false) | new Filter<int>((x) => false);
             var filter_2 = filter | new Filter<int>((x) => true);
 
-            Assert.True(filter_2.TheyShellPass(0));
+            Assert.True(filter_2.Evaluate(0));
         }
 
         [Fact]
@@ -93,7 +93,7 @@ namespace TelegramUpdaterTests
             var filter = new Filter<int>((x) => false) | new Filter<int>((x) => false);
             var filter_2 = filter & new Filter<int>((x) => true);
 
-            Assert.False(filter_2.TheyShellPass(0));
+            Assert.False(filter_2.Evaluate(0));
         }
 
         [Fact]

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace TelegramUpdater.Filters;
 
@@ -50,7 +47,7 @@ public class BasicRegexFilter<T> : Filter<T>
     }
 
     /// <inheritdoc/>
-    public override bool TheyShellPass(T inputs)
+    protected override bool TheyShellPass(T inputs)
     {
         var text = _getText(inputs);
 

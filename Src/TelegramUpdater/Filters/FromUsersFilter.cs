@@ -12,7 +12,7 @@ internal class FromUsersFilter<T> : UpdaterFilter<T>
         Users = users;
     }
 
-    public override bool TheyShellPass(UpdaterFilterInputs<T> input)
+    protected override bool TheyShellPass(UpdaterFilterInputs<T> input)
     {
         var user = _userSelector(input.Input);
         if (user is null) return false;

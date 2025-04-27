@@ -14,7 +14,7 @@ namespace TelegramUpdaterTests
                 "test",
                 new CommandFilterOptions(joinArgsFormIndex: 0));
 
-            filter.TheyShellPass(new(null!, new Message { Text = "/test hello world" }));
+            filter.Evaluate(new(null!, new Message { Text = "/test hello world" }));
 
             if (filter.ExtraData is null) throw new Exception("ExtraData is null");
 
@@ -38,7 +38,7 @@ namespace TelegramUpdaterTests
 
             var message = new Message { Text = command };
 
-            Assert.True(filter.TheyShellPass(new(null!, message)));
+            Assert.True(filter.Evaluate(new(null!, message)));
         }
 
         [Theory]
@@ -53,7 +53,7 @@ namespace TelegramUpdaterTests
 
             var message = new Message { Text = command };
 
-            Assert.False(filter.TheyShellPass(new(null!, message)));
+            Assert.False(filter.Evaluate(new(null!, message)));
         }
 
         [Theory]
@@ -72,7 +72,7 @@ namespace TelegramUpdaterTests
 
             var message = new Message { Text = command };
 
-            Assert.True(filter.TheyShellPass(new(null!, message)));
+            Assert.True(filter.Evaluate(new(null!, message)));
         }
 
         [Theory]
@@ -91,7 +91,7 @@ namespace TelegramUpdaterTests
 
             var message = new Message { Text = command };
 
-            Assert.Equal(filter.TheyShellPass(new(null!, message)), shouldMatch);
+            Assert.Equal(filter.Evaluate(new(null!, message)), shouldMatch);
         }
 
         [Theory]
@@ -110,7 +110,7 @@ namespace TelegramUpdaterTests
 
             var message = new Message { Text = command };
 
-            Assert.Equal(filter.TheyShellPass(new(null!, message)), shouldMatch);
+            Assert.Equal(filter.Evaluate(new(null!, message)), shouldMatch);
         }
 
         [Theory]
@@ -129,7 +129,7 @@ namespace TelegramUpdaterTests
 
             var message = new Message { Text = command };
 
-            Assert.Equal(filter.TheyShellPass(new(null!, message)), shouldMatch);
+            Assert.Equal(filter.Evaluate(new(null!, message)), shouldMatch);
         }
 
         [Theory]
@@ -148,7 +148,7 @@ namespace TelegramUpdaterTests
 
             var message = new Message { Text = command };
 
-            Assert.Equal(filter.TheyShellPass(new(null!, message)), shouldMatch);
+            Assert.Equal(filter.Evaluate(new(null!, message)), shouldMatch);
         }
     }
 }

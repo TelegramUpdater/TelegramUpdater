@@ -15,7 +15,7 @@ internal class FromUsernamesFilter<T> : UpdaterFilter<T> where T : class
         Usernames = usernames;
     }
 
-    public override bool TheyShellPass(UpdaterFilterInputs<T> inputs)
+    protected override bool TheyShellPass(UpdaterFilterInputs<T> inputs)
     {
         var username = _usernameSelector(inputs.Input);
         if (username == null) return false;
