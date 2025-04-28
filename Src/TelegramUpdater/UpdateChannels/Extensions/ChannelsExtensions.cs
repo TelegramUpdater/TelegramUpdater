@@ -25,7 +25,7 @@ public static class ChannelsExtensions
     /// </param>
     /// <param name="cancellationToken">To cancel the job.</param>
     /// <returns></returns>
-    public static async ValueTask<IContainer<TExp>?> OpenChannelAsync<TExp, TCur>(
+    public static async ValueTask<IContainer<TExp>?> OpenChannel<TExp, TCur>(
         this IContainer<TCur> container,
         IGenericUpdateChannel<TExp> updateChannel,
         Func<
@@ -98,7 +98,7 @@ public static class ChannelsExtensions
     /// A callback function to be called if an unrelated update from comes.
     /// </param>
     /// <param name="cancellationToken">To cancel the job.</param>
-    public static async Task<IContainer<Message>?> ChannelMessageAsync<K>(
+    public static async Task<IContainer<Message>?> ChannelMessage<K>(
         this IContainer<K> updateContainer,
         Filter<UpdaterFilterInputs<Message>>? filter,
         TimeSpan? timeOut,
@@ -107,7 +107,7 @@ public static class ChannelsExtensions
             ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
         CancellationToken cancellationToken = default) where K : class
     {
-        return await updateContainer.OpenChannelAsync(
+        return await updateContainer.OpenChannel(
             new MessageChannel(timeOut ?? TimeSpan.FromSeconds(30), filter),
             onUnrelatedUpdate,
             cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -136,7 +136,7 @@ public static class ChannelsExtensions
         Filter<UpdaterFilterInputs<Message>>? filter = default,
         CancellationToken cancellationToken = default)
     {
-        return await updateContainer.ChannelMessageAsync(
+        return await updateContainer.ChannelMessage(
             filter, timeOut, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
     }
 
@@ -144,7 +144,7 @@ public static class ChannelsExtensions
     /// Waits for the user to click on an inline button.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public static async Task<IContainer<CallbackQuery>?> ChannelButtonClickAsync<T>(
+    public static async Task<IContainer<CallbackQuery>?> ChannelButtonClick<T>(
         this IContainer<T> updateContainer,
         TimeSpan timeOut,
         CallbackQueryRegex callbackQueryRegex,
@@ -153,7 +153,7 @@ public static class ChannelsExtensions
             ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
         CancellationToken cancellationToken = default) where T : class
     {
-        return await updateContainer.OpenChannelAsync(
+        return await updateContainer.OpenChannel(
             new CallbackQueryChannel(
                 timeOut,
                 callbackQueryRegex),

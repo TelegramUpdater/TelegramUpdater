@@ -6,8 +6,7 @@
 /// <remarks>
 /// Set handling priority of this handler.
 /// </remarks>
-/// <param name="group">Handling priority group, The lower the sooner to process.</param>
-public abstract class ChannelPostHandler(int group)
-    : AnyHandler<Message>(x => x.ChannelPost )
+public abstract class ChannelPostHandler()
+    : AnyHandler<Message>(x => x.ChannelPost)
 {
 }

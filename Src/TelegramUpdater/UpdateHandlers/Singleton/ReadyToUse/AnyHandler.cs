@@ -24,11 +24,11 @@ public class AnyHandler<T> : AbstractSingletonUpdateHandler<T> where T : class
     /// A callback function where you may handle the incoming update.
     /// </param>
     /// <returns></returns>
-    internal AnyHandler(UpdateType updateType,
-                        Func<Update, T?> getT,
-                        Func<IContainer<T>, Task> callback,
-                        IFilter<UpdaterFilterInputs<T>>? filter)
-        : base(updateType, getT, filter)
+    internal AnyHandler(
+        UpdateType updateType,
+        Func<Update, T?> getT,
+        Func<IContainer<T>, Task> callback,
+        IFilter<UpdaterFilterInputs<T>>? filter) : base(updateType, getT, filter)
     {
         _handleAsync = callback ??
             throw new ArgumentNullException(nameof(callback));

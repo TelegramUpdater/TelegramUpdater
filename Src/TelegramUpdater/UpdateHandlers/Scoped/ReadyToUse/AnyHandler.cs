@@ -38,8 +38,8 @@ public abstract class AnyHandler<T>(Func<Update, T?> getT)
     /// </summary>
     protected void ContinuePropagation() => Container.ContinuePropagation();
 
-    /// <inheritdoc cref="ChannelsExtensions.OpenChannelAsync{TExp, TCur}(IContainer{TCur}, IGenericUpdateChannel{TExp}, Func{IUpdater, ShiningInfo{long, Update}, Task}?, CancellationToken)"/>
-    public async ValueTask<IContainer<TExp>?> OpenChannelAsync<TExp>(
+    /// <inheritdoc cref="ChannelsExtensions.OpenChannel{TExp, TCur}(IContainer{TCur}, IGenericUpdateChannel{TExp}, Func{IUpdater, ShiningInfo{long, Update}, Task}?, CancellationToken)"/>
+    public async ValueTask<IContainer<TExp>?> OpenChannel<TExp>(
         IGenericUpdateChannel<TExp> updateChannel,
         Func<
             IUpdater, ShiningInfo<long, Update>,
@@ -47,7 +47,7 @@ public abstract class AnyHandler<T>(Func<Update, T?> getT)
         CancellationToken cancellationToken = default)
         where TExp : class
     {
-        return await Container.OpenChannelAsync(
+        return await Container.OpenChannel(
             updateChannel, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
     }
 
@@ -62,7 +62,7 @@ public abstract class AnyHandler<T>(Func<Update, T?> getT)
     /// </param>
     /// <param name="cancellationToken">To cancel the job.</param>
     /// <returns></returns>
-    public async ValueTask<IContainer<Message>?> AwaitMessageAsync(
+    public async ValueTask<IContainer<Message>?> AwaitMessage(
         Filter<UpdaterFilterInputs<Message>>? filter,
         TimeSpan? timeOut,
         Func<
@@ -70,7 +70,7 @@ public abstract class AnyHandler<T>(Func<Update, T?> getT)
             ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
         CancellationToken cancellationToken = default)
     {
-        return await Container.ChannelMessageAsync(
+        return await Container.ChannelMessage(
             filter, timeOut, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
     }
 
@@ -87,7 +87,7 @@ public abstract class AnyHandler<T>(Func<Update, T?> getT)
     /// </param>
     /// <param name="cancellationToken">To cancel the job.</param>
     /// <returns></returns>
-    public async Task<IContainer<CallbackQuery>?> AwaitButtonClickAsync(
+    public async Task<IContainer<CallbackQuery>?> AwaitButtonClick(
         TimeSpan timeOut,
         CallbackQueryRegex callbackQueryRegex,
         Func<
@@ -95,7 +95,7 @@ public abstract class AnyHandler<T>(Func<Update, T?> getT)
             ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
         CancellationToken cancellationToken = default)
     {
-        return await Container.ChannelButtonClickAsync(
+        return await Container.ChannelButtonClick(
             timeOut, callbackQueryRegex, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
     }
     #endregion

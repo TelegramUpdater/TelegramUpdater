@@ -7,12 +7,11 @@ using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
 namespace Playground.UpdateHandlers.Messages;
 
-[Command(command: "start"), Private]
+[Command("start"), Private]
 internal class Start : MessageHandler
 {
     protected override async Task HandleAsync(IContainer<Message> cntr)
     {
-        await ResponseAsync("Hi there!");
-        await Task.Delay(5000);
+        await Response("Hi there!");
     }
 }

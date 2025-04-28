@@ -19,12 +19,10 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// A filter to choose the right update to be handled inside
 /// <paramref name="callback"/>.
 /// </param>
-/// <param name="group">
-/// Handling priority group, The lower the sooner to process.
-/// </param>
 public sealed class InlineQueryHandler(
     Func<IContainer<InlineQuery>, Task> callback,
-    IFilter<UpdaterFilterInputs<InlineQuery>>? filter = default) : AnyHandler<InlineQuery>(UpdateType.InlineQuery,
+    IFilter<UpdaterFilterInputs<InlineQuery>>? filter = default) 
+    : AnyHandler<InlineQuery>(UpdateType.InlineQuery,
            x => x.InlineQuery,
            callback,
            filter)

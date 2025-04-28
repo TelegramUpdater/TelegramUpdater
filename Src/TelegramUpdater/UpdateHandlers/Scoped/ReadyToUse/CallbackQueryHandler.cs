@@ -6,9 +6,8 @@
 /// <remarks>
 /// Set handling priority of this handler.
 /// </remarks>
-/// <param name="group">Handling priority group, The lower the sooner to process.</param>
-public abstract class CallbackQueryHandler( )
-    : AnyHandler<CallbackQuery>(x => x.CallbackQuery )
+public abstract class CallbackQueryHandler()
+    : AnyHandler<CallbackQuery>(x => x.CallbackQuery)
 {
     #region Extension Methods
     /// <inheritdoc cref="CallbackQuery.From"/>.
@@ -22,7 +21,7 @@ public abstract class CallbackQueryHandler( )
 
     /// <inheritdoc cref="TelegramBotClientExtensions
     /// .AnswerCallbackQuery(ITelegramBotClient, string, string?, bool, string?, int?, CancellationToken)"/>.
-    protected async Task AnswerAsync(
+    protected async Task Answer(
         string? text = default,
         bool showAlert = default,
         string? url = default,

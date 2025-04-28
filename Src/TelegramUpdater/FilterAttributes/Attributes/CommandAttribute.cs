@@ -231,7 +231,7 @@ public sealed class CommandAttribute : AbstractUpdaterFilterAttribute
     /// <param name="caseSensitive">If command filter checks should be Case Sensitive.</param>
     public CommandAttribute(
         string deepLinkArg,
-        bool joinArgs = false,
+        bool joinArgs,
         int joinArgsFormIndex = 0,
         bool caseSensitive = default)
     {

@@ -10,11 +10,9 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// <remarks>
 /// Set handling priority of this handler.
 /// </remarks>
-/// <param name="group">Handling priority group, The lower the sooner to process.</param>
-public abstract class InlineQueryHandler(int group = default)
-    : AnyHandler<InlineQuery>(x => x.InlineQuery )
+public abstract class InlineQueryHandler()
+    : AnyHandler<InlineQuery>(x => x.InlineQuery)
 {
-
     #region Extension Methods
     /// <inheritdoc cref="InlineQuery.From"/>.
     protected User From => ActualUpdate.From;
@@ -29,7 +27,7 @@ public abstract class InlineQueryHandler(int group = default)
     protected ChatType? ChatType => ActualUpdate.ChatType;
 
     /// <inheritdoc cref="TelegramBotClientExtensions.AnswerInlineQuery(ITelegramBotClient, string, IEnumerable{InlineQueryResult}, int?, bool, string?, InlineQueryResultsButton?, CancellationToken)"/>.
-    public async Task AnswerAsync(
+    public async Task Answer(
         IEnumerable<InlineQueryResult> results,
         int? cacheTime = null,
         bool isPersonal = default,

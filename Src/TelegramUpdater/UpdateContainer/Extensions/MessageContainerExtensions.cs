@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: Webpage
+﻿// Ignore Spelling: Webpage inline
 
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -27,7 +27,7 @@ public static class MessageContainerExtensions
     /// <summary>
     /// Updates a <see cref="Message"/> of your own with removing it and sending a new message.
     /// </summary>
-    public static async Task<IContainer<Message>> ForceUpdateAsync(
+    public static async Task<IContainer<Message>> ForceUpdate(
         this IContainer<Message> simpleContext,
         string text,
         ParseMode parseMode = default,
@@ -65,7 +65,7 @@ public static class MessageContainerExtensions
     }
 
     /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)"/>
-    public static async Task<IContainer<Message>> ResponseAsync(
+    public static async Task<IContainer<Message>> Response(
         this IContainer<Message> simpleContext,
         string text,
         bool sendAsReply = true,
@@ -103,9 +103,10 @@ public static class MessageContainerExtensions
         .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageText(ITelegramBotClient, ChatId, int, string, ParseMode, IEnumerable{MessageEntity}?, LinkPreviewOptions?, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public static async Task<IContainer<Message>?> EditAsync(
+    public static async Task<IContainer<Message>?> Edit(
         this IContainer<Message> simpleContext,
-        string text, ParseMode parseMode = default,
+        string text,
+        ParseMode parseMode = default,
         IEnumerable<MessageEntity>? messageEntities = default,
         bool? disableWebpagePreview = default,
         InlineKeyboardMarkup? replyMarkup = default,
@@ -118,11 +119,95 @@ public static class MessageContainerExtensions
             text: text,
             parseMode: parseMode,
             entities: messageEntities,
-            linkPreviewOptions:disableWebpagePreview,
+            linkPreviewOptions: disableWebpagePreview,
             replyMarkup: replyMarkup,
             businessConnectionId: businessConnectionId,
             cancellationToken: cancellationToken)
             .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageLiveLocation(ITelegramBotClient, ChatId, int, double, double, int?, double?, int?, int?, InlineKeyboardMarkup?, string?, CancellationToken)"/>
+    public static async Task<IContainer<Message>?> Edit(
+        this IContainer<Message> simpleContext,
+        double latitude,
+        double longitude,
+        int? livePeriod = default,
+        float? horizontalAccuracy = default,
+        int? heading = default,
+        int? proximityAlertRadius = default,
+        InlineKeyboardMarkup? replyMarkup = default,
+        string? businessConnectionId = default,
+        CancellationToken cancellationToken = default)
+    {
+        return await simpleContext.BotClient.EditMessageLiveLocation(
+            chatId: simpleContext.Update.Chat.Id,
+            messageId: simpleContext.Update.MessageId,
+            latitude: latitude,
+            longitude: longitude,
+            livePeriod: livePeriod,
+            horizontalAccuracy: horizontalAccuracy,
+            heading: heading,
+            proximityAlertRadius: proximityAlertRadius,
+            replyMarkup: replyMarkup,
+            businessConnectionId: businessConnectionId,
+            cancellationToken: cancellationToken)
+        .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageMedia(ITelegramBotClient, ChatId, int, InputMedia, InlineKeyboardMarkup?, string?, CancellationToken)"/>
+    public static async Task<IContainer<Message>?> Edit(
+        this IContainer<Message> simpleContext,
+        InputMedia inputMedia,
+        InlineKeyboardMarkup? inlineKeyboardMarkup = default,
+        string? businessConnectionId = default,
+        CancellationToken cancellationToken = default)
+    {
+        return await simpleContext.BotClient.EditMessageMedia(
+            chatId: simpleContext.Update.Chat.Id,
+            messageId: simpleContext.Update.MessageId,
+            media: inputMedia,
+            replyMarkup: inlineKeyboardMarkup,
+            businessConnectionId: businessConnectionId,
+            cancellationToken: cancellationToken)
+        .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageCaption(ITelegramBotClient, string, string?, ParseMode, IEnumerable{MessageEntity}?, bool, InlineKeyboardMarkup?, string?, CancellationToken)"/>
+    public static async Task<IContainer<Message>?> EditCaption(
+        this IContainer<Message> simpleContext,
+        string caption,
+        ParseMode parseMode = default,
+        IEnumerable<MessageEntity>? captionEntities = default,
+        InlineKeyboardMarkup? inlineKeyboardMarkup = default,
+        string? businessConnectionId = default,
+        CancellationToken cancellationToken = default)
+    {
+        return await simpleContext.BotClient.EditMessageCaption(
+            chatId: simpleContext.Update.Chat.Id,
+            messageId: simpleContext.Update.MessageId,
+            caption: caption,
+            parseMode: parseMode,
+            captionEntities: captionEntities,
+            replyMarkup: inlineKeyboardMarkup,
+            businessConnectionId: businessConnectionId,
+            cancellationToken: cancellationToken)
+        .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageReplyMarkup(ITelegramBotClient, string, InlineKeyboardMarkup?, string?, CancellationToken)"/>
+    public static async Task<IContainer<Message>?> Edit(
+        this IContainer<Message> simpleContext,
+        InlineKeyboardMarkup? inlineKeyboardMarkup = default,
+        string? businessConnectionId = default,
+        CancellationToken cancellationToken = default)
+    {
+        return await simpleContext.BotClient.EditMessageReplyMarkup(
+            chatId: simpleContext.Update.Chat.Id,
+            messageId: simpleContext.Update.MessageId,
+            replyMarkup: inlineKeyboardMarkup,
+            businessConnectionId: businessConnectionId,
+            cancellationToken: cancellationToken)
+        .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
     }
 
     /// <inheritdoc cref="ChatType.Private"/>

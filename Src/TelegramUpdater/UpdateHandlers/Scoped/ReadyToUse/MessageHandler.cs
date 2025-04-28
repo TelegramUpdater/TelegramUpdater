@@ -12,9 +12,8 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// <remarks>
 /// Set handling priority of this handler.
 /// </remarks>
-/// <param name="group">Handling priority group, The lower the sooner to process.</param>
-public abstract class MessageHandler(int group = default)
-    : AnyHandler<Message>(x => x.Message )
+public abstract class MessageHandler()
+    : AnyHandler<Message>(x => x.Message)
 {
 
     #region Extension Methods
@@ -37,7 +36,7 @@ public abstract class MessageHandler(int group = default)
 
     /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)"/>.
     /// <remarks>This methods sends a message to the <see cref="Message.Chat"/></remarks>
-    protected async Task<Message> ResponseAsync(
+    protected async Task<Message> Response(
         string text,
         bool sendAsReply = false,
         ParseMode parseMode = default,
@@ -51,7 +50,7 @@ public abstract class MessageHandler(int group = default)
         string? businessConnectionId = default,
         bool allowPaidBroadcast = default,
         CancellationToken cancellationToken = default)
-        => (await Container.ResponseAsync(
+        => (await Container.Response(
             text: text,
             parseMode: parseMode,
             sendAsReply: sendAsReply,
@@ -68,7 +67,7 @@ public abstract class MessageHandler(int group = default)
         .Update;
 
     /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)"/>.
-    protected async Task<Message> SendTextMessageAsync(
+    protected async Task<Message> SendMessage(
         ChatId chatId,
         string text,
         ParseMode parseMode = default,
@@ -100,7 +99,7 @@ public abstract class MessageHandler(int group = default)
             cancellationToken: cancellationToken).ConfigureAwait(false);
 
     /// <inheritdoc cref="TelegramBotClientExtensions.DeleteMessage(ITelegramBotClient, ChatId, int, CancellationToken)"/>
-    protected async Task DeleteAsync(CancellationToken cancellationToken = default)
+    protected async Task Delete(CancellationToken cancellationToken = default)
     {
         await BotClient.DeleteMessage(Chat.Id, Id, cancellationToken).ConfigureAwait(false);
     }
@@ -108,7 +107,7 @@ public abstract class MessageHandler(int group = default)
     /// <summary>
     /// Asks a user to input an text message and waits for it.
     /// </summary>
-    public async Task<string?> AwaitTextInputAsync(
+    public async Task<string?> AwaitTextInput(
         TimeSpan timeOut,
         string text,
         ParseMode parseMode = default,
@@ -125,7 +124,7 @@ public abstract class MessageHandler(int group = default)
         CancellationToken cancellationToken = default)
     {
         if (text is not null)
-            await ResponseAsync(
+            await Response(
                 text,
                 sendAsReply: sendMessageAsReply,
                 parseMode: parseMode,
@@ -136,7 +135,7 @@ public abstract class MessageHandler(int group = default)
                 replyMarkup: replyMarkup,
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
-        var update = await AwaitMessageAsync(
+        var update = await AwaitMessage(
             FilterCutify.Text(), timeOut, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
         if (update == null)
         {
