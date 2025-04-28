@@ -12,7 +12,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// </remarks>
 /// <param name="group">Handling priority group, The lower the sooner to process.</param>
 public abstract class InlineQueryHandler(int group = default)
-    : AnyHandler<InlineQuery>(x => x.InlineQuery, group)
+    : AnyHandler<InlineQuery>(x => x.InlineQuery )
 {
 
     #region Extension Methods

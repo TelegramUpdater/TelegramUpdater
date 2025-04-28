@@ -10,6 +10,6 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// </remarks>
 /// <param name="group">Handling priority group, The lower the sooner to process.</param>
 public abstract class ChosenInlineResultHandler(int group = default)
-    : AnyHandler<ChosenInlineResult>(x => x.ChosenInlineResult, group)
+    : AnyHandler<ChosenInlineResult>(x => x.ChosenInlineResult )
 {
 }

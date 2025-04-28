@@ -13,13 +13,43 @@ using TelegramUpdater.UpdateHandlers.Singleton;
 namespace TelegramUpdater;
 
 /// <summary>
+/// The handler and some more info about it.
+/// </summary>
+/// <typeparam name="T">Type of the handler.</typeparam>
+/// <param name="handler">The handler.</param>
+/// <param name="group">Handling priority.</param>
+public class HandlingInfo<T>(T handler, int group = 0)
+{
+    /// <summary>
+    /// The handler.
+    /// </summary>
+    public T Handler { get; } = handler;
+
+    /// <summary>
+    /// Handling priority.
+    /// </summary>
+    public int Group { get; } = group;
+
+    /// <summary>
+    /// Swap this handle with something else, while keeping the extra as before.
+    /// </summary>
+    /// <typeparam name="Q"></typeparam>
+    /// <param name="sweaper"></param>
+    /// <returns></returns>
+    public HandlingInfo<Q> SwapFace<Q>(Func<T, Q> sweaper)
+    {
+        return new(sweaper(Handler), Group);
+    }
+}
+
+/// <summary>
 /// Fetch updates from telegram and handle them.
 /// </summary>
 public sealed class Updater : IUpdater
 {
     private readonly ITelegramBotClient _botClient;
-    private readonly List<ISingletonUpdateHandler> _updateHandlers;
-    private readonly List<IScopedUpdateHandlerContainer> _scopedHandlerContainers;
+    private readonly List<HandlingInfo<ISingletonUpdateHandler>> _updateHandlers;
+    private readonly List<HandlingInfo<IScopedUpdateHandlerContainer>> _scopedHandlerContainers;
     private readonly List<IExceptionHandler> _exceptionHandlers;
     private readonly ILogger<IUpdater> _logger;
     private readonly Type? _preUpdateProcessorType;
@@ -222,10 +252,10 @@ public sealed class Updater : IUpdater
     public UpdateType[] AllowedUpdates => _updaterOptions.AllowedUpdates;
 
     /// <inheritdoc/>
-    public IEnumerable<IScopedUpdateHandlerContainer> ScopedHandlerContainers => _scopedHandlerContainers;
+    public IEnumerable<HandlingInfo<IScopedUpdateHandlerContainer>> ScopedHandlerContainers => _scopedHandlerContainers;
 
     /// <inheritdoc/>
-    public IEnumerable<ISingletonUpdateHandler> SingletonUpdateHandlers => _updateHandlers;
+    public IEnumerable<HandlingInfo<ISingletonUpdateHandler>> SingletonUpdateHandlers => _updateHandlers;
 
     /// <inheritdoc/>
     public object this[string key]
@@ -245,18 +275,19 @@ public sealed class Updater : IUpdater
     public bool ContainsKey(string key) => _extraData.ContainsKey(key);
 
     /// <inheritdoc/>
-    public Updater AddSingletonUpdateHandler(ISingletonUpdateHandler updateHandler)
+    public Updater AddSingletonUpdateHandler(
+        ISingletonUpdateHandler updateHandler, int group = 0)
     {
-        _updateHandlers.Add(updateHandler);
+        _updateHandlers.Add(new(updateHandler, group: group));
         _logger.LogInformation($"Added new singleton handler.");
         return this;
     }
 
     /// <inheritdoc/>
     public Updater AddScopedUpdateHandler(
-        IScopedUpdateHandlerContainer scopedHandlerContainer)
+        IScopedUpdateHandlerContainer scopedHandlerContainer, int group = 0)
     {
-        _scopedHandlerContainers.Add(scopedHandlerContainer);
+        _scopedHandlerContainers.Add(new(scopedHandlerContainer, group: group));
         _logger.LogInformation("Added new scoped handler {handler}",
             scopedHandlerContainer.ScopedHandlerType);
         return this;
@@ -347,8 +378,8 @@ public sealed class Updater : IUpdater
 
     private UpdateType[] DetectAllowedUpdates()
         => _updateHandlers
-            .Select(x => x.UpdateType)
-            .Concat(_scopedHandlerContainers.Select(x => x.UpdateType))
+            .Select(x => x.Handler.UpdateType)
+            .Concat(_scopedHandlerContainers.Select(x => x.Handler.UpdateType))
             .Distinct()
             .ToArray();
 
@@ -422,11 +453,8 @@ public sealed class Updater : IUpdater
             }
 
             var scopedHandlers = _scopedHandlerContainers
-                .Where(x => x.ShouldHandle(new(this, shiningInfo.Value)));
-
-            var singletonhandlers = _updateHandlers
-                .Where(x => x.ShouldHandle(new(this, shiningInfo.Value)))
-                .Cast<IUpdateHandler>();
+                .Where(x => x.Handler.ShouldHandle(new(this, shiningInfo.Value)))
+                .OrderBy(x=> x.Group);
 
             if (!scopedHandlers.Any())
             {
@@ -446,7 +474,7 @@ public sealed class Updater : IUpdater
                 var scope = _serviceDescriptors.CreateAsyncScope();
                 await using (scope.ConfigureAwait(false))
                 {
-                    var handler = container.CreateInstance(scope);
+                    var handler = container.Handler.CreateInstance(scope, logger: Logger);
 
                     if (handler != null)
                     {
@@ -478,15 +506,14 @@ public sealed class Updater : IUpdater
             }
 
             var singletonhandlers = _updateHandlers
-                .Where(x => x.ShouldHandle(new(this, shiningInfo.Value)))
-                .Cast<IUpdateHandler>();
+                .Where(x => x.Handler.ShouldHandle(new(this, shiningInfo.Value)))
+                .Select(x => x.SwapFace<IUpdateHandler>(x => x));
 
             var scopedHandlers = _scopedHandlerContainers
-                .Where(x => x.ShouldHandle(new(this, shiningInfo.Value)))
-                .Select(x => x.CreateInstance())
-                .Where(x => x != null)
-                .Cast<IScopedUpdateHandler>()
-                .Cast<IUpdateHandler>();
+                .Where(x => x.Handler.ShouldHandle(new(this, shiningInfo.Value)))
+                .Select(x => x.SwapFace(x => x.CreateInstance(logger: Logger)))
+                .Where(x => x.Handler != null)
+                .Select(x => x.SwapFace<IUpdateHandler>(x => x!));
 
             var handlers = singletonhandlers.Concat(scopedHandlers)
                 .OrderBy(x => x.Group);
@@ -507,7 +534,7 @@ public sealed class Updater : IUpdater
                 }
 
                 if (!await HandleHandler(
-                    shiningInfo, handler, cancellationToken).ConfigureAwait(false))
+                    shiningInfo, handler.Handler, cancellationToken).ConfigureAwait(false))
                 {
                     break;
                 }

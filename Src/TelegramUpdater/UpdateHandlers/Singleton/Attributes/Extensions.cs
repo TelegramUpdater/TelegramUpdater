@@ -35,8 +35,7 @@ public static class SingletonAttributesExtensions
     internal static ISingletonUpdateHandler? CreateHandlerOfType<T>(
         UpdateType updateType,
         Func<Update, T?> resolver,
-        MethodInfo method,
-        int group) where T : class
+        MethodInfo method) where T : class
     {
         var filters = method.GetFilterAttributes<UpdaterFilterInputs<T>>();
 
@@ -45,7 +44,7 @@ public static class SingletonAttributesExtensions
             var callback = (Func<IContainer<T>, Task>)Delegate
                 .CreateDelegate(typeof(Func<IContainer<T>, Task>), method);
 
-            return new AnyHandler<T>(updateType, resolver, callback, filters, group);
+            return new AnyHandler<T>(updateType, resolver, callback, filters);
         }
         catch (ArgumentException)
         {
@@ -57,7 +56,7 @@ public static class SingletonAttributesExtensions
     }
 
     internal static ISingletonUpdateHandler? GetSingletonUpdateHandler(
-       MethodInfo method, UpdateType updateType, int group)
+        MethodInfo method, UpdateType updateType)
     {
         var propertyInfo = typeof(Update).GetProperty(updateType.ToString());
         if (propertyInfo == null)
@@ -70,7 +69,7 @@ public static class SingletonAttributesExtensions
             .GetMethod(nameof(CreateHandlerOfType), BindingFlags.NonPublic | BindingFlags.Static)!
             .MakeGenericMethod(propertyInfo.PropertyType!);
 
-        return (ISingletonUpdateHandler?)createHandlerMethod.Invoke(null, [updateType, resolver, method, group]);
+        return (ISingletonUpdateHandler?)createHandlerMethod.Invoke(null, [updateType, resolver, method]);
     }
 
     /// <summary>
@@ -79,7 +78,7 @@ public static class SingletonAttributesExtensions
     /// </summary>
     /// <returns></returns>
     /// <exception cref="ApplicationException"></exception>
-    public static IEnumerable<ISingletonUpdateHandler> IterSingletonUpdateHandlerCallbacks()
+    public static IEnumerable<HandlingInfo<ISingletonUpdateHandler>> IterSingletonUpdateHandlerCallbacks()
     {
         var entryAssembly = Assembly.GetEntryAssembly() ?? throw new InvalidOperationException("Can't find entry assembly.");
         var assemplyName = entryAssembly.GetName().Name;
@@ -106,12 +105,11 @@ public static class SingletonAttributesExtensions
 
                     if (ut != singletonAttr.UpdateType) continue;
 
-                    var handler = GetSingletonUpdateHandler(
-                        method, singletonAttr.UpdateType, singletonAttr.Group);
+                    var handler = GetSingletonUpdateHandler(method, singletonAttr.UpdateType);
 
                     if (handler is not null)
                     {
-                        yield return handler;
+                        yield return new(handler, singletonAttr.Group);
                     }
                 }
             }
@@ -131,7 +129,7 @@ public static class SingletonAttributesExtensions
     {
         foreach (var handler in IterSingletonUpdateHandlerCallbacks())
         {
-            updater.AddSingletonUpdateHandler(handler);
+            updater.AddSingletonUpdateHandler(handler.Handler, handler.Group);
         }
 
         return updater;

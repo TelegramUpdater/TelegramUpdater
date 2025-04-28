@@ -17,12 +17,9 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// A filter to choose the right update to be handled inside
 /// <paramref name="callback"/>.
 /// </param>
-/// <param name="group">
-/// Handling priority group, The lower the sooner to process.
-/// </param>
 public sealed class PollHandler(
     Func<IContainer<Poll>, Task> callback,
-    IFilter<UpdaterFilterInputs<Poll>>? filter,
-    int group) : AnyHandler<Poll>(UpdateType.Poll, x=> x.Poll, callback, filter, group)
+    IFilter<UpdaterFilterInputs<Poll>>? filter)
+    : AnyHandler<Poll>(UpdateType.Poll, x=> x.Poll, callback, filter)
 {
 }

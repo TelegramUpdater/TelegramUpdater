@@ -8,8 +8,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// <remarks>
 /// Set handling priority of this handler.
 /// </remarks>
-/// <param name="group">Handling priority group, The lower the sooner to process.</param>
-public abstract class ShippingQueryHandler(int group = default)
-    : AnyHandler<ShippingQuery>(x => x.ShippingQuery, group)
+public abstract class ShippingQueryHandler()
+    : AnyHandler<ShippingQuery>(x => x.ShippingQuery)
 {
 }

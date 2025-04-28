@@ -19,14 +19,12 @@ public abstract class AbstractSingletonUpdateHandler<T>
     /// <param name="updateType">Target update type.</param>
     /// <param name="getT">To extract this update from <see cref="Update"/></param>
     /// <param name="filter">Filters.</param>
-    /// <param name="group">Priority of handling.</param>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="ArgumentNullException"></exception>
     protected AbstractSingletonUpdateHandler(
         UpdateType updateType,
         Func<Update, T?> getT,
-        IFilter<UpdaterFilterInputs<T>>? filter,
-        int group)
+        IFilter<UpdaterFilterInputs<T>>? filter)
     {
         if (updateType == UpdateType.Unknown)
             throw new ArgumentException(
@@ -35,7 +33,6 @@ public abstract class AbstractSingletonUpdateHandler<T>
         Filter = filter;
         GetActualUpdate = getT ?? throw new ArgumentNullException(nameof(getT));
         UpdateType = updateType;
-        Group = group;
     }
 
     internal IReadOnlyDictionary<string, object>? ExtraData
@@ -43,9 +40,6 @@ public abstract class AbstractSingletonUpdateHandler<T>
 
     /// <inheritdoc/>
     public UpdateType UpdateType { get; }
-
-    /// <inheritdoc/>
-    public int Group { get; }
 
     /// <inheritdoc/>
     public IFilter<UpdaterFilterInputs<T>>? Filter { get; }

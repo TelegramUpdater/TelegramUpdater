@@ -15,10 +15,10 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// </remarks>
 /// <param name="getT">To extract <typeparamref name="T"/> from <see cref="Update"/>.</param>
 /// <param name="group">Handling priority.</param>
-public abstract class AnyHandler<T>(Func<Update, T?> getT, int group) : AbstractScopedUpdateHandler<T>(getT, group)
+public abstract class AnyHandler<T>(Func<Update, T?> getT)
+    : AbstractScopedUpdateHandler<T>(getT)
     where T : class
 {
-
     /// <inheritdoc/>
     internal protected sealed override IContainer<T> ContainerBuilder(
         IUpdater updater, ShiningInfo<long, Update> shiningInfo)
@@ -100,24 +100,3 @@ public abstract class AnyHandler<T>(Func<Update, T?> getT, int group) : Abstract
     }
     #endregion
 }
-
-
-/*
- * All allowed update types since now.
- 
-    case UpdateType.Unknown:
-    case UpdateType.MessageHandler:
-    case UpdateType.InlineQueryHandler:
-    case UpdateType.ChosenInlineResultHandler:
-    case UpdateType.CallbackQueryHandler:
-    case UpdateType.EditedMessageHandler:
-    case UpdateType.ChannelPostHandler:
-    case UpdateType.EditedChannelPostHandler:
-    case UpdateType.ShippingQueryHandler:
-    case UpdateType.PreCheckoutQueryHandler:
-    case UpdateType.PollHandler:
-    case UpdateType.PollAnswerHandler:
-    case UpdateType.MyChatMemberHandler:
-    case UpdateType.ChatMemberHandler:
-    case UpdateType.ChatJoinRequestHandler:
- */

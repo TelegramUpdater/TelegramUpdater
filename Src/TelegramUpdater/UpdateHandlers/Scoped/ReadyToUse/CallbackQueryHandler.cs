@@ -7,8 +7,8 @@
 /// Set handling priority of this handler.
 /// </remarks>
 /// <param name="group">Handling priority group, The lower the sooner to process.</param>
-public abstract class CallbackQueryHandler(int group = 0)
-    : AnyHandler<CallbackQuery>(x => x.CallbackQuery, group)
+public abstract class CallbackQueryHandler( )
+    : AnyHandler<CallbackQuery>(x => x.CallbackQuery )
 {
     #region Extension Methods
     /// <inheritdoc cref="CallbackQuery.From"/>.

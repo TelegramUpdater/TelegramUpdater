@@ -37,7 +37,9 @@ public sealed class SingletonHandlerCallbackAttribute : Attribute
         UpdateType = updateType;
     }
 
-    /// <inheritdoc cref="IUpdateHandler.Group"/>
+    /// <summary>
+    /// Handling priority.
+    /// </summary>
     public int Group { get; set; } = default;
 
     /// <summary>

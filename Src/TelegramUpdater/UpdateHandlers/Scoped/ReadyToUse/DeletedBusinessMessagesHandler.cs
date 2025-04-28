@@ -6,9 +6,8 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// <remarks>
 /// Set handling priority of this handler.
 /// </remarks>
-/// <param name="group">Handling priority group, The lower the sooner to process.</param>
-public abstract class DeletedBusinessMessagesHandler(int group = 0)
-    : AnyHandler<BusinessMessagesDeleted>(x => x.DeletedBusinessMessages, group)
+public abstract class DeletedBusinessMessagesHandler()
+    : AnyHandler<BusinessMessagesDeleted>(x => x.DeletedBusinessMessages)
 {
     // Add any specific properties or methods for BusinessMessagesDeleted if needed.
 }

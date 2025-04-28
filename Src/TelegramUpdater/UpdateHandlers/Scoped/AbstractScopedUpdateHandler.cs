@@ -13,15 +13,12 @@ namespace TelegramUpdater.UpdateHandlers.Scoped;
 /// <param name="getT">Extract actual update from <see cref="Update"/>.</param>
 /// <param name="group">Handling priority.</param>
 /// <exception cref="ArgumentNullException"></exception>
-public abstract class AbstractScopedUpdateHandler<T>(Func<Update, T?> getT, int group) : IScopedUpdateHandler
+public abstract class AbstractScopedUpdateHandler<T>(Func<Update, T?> getT) : IScopedUpdateHandler
     where T : class
 {
     private readonly Func<Update, T?> _getT = getT ?? throw new ArgumentNullException(nameof(getT));
     private IReadOnlyDictionary<string, object>? _extraData;
     private IContainer<T> _container = default!;
-
-    /// <inheritdoc/>
-    public int Group { get; } = group;
 
     /// <summary>
     /// Bot client instance.

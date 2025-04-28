@@ -27,7 +27,8 @@ public static class ScopedUpdateHandlersExtensions
         Type typeOfScopedHandler,
         UpdaterFilter<TUpdate>? filter = default,
         UpdateType? updateType = default,
-        Func<Update, TUpdate>? getT = default) where TUpdate : class
+        Func<Update, TUpdate>? getT = default,
+        int group = default) where TUpdate : class
     {
         if (!typeof(IScopedUpdateHandler).IsAssignableFrom(typeOfScopedHandler))
         {
@@ -56,7 +57,7 @@ public static class ScopedUpdateHandlersExtensions
 
         if (container != null)
         {
-            return updater.AddScopedUpdateHandler(container);
+            return updater.AddScopedUpdateHandler(container, group);
         }
 
         updater.Logger.LogWarning(
@@ -83,7 +84,8 @@ public static class ScopedUpdateHandlersExtensions
         this IUpdater updater,
         Filter<UpdaterFilterInputs<TUpdate>>? filter = default,
         UpdateType? updateType = default,
-        Func<Update, TUpdate?>? getT = default)
+        Func<Update, TUpdate?>? getT = default,
+        int group = default)
         where THandler : IScopedUpdateHandler where TUpdate : class
     {
         if (updateType == null)
@@ -103,7 +105,7 @@ public static class ScopedUpdateHandlersExtensions
 
         return updater.AddScopedUpdateHandler(
             new ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
-                updateType.Value, filter, getT));
+                updateType.Value, filter, getT), group);
     }
 
     /// <summary>

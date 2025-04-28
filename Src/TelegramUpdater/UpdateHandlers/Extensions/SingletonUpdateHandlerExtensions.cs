@@ -41,7 +41,7 @@ public static class SingletonUpdateHandlerExtensions
         }
 
         return updater.AddSingletonUpdateHandler(
-            new AnyHandler<T>(updateType, updateSelector, callback, filter, group));
+            new AnyHandler<T>(updateType, updateSelector, callback, filter), group);
     }
 
     /// <summary>
@@ -70,23 +70,23 @@ public static class SingletonUpdateHandlerExtensions
             updateType switch
             {
                 UpdateType.Message
-                    => new MessageHandler(callback, filter, group),
+                    => new MessageHandler(callback, filter),
                 UpdateType.EditedMessage
-                    => new EditedMessageHandler(callback, filter, group),
+                    => new EditedMessageHandler(callback, filter),
                 UpdateType.ChannelPost
-                    => new ChannelPostHandler(callback, filter, group),
+                    => new ChannelPostHandler(callback, filter),
                 UpdateType.EditedChannelPost
-                    => new EditedChannelPostHandler(callback, filter, group),
+                    => new EditedChannelPostHandler(callback, filter),
                 UpdateType.BusinessMessage
-                    => new BusinessMessageHandler(callback, filter, group),
+                    => new BusinessMessageHandler(callback, filter),
                 UpdateType.EditedBusinessMessage
-                    => new EditedBusinessMessageHandler(callback, filter, group),
+                    => new EditedBusinessMessageHandler(callback, filter),
 
                 _ => throw new ArgumentException(
                     $"Update type {updateType} is not a Message.",
                     nameof(updateType)
                 ),
-            });
+            }, group);
 
     /// <summary>
     /// Adds a handler for any update that is a <see cref="ChatMemberUpdated"/>.
@@ -113,14 +113,14 @@ public static class SingletonUpdateHandlerExtensions
             updateType switch
             {
                 UpdateType.ChatMember
-                    => new ChatMemberHandler(callback, filter, group),
+                    => new ChatMemberHandler(callback, filter ),
                 UpdateType.MyChatMember
-                    => new MyChatMemberHandler(callback, filter, group),
+                    => new MyChatMemberHandler(callback, filter ),
 
                 _ => throw new ArgumentException(
                     $"Update type {updateType} is not a ChatMemberUpdated.", nameof(updateType)
                 ),
-            });
+            }, group);
 
     /// <summary>
     /// Adds a handler for <see cref="UpdateType.CallbackQuery"/>.
@@ -139,7 +139,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<CallbackQuery>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new CallbackQueryHandler(callback, filter, group));
+            new CallbackQueryHandler(callback, filter), group);
 
     /// <summary>
     /// Adds a handler for <see cref="UpdateType.InlineQuery"/>.
@@ -158,7 +158,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<InlineQuery>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new InlineQueryHandler(callback, filter, group));
+            new InlineQueryHandler(callback, filter), group);
 
     /// <summary>
     /// Adds a handler for <see cref="UpdateType.ChosenInlineResult"/>.
@@ -177,7 +177,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<ChosenInlineResult>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new ChosenInlineResultHandler(callback, filter, group));
+            new ChosenInlineResultHandler(callback, filter), group);
 
     /// <summary>
     /// Adds a handler for <see cref="UpdateType.ChatJoinRequest"/>.
@@ -196,7 +196,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<ChatJoinRequest>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new ChatJoinRequestHandler(callback, filter, group));
+            new ChatJoinRequestHandler(callback, filter), group);
 
     /// <summary>
     /// Adds a handler for <see cref="UpdateType.Poll"/>.
@@ -215,7 +215,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<Poll>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new PollHandler(callback, filter, group));
+            new PollHandler(callback, filter), group);
 
     /// <summary>
     /// Adds a handler for <see cref="UpdateType.PollAnswer"/>.
@@ -234,7 +234,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<PollAnswer>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new PollAnswerHandler(callback, filter, group));
+            new PollAnswerHandler(callback, filter), group);
 
     /// <summary>
     /// Adds a handler for <see cref="UpdateType.PreCheckoutQuery"/>.
@@ -253,7 +253,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<PreCheckoutQuery>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new PreCheckoutQueryHandler(callback, filter, group));
+            new PreCheckoutQueryHandler(callback, filter), group);
 
     /// <summary>
     /// Adds a handler for <see cref="UpdateType.ShippingQuery"/>.
@@ -272,7 +272,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<ShippingQuery>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new ShippingQueryHandler(callback, filter, group));
+            new ShippingQueryHandler(callback, filter), group);
 
     // UpdateType.MessageReaction => typeof(MessageReactionUpdated)
     /// <summary>
@@ -292,7 +292,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<MessageReactionUpdated>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new MessageReactionHandler(callback, filter, group));
+            new MessageReactionHandler(callback, filter), group);
 
     // UpdateType.MessageReactionCount => typeof(MessageReactionCountUpdated)
     /// <summary>
@@ -312,7 +312,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<MessageReactionCountUpdated>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new MessageReactionCountHandler(callback, filter, group));
+            new MessageReactionCountHandler(callback, filter), group);
 
     // UpdateType.ChatBoost => typeof(ChatBoostUpdated)
     /// <summary>
@@ -332,7 +332,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<ChatBoostUpdated>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new ChatBoostHandler(callback, filter, group));
+            new ChatBoostHandler(callback, filter), group);
 
     // UpdateType.RemovedChatBoost => typeof(ChatBoostRemoved)
     /// <summary>
@@ -352,7 +352,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<ChatBoostRemoved>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new RemovedChatBoostHandler(callback, filter, group));
+            new RemovedChatBoostHandler(callback, filter), group);
 
     // UpdateType.BusinessConnection => typeof(BusinessConnection)
     /// <summary>
@@ -372,7 +372,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<BusinessConnection>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new BusinessConnectionHandler(callback, filter, group));
+            new BusinessConnectionHandler(callback, filter), group);
 
     // UpdateType.DeletedBusinessMessages => typeof(BusinessMessagesDeleted)
     /// <summary>
@@ -392,7 +392,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<BusinessMessagesDeleted>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new DeletedBusinessMessagesHandler(callback, filter, group));
+            new DeletedBusinessMessagesHandler(callback, filter), group);
 
     // UpdateType.PurchasedPaidMedia => typeof(PaidMediaPurchased)
     /// <summary>
@@ -412,6 +412,6 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<PaidMediaPurchased>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
-            new PurchasedPaidMediaHandler(callback, filter, group));
+            new PurchasedPaidMediaHandler(callback, filter), group);
 
 }

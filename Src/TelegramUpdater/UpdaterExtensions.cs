@@ -6,6 +6,7 @@ using System.Reflection;
 using Telegram.Bot.Types.Payments;
 using TelegramUpdater.Filters;
 using TelegramUpdater.UpdateHandlers.Scoped;
+using TelegramUpdater.UpdateHandlers.Scoped.Attributes;
 using TelegramUpdater.UpdateHandlers.Singleton;
 using TelegramUpdater.UpdateWriters;
 
@@ -238,7 +239,7 @@ public static class UpdaterExtensions
     /// /Messages/MyScopedMessageHandler
     /// </remarks>
     /// <returns></returns>
-    public static IEnumerable<IScopedUpdateHandlerContainer> IterCollectedScopedContainers(
+    public static IEnumerable<HandlingInfo<IScopedUpdateHandlerContainer>> IterCollectedScopedContainers(
         string handlersParentNamespace = "UpdateHandlers")
     {
         foreach ((UpdateType updateType, Type update, Type handler) in
@@ -253,7 +254,9 @@ public static class UpdaterExtensions
 
             if (container is null) continue;
 
-            yield return container;
+            var extrainfo = handler.GetCustomAttribute<ScopedHandlerAttribute>();
+
+            yield return new(container, extrainfo?.Group?? default);
         }
     }
 
@@ -288,8 +291,8 @@ public static class UpdaterExtensions
             if (container is null) continue;
 
             updater.Logger.LogInformation(
-                "Scoped handler collected! ( {Name} )", container.ScopedHandlerType.Name);
-            updater.AddScopedUpdateHandler(container);
+                "Scoped handler collected! ( {Name} )", container.Handler.ScopedHandlerType.Name);
+            updater.AddScopedUpdateHandler(container.Handler, container.Group);
         }
 
         return updater;

@@ -24,11 +24,9 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// </param>
 public sealed class InlineQueryHandler(
     Func<IContainer<InlineQuery>, Task> callback,
-    IFilter<UpdaterFilterInputs<InlineQuery>>? filter = default,
-    int group = default) : AnyHandler<InlineQuery>(UpdateType.InlineQuery,
+    IFilter<UpdaterFilterInputs<InlineQuery>>? filter = default) : AnyHandler<InlineQuery>(UpdateType.InlineQuery,
            x => x.InlineQuery,
            callback,
-           filter,
-           group)
+           filter)
 {
 }

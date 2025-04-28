@@ -42,14 +42,14 @@ public interface IUpdater
     /// registered to this instance
     /// of <see cref="IUpdater"/>.
     /// </summary>
-    public IEnumerable<IScopedUpdateHandlerContainer> ScopedHandlerContainers { get; }
+    public IEnumerable<HandlingInfo<IScopedUpdateHandlerContainer>> ScopedHandlerContainers { get; }
 
     /// <summary>
     /// Enumerate over <see cref="ISingletonUpdateHandler"/>s,
     /// registered to this instance
     /// of <see cref="IUpdater"/>.
     /// </summary>
-    public IEnumerable<ISingletonUpdateHandler> SingletonUpdateHandlers { get; }
+    public IEnumerable<HandlingInfo<ISingletonUpdateHandler>> SingletonUpdateHandlers { get; }
 
     /// <summary>
     /// Stop reader and writer ( if available ) tasks.
@@ -69,13 +69,15 @@ public interface IUpdater
     /// Use <see cref="ScopedUpdateHandlerContainerBuilder{THandler, TUpdate}"/>
     /// To Create a new <see cref="IScopedUpdateHandlerContainer"/>
     /// </param>
-    Updater AddScopedUpdateHandler(IScopedUpdateHandlerContainer scopedHandlerContainer);
+    /// <param name="group"></param>
+    Updater AddScopedUpdateHandler(IScopedUpdateHandlerContainer scopedHandlerContainer, int group = 0);
 
     /// <summary>
     /// Add your handler to this updater.
     /// </summary>
     /// <param name="updateHandler"></param>
-    Updater AddSingletonUpdateHandler(ISingletonUpdateHandler updateHandler);
+    /// <param name="group"></param>
+    Updater AddSingletonUpdateHandler(ISingletonUpdateHandler updateHandler, int group = 0);
 
     /// <summary>
     /// Get current <see cref="TelegramBotClient"/>'s user information.

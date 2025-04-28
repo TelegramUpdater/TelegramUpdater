@@ -17,12 +17,8 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// A filter to choose the right update to be handled inside
 /// <paramref name="callback"/>.
 /// </param>
-/// <param name="group">
-/// Handling priority group, The lower the sooner to process.
-/// </param>
 public sealed class ChatJoinRequestHandler(
     Func<IContainer<ChatJoinRequest>, Task> callback,
-    IFilter<UpdaterFilterInputs<ChatJoinRequest>>? filter,
-    int group) : AnyHandler<ChatJoinRequest>(UpdateType.ChatJoinRequest, x=> x.ChatJoinRequest, callback, filter, group)
+    IFilter<UpdaterFilterInputs<ChatJoinRequest>>? filter) : AnyHandler<ChatJoinRequest>(UpdateType.ChatJoinRequest, x=> x.ChatJoinRequest, callback, filter )
 {
 }

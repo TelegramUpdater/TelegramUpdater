@@ -20,7 +20,6 @@ public class AnyHandler<T> : AbstractSingletonUpdateHandler<T> where T : class
     /// A function to extract actual update from <see cref="Update"/>.
     /// </param>
     /// <param name="filter">Filters for this handler.</param>
-    /// <param name="group">Handling priority for this handler.</param>
     /// <param name="callback">
     /// A callback function where you may handle the incoming update.
     /// </param>
@@ -28,9 +27,8 @@ public class AnyHandler<T> : AbstractSingletonUpdateHandler<T> where T : class
     internal AnyHandler(UpdateType updateType,
                         Func<Update, T?> getT,
                         Func<IContainer<T>, Task> callback,
-                        IFilter<UpdaterFilterInputs<T>>? filter,
-                        int group)
-        : base(updateType, getT, filter, group)
+                        IFilter<UpdaterFilterInputs<T>>? filter)
+        : base(updateType, getT, filter)
     {
         _handleAsync = callback ??
             throw new ArgumentNullException(nameof(callback));

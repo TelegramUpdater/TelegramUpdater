@@ -14,7 +14,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// </remarks>
 /// <param name="group">Handling priority group, The lower the sooner to process.</param>
 public abstract class MessageHandler(int group = default)
-    : AnyHandler<Message>(x => x.Message, group)
+    : AnyHandler<Message>(x => x.Message )
 {
 
     #region Extension Methods

@@ -7,8 +7,8 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// Set handling priority of this handler.
 /// </remarks>
 /// <param name="group">Handling priority group, The lower the sooner to process.</param>
-public abstract class ChatBoostHandler(int group = 0)
-    : AnyHandler<ChatBoostUpdated>(x => x.ChatBoost, group)
+public abstract class ChatBoostHandler( )
+    : AnyHandler<ChatBoostUpdated>(x => x.ChatBoost )
 {
     // Add any specific properties or methods for ChatBoostUpdated if needed.
 }

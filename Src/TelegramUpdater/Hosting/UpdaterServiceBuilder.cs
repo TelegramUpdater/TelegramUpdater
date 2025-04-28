@@ -11,7 +11,7 @@ namespace TelegramUpdater.Hosting;
 /// </summary>
 public class UpdaterServiceBuilder
 {
-    private readonly List<IScopedUpdateHandlerContainer> _scopedHandlerContainers;
+    private readonly List<HandlingInfo<IScopedUpdateHandlerContainer>> _scopedHandlerContainers;
     private readonly List<Action<IUpdater>> _otherExecutions;
 
     /// <summary>
@@ -27,7 +27,7 @@ public class UpdaterServiceBuilder
     {
         foreach (var container in _scopedHandlerContainers)
         {
-            updater.AddScopedUpdateHandler(container);
+            updater.AddScopedUpdateHandler(container.Handler, container.Group);
         }
 
         foreach (var execution in _otherExecutions)
@@ -38,7 +38,7 @@ public class UpdaterServiceBuilder
         _scopedHandlerContainers.Clear();
     }
 
-    internal IEnumerable<IScopedUpdateHandlerContainer> IterScopedContainers()
+    internal IEnumerable<HandlingInfo<IScopedUpdateHandlerContainer>> IterScopedContainers()
     {
         foreach (var container in _scopedHandlerContainers)
         {
@@ -50,7 +50,7 @@ public class UpdaterServiceBuilder
     {
         foreach (var container in IterScopedContainers())
         {
-            serviceDescriptors.AddScoped(container.ScopedHandlerType);
+            serviceDescriptors.AddScoped(container.Handler.ScopedHandlerType);
         }
     }
 
@@ -61,10 +61,11 @@ public class UpdaterServiceBuilder
     /// Use <see cref="ScopedUpdateHandlerContainerBuilder{THandler, TUpdate}"/>
     /// To Create a new <see cref="IScopedUpdateHandlerContainer"/>
     /// </param>
+    /// <param name="group"></param>
     public UpdaterServiceBuilder AddScopedUpdateHandler(
-        IScopedUpdateHandlerContainer scopedHandlerContainer)
+        IScopedUpdateHandlerContainer scopedHandlerContainer, int group)
     {
-        _scopedHandlerContainers.Add(scopedHandlerContainer);
+        _scopedHandlerContainers.Add(new(scopedHandlerContainer, group));
         return this;
     }
 
@@ -82,7 +83,8 @@ public class UpdaterServiceBuilder
     public UpdaterServiceBuilder AddScopedUpdateHandler<THandler, TUpdate>(
         UpdaterFilter<TUpdate>? filter = default,
         UpdateType? updateType = default,
-        Func<Update, TUpdate>? getT = default)
+        Func<Update, TUpdate>? getT = default,
+        int group = default)
         where THandler : IScopedUpdateHandler where TUpdate : class
     {
         if (updateType == null)
@@ -100,7 +102,7 @@ public class UpdaterServiceBuilder
 
         return AddScopedUpdateHandler(
             new ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
-                updateType.Value, filter, getT));
+                updateType.Value, filter, getT), group);
     }
 
     /// <summary>
@@ -118,7 +120,8 @@ public class UpdaterServiceBuilder
         Type typeOfScopedHandler,
         UpdaterFilter<TUpdate>? filter = default,
         UpdateType? updateType = default,
-        Func<Update, TUpdate>? getT = default) where TUpdate : class
+        Func<Update, TUpdate>? getT = default,
+        int group = default) where TUpdate : class
     {
         if (!typeof(IScopedUpdateHandler).IsAssignableFrom(typeOfScopedHandler))
         {
@@ -146,7 +149,7 @@ public class UpdaterServiceBuilder
 
         if (container != null)
         {
-            return AddScopedUpdateHandler(container);
+            return AddScopedUpdateHandler(container, group);
         }
 
         throw new InvalidOperationException(
@@ -291,7 +294,7 @@ public class UpdaterServiceBuilder
         {
             if (container is null) continue;
 
-            AddScopedUpdateHandler(container);
+            AddScopedUpdateHandler(container.Handler, container.Group);
         }
 
         return this;

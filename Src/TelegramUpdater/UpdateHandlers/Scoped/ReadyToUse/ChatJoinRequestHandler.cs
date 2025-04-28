@@ -8,6 +8,6 @@
 /// </remarks>
 /// <param name="group">Handling priority group, The lower the sooner to process.</param>
 public abstract class ChatJoinRequestHandler(int group = default)
-    : AnyHandler<ChatJoinRequest>(x => x.ChatJoinRequest, group)
+    : AnyHandler<ChatJoinRequest>(x => x.ChatJoinRequest )
 {
 }
