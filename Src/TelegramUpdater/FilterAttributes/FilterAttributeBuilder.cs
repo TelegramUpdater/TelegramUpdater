@@ -3,7 +3,7 @@
 /// <summary>
 /// Using this class you can build filter attributes which can be cross update type.
 /// </summary>
-public abstract class FilterAttributeBuilder : AbstractFilterAttribute
+public abstract class FilterAttributeBuilder : AbstractUpdaterFilterAttribute
 {
     private readonly Dictionary<Type, object> _filtersPerUpdateType;
 
@@ -32,18 +32,12 @@ public abstract class FilterAttributeBuilder : AbstractFilterAttribute
     /// <exception cref="InvalidOperationException"></exception>
     public FilterAttributeBuilder AddFilterForUpdate<T>(UpdaterFilter<T> filter) where T : class
     {
-        var t = typeof(T);
-        if (!Enum.TryParse(t.Name, out UpdateType _))
-        {
-            throw new InvalidOperationException($"{typeof(T)} is not an update!");
-        }
-
-        _filtersPerUpdateType.Add(t, filter);
+        _filtersPerUpdateType.Add(typeof(T), filter);
         return this;
     }
 
     /// <inheritdoc/>
-    protected internal override object GetFilterTypeOf(Type requestedType)
+    protected internal override object GetUpdaterFilterTypeOf(Type requestedType)
     {
         if (!_filtersPerUpdateType.TryGetValue(requestedType, out object? value))
         {

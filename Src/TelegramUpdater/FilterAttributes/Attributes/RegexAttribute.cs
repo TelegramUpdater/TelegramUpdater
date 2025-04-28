@@ -12,7 +12,7 @@ namespace TelegramUpdater.FilterAttributes.Attributes;
 /// <param name="pattern"></param>
 /// <param name="regexOptions"></param>
 /// <param name="catchCaption"></param>
-public sealed class RegexAttribute(string pattern, RegexOptions regexOptions = default, bool catchCaption = false) : AbstractFilterAttribute
+public sealed class RegexAttribute(string pattern, RegexOptions regexOptions = default, bool catchCaption = false) : AbstractUpdaterFilterAttribute
 {
     internal string Pattern { get; init; } = pattern;
 
@@ -21,7 +21,7 @@ public sealed class RegexAttribute(string pattern, RegexOptions regexOptions = d
     internal bool? CatchCaption { get; init; } = catchCaption;
 
     /// <inheritdoc/>
-    protected internal override object GetFilterTypeOf(Type requestedType)
+    protected internal override object GetUpdaterFilterTypeOf(Type requestedType)
     {
 #if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(requestedType);

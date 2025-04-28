@@ -8,7 +8,7 @@ namespace TelegramUpdater.FilterAttributes.Attributes;
 /// <summary>
 /// An attribute to filter users based on their id or username.
 /// </summary>
-public sealed class UsersAttribute : AbstractFilterAttribute
+public sealed class UsersAttribute : AbstractUpdaterFilterAttribute
 {
     [MemberNotNullWhen(true, nameof(UserIds))]
     [MemberNotNullWhen(false, nameof(Usernames))]
@@ -51,7 +51,7 @@ public sealed class UsersAttribute : AbstractFilterAttribute
     internal string[]? Usernames { get; init; }
 
     /// <inheritdoc/>
-    protected internal override object GetFilterTypeOf(Type requestedType)
+    protected internal override object GetUpdaterFilterTypeOf(Type requestedType)
     {
 #if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(requestedType);

@@ -424,13 +424,17 @@ public sealed class Updater : IUpdater
             var scopedHandlers = _scopedHandlerContainers
                 .Where(x => x.ShouldHandle(new(this, shiningInfo.Value)));
 
+            var singletonhandlers = _updateHandlers
+                .Where(x => x.ShouldHandle(new(this, shiningInfo.Value)))
+                .Cast<IUpdateHandler>();
+
             if (!scopedHandlers.Any())
             {
                 return;
             }
 
             // valid handlers for an update should process one by one
-            // This change can be cut off when throwing an specified exception
+            // This chain can be cut off when throwing an specified exception
             // Other exceptions are redirected to ExceptionHandler.
             foreach (var container in scopedHandlers)
             {
@@ -487,7 +491,7 @@ public sealed class Updater : IUpdater
             var handlers = singletonhandlers.Concat(scopedHandlers)
                 .OrderBy(x => x.Group);
 
-            if (!(handlers.Any() || scopedHandlers.Any()))
+            if (!handlers.Any())
             {
                 return;
             }
