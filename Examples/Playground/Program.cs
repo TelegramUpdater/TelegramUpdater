@@ -15,7 +15,6 @@ builder.Services.AddTelegramUpdater(
         allowedUpdates: [UpdateType.Message, UpdateType.CallbackQuery]),
 
     (builder) => builder
-        .AddMessageHandler<Start>()
         .Execute(updater => updater
             .AddSingletonUpdateHandler(
                 UpdateType.Message,
@@ -24,6 +23,7 @@ builder.Services.AddTelegramUpdater(
                     await container.ResponseAsync("Want me to help you?!");
                 },
                 FilterCutify.OnCommand("help")))
+        .AutoCollectScopedHandlers()
         .AddDefaultExceptionHandler());
 
 var host = builder.Build();

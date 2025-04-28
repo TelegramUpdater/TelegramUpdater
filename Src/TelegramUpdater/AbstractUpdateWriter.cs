@@ -45,7 +45,7 @@ public abstract class AbstractUpdateWriter
     /// <summary>
     /// Updater instance.
     /// </summary>
-    protected IUpdater Updater { get; private set; } = null!;
+    protected IUpdater Updater { get; set; } = null!;
 
     /// <summary>
     /// Telegram bot client instance.

@@ -425,73 +425,62 @@ public sealed class Updater : IUpdater
             }
         }
 
-        if (servicesAvailabe)
-        {
-            await ProcessUpdateFromServices(
-                shiningInfo, cancellationToken).ConfigureAwait(false);
-        }
-        else
-        {
-            await ProcessUpdate(shiningInfo, cancellationToken).ConfigureAwait(false);
-        }
+        await ProcessUpdate(shiningInfo, cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task ProcessUpdateFromServices(
-        ShiningInfo<long, Update> shiningInfo,
-        CancellationToken cancellationToken)
+    Func<IServiceProvider?, ShiningInfo<long, Update>, CancellationToken, Task<bool>> GetHandlingJob(
+        IScopedUpdateHandlerContainer container)
     {
-        try
+        return async (serviceProvider, shiningInfo, cancellationToken) =>
         {
-            if (_serviceDescriptors == null)
-                throw new InvalidOperationException(
-                    "Can't ProcessUpdateFromServices when" +
-                    " there is no ServiceProvider.");
-
-            if (cancellationToken.IsCancellationRequested)
+            if (serviceProvider is not null)
             {
-                return;
-            }
-
-            var scopedHandlers = _scopedHandlerContainers
-                .Where(x => x.Handler.ShouldHandle(new(this, shiningInfo.Value)))
-                .OrderBy(x=> x.Group);
-
-            if (!scopedHandlers.Any())
-            {
-                return;
-            }
-
-            // valid handlers for an update should process one by one
-            // This chain can be cut off when throwing an specified exception
-            // Other exceptions are redirected to ExceptionHandler.
-            foreach (var container in scopedHandlers)
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    break;
-                }
-
-                var scope = _serviceDescriptors.CreateAsyncScope();
+                var scope = serviceProvider.CreateAsyncScope();
                 await using (scope.ConfigureAwait(false))
                 {
-                    var handler = container.Handler.CreateInstance(scope, logger: Logger);
+                    var handler = container.CreateInstance(scope, logger: Logger);
 
                     if (handler != null)
                     {
                         if (!await HandleHandler(
                             shiningInfo, handler, cancellationToken).ConfigureAwait(false))
                         {
-                            break;
+                            return true;
                         }
                     }
                 }
             }
-        }
-        catch (Exception e)
+            else
+            {
+                var handler = container.CreateInstance(logger: Logger);
+
+                if (handler != null)
+                {
+                    if (!await HandleHandler(
+                        shiningInfo, handler, cancellationToken).ConfigureAwait(false))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        };
+    }
+
+    Func<IServiceProvider?, ShiningInfo<long, Update>, CancellationToken, Task<bool>> GetHandlingJob(
+        ISingletonUpdateHandler container)
+    {
+        return async (_, shiningInfo, cancellationToken) =>
         {
-            _logger.LogError(
-                exception: e, "Error in ProcessUpdateFromServices.");
-        }
+            if (!await HandleHandler(
+                shiningInfo, container, cancellationToken).ConfigureAwait(false))
+            {
+                return true;
+            }
+
+            return false;
+        };
     }
 
     private async Task ProcessUpdate(
@@ -507,16 +496,15 @@ public sealed class Updater : IUpdater
 
             var singletonhandlers = _updateHandlers
                 .Where(x => x.Handler.ShouldHandle(new(this, shiningInfo.Value)))
-                .Select(x => x.SwapFace<IUpdateHandler>(x => x));
+                .Select(x => x.SwapFace(x => GetHandlingJob(x)));
 
             var scopedHandlers = _scopedHandlerContainers
                 .Where(x => x.Handler.ShouldHandle(new(this, shiningInfo.Value)))
-                .Select(x => x.SwapFace(x => x.CreateInstance(logger: Logger)))
-                .Where(x => x.Handler != null)
-                .Select(x => x.SwapFace<IUpdateHandler>(x => x!));
+                .Select(x => x.SwapFace(x => GetHandlingJob(x)));
 
             var handlers = singletonhandlers.Concat(scopedHandlers)
-                .OrderBy(x => x.Group);
+                .OrderBy(x => x.Group)
+                .Select(x=> x.Handler);
 
             if (!handlers.Any())
             {
@@ -533,8 +521,8 @@ public sealed class Updater : IUpdater
                     break;
                 }
 
-                if (!await HandleHandler(
-                    shiningInfo, handler.Handler, cancellationToken).ConfigureAwait(false))
+                if (await handler(_serviceDescriptors, shiningInfo, cancellationToken)
+                    .ConfigureAwait(false))
                 {
                     break;
                 }

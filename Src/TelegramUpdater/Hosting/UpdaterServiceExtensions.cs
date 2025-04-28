@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using TelegramUpdater.UpdateWriters;
 
 namespace TelegramUpdater.Hosting;
 
@@ -51,14 +52,14 @@ public static class UpdaterServiceExtensions
     /// </para>
     /// </param>
     /// <param name="builder">Use this to config your <see cref="IUpdater"/>.</param>
-    /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="AbstractUpdateWriterService"/></typeparam>
+    /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="AbstractUpdateWriter"/></typeparam>
     public static void AddTelegramUpdater<TWriter>(
         this IServiceCollection serviceDescriptors,
         string botToken,
         UpdaterOptions updaterOptions = default,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
-        where TWriter : AbstractUpdateWriterService
+        where TWriter : AbstractUpdateWriter
     {
         serviceDescriptors.AddTelegramBotClient(botToken);
 
@@ -87,7 +88,9 @@ public static class UpdaterServiceExtensions
         {
             serviceDescriptors.AddScoped(preUpdateProcessorType);
         }
-        serviceDescriptors.AddHostedService<TWriter>();
+
+        serviceDescriptors.AddSingleton<TWriter>();
+        serviceDescriptors.AddHostedService<UpdateWriterService<TWriter>>();
     }
 
     /// <summary>
@@ -119,14 +122,14 @@ public static class UpdaterServiceExtensions
     /// </param>
     /// <param name="updaterOptions">Options for this updater.</param>
     /// <param name="builder">Use this to config your <see cref="IUpdater"/>.</param>
-    /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="AbstractUpdateWriterService"/></typeparam>
+    /// <typeparam name="TWriter">Type of your custom updater. a child class of <see cref="AbstractUpdateWriter"/></typeparam>
     public static void AddTelegramUpdater<TWriter>(
         this IServiceCollection serviceDescriptors,
         ITelegramBotClient telegramBot,
         UpdaterOptions updaterOptions = default,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
-        where TWriter : AbstractUpdateWriterService
+        where TWriter : AbstractUpdateWriter
     {
         var updaterBuilder = new UpdaterServiceBuilder();
         builder?.Invoke(updaterBuilder);
@@ -152,7 +155,9 @@ public static class UpdaterServiceExtensions
         {
             serviceDescriptors.AddScoped(preUpdateProcessorType);
         }
-        serviceDescriptors.AddHostedService<TWriter>();
+
+        serviceDescriptors.AddSingleton<TWriter>();
+        serviceDescriptors.AddHostedService<UpdateWriterService<TWriter>>();
     }
 
     /// <summary>
@@ -166,13 +171,13 @@ public static class UpdaterServiceExtensions
     /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
     /// </para>
     /// </remarks>
-    /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="AbstractUpdateWriterService"/></typeparam>
+    /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="AbstractUpdateWriter"/></typeparam>
     public static void AddTelegramUpdater<TWriter>(
         this IServiceCollection serviceDescriptors,
         UpdaterOptions updaterOptions,
         Action<UpdaterServiceBuilder> builder,
         Type? preUpdateProcessorType = default)
-        where TWriter : AbstractUpdateWriterService
+        where TWriter : AbstractUpdateWriter
     {
         var updaterBuilder = new UpdaterServiceBuilder();
         builder(updaterBuilder);
@@ -200,7 +205,9 @@ public static class UpdaterServiceExtensions
         {
             serviceDescriptors.AddScoped(preUpdateProcessorType);
         }
-        serviceDescriptors.AddHostedService<TWriter>();
+
+        serviceDescriptors.AddSingleton<TWriter>();
+        serviceDescriptors.AddHostedService<UpdateWriterService<TWriter>>();
     }
 
     /// <summary>
@@ -237,7 +244,7 @@ public static class UpdaterServiceExtensions
         UpdaterOptions updaterOptions = default,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
-        => serviceDescriptors.AddTelegramUpdater<SimpleWriterService>(
+        => serviceDescriptors.AddTelegramUpdater<SimpleUpdateWriter>(
             botToken, updaterOptions, builder, preUpdateProcessorType);
 
     /// <summary>
@@ -275,7 +282,7 @@ public static class UpdaterServiceExtensions
         UpdaterOptions updaterOptions = default,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
-        => serviceDescriptors.AddTelegramUpdater<SimpleWriterService>(
+        => serviceDescriptors.AddTelegramUpdater<SimpleUpdateWriter>(
             telegramBot, updaterOptions, builder, preUpdateProcessorType);
 
     /// <summary>

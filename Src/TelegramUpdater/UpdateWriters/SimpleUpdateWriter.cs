@@ -5,6 +5,17 @@ namespace TelegramUpdater.UpdateWriters;
 
 internal class SimpleUpdateWriter : AbstractUpdateWriter
 {
+    public SimpleUpdateWriter()
+    {
+
+    }
+
+    public SimpleUpdateWriter(IUpdater? updater = default)
+    {
+        if (updater is not null)
+            Updater = updater;
+    }
+
     async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         await EnqueueUpdateAsync(update, cancellationToken).ConfigureAwait(false);
@@ -36,6 +47,7 @@ internal class SimpleUpdateWriter : AbstractUpdateWriter
         }
         catch (OperationCanceledException)
         {
+            // Ignored
         }
     }
 }

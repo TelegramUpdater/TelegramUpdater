@@ -80,6 +80,7 @@ public class UpdaterServiceBuilder
     /// A function to choose real update from <see cref="Update"/>
     /// <para>Don't touch it if you don't know.</para>
     /// </param>
+    /// <param name="group"></param>
     public UpdaterServiceBuilder AddScopedUpdateHandler<THandler, TUpdate>(
         UpdaterFilter<TUpdate>? filter = default,
         UpdateType? updateType = default,
@@ -116,6 +117,7 @@ public class UpdaterServiceBuilder
     /// A function to choose real update from <see cref="Update"/>
     /// <para>Don't touch it if you don't know.</para>
     /// </param>
+    /// <param name="group"></param>
     public UpdaterServiceBuilder AddScopedUpdateHandler<TUpdate>(
         Type typeOfScopedHandler,
         UpdaterFilter<TUpdate>? filter = default,

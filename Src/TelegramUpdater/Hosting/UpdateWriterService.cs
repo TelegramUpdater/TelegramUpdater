@@ -1,7 +1,4 @@
 ﻿using Microsoft.Extensions.Hosting;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace TelegramUpdater.Hosting;
 
@@ -12,17 +9,22 @@ namespace TelegramUpdater.Hosting;
 /// <see cref="Updater"/> Should exists in <see cref="IServiceProvider"/>
 /// </remarks>
 /// <inheritdoc/>
-public abstract class AbstractUpdateWriterService(IUpdater updater) : AbstractUpdateWriter(updater),
-    IHostedService, IDisposable
+public class UpdateWriterService<TWriter>(TWriter writer)
+    : IHostedService, IDisposable where TWriter : AbstractUpdateWriter
 {
     private Task? _executingTask;
     private readonly CancellationTokenSource _stoppingCts = new();
+
+    /// <summary>
+    /// The <see cref="AbstractUpdateWriter"/>.
+    /// </summary>
+    public TWriter Writer { get; } = writer;
 
     /// <inheritdoc/>
     public virtual Task StartAsync(CancellationToken cancellationToken)
     {
         // Store the task we're executing
-        _executingTask = ExecuteAsync(_stoppingCts.Token);
+        _executingTask = Writer.ExecuteAsync(_stoppingCts.Token);
 
         // If the task is completed then return it,
         // this will bubble cancellation and failure to the caller

@@ -273,9 +273,10 @@ public sealed class Rainbow<TId, TValue> where TId : struct
     /// <param name="queueId">Queue id.</param>
     /// <param name="timeOut">Returns default on this timeout!</param>
     /// <param name="cancellationToken">Cancel the job.</param>
-    public async ValueTask<ShiningInfo<TId, TValue>?> ReadNextAsync(ushort queueId,
-                                                                    TimeSpan timeOut,
-                                                                    CancellationToken cancellationToken = default)
+    public async ValueTask<ShiningInfo<TId, TValue>?> ReadNextAsync(
+        ushort queueId,
+        TimeSpan timeOut,
+        CancellationToken cancellationToken = default)
     {
         if (!_availableQueues.TryGetValue(queueId, out var channel))
         {
