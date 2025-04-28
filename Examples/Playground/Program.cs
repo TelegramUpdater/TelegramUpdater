@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Playground;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -11,6 +13,11 @@ var builder = Host.CreateApplicationBuilder(args);
 
 var botToken = builder.Configuration.GetSection("TelegramUpdater:BotToken")
     .Get<string>() ?? throw new InvalidOperationException("Bot token not found.");
+
+builder.Services.AddSqlite<PlaygroundMemory>(
+    builder.Configuration.GetConnectionString("DatabaseConnection"));
+
+builder.Services.AddHostedService<UpgradeMemory>();
 
 builder.Services.AddTelegramUpdater(
     botToken,
@@ -54,20 +61,16 @@ partial class Program
                 InlineKeyboardButton.WithCallbackData("Yes"),
                 InlineKeyboardButton.WithCallbackData("No")]]));
 
+        // Wait for short coming answer right here
         var answer = await container.ChannelButtonClick(
             TimeSpan.FromSeconds(5),
             new(@"Yes|No"));
-
-        if (answer == null) // likely Timed out.
-        {
-            await message.Edit("Slow");
-            return;
-        }
 
         switch (answer)
         {
             case { Update.Data: { } data }:
                 {
+                    // User did answer
                     if (data == "Yes")
                         await answer.Edit("Well me too :)");
                     else
@@ -75,6 +78,12 @@ partial class Program
 
                     await answer.Answer();
 
+                    break;
+                }
+            default:
+                {
+                    // Likely timed out.
+                    await message.Edit("Slow");
                     break;
                 }
         }
