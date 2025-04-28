@@ -120,7 +120,6 @@ public sealed class Updater : IUpdater
         _rainbow = new Rainbow<long, Update>(
             updaterOptions.MaxDegreeOfParallelism ??
                 Environment.ProcessorCount,
-
             customKeyResolver ?? QueueKeyResolver,
             ShineCallback, ShineErrors);
 
@@ -321,7 +320,7 @@ public sealed class Updater : IUpdater
     }
 
     /// <inheritdoc/>
-    public async Task<User> GetMeAsync()
+    public async Task<User> GetMe()
     {
         _me ??= await _botClient.GetMe(cancellationToken: UpdaterOptions.CancellationToken)
             .ConfigureAwait(false);

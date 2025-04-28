@@ -83,7 +83,7 @@ public interface IUpdater
     /// <remarks>
     /// This method will cache! call freely.
     /// </remarks>
-    Task<User> GetMeAsync();
+    Task<User> GetMe();
 
     /// <summary>
     /// Manually write an update to the <see cref="Rainbow"/>
