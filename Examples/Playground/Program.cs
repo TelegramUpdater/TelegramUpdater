@@ -11,21 +11,17 @@ using TelegramUpdater.UpdateHandlers.Singleton.Attributes;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-var botToken = builder.Configuration.GetSection("TelegramUpdater:BotToken")
-    .Get<string>() ?? throw new InvalidOperationException("Bot token not found.");
-
 builder.Services.AddSqlite<PlaygroundMemory>(
     builder.Configuration.GetConnectionString("DatabaseConnection"));
 
 builder.Services.AddHostedService<UpgradeMemory>();
 
-builder.Services.AddTelegramUpdater(
-    botToken,
-    new UpdaterOptions(
-        allowedUpdates: [UpdateType.Message, UpdateType.CallbackQuery]),
-
+// this will collect updater options like BotToken, AllowedUpdates and ...
+// from configuration section "TelegramUpdater". in this example from appsettings.json
+builder.AddTelegramUpdater(
     (builder) => builder
         .Execute(updater => updater
+
             // Add in line handler
             .AddSingletonUpdateHandler(
                 UpdateType.Message,
@@ -34,8 +30,10 @@ builder.Services.AddTelegramUpdater(
                     await container.Response("Want me to help you?!");
                 },
                 FilterCutify.OnCommand("help"))
+
             // Collects static methods marked with `SingletonHandlerCallback` attribute.
             .CollectSingletonUpdateHandlerCallbacks())
+
         // Collect scoped handlers located for example at UpdateHandlers/Messages for messages.
         .AutoCollectScopedHandlers()
         .AddDefaultExceptionHandler());

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -34,11 +35,11 @@ public class HandlingInfo<T>(T handler, int group = 0)
     /// Swap this handle with something else, while keeping the extra as before.
     /// </summary>
     /// <typeparam name="Q"></typeparam>
-    /// <param name="sweaper"></param>
+    /// <param name="func"></param>
     /// <returns></returns>
-    public HandlingInfo<Q> SwapFace<Q>(Func<T, Q> sweaper)
+    public HandlingInfo<Q> SwapFace<Q>(Func<T, Q> func)
     {
-        return new(sweaper(Handler), Group);
+        return new(func(Handler), Group);
     }
 }
 
@@ -62,7 +63,7 @@ public sealed class Updater : IUpdater
 
     // Updater can use this to change the behavior on scoped handlers.
     // If it's present, then DI will be available inside scoped handlers
-    private readonly IServiceProvider? _serviceDescriptors;
+    private readonly IServiceScopeFactory? _scopeFactory;
 
     // This the main class responsible for queuing updates
     // It handles everything related to process priority and more
@@ -74,7 +75,7 @@ public sealed class Updater : IUpdater
     /// </summary>
     /// <param name="botClient">Telegram bot client</param>
     /// <param name="updaterOptions">Options for this updater.</param>
-    /// <param name="serviceDescriptors">
+    /// <param name="scopeFactory">
     /// Optional service provider.
     /// </param>
     /// <param name="preUpdateProcessorType">
@@ -82,7 +83,7 @@ public sealed class Updater : IUpdater
     /// It should be a sub-class of <see cref="AbstractPreUpdateProcessor"/>.
     /// <para>
     /// Your class should have a parameterless ctor if
-    /// <paramref name="serviceDescriptors"/>
+    /// <paramref name="scopeFactory"/>
     /// is <see langword="null"/>.
     /// otherwise you can use items which are in services.
     /// </para>
@@ -101,8 +102,8 @@ public sealed class Updater : IUpdater
     /// </param>
     public Updater(
         ITelegramBotClient botClient,
-        UpdaterOptions updaterOptions = default,
-        IServiceProvider? serviceDescriptors = default,
+        UpdaterOptions? updaterOptions = default,
+        IServiceScopeFactory? scopeFactory = default,
         Type? preUpdateProcessorType = default,
         Func<Update, long>? customKeyResolver = default,
         bool outgoingRateControl = false)
@@ -114,7 +115,7 @@ public sealed class Updater : IUpdater
         if (outgoingRateControl)
             _botClient.OnApiResponseReceived += OnApiResponseReceived;
 
-        _updaterOptions = updaterOptions;
+        _updaterOptions = updaterOptions?? new();
         _preUpdateProcessorType = preUpdateProcessorType;
 
         if (_preUpdateProcessorType is not null)
@@ -128,7 +129,7 @@ public sealed class Updater : IUpdater
                     " instance of AbstractPreUpdateProcessor.");
             }
 
-            if (serviceDescriptors is null)
+            if (scopeFactory is null)
             {
                 if (_preUpdateProcessorType
                     .GetConstructor(Type.EmptyTypes) == null)
@@ -141,14 +142,12 @@ public sealed class Updater : IUpdater
             }
         }
 
-        _serviceDescriptors = serviceDescriptors;
-
+        _scopeFactory = scopeFactory;
         _updateHandlers = [];
         _exceptionHandlers = [];
         _scopedHandlerContainers = [];
-
         _rainbow = new Rainbow<long, Update>(
-            updaterOptions.MaxDegreeOfParallelism ??
+            _updaterOptions.MaxDegreeOfParallelism ??
                 Environment.ProcessorCount,
             customKeyResolver ?? QueueKeyResolver,
             ShineCallback, ShineErrors);
@@ -197,7 +196,8 @@ public sealed class Updater : IUpdater
             Match match = regex.Match(description);
             if (match.Success)
             {
-                var tryAfterSeconds = int.Parse(match.Groups["tryAfter"].Value);
+                var tryAfterSeconds = int.Parse(
+                    match.Groups["tryAfter"].Value, CultureInfo.InvariantCulture);
 
                 Logger.LogWarning("A wait of {seconds} is required! caused by {method}",
                     tryAfterSeconds, args.ApiRequestEventArgs.Request.MethodName);
@@ -210,7 +210,6 @@ public sealed class Updater : IUpdater
     /// Creates an instance of updater to fetch updates from
     /// telegram and handle them.
     /// </summary>
-    /// <param name="botToken">Your telegram bot token.</param>
     /// <param name="updaterOptions">Options for this updater.</param>
     /// <param name="preUpdateProcessorType">
     /// Type of a class that will be initialized on every incoming update.
@@ -227,13 +226,60 @@ public sealed class Updater : IUpdater
     /// from <see cref="Update"/> 
     /// ( as queue keys ), you can pass your own. <b>Use with care!</b>
     /// </param>
-    public Updater(string botToken,
-        UpdaterOptions updaterOptions = default,
+    /// <param name="outgoingRateControl">
+    /// <b>[BETA]</b> - Applies a wait if you cross the telegram limits border.
+    /// <c>"Too Many Requests: retry after xxx"</c> Error.
+    /// </param>
+    public Updater(
+        UpdaterOptions? updaterOptions = default,
         Type? preUpdateProcessorType = default,
-        Func<Update, long>? customKeyResolver = default)
-        : this(new TelegramBotClient(botToken), updaterOptions,
-              preUpdateProcessorType: preUpdateProcessorType,
-              customKeyResolver: customKeyResolver)
+        Func<Update, long>? customKeyResolver = default,
+        bool outgoingRateControl = default): this(
+            botClient: new TelegramBotClient(
+                updaterOptions?.BotToken?? throw new ArgumentNullException(
+                    nameof(updaterOptions), "Bot token in updater options is null.")),
+            updaterOptions: updaterOptions,
+            preUpdateProcessorType: preUpdateProcessorType,
+            customKeyResolver: customKeyResolver,
+            outgoingRateControl: outgoingRateControl)
+    { }
+
+    /// <summary>
+    /// Creates an instance of updater to fetch updates from
+    /// telegram and handle them.
+    /// </summary>
+    /// <param name="botToken">Your telegram bot token. This will replace <see cref="UpdaterOptions.BotToken"/></param>
+    /// <param name="updaterOptions">Options for this updater.</param>
+    /// <param name="preUpdateProcessorType">
+    /// Type of a class that will be initialized on every incoming update.
+    /// It should be a sub-class of <see cref="AbstractPreUpdateProcessor"/>.
+    /// <para>
+    /// Your class should have a parameterless ctor.
+    /// </para>
+    /// <para>
+    /// Don't forget to add this to service collections if available.
+    /// </para>
+    /// </param>
+    /// <param name="customKeyResolver">
+    /// If you wanna customize the way updater resolves a sender id
+    /// from <see cref="Update"/> 
+    /// ( as queue keys ), you can pass your own. <b>Use with care!</b>
+    /// </param>
+    /// <param name="outgoingRateControl">
+    /// <b>[BETA]</b> - Applies a wait if you cross the telegram limits border.
+    /// <c>"Too Many Requests: retry after xxx"</c> Error.
+    /// </param>
+    public Updater(
+        string botToken,
+        UpdaterOptions? updaterOptions = default,
+        Type? preUpdateProcessorType = default,
+        Func<Update, long>? customKeyResolver = default,
+        bool outgoingRateControl = default): this(
+            updaterOptions: UpdaterExtensions.RedesignOptions(
+                updaterOptions: updaterOptions, newBotToken: botToken),
+            preUpdateProcessorType: preUpdateProcessorType,
+            customKeyResolver: customKeyResolver,
+            outgoingRateControl: outgoingRateControl)
     { }
 
     /// <inheritdoc/>
@@ -397,14 +443,14 @@ public sealed class Updater : IUpdater
         if (shiningInfo == null)
             return;
 
-        var servicesAvailabe = _serviceDescriptors is not null;
+        var servicesAvailabe = _scopeFactory is not null;
 
         if (_preUpdateProcessorType != null)
         {
             AbstractPreUpdateProcessor processor;
             if (servicesAvailabe)
             {
-                var scope = _serviceDescriptors!.CreateAsyncScope();
+                var scope = _scopeFactory!.CreateAsyncScope();
                 await using (scope.ConfigureAwait(false))
                 {
                     processor = (AbstractPreUpdateProcessor)scope
@@ -428,47 +474,28 @@ public sealed class Updater : IUpdater
         await ProcessUpdate(shiningInfo, cancellationToken).ConfigureAwait(false);
     }
 
-    Func<IServiceProvider?, ShiningInfo<long, Update>, CancellationToken, Task<bool>> GetHandlingJob(
+    Func<IServiceScope?, ShiningInfo<long, Update>, CancellationToken, Task<bool>> GetHandlingJob(
         IScopedUpdateHandlerContainer container)
     {
-        return async (serviceProvider, shiningInfo, cancellationToken) =>
+        return async (scope, shiningInfo, cancellationToken) =>
         {
-            if (serviceProvider is not null)
-            {
-                var scope = serviceProvider.CreateAsyncScope();
-                await using (scope.ConfigureAwait(false))
-                {
-                    var handler = container.CreateInstance(scope, logger: Logger);
+            var handler = container.CreateInstance(scope, logger: Logger);
 
-                    if (handler != null)
-                    {
-                        if (!await HandleHandler(
-                            shiningInfo, handler, cancellationToken).ConfigureAwait(false))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-            else
+            if (handler != null)
             {
-                var handler = container.CreateInstance(logger: Logger);
-
-                if (handler != null)
+                if (!await HandleHandler(
+                    shiningInfo, handler, cancellationToken).ConfigureAwait(false))
                 {
-                    if (!await HandleHandler(
-                        shiningInfo, handler, cancellationToken).ConfigureAwait(false))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
+
             }
 
             return false;
         };
     }
 
-    Func<IServiceProvider?, ShiningInfo<long, Update>, CancellationToken, Task<bool>> GetHandlingJob(
+    Func<IServiceScope?, ShiningInfo<long, Update>, CancellationToken, Task<bool>> GetHandlingJob(
         ISingletonUpdateHandler container)
     {
         return async (_, shiningInfo, cancellationToken) =>
@@ -494,6 +521,12 @@ public sealed class Updater : IUpdater
                 return;
             }
 
+            AsyncServiceScope? serviceScope = default;
+            if (_scopeFactory is not null)
+                // The scope is created at beginning of processing pipeline for an update.
+                // The update may trigger more than one handler, so the scope is persisting between them
+                serviceScope = _scopeFactory.CreateAsyncScope();
+
             var singletonhandlers = _updateHandlers
                 .Where(x => x.Handler.ShouldHandle(new(this, shiningInfo.Value)))
                 .Select(x => x.SwapFace(x => GetHandlingJob(x)));
@@ -506,10 +539,7 @@ public sealed class Updater : IUpdater
                 .OrderBy(x => x.Group)
                 .Select(x=> x.Handler);
 
-            if (!handlers.Any())
-            {
-                return;
-            }
+            if (!handlers.Any()) return;
 
             // valid handlers for an update should process one by one
             // This change can be cut off when throwing an specified exception
@@ -521,12 +551,15 @@ public sealed class Updater : IUpdater
                     break;
                 }
 
-                if (await handler(_serviceDescriptors, shiningInfo, cancellationToken)
+                if (await handler(serviceScope, shiningInfo, cancellationToken)
                     .ConfigureAwait(false))
                 {
                     break;
                 }
             }
+
+            if (serviceScope is not null)
+                await serviceScope.Value.DisposeAsync().ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -583,3 +616,4 @@ public sealed class Updater : IUpdater
         return true;
     }
 }
+

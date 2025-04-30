@@ -1,6 +1,9 @@
 ﻿// Ignore Spelling: Iter
 
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Telegram.Bot.Types.Payments;
@@ -356,5 +359,28 @@ public static class UpdaterExtensions
                 "Set {count} commands to scope {scope}.",
                 scope.Count(), commandScope?.Type?? BotCommandScopeType.Default);
         }
+    }
+
+    internal static UpdaterOptions RedesignOptions(
+        UpdaterOptions? updaterOptions = null,
+        IServiceProvider? serviceProvider = default,
+        string? newBotToken = default)
+    {
+        var fetchedOption = updaterOptions ?? (serviceProvider?.GetService<IConfiguration>()?
+            .GetSection(UpdaterOptions.Updater).Get<UpdaterOptions>());
+
+        var logger = fetchedOption?.Logger ?? serviceProvider?.GetService<ILogger<IUpdater>>();
+
+        if (updaterOptions is null)
+            logger?.LogWarning("No updater option passed or can be found from configuration.");
+
+        return new UpdaterOptions(
+            botToken: newBotToken?? fetchedOption?.BotToken,
+            maxDegreeOfParallelism: fetchedOption?.MaxDegreeOfParallelism,
+            logger: logger,
+            cancellationToken: fetchedOption?.CancellationToken?? default,
+            flushUpdatesQueue: fetchedOption?.FlushUpdatesQueue?? default,
+            allowedUpdates: fetchedOption?.AllowedUpdates
+        );
     }
 }

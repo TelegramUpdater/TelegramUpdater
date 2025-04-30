@@ -1,5 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using TelegramUpdater.UpdateWriters;
 
 namespace TelegramUpdater.Hosting;
@@ -34,6 +35,105 @@ public static class UpdaterServiceExtensions
     /// <para>
     /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
     /// </para>
+    /// <para>
+    /// This method tries to resolve <see cref="UpdaterOptions"/> from configuration.
+    /// </para>
+    /// </remarks>
+    /// <param name="serviceDescriptors">The service collection.</param>
+    /// <param name="configurationManager"></param>
+    /// <param name="preUpdateProcessorType">
+    /// Type of a class that will be initialized on every incoming update.
+    /// It should be a sub-class of <see cref="AbstractPreUpdateProcessor"/>.
+    /// <para>
+    /// Your class should have a parameterless ctor if
+    /// <paramref name="serviceDescriptors"/>
+    /// is <see langword="null"/>.
+    /// otherwise you can use items which are in services.
+    /// </para>
+    /// <para>
+    /// Don't forget to add this to service collections if available.
+    /// </para>
+    /// </param>
+    /// <param name="builder">Use this to config your <see cref="IUpdater"/>.</param>
+    /// <typeparam name="TWriter">Type of your custom updater service. a child class of <see cref="AbstractUpdateWriter"/></typeparam>
+    public static void AddTelegramUpdater<TWriter>(
+        this IServiceCollection serviceDescriptors,
+        IConfigurationManager configurationManager,
+        Action<UpdaterServiceBuilder>? builder = default,
+        Type? preUpdateProcessorType = default)
+        where TWriter : AbstractUpdateWriter
+    {
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(serviceDescriptors);
+        ArgumentNullException.ThrowIfNull(configurationManager);
+#else
+        if (serviceDescriptors == null)
+            throw new ArgumentNullException(nameof(serviceDescriptors));
+
+        if (configurationManager == null)
+            throw new ArgumentNullException(nameof(configurationManager));
+#endif
+
+        var updaterOptions = configurationManager?
+            .GetSection(UpdaterOptions.Updater).Get<UpdaterOptions>() ??
+                throw new InvalidOperationException("No configuration for UpdaterOptions found.");
+
+        serviceDescriptors.AddTelegramBotClient(updaterOptions.BotToken ??
+            throw new InvalidOperationException("No BotToken found in UpdaterOptions."));
+
+        var updaterBuilder = new UpdaterServiceBuilder();
+        builder?.Invoke(updaterBuilder);
+
+        updaterBuilder.AddToServiceCollection(serviceDescriptors);
+
+        serviceDescriptors.AddSingleton<IUpdater>(
+            (services) =>
+            {
+                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
+                var botClient = services.GetRequiredService<ITelegramBotClient>();
+
+                var updater = new Updater(
+                    botClient: botClient,
+                    updaterOptions: UpdaterExtensions.RedesignOptions(
+                        updaterOptions: updaterOptions, serviceProvider: services),
+                    scopeFactory: scopeFactory,
+                    preUpdateProcessorType: preUpdateProcessorType);
+
+                updaterBuilder.AddToUpdater(updater);
+                return updater;
+            });
+
+        if (preUpdateProcessorType is not null)
+        {
+            serviceDescriptors.AddScoped(preUpdateProcessorType);
+        }
+
+        serviceDescriptors.AddSingleton<TWriter>();
+        serviceDescriptors.AddHostedService<UpdateWriterService<TWriter>>();
+    }
+
+    /// <inheritdoc cref="AddTelegramUpdater{TWriter}(IServiceCollection, IConfigurationManager?, Action{UpdaterServiceBuilder}?, Type?)"/>
+    public static void AddTelegramUpdater<TWriter>(
+        this IHostApplicationBuilder applicationBuilder,
+        Action<UpdaterServiceBuilder>? builder = default,
+        Type? preUpdateProcessorType = default)
+        where TWriter : AbstractUpdateWriter
+        => AddTelegramUpdater<TWriter>(
+            serviceDescriptors: applicationBuilder.Services,
+            configurationManager: applicationBuilder.Configuration,
+            builder: builder,
+            preUpdateProcessorType: preUpdateProcessorType);
+
+    /// <summary>
+    /// Add telegram updater to the <see cref="IServiceCollection"/>.
+    /// Using your custom update writer service.
+    /// </summary>
+    /// <remarks>
+    /// This method will also adds <see cref="ITelegramBotClient"/> to the service collection as Singleton.
+    /// If you already did that, Pass an instance of <see cref="ITelegramBotClient"/> instead of <paramref name="botToken"/>.
+    /// <para>
+    /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
+    /// </para>
     /// </remarks>
     /// <param name="botToken">Your bot API token.</param>
     /// <param name="updaterOptions">Updater options.</param>
@@ -56,11 +156,25 @@ public static class UpdaterServiceExtensions
     public static void AddTelegramUpdater<TWriter>(
         this IServiceCollection serviceDescriptors,
         string botToken,
-        UpdaterOptions updaterOptions = default,
+        UpdaterOptions? updaterOptions = default,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
         where TWriter : AbstractUpdateWriter
     {
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(serviceDescriptors);
+#else
+        if (serviceDescriptors == null)
+            throw new ArgumentNullException(nameof(serviceDescriptors));
+#endif
+
+#if NET8_0_OR_GREATER
+        ArgumentException.ThrowIfNullOrEmpty(botToken);
+#else
+        if (string.IsNullOrEmpty(botToken))
+            throw new ArgumentNullException(nameof(serviceDescriptors));
+#endif
+
         serviceDescriptors.AddTelegramBotClient(botToken);
 
         var updaterBuilder = new UpdaterServiceBuilder();
@@ -69,16 +183,17 @@ public static class UpdaterServiceExtensions
         updaterBuilder.AddToServiceCollection(serviceDescriptors);
 
         serviceDescriptors.AddSingleton<IUpdater>(
-            services =>
+            (services) =>
             {
+                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
                 var botClient = services.GetRequiredService<ITelegramBotClient>();
-                var updater = new Updater(botClient, new UpdaterOptions(
-                    updaterOptions.MaxDegreeOfParallelism,
-                    logger: services.GetRequiredService<ILogger<IUpdater>>(),
-                    cancellationToken: updaterOptions.CancellationToken,
-                    flushUpdatesQueue: updaterOptions.FlushUpdatesQueue,
-                    allowedUpdates: updaterOptions.AllowedUpdates
-                 ), services, preUpdateProcessorType);
+
+                var updater = new Updater(
+                    botClient: botClient,
+                    updaterOptions: UpdaterExtensions.RedesignOptions(
+                        updaterOptions: updaterOptions, serviceProvider: services),
+                    scopeFactory: scopeFactory,
+                    preUpdateProcessorType: preUpdateProcessorType);
 
                 updaterBuilder.AddToUpdater(updater);
                 return updater;
@@ -99,14 +214,14 @@ public static class UpdaterServiceExtensions
     /// </summary>
     /// <remarks>
     /// This method adds updater and handlers to the <see cref="IServiceCollection"/>,
-    /// But not <paramref name="telegramBot"/>! and you should do it yourself.
+    /// But not <paramref name="botClient"/>! and you should do it yourself.
     /// <para>You better pass botToken as <see cref="string"/></para>
     /// <para>
     /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
     /// </para>
     /// </remarks>
     /// <param name="serviceDescriptors">The service collection.</param>
-    /// <param name="telegramBot"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
+    /// <param name="botClient"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
     /// <param name="preUpdateProcessorType">
     /// Type of a class that will be initialized on every incoming update.
     /// It should be a sub-class of <see cref="AbstractPreUpdateProcessor"/>.
@@ -125,12 +240,23 @@ public static class UpdaterServiceExtensions
     /// <typeparam name="TWriter">Type of your custom updater. a child class of <see cref="AbstractUpdateWriter"/></typeparam>
     public static void AddTelegramUpdater<TWriter>(
         this IServiceCollection serviceDescriptors,
-        ITelegramBotClient telegramBot,
-        UpdaterOptions updaterOptions = default,
+        ITelegramBotClient botClient,
+        UpdaterOptions? updaterOptions = default,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
         where TWriter : AbstractUpdateWriter
     {
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(serviceDescriptors);
+        ArgumentNullException.ThrowIfNull(botClient);
+#else
+        if (serviceDescriptors == null)
+            throw new ArgumentNullException(nameof(serviceDescriptors));
+
+        if (botClient == null)
+            throw new ArgumentNullException(nameof(botClient));
+#endif
+
         var updaterBuilder = new UpdaterServiceBuilder();
         builder?.Invoke(updaterBuilder);
 
@@ -139,13 +265,14 @@ public static class UpdaterServiceExtensions
         serviceDescriptors.AddSingleton<IUpdater>(
             services =>
             {
-                var updater = new Updater(telegramBot, new UpdaterOptions(
-                    updaterOptions.MaxDegreeOfParallelism,
-                    logger: services.GetRequiredService<ILogger<IUpdater>>(),
-                    cancellationToken: updaterOptions.CancellationToken,
-                    flushUpdatesQueue: updaterOptions.FlushUpdatesQueue,
-                    allowedUpdates: updaterOptions.AllowedUpdates
-                 ), services, preUpdateProcessorType);
+                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
+
+                var updater = new Updater(
+                    botClient: botClient,
+                    updaterOptions: UpdaterExtensions.RedesignOptions(
+                        updaterOptions: updaterOptions, serviceProvider: services),
+                    scopeFactory: scopeFactory,
+                    preUpdateProcessorType: preUpdateProcessorType);
 
                 updaterBuilder.AddToUpdater(updater);
                 return updater;
@@ -179,6 +306,13 @@ public static class UpdaterServiceExtensions
         Type? preUpdateProcessorType = default)
         where TWriter : AbstractUpdateWriter
     {
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(serviceDescriptors);
+#else
+        if (serviceDescriptors == null)
+            throw new ArgumentNullException(nameof(serviceDescriptors));
+#endif
+
         var updaterBuilder = new UpdaterServiceBuilder();
         builder(updaterBuilder);
 
@@ -187,15 +321,15 @@ public static class UpdaterServiceExtensions
         serviceDescriptors.AddSingleton<IUpdater>(
             services =>
             {
-                var telegramBot = services.GetRequiredService<ITelegramBotClient>();
+                var botClient = services.GetRequiredService<ITelegramBotClient>();
+                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
 
-                var updater = new Updater(telegramBot, new UpdaterOptions(
-                    updaterOptions.MaxDegreeOfParallelism,
-                    logger: services.GetRequiredService<ILogger<IUpdater>>(),
-                    cancellationToken: updaterOptions.CancellationToken,
-                    flushUpdatesQueue: updaterOptions.FlushUpdatesQueue,
-                    allowedUpdates: updaterOptions.AllowedUpdates
-                 ), services, preUpdateProcessorType);
+                var updater = new Updater(
+                    botClient: botClient,
+                    updaterOptions: UpdaterExtensions.RedesignOptions(
+                        updaterOptions: updaterOptions, serviceProvider: services),
+                    scopeFactory: scopeFactory,
+                    preUpdateProcessorType: preUpdateProcessorType);
 
                 updaterBuilder.AddToUpdater(updater);
                 return updater;
@@ -210,80 +344,49 @@ public static class UpdaterServiceExtensions
         serviceDescriptors.AddHostedService<UpdateWriterService<TWriter>>();
     }
 
-    /// <summary>
-    /// Add telegram updater to the <see cref="IServiceCollection"/>.
-    /// Using a simple update writer
-    /// </summary>
-    /// <remarks>
-    /// This method will also adds <see cref="ITelegramBotClient"/> to the service collection as Singleton.
-    /// If you already did that, Pass an instance of <see cref="ITelegramBotClient"/> instead of <paramref name="botToken"/>.
-    /// <para>
-    /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
-    /// </para>
-    /// </remarks>
-    /// <param name="botToken">Your bot API token.</param>
-    /// <param name="updaterOptions">Updater options.</param>
-    /// <param name="serviceDescriptors">The service collection.</param>
-    /// <param name="preUpdateProcessorType">
-    /// Type of a class that will be initialized on every incoming update.
-    /// It should be a sub-class of <see cref="AbstractPreUpdateProcessor"/>.
-    /// <para>
-    /// Your class should have a parameterless ctor if
-    /// <paramref name="serviceDescriptors"/>
-    /// is <see langword="null"/>.
-    /// otherwise you can use items which are in services.
-    /// </para>
-    /// <para>
-    /// Don't forget to add this to service collections if available.
-    /// </para>
-    /// </param>
-    /// <param name="builder">Use this to config your <see cref="IUpdater"/>.</param>
+    /// <inheritdoc cref="AddTelegramUpdater{TWriter}(IServiceCollection, string, UpdaterOptions?, Action{UpdaterServiceBuilder}?, Type?)"/>
     public static void AddTelegramUpdater(
         this IServiceCollection serviceDescriptors,
         string botToken,
-        UpdaterOptions updaterOptions = default,
+        UpdaterOptions? updaterOptions = default,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
         => serviceDescriptors.AddTelegramUpdater<SimpleUpdateWriter>(
             botToken, updaterOptions, builder, preUpdateProcessorType);
 
-    /// <summary>
-    /// Add telegram updater to the <see cref="IServiceCollection"/>.
-    /// Using a simple update writer
-    /// </summary>
-    /// <remarks>
-    /// This method adds updater and handlers to the <see cref="IServiceCollection"/>,
-    /// But not <paramref name="telegramBot"/>! and you should do it yourself.
-    /// <para>You better pass botToken as <see cref="string"/></para>
-    /// <para>
-    /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
-    /// </para>
-    /// </remarks>
-    /// <param name="telegramBot"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
-    /// <param name="serviceDescriptors">The service collection.</param>
-    /// <param name="preUpdateProcessorType">
-    /// Type of a class that will be initialized on every incoming update.
-    /// It should be a sub-class of <see cref="AbstractPreUpdateProcessor"/>.
-    /// <para>
-    /// Your class should have a parameterless ctor if
-    /// <paramref name="serviceDescriptors"/>
-    /// is <see langword="null"/>.
-    /// otherwise you can use items which are in services.
-    /// </para>
-    /// <para>
-    /// Don't forget to add this to service collections if available.
-    /// </para>
-    /// </param>
-    /// <param name="builder">Use this to config your <see cref="IUpdater"/>.</param>
-    /// <param name="updaterOptions">Options for this updater.</param>
+    /// <inheritdoc cref="AddTelegramUpdater{TWriter}(IServiceCollection, ITelegramBotClient, UpdaterOptions?, Action{UpdaterServiceBuilder}?, Type?)"/>
     public static void AddTelegramUpdater(
         this IServiceCollection serviceDescriptors,
         ITelegramBotClient telegramBot,
-        UpdaterOptions updaterOptions = default,
+        UpdaterOptions? updaterOptions = default,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
         => serviceDescriptors.AddTelegramUpdater<SimpleUpdateWriter>(
             telegramBot, updaterOptions, builder, preUpdateProcessorType);
+
+
+    /// <inheritdoc cref="AddTelegramUpdater{TWriter}(IServiceCollection, IConfigurationManager?, Action{UpdaterServiceBuilder}?, Type?)"/>
+    public static void AddTelegramUpdater(
+        this IHostApplicationBuilder applicationBuilder,
+        Action<UpdaterServiceBuilder>? builder = default,
+        Type? preUpdateProcessorType = default)
+        => AddTelegramUpdater<SimpleUpdateWriter>(
+            serviceDescriptors: applicationBuilder.Services,
+            configurationManager: applicationBuilder.Configuration,
+            builder: builder,
+            preUpdateProcessorType: preUpdateProcessorType);
+
+    /// <inheritdoc cref="AddTelegramUpdater{TWriter}(IServiceCollection, IConfigurationManager?, Action{UpdaterServiceBuilder}?, Type?)"/>
+    public static void AddTelegramUpdater(
+        this IServiceCollection serviceDescriptors,
+        IConfigurationManager configurationManager,
+        Action<UpdaterServiceBuilder>? builder = default,
+        Type? preUpdateProcessorType = default)
+        => AddTelegramUpdater<SimpleUpdateWriter>(
+            serviceDescriptors: serviceDescriptors,
+            configurationManager: configurationManager,
+            builder: builder,
+            preUpdateProcessorType: preUpdateProcessorType);
 
     /// <summary>
     /// Add telegram updater to the <see cref="IServiceCollection"/>.
@@ -291,13 +394,13 @@ public static class UpdaterServiceExtensions
     /// </summary>
     /// <remarks>
     /// This method adds updater and handlers to the <see cref="IServiceCollection"/>,
-    /// But not <paramref name="telegramBot"/>! and you should do it yourself.
+    /// But not <paramref name="botClient"/>! and you should do it yourself.
     /// <para>You better pass botToken as <see cref="string"/></para>
     /// <para>
     /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
     /// </para>
     /// </remarks>
-    /// <param name="telegramBot"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
+    /// <param name="botClient"><see cref="ITelegramBotClient"/> required by <see cref="Updater"/>.</param>
     /// <param name="serviceDescriptors">The service collection.</param>
     /// <param name="preUpdateProcessorType">
     /// Type of a class that will be initialized on every incoming update.
@@ -316,11 +419,22 @@ public static class UpdaterServiceExtensions
     /// <param name="updaterOptions">Options for this updater.</param>
     public static void AddTelegramManualUpdater(
         this IServiceCollection serviceDescriptors,
-        ITelegramBotClient telegramBot,
-        UpdaterOptions updaterOptions = default,
+        ITelegramBotClient botClient,
+        UpdaterOptions? updaterOptions = default,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
     {
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(serviceDescriptors);
+        ArgumentNullException.ThrowIfNull(botClient);
+#else
+        if (serviceDescriptors == null)
+            throw new ArgumentNullException(nameof(serviceDescriptors));
+
+        if (botClient == null)
+            throw new ArgumentNullException(nameof(botClient));
+#endif
+
         var updaterBuilder = new UpdaterServiceBuilder();
         builder?.Invoke(updaterBuilder);
 
@@ -329,13 +443,14 @@ public static class UpdaterServiceExtensions
         serviceDescriptors.AddSingleton<IUpdater>(
             services =>
             {
-                var updater = new Updater(telegramBot, new UpdaterOptions(
-                    updaterOptions.MaxDegreeOfParallelism,
-                    logger: services.GetRequiredService<ILogger<IUpdater>>(),
-                    cancellationToken: updaterOptions.CancellationToken,
-                    flushUpdatesQueue: updaterOptions.FlushUpdatesQueue,
-                    allowedUpdates: updaterOptions.AllowedUpdates
-                 ), services, preUpdateProcessorType);
+                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
+
+                var updater = new Updater(
+                    botClient: botClient,
+                    updaterOptions: UpdaterExtensions.RedesignOptions(
+                        updaterOptions: updaterOptions, serviceProvider: services),
+                    scopeFactory: scopeFactory,
+                    preUpdateProcessorType: preUpdateProcessorType);
 
                 updaterBuilder.AddToUpdater(updater);
                 return updater;
@@ -364,6 +479,13 @@ public static class UpdaterServiceExtensions
         Action<UpdaterServiceBuilder> builder,
         Type? preUpdateProcessorType = default)
     {
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(serviceDescriptors);
+#else
+        if (serviceDescriptors == null)
+            throw new ArgumentNullException(nameof(serviceDescriptors));
+#endif
+
         var updaterBuilder = new UpdaterServiceBuilder();
         builder(updaterBuilder);
 
@@ -372,15 +494,15 @@ public static class UpdaterServiceExtensions
         serviceDescriptors.AddSingleton<IUpdater>(
             services =>
             {
-                var telegramBot = services.GetRequiredService<ITelegramBotClient>();
+                var botClient = services.GetRequiredService<ITelegramBotClient>();
+                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
 
-                var updater = new Updater(telegramBot, new UpdaterOptions(
-                    updaterOptions.MaxDegreeOfParallelism,
-                    logger: services.GetRequiredService<ILogger<IUpdater>>(),
-                    cancellationToken: updaterOptions.CancellationToken,
-                    flushUpdatesQueue: updaterOptions.FlushUpdatesQueue,
-                    allowedUpdates: updaterOptions.AllowedUpdates
-                 ), services, preUpdateProcessorType);
+                var updater = new Updater(
+                    botClient: botClient,
+                    updaterOptions: UpdaterExtensions.RedesignOptions(
+                        updaterOptions: updaterOptions, serviceProvider: services),
+                    scopeFactory: scopeFactory,
+                    preUpdateProcessorType: preUpdateProcessorType);
 
                 updaterBuilder.AddToUpdater(updater);
                 return updater;
@@ -422,10 +544,24 @@ public static class UpdaterServiceExtensions
     public static void AddTelegramManualUpdater(
         this IServiceCollection serviceDescriptors,
         string botToken,
-        UpdaterOptions updaterOptions = default,
+        UpdaterOptions? updaterOptions = default,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
     {
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(serviceDescriptors);
+#else
+        if (serviceDescriptors == null)
+            throw new ArgumentNullException(nameof(serviceDescriptors));
+#endif
+
+#if NET8_0_OR_GREATER
+        ArgumentException.ThrowIfNullOrEmpty(botToken);
+#else
+        if (string.IsNullOrEmpty(botToken))
+            throw new ArgumentNullException(nameof(serviceDescriptors));
+#endif
+
         serviceDescriptors.AddTelegramBotClient(botToken);
 
         var updaterBuilder = new UpdaterServiceBuilder();
@@ -437,13 +573,14 @@ public static class UpdaterServiceExtensions
             services =>
             {
                 var botClient = services.GetRequiredService<ITelegramBotClient>();
-                var updater = new Updater(botClient, new UpdaterOptions(
-                    updaterOptions.MaxDegreeOfParallelism,
-                    logger: services.GetRequiredService<ILogger<IUpdater>>(),
-                    cancellationToken: updaterOptions.CancellationToken,
-                    flushUpdatesQueue: updaterOptions.FlushUpdatesQueue,
-                    allowedUpdates: updaterOptions.AllowedUpdates
-                 ), services, preUpdateProcessorType);
+                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
+
+                var updater = new Updater(
+                    botClient: botClient,
+                    updaterOptions: UpdaterExtensions.RedesignOptions(
+                        updaterOptions: updaterOptions, serviceProvider: services),
+                    scopeFactory: scopeFactory,
+                    preUpdateProcessorType: preUpdateProcessorType);
 
                 updaterBuilder.AddToUpdater(updater);
                 return updater;
