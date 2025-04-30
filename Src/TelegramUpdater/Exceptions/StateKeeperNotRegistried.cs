@@ -1,10 +1,9 @@
-﻿namespace TelegramUpdater.Exceptions
+﻿namespace TelegramUpdater.Exceptions;
+
+public sealed class StateKeeperNotRegistried : Exception
 {
-    public sealed class StateKeeperNotRegistried : Exception
+    public StateKeeperNotRegistried(string? stateKeeperName)
+        : base($"There's no state keeper registered with this name ( {stateKeeperName} )")
     {
-        public StateKeeperNotRegistried(string? stateKeeperName)
-            : base($"There's not state keeper registried with this name ( {stateKeeperName} )")
-        {
-        }
     }
 }

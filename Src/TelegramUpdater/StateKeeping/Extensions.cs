@@ -11,6 +11,10 @@ namespace TelegramUpdater;
 /// </summary>
 public static class Extensions
 {
+    internal const string StateKeeperKeyPrefix = "StateKeeper_";
+
+    internal const string DefaultStateKeeperName = "DefaultStateKeeper";
+
     /// <summary>
     /// Register an <see cref="IStateKeeper{TKey, TState}"/> on <see cref="IUpdater"/>.
     /// </summary>
@@ -19,10 +23,12 @@ public static class Extensions
     /// <param name="stateKeeper">The state keeper to add.</param>
     /// <returns></returns>
     public static IUpdater AddStateKeeper<TKey, TState>(
-        this IUpdater updater, string name, IStateKeeper<TKey, TState> stateKeeper)
+        this IUpdater updater,
+        string name,
+        IStateKeeper<TKey, TState> stateKeeper)
         where TKey : notnull
     {
-        var key = "StateKeeper_" + name;
+        var key = StateKeeperKeyPrefix + name;
 
         if (updater.ContainsKey(key))
             throw new InvalidOperationException("Duplicated state keeper name.");
@@ -43,7 +49,7 @@ public static class Extensions
         this IUpdater updater, string name)
         where TKey : notnull
     {
-        var key = "StateKeeper_" + name;
+        var key = StateKeeperKeyPrefix + name;
 
         if (updater.ContainsKey(key))
         {
@@ -67,7 +73,7 @@ public static class Extensions
         [NotNullWhen(true)] out IStateKeeper<TKey, TState>? stateKeeper)
         where TKey : notnull
     {
-        var key = "StateKeeper_" + name;
+        var key = StateKeeperKeyPrefix + name;
 
         if (updater.ContainsKey(key))
         {
@@ -87,9 +93,7 @@ public static class Extensions
     /// <returns></returns>
     public static IUpdater AddUserNumericStateKeeper(
         this IUpdater updater, string name)
-    {
-        return updater.AddStateKeeper<long, int>(name, new UserNumericStateKeeper());
-    }
+        => updater.AddStateKeeper<long, int>(name, new UserNumericStateKeeper());
 
     /// <summary>
     /// Get a <see cref="UserNumericStateKeeper"/> that you register before using
@@ -101,9 +105,7 @@ public static class Extensions
     /// <exception cref="KeyNotFoundException"></exception>
     public static UserNumericStateKeeper GetUserNumericStateKeeper(
          this IUpdater updater, string name)
-    {
-        return (UserNumericStateKeeper)updater.GetStateKeeper<long, int>(name);
-    }
+        => (UserNumericStateKeeper)updater.GetStateKeeper<long, int>(name);
 
     /// <summary>
     /// Tries to get a <see cref="UserNumericStateKeeper"/> that you register before using
@@ -136,10 +138,20 @@ public static class Extensions
     /// <returns></returns>
     public static IUpdater AddUserEnumStateKeeper<TEnum>(
         this IUpdater updater, string name)
+        where TEnum : struct, Enum => updater.AddStateKeeper<long, TEnum>(name, new UserEnumStateKeeper<TEnum>());
+
+    internal static string DefaultEnumStateKeeperName<TEnum>() where TEnum : struct, Enum
+        => DefaultStateKeeperName + "Enum" + typeof(TEnum).Name;
+
+    /// <summary>
+    /// Register a default <see cref="UserEnumStateKeeper{TEnum}"/> on <see cref="IUpdater"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <returns></returns>
+    public static IUpdater AddUserEnumStateKeeper<TEnum>(
+        this IUpdater updater)
         where TEnum : struct, Enum
-    {
-        return updater.AddStateKeeper<long, TEnum>(name, new UserEnumStateKeeper<TEnum>());
-    }
+        => updater.AddUserEnumStateKeeper<TEnum>(DefaultEnumStateKeeperName<TEnum>());
 
     /// <summary>
     /// Get a <see cref="UserEnumStateKeeper{TEnum}"/> that you register before using
@@ -155,6 +167,18 @@ public static class Extensions
     {
         return (UserEnumStateKeeper<TEnum>)updater.GetStateKeeper<long, TEnum>(name);
     }
+
+    /// <summary>
+    /// Get a default <see cref="UserEnumStateKeeper{TEnum}"/> that you register before using
+    /// <see cref="AddUserEnumStateKeeper(IUpdater, string)"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <returns></returns>
+    /// <exception cref="KeyNotFoundException"></exception>
+    public static UserEnumStateKeeper<TEnum> GetUserEnumStateKeeper<TEnum>(
+        this IUpdater updater)
+        where TEnum : struct, Enum
+        => updater.GetUserEnumStateKeeper<TEnum>(DefaultEnumStateKeeperName<TEnum>());
 
     /// <summary>
     /// Tries to get a <see cref="UserEnumStateKeeper{TEnum}"/> that you register before using
@@ -178,4 +202,17 @@ public static class Extensions
         stateKeeper = default;
         return false;
     }
+
+    /// <summary>
+    /// Tries to get a default <see cref="UserEnumStateKeeper{TEnum}"/> that you register before using
+    /// <see cref="AddUserEnumStateKeeper(IUpdater, string)"/>.
+    /// </summary>
+    /// <param name="updater">The updater.</param>
+    /// <param name="stateKeeper">The enum state keeper.</param>
+    /// <returns></returns>
+    public static bool TryGetUserEnumStateKeeper<TEnum>(
+        this IUpdater updater,
+        [NotNullWhen(true)] out UserEnumStateKeeper<TEnum>? stateKeeper)
+        where TEnum : struct, Enum
+        => TryGetUserEnumStateKeeper(updater, DefaultEnumStateKeeperName<TEnum>(), out stateKeeper);
 }

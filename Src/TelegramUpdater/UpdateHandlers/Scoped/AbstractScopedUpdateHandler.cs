@@ -11,34 +11,12 @@ namespace TelegramUpdater.UpdateHandlers.Scoped;
 /// Create a new instance of <see cref="AbstractScopedUpdateHandler{T}"/>.
 /// </remarks>
 /// <param name="getT">Extract actual update from <see cref="Update"/>.</param>
-/// <param name="group">Handling priority.</param>
 /// <exception cref="ArgumentNullException"></exception>
-public abstract class AbstractScopedUpdateHandler<T>(Func<Update, T?> getT) : IScopedUpdateHandler
-    where T : class
+public abstract class AbstractScopedUpdateHandler<T>(Func<Update, T?> getT)
+    : AbstractHandlerProvider<T>, IScopedUpdateHandler where T : class
 {
     private readonly Func<Update, T?> _getT = getT ?? throw new ArgumentNullException(nameof(getT));
     private IReadOnlyDictionary<string, object>? _extraData;
-    private IContainer<T> _container = default!;
-
-    /// <summary>
-    /// Bot client instance.
-    /// </summary>
-    public ITelegramBotClient BotClient => _container.BotClient;
-
-    /// <summary>
-    /// The updater instance.
-    /// </summary>
-    public IUpdater Updater => _container.Updater;
-
-    /// <summary>
-    /// The actual update. one of <see cref="Update"/> properties.
-    /// </summary>
-    public T ActualUpdate => _container.Update;
-
-    /// <summary>
-    /// Container itself. same as container in <see cref="HandleAsync(IContainer{T})"/>.
-    /// </summary>
-    public IContainer<T> Container => _container;
 
     IReadOnlyDictionary<string, object>? IScopedUpdateHandler.ExtraData
         => _extraData;
@@ -80,7 +58,10 @@ public abstract class AbstractScopedUpdateHandler<T>(Func<Update, T?> getT) : IS
     private IContainer<T> ContainerBuilderWrapper(
         IUpdater updater, ShiningInfo<long, Update> shiningInfo)
     {
-        _container = ContainerBuilder(updater, shiningInfo);
-        return _container;
+        Container = ContainerBuilder(updater, shiningInfo);
+        return Container;
     }
+
+    /// <inheritdoc/>
+    public override IContainer<T> Container { get; protected set; } = default!;
 }

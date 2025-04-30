@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Playground;
+using Playground.UpdateHandlers.Messages;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -20,9 +21,11 @@ builder.Services.AddHostedService<UpgradeMemory>();
 // from configuration section "TelegramUpdater". in this example from appsettings.json
 builder.AddTelegramUpdater(
     (builder) => builder
+
+        // Modify the actual updater
         .Execute(updater => updater
 
-            // Add in line handler
+            // Add a quick handler
             .AddSingletonUpdateHandler(
                 UpdateType.Message,
                 async (container) =>
@@ -32,7 +35,10 @@ builder.AddTelegramUpdater(
                 FilterCutify.OnCommand("help"))
 
             // Collects static methods marked with `SingletonHandlerCallback` attribute.
-            .CollectSingletonUpdateHandlerCallbacks())
+            .CollectSingletonUpdateHandlerCallbacks()
+
+            // State tracker
+            .AddUserEnumStateKeeper<RenameState>())
 
         // Collect scoped handlers located for example at UpdateHandlers/Messages for messages.
         .AutoCollectScopedHandlers()

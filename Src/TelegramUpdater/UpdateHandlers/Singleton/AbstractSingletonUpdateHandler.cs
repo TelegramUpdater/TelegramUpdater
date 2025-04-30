@@ -8,7 +8,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton;
 /// </summary>
 /// <typeparam name="T">Update type.</typeparam>
 public abstract class AbstractSingletonUpdateHandler<T>
-    : IGenericSingletonUpdateHandler<T>
+    : AbstractHandlerProvider<T>, IGenericSingletonUpdateHandler<T>
     where T : class
 {
     // TODO: use internal protected for GetT like scoped.
@@ -39,13 +39,13 @@ public abstract class AbstractSingletonUpdateHandler<T>
         => Filter?.ExtraData;
 
     /// <inheritdoc/>
-    public UpdateType UpdateType { get; }
-
-    /// <inheritdoc/>
     public IFilter<UpdaterFilterInputs<T>>? Filter { get; }
 
     /// <inheritdoc/>
     public Func<Update, T?> GetActualUpdate { get; }
+
+    /// <inheritdoc />
+    public UpdateType UpdateType { get; }
 
     /// <summary>
     /// Here you may handle the incoming update here.
@@ -69,9 +69,11 @@ public abstract class AbstractSingletonUpdateHandler<T>
     }
 
     /// <inheritdoc/>
-    async Task IUpdateHandler.HandleAsync(IUpdater updater,
-                                  ShiningInfo<long, Update> shiningInfo)
-        => await HandleAsync(ContainerBuilder(updater, shiningInfo)).ConfigureAwait(false);
+    async Task IUpdateHandler.HandleAsync(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
+    {
+        Container = ContainerBuilder(updater, shiningInfo);
+        await HandleAsync(Container).ConfigureAwait(false);
+    }
 
     /// <inheritdoc/>
     public bool ShouldHandle(UpdaterFilterInputs<Update> inputs)
@@ -94,4 +96,7 @@ public abstract class AbstractSingletonUpdateHandler<T>
 
     internal abstract IContainer<T> ContainerBuilder(
         IUpdater updater, ShiningInfo<long, Update> shiningInfo);
+
+    /// <inheritdoc/>
+    public override IContainer<T> Container { get; protected set; } = default!;
 }

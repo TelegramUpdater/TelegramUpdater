@@ -26,7 +26,6 @@ public abstract class AnyHandler<T>(Func<Update, T?> getT)
         return new AnyContainer<T>(GetT, updater, shiningInfo, ExtraData);
     }
 
-
     #region Extension Methods
     /// <summary>
     /// All pending handlers for this update will be ignored after throwing this.
