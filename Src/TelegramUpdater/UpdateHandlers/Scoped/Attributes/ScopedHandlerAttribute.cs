@@ -9,5 +9,5 @@ public class ScopedHandlerAttribute : Attribute
     /// <summary>
     /// Handling priority.
     /// </summary>
-    public int Group { get; } = default;
+    public int Group { get; set; } = default;
 }

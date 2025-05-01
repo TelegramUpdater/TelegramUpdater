@@ -37,7 +37,7 @@ public interface IUpdater
     /// A list of allowed updates. updater only receives
     /// and handles this kind of updates.
     /// </summary>
-    public UpdateType[] AllowedUpdates { get; }
+    public UpdateType[]? AllowedUpdates { get; }
 
     /// <summary>
     /// Enumerate over <see cref="IScopedUpdateHandlerContainer"/>s,
@@ -136,4 +136,9 @@ public interface IUpdater
     /// <param name="value"></param>
     /// <returns></returns>
     public bool TryGetValue(object key, [NotNullWhen(true)] out object? value);
+
+    /// <summary>
+    /// The memory cache associated with the <see cref="IUpdater"/>.
+    /// </summary>
+    public IMemoryCache MemoryCache { get; }
 }

@@ -57,7 +57,7 @@ public sealed class Updater : IUpdater
     private readonly ILogger<IUpdater> _logger;
     private readonly Type? _preUpdateProcessorType;
     private readonly MemoryCache _memoryCache;
-    private UpdaterOptions _updaterOptions;
+    private readonly UpdaterOptions _updaterOptions;
     private User? _me = null;
 
     // Updater can use this to cancel update processing when it's needed.
@@ -296,13 +296,16 @@ public sealed class Updater : IUpdater
     public Rainbow<long, Update> Rainbow => _rainbow;
 
     /// <inheritdoc/>
-    public UpdateType[] AllowedUpdates => _updaterOptions.AllowedUpdates;
+    public UpdateType[]? AllowedUpdates => _updaterOptions.AllowedUpdates;
 
     /// <inheritdoc/>
     public IEnumerable<HandlingInfo<IScopedUpdateHandlerContainer>> ScopedHandlerContainers => _scopedHandlerContainers;
 
     /// <inheritdoc/>
     public IEnumerable<HandlingInfo<ISingletonUpdateHandler>> SingletonUpdateHandlers => _updateHandlers;
+
+    /// <inheritdoc/>
+    public IMemoryCache MemoryCache => _memoryCache;
 
     /// <inheritdoc/>
     public object? this[object key]
@@ -510,6 +513,18 @@ public sealed class Updater : IUpdater
         };
     }
 
+    class HandlingJobInfo(
+        int group,
+        Func<IServiceScope?, ShiningInfo<long, Update>, CancellationToken, Task<bool>> handler,
+        Func<UpdaterFilterInputs<Update>, bool> filter)
+    {
+        public int Group { get; } = group;
+
+        public Func<IServiceScope?, ShiningInfo<long, Update>, CancellationToken, Task<bool>> Handler { get; } = handler;
+
+        public Func<UpdaterFilterInputs<Update>, bool> Filter { get; } = filter;
+    }
+
     private async Task ProcessUpdate(
         ShiningInfo<long, Update> shiningInfo,
         CancellationToken cancellationToken)
@@ -528,30 +543,30 @@ public sealed class Updater : IUpdater
                 serviceScope = _scopeFactory.CreateAsyncScope();
 
             var singletonhandlers = _updateHandlers
-                .Where(x => x.Handler.ShouldHandle(new(this, shiningInfo.Value)))
-                .Select(x => x.SwapFace(x => GetHandlingJob(x)));
+                .Select(x => new HandlingJobInfo(x.Group, GetHandlingJob(x.Handler), x.Handler.ShouldHandle));
 
             var scopedHandlers = _scopedHandlerContainers
-                .Where(x => x.Handler.ShouldHandle(new(this, shiningInfo.Value)))
-                .Select(x => x.SwapFace(x => GetHandlingJob(x)));
+                .Select(x => new HandlingJobInfo(x.Group, GetHandlingJob(x.Handler), x.Handler.ShouldHandle));
 
-            var handlers = singletonhandlers.Concat(scopedHandlers)
-                .OrderBy(x => x.Group)
-                .Select(x=> x.Handler);
+            var handlers = singletonhandlers.Concat(scopedHandlers);
 
             if (!handlers.Any()) return;
 
             // valid handlers for an update should process one by one
             // This change can be cut off when throwing an specified exception
             // Other exceptions are redirected to ExceptionHandler.
-            foreach (var handler in handlers)
+            foreach (var handlingInfo in handlers.OrderBy(x => x.Group))
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
                     break;
                 }
 
-                if (await handler(serviceScope, shiningInfo, cancellationToken)
+                if (!handlingInfo.Filter(new(this, shiningInfo.Value)))
+                    // Filter didn't pass, ignore
+                    continue;
+
+                if (await handlingInfo.Handler(serviceScope, shiningInfo, cancellationToken)
                     .ConfigureAwait(false))
                 {
                     break;

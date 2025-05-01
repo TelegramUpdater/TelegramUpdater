@@ -46,20 +46,20 @@ public abstract class AbstractHandlerProvider<TUpdate>
     /// <inheritdoc cref="Extensions.GetUserEnumStateKeeper{TEnum}(IUpdater)"/>
     public MemoryUserEnumStateKeeper<TEnum> GetUserEnumStateKeeper<TEnum>()
         where TEnum : struct, Enum
-        => Updater.GetUserEnumStateKeeper<TEnum>();
+        => Container.GetUserEnumStateKeeper<TEnum>();
 
     /// <inheritdoc cref="Extensions.TryGetUserEnumStateKeeper{TEnum}(IUpdater, string, out MemoryUserEnumStateKeeper{TEnum}?)"/>
     public bool TryGetUserEnumStateKeeper<TEnum>(
         string name,
         [NotNullWhen(true)] out MemoryUserEnumStateKeeper<TEnum>? stateKeeper)
         where TEnum : struct, Enum
-        => Updater.TryGetUserEnumStateKeeper(name, out stateKeeper);
+        => Container.TryGetUserEnumStateKeeper(name, out stateKeeper);
 
     /// <inheritdoc cref="Extensions.TryGetUserEnumStateKeeper{TEnum}(IUpdater, out MemoryUserEnumStateKeeper{TEnum}?)"/>
     public bool TryGetUserEnumStateKeeper<TEnum>(
         [NotNullWhen(true)] out MemoryUserEnumStateKeeper<TEnum>? stateKeeper)
         where TEnum : struct, Enum
-        => Updater.TryGetUserEnumStateKeeper(out stateKeeper);
+        => Container.TryGetUserEnumStateKeeper(out stateKeeper);
 
     /// <summary>
     /// Initialize the state of the user.
@@ -68,15 +68,8 @@ public abstract class AbstractHandlerProvider<TUpdate>
     /// <param name="user"></param>
     /// <returns></returns>
     public bool InitiateState<TEnum>(User user) where TEnum : struct, Enum
-    {
-        if (TryGetUserEnumStateKeeper<TEnum>(out var stateKeeper))
-        {
-            stateKeeper.InitializeState(user);
-            return true;
-        }
+        => Container.InitiateState<TEnum>(user);
 
-        return false;
-    }
 
     /// <summary>
     /// Move the state of the user forward.
@@ -85,14 +78,8 @@ public abstract class AbstractHandlerProvider<TUpdate>
     /// <param name="user"></param>
     /// <returns></returns>
     public bool ForwardState<TEnum>(User user) where TEnum : struct, Enum
-    {
-        if (TryGetUserEnumStateKeeper<TEnum>(out var stateKeeper))
-        {
-            return stateKeeper.TryMoveForward(user, out var _);
-        }
+        => Container.ForwardState<TEnum>(user);
 
-        return false;
-    }
 
     /// <summary>
     /// Move the state of the user backward.
@@ -101,14 +88,7 @@ public abstract class AbstractHandlerProvider<TUpdate>
     /// <param name="user"></param>
     /// <returns></returns>
     public bool BackwardState<TEnum>(User user) where TEnum : struct, Enum
-    {
-        if (TryGetUserEnumStateKeeper<TEnum>(out var stateKeeper))
-        {
-            return stateKeeper.TryMoveBackward(user, out var _);
-        }
-
-        return false;
-    }
+        => Container.BackwardState<TEnum>(user);
 
     /// <summary>
     /// Set the state of the user.
@@ -118,15 +98,7 @@ public abstract class AbstractHandlerProvider<TUpdate>
     /// <param name="state"></param>
     /// <returns></returns>
     public bool SetState<TEnum>(User user, TEnum state) where TEnum : struct, Enum
-    {
-        if (TryGetUserEnumStateKeeper<TEnum>(out var stateKeeper))
-        {
-            stateKeeper.SetState(user, state);
-            return true;
-        }
-
-        return false;
-    }
+        => Container.SetState<TEnum>(user, state);
 
     /// <summary>
     /// Delete the state of the user.
@@ -134,19 +106,29 @@ public abstract class AbstractHandlerProvider<TUpdate>
     /// <typeparam name="TEnum"></typeparam>
     /// <param name="user"></param>
     /// <returns></returns>
-    public bool DeleteState<TEnum>(User user) where TEnum : struct, Enum
-    {
-        if (TryGetUserEnumStateKeeper<TEnum>(out var stateKeeper))
-        {
-            stateKeeper.DeleteState(user);
-            return true;
-        }
-        return false;
-    }
+    public bool DeleteState<TEnum>(User user) where TEnum : struct, Enum => Container.DeleteState<TEnum>(user);
 
     #endregion
 
     /// <inheritdoc cref="Extensions.GetUserNumericStateKeeper(IUpdater, string)"/>
     public MemoryUserNumericStateKeeper GetUserNumericStateKeeper(string name)
-        => Updater.GetUserNumericStateKeeper(name);
+        => Container.GetUserNumericStateKeeper(name);
+
+    /// <summary>
+    /// Stops the updater from handling other handlers after this.
+    /// </summary>
+    /// <exception cref="StopPropagationException"></exception>
+    public void StopPropagation()
+    {
+        throw new StopPropagationException();
+    }
+
+    /// <summary>
+    /// Stops the updater from handling this handler and jump to other handlers after this.
+    /// </summary>
+    /// <exception cref="ContinuePropagationException"></exception>
+    public void ContinuePropagation()
+    {
+        throw new ContinuePropagationException();
+    }
 }

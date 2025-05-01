@@ -1,7 +1,11 @@
-﻿using Telegram.Bot.Types;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramUpdater;
 using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.UpdateContainer;
+using TelegramUpdater.UpdateHandlers.Scoped.Attributes;
 using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
 namespace Playground.UpdateHandlers.Messages;
@@ -13,14 +17,20 @@ internal class Rename : MessageHandler
     {
         if (From is null) return;
 
+        DeleteState<RenameState>(From);
+
         await Response(
             "Ok let's rename you! What is your name?",
             replyMarkup: new ForceReplyMarkup());
 
         InitiateState<RenameState>(From);
+
+        // Stop handling below handlers.
+        StopPropagation();
     }
 }
 
+[ScopedHandler(Group = 1)]
 [Text, Renameing(RenameState.AskingName), Private]
 internal class RenameAskName : MessageHandler
 {
@@ -35,6 +45,8 @@ internal class RenameAskName : MessageHandler
                     $"Ok {text}, what is your last name?",
                     replyMarkup: new ForceReplyMarkup());
 
+                Updater.MemoryCache.Set(From.Id, text, TimeSpan.FromSeconds(30));
+
                 ForwardState<RenameState>(From);
 
                 break;
@@ -43,11 +55,15 @@ internal class RenameAskName : MessageHandler
                 await cntr.Response("Please provide a name.");
                 break;
         }
+
+        // Stop handling below handlers.
+        StopPropagation();
     }
 }
 
+[ScopedHandler(Group = 2)]
 [Text, Renameing(RenameState.AskingLastName), Private]
-internal class RenameAskLastName : MessageHandler
+internal class RenameAskLastName(PlaygroundMemory memory) : MessageHandler
 {
     protected override async Task HandleAsync(IContainer<Message> cntr)
     {
@@ -56,10 +72,24 @@ internal class RenameAskLastName : MessageHandler
         switch (ActualUpdate)
         {
             case { Text: { } text } when !string.IsNullOrWhiteSpace(text):
-                await cntr.Response(
-                    $"Ok {text}, you are now renamed!",
-                    replyMarkup: new ReplyKeyboardRemove());
+                var fullName = $"{Updater[From.Id]} {text}";
 
+                var updated = await memory.SeenUsers
+                    .Where(x => x.TelegramId == From.Id)
+                    .ExecuteUpdateAsync(x => x.SetProperty(x => x.Name, fullName));
+
+                if (updated == 1)
+                {
+                    await cntr.Response(
+                        $"Ok {text}, you are now renamed to {fullName}!",
+                        replyMarkup: new ReplyKeyboardRemove());
+                }
+                else
+                {
+                    await Response("Did you called /start?");
+                }
+
+                Updater.MemoryCache.Remove(From.Id);
                 DeleteState<RenameState>(From);
 
                 break;
@@ -71,7 +101,6 @@ internal class RenameAskLastName : MessageHandler
         }
     }
 }
-
 
 
 internal enum RenameState

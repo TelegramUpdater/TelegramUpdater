@@ -1,6 +1,7 @@
 ﻿// Ignore Spelling: cntr
 
 using Microsoft.EntityFrameworkCore;
+using Playground.Models;
 using Telegram.Bot.Types;
 using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.UpdateContainer;
@@ -15,11 +16,14 @@ internal class Start(PlaygroundMemory memory) : MessageHandler
     {
         if (From is null) return;
 
-        var known = await memory.SeenUsers
-            .AnyAsync(x => x.TelegramId == From.Id);
+        // Ignore if user is in rename state
+        DeleteState<RenameState>(From);
 
-        if (known)
-            await Response("Welcome back my friend!");
+        var knownUser = await memory.SeenUsers
+            .SingleOrDefaultAsync(x => x.TelegramId == From.Id);
+
+        if (knownUser is SeenUser seen)
+            await Response($"Welcome back my friend {seen.Name}!");
         else
         {
             memory.SeenUsers.Add(new()
