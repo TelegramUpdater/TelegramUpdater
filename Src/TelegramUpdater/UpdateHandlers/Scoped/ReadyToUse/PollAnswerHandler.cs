@@ -7,6 +7,6 @@
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class PollAnswerHandler()
-    : AnyHandler<PollAnswer>(x => x.PollAnswer)
+    : DefaultHandler<PollAnswer>(x => x.PollAnswer)
 {
 }

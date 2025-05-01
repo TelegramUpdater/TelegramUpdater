@@ -12,7 +12,7 @@
 public sealed class CallbackQueryChannel(
     TimeSpan timeOut,
     IFilter<UpdaterFilterInputs<CallbackQuery>>? filter = default)
-    : AnyChannel<CallbackQuery>(
+    : DefaultChannel<CallbackQuery>(
         UpdateType.CallbackQuery,
         x => x.CallbackQuery,
         timeOut,

@@ -9,6 +9,6 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class PreCheckoutQueryHandler()
-    : AnyHandler<PreCheckoutQuery>(x => x.PreCheckoutQuery)
+    : DefaultHandler<PreCheckoutQuery>(x => x.PreCheckoutQuery)
 {
 }

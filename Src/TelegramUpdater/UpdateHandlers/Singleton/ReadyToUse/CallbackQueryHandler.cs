@@ -20,7 +20,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 public sealed class CallbackQueryHandler(
     Func<IContainer<CallbackQuery>, Task> callback,
     IFilter<UpdaterFilterInputs<CallbackQuery>>? filter = default)
-    : AnyHandler<CallbackQuery>(UpdateType.CallbackQuery,
+    : DefaultHandler<CallbackQuery>(UpdateType.CallbackQuery,
            callback,
            filter,
            x => x.CallbackQuery)

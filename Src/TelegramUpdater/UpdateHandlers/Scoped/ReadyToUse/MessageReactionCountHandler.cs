@@ -7,7 +7,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class MessageReactionCountHandler()
-    : AnyHandler<MessageReactionCountUpdated>(x => x.MessageReactionCount)
+    : DefaultHandler<MessageReactionCountUpdated>(x => x.MessageReactionCount)
 {
     // Add any specific properties or methods for MessageReactionCountUpdated if needed.
 }

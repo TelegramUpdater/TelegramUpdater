@@ -7,7 +7,7 @@ namespace TelegramUpdater.UpdateContainer;
 /// <summary>
 /// A set of extension methods for all of containers.
 /// </summary>
-public static class AnyContainerExtensions
+public static class DefaultContainerExtensions
 {
     #region Enum State
     /// <inheritdoc cref="Extensions.GetUserEnumStateKeeper{TEnum}(IUpdater, string)"/>

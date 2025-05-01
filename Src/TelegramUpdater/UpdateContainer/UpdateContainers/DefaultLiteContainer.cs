@@ -9,7 +9,7 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers;
 /// outside of updater. Eg: the result of requests.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class AnyLiteContainer<T> : AbstractUpdateContainer<T> where T : class
+public class DefaultLiteContainer<T> : AbstractUpdateContainer<T> where T : class
 {
     /// <summary>
     /// Create a lite container.
@@ -20,7 +20,7 @@ public class AnyLiteContainer<T> : AbstractUpdateContainer<T> where T : class
     /// <param name="update">The update itself.</param>
     /// <param name="updater">The updater instance</param>
     /// <param name="extraObjects"></param>
-    internal AnyLiteContainer(
+    internal DefaultLiteContainer(
         Func<Update, T?> insiderResolver,
         Update update,
         IUpdater updater,
@@ -48,7 +48,7 @@ public class AnyLiteContainer<T> : AbstractUpdateContainer<T> where T : class
 
         prop.SetValue(u, update);
 
-        return new AnyLiteContainer<U>(
+        return new DefaultLiteContainer<U>(
             insiderResolver.Compile(), u, updater);
     }
 

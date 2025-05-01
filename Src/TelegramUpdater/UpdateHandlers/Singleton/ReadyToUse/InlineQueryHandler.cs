@@ -22,7 +22,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 public sealed class InlineQueryHandler(
     Func<IContainer<InlineQuery>, Task> callback,
     IFilter<UpdaterFilterInputs<InlineQuery>>? filter = default) 
-    : AnyHandler<InlineQuery>(UpdateType.InlineQuery,
+    : DefaultHandler<InlineQuery>(UpdateType.InlineQuery,
            callback,
            filter,
            x => x.InlineQuery)

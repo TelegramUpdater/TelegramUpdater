@@ -13,7 +13,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class MessageHandler()
-    : AnyHandler<Message>(x => x.Message)
+    : DefaultHandler<Message>(x => x.Message)
 {
 
     #region Extension Methods

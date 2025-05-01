@@ -7,7 +7,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class RemovedChatBoostHandler()
-    : AnyHandler<ChatBoostRemoved>(x => x.RemovedChatBoost)
+    : DefaultHandler<ChatBoostRemoved>(x => x.RemovedChatBoost)
 {
     // Add any specific properties or methods for ChatBoostRemoved if needed.
 }

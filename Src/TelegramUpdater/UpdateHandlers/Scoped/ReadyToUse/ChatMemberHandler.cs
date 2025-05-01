@@ -7,6 +7,6 @@
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class ChatMemberHandler()
-    : AnyHandler<ChatMemberUpdated>(x => x.ChatMember)
+    : DefaultHandler<ChatMemberUpdated>(x => x.ChatMember)
 {
 }

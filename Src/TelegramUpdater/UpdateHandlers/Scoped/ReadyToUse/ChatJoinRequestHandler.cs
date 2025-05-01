@@ -7,6 +7,6 @@
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class ChatJoinRequestHandler()
-    : AnyHandler<ChatJoinRequest>(x => x.ChatJoinRequest)
+    : DefaultHandler<ChatJoinRequest>(x => x.ChatJoinRequest)
 {
 }

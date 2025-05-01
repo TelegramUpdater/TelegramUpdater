@@ -8,7 +8,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// Create update handler for any type of updates.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class AnyHandler<T> : AbstractSingletonUpdateHandler<T> where T : class
+public class DefaultHandler<T> : AbstractSingletonUpdateHandler<T> where T : class
 {
     private readonly Func<IContainer<T>, Task> _handleAsync;
 
@@ -24,7 +24,7 @@ public class AnyHandler<T> : AbstractSingletonUpdateHandler<T> where T : class
     /// A callback function where you may handle the incoming update.
     /// </param>
     /// <returns></returns>
-    internal AnyHandler(
+    internal DefaultHandler(
         UpdateType updateType,
         Func<IContainer<T>, Task> callback,
         IFilter<UpdaterFilterInputs<T>>? filter = default,
@@ -36,7 +36,7 @@ public class AnyHandler<T> : AbstractSingletonUpdateHandler<T> where T : class
 
     internal override IContainer<T> ContainerBuilder(
         IUpdater updater, ShiningInfo<long, Update> shiningInfo)
-        => new AnyContainer<T>(ExtractInnerUpdater, updater, shiningInfo, ExtraData);
+        => new DefaultContainer<T>(ExtractInnerUpdater, updater, shiningInfo, ExtraData);
 
     /// <inheritdoc/>
     protected override async Task HandleAsync(

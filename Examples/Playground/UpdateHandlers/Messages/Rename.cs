@@ -6,6 +6,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.UpdateContainer;
+using TelegramUpdater.UpdateContainer.UpdateContainers;
 using TelegramUpdater.UpdateHandlers.Scoped.Attributes;
 using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
@@ -14,7 +15,7 @@ namespace Playground.UpdateHandlers.Messages;
 [Command("rename"), Private]
 internal class Rename : MessageHandler
 {
-    protected override async Task HandleAsync(IContainer<Message> cntr)
+    protected override async Task HandleAsync(DefaultContainer<Message> cntr)
     {
         if (From is null) return;
 
@@ -35,7 +36,7 @@ internal class Rename : MessageHandler
 [Text, Renameing(RenameState.AskingName), Private]
 internal class RenameAskName : MessageHandler
 {
-    protected override async Task HandleAsync(IContainer<Message> cntr)
+    protected override async Task HandleAsync(DefaultContainer<Message> cntr)
     {
         if (From is null) return;
 
@@ -66,7 +67,7 @@ internal class RenameAskName : MessageHandler
 [Text, Renameing(RenameState.AskingLastName), Private]
 internal class RenameAskLastName(PlaygroundMemory memory) : MessageHandler
 {
-    protected override async Task HandleAsync(IContainer<Message> cntr)
+    protected override async Task HandleAsync(DefaultContainer<Message> cntr)
     {
         if (From is null) return;
 

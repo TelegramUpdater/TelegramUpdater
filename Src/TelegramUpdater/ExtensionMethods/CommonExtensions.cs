@@ -17,13 +17,13 @@ public static class CommonExtensions
         this Task<T> t, Expression<Func<Update, T?>> insiderResovler, IUpdater updater) where T : class
     {
         var result = await t.ConfigureAwait(false);
-        return AnyLiteContainer<T>.CreateLiteContainer(insiderResovler, result, updater);
+        return DefaultLiteContainer<T>.CreateLiteContainer(insiderResovler, result, updater);
     }
 
     internal static IContainer<T> Wrap<T>(
         this T t, Expression<Func<Update, T?>> insiderResovler, IUpdater updater) where T : class
     {
-        return AnyLiteContainer<T>.CreateLiteContainer(insiderResovler, t, updater);
+        return DefaultLiteContainer<T>.CreateLiteContainer(insiderResovler, t, updater);
     }
 
     internal static async Task<IContainer<Message>> WrapMessageAsync(

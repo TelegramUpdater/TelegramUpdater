@@ -11,7 +11,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class InlineQueryHandler()
-    : AnyHandler<InlineQuery>(x => x.InlineQuery)
+    : DefaultHandler<InlineQuery>(x => x.InlineQuery)
 {
     #region Extension Methods
     /// <inheritdoc cref="InlineQuery.From"/>.

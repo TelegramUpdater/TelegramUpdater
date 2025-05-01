@@ -310,7 +310,7 @@ public static class UpdaterExtensions
     public static async Task StartAsync(
         this IUpdater updater, CancellationToken cancellationToken = default)
     {
-        await updater.StartAsync<SimpleUpdateWriter>(cancellationToken).ConfigureAwait(false);
+        await updater.StartAsync<DefaultUpdateWriter>(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

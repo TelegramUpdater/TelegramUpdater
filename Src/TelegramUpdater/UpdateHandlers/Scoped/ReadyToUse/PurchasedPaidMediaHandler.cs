@@ -9,7 +9,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class PurchasedPaidMediaHandler()
-    : AnyHandler<PaidMediaPurchased>(x => x.PurchasedPaidMedia)
+    : DefaultHandler<PaidMediaPurchased>(x => x.PurchasedPaidMedia)
 {
     // Add any specific properties or methods for PaidMediaPurchased if needed.
 }

@@ -36,7 +36,7 @@ public static class SingletonUpdateHandlerExtensions
         where T : class
     {
         return updater.AddSingletonUpdateHandler(
-            updateHandler: new AnyHandler<T>(
+            updateHandler: new DefaultHandler<T>(
                 updateType: updateType,
                 getT: updateSelector,
                 callback: callback,
@@ -60,7 +60,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdaterFilter<TUpdate>? filter = default,
         int group = default) where TUpdate : class
         => updater.AddSingletonUpdateHandler(
-            updateHandler: new AnyHandler<TUpdate>(
+            updateHandler: new DefaultHandler<TUpdate>(
                 updateType: updateType, callback: callback, filter: filter), group);
 
     /// <summary>

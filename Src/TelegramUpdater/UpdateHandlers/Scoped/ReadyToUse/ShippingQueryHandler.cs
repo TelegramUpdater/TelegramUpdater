@@ -9,6 +9,6 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class ShippingQueryHandler()
-    : AnyHandler<ShippingQuery>(x => x.ShippingQuery)
+    : DefaultHandler<ShippingQuery>(x => x.ShippingQuery)
 {
 }

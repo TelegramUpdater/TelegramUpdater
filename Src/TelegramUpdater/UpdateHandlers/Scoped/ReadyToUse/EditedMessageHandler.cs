@@ -4,6 +4,6 @@
 /// Abstract scoped update handler for <see cref="UpdateType.EditedMessage"/>.
 /// </summary>
 public abstract class EditedMessageHandler()
-    : AnyHandler<Message>(x => x.EditedMessage)
+    : DefaultHandler<Message>(x => x.EditedMessage)
 {
 }

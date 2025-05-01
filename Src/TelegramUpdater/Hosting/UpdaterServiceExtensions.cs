@@ -358,7 +358,7 @@ public static class UpdaterServiceExtensions
         UpdaterOptions? updaterOptions = default,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
-        => serviceDescriptors.AddTelegramUpdater<SimpleUpdateWriter>(
+        => serviceDescriptors.AddTelegramUpdater<DefaultUpdateWriter>(
             botToken, updaterOptions, builder, preUpdateProcessorType);
 
     /// <inheritdoc cref="AddTelegramUpdater{TWriter}(IServiceCollection, ITelegramBotClient, UpdaterOptions?, Action{UpdaterServiceBuilder}?, Type?)"/>
@@ -368,7 +368,7 @@ public static class UpdaterServiceExtensions
         UpdaterOptions? updaterOptions = default,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
-        => serviceDescriptors.AddTelegramUpdater<SimpleUpdateWriter>(
+        => serviceDescriptors.AddTelegramUpdater<DefaultUpdateWriter>(
             telegramBot, updaterOptions, builder, preUpdateProcessorType);
 
 
@@ -377,7 +377,7 @@ public static class UpdaterServiceExtensions
         this IHostApplicationBuilder applicationBuilder,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
-        => AddTelegramUpdater<SimpleUpdateWriter>(
+        => AddTelegramUpdater<DefaultUpdateWriter>(
             serviceDescriptors: applicationBuilder.Services,
             configurationManager: applicationBuilder.Configuration,
             builder: builder,
@@ -389,7 +389,7 @@ public static class UpdaterServiceExtensions
         IConfigurationManager configurationManager,
         Action<UpdaterServiceBuilder>? builder = default,
         Type? preUpdateProcessorType = default)
-        => AddTelegramUpdater<SimpleUpdateWriter>(
+        => AddTelegramUpdater<DefaultUpdateWriter>(
             serviceDescriptors: serviceDescriptors,
             configurationManager: configurationManager,
             builder: builder,

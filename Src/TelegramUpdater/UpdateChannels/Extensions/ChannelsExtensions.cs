@@ -66,7 +66,7 @@ public static class ChannelsExtensions
 
                 if (updateChannel.ShouldChannel(new(container.Updater, update.Value)))
                 {
-                    return new AnyContainer<TExp>(
+                    return new DefaultContainer<TExp>(
                         updateChannel.GetActualUpdate,
                         container.Updater,
                         update,

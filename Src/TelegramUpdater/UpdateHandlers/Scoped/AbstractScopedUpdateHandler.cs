@@ -8,12 +8,15 @@ namespace TelegramUpdater.UpdateHandlers.Scoped;
 /// </summary>
 /// <typeparam name="T"></typeparam>
 /// <remarks>
-/// Create a new instance of <see cref="AbstractScopedUpdateHandler{T}"/>.
+/// Create a new instance of <see cref="AbstractScopedUpdateHandler{T, TContainer}"/>.
 /// </remarks>
 /// <param name="getT">Extract actual update from <see cref="Update"/>.</param>
+/// <typeparam name="TContainer"></typeparam>
 /// <exception cref="ArgumentNullException"></exception>
-public abstract class AbstractScopedUpdateHandler<T>(Func<Update, T?> getT)
-    : AbstractHandlerProvider<T>, IScopedUpdateHandler where T : class
+public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?> getT)
+    : AbstractHandlerProvider<T>, IScopedUpdateHandler
+    where T : class
+    where TContainer : IContainer<T>
 {
     private readonly Func<Update, T?> _getT = getT ?? throw new ArgumentNullException(nameof(getT));
     private IReadOnlyDictionary<string, object>? _extraData;
@@ -27,11 +30,11 @@ public abstract class AbstractScopedUpdateHandler<T>(Func<Update, T?> getT)
     /// <summary>
     /// Here you may handle the incoming update.
     /// </summary>
-    /// <param name="cntr">
+    /// <param name="container">
     /// Provides everything you need and everything you want!
     /// </param>
     /// <returns></returns>
-    protected abstract Task HandleAsync(IContainer<T> cntr);
+    protected abstract Task HandleAsync(TContainer container);
 
     /// <inheritdoc/>
     async Task IUpdateHandler.HandleAsync(
@@ -52,14 +55,15 @@ public abstract class AbstractScopedUpdateHandler<T>(Func<Update, T?> getT)
     /// <summary>
     /// Create update container for this handler.
     /// </summary>
-    internal protected abstract IContainer<T> ContainerBuilder(
+    internal protected abstract TContainer ContainerBuilder(
         IUpdater updater, ShiningInfo<long, Update> shiningInfo);
 
-    private IContainer<T> ContainerBuilderWrapper(
+    private TContainer ContainerBuilderWrapper(
         IUpdater updater, ShiningInfo<long, Update> shiningInfo)
     {
-        Container = ContainerBuilder(updater, shiningInfo);
-        return Container;
+        var container = ContainerBuilder(updater, shiningInfo);
+        Container = container;
+        return container;
     }
 
     /// <inheritdoc/>

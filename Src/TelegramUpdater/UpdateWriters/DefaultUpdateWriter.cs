@@ -3,14 +3,14 @@ using Telegram.Bot.Polling;
 
 namespace TelegramUpdater.UpdateWriters;
 
-internal class SimpleUpdateWriter : AbstractUpdateWriter
+internal class DefaultUpdateWriter : AbstractUpdateWriter
 {
-    public SimpleUpdateWriter()
+    public DefaultUpdateWriter()
     {
 
     }
 
-    public SimpleUpdateWriter(IUpdater? updater = default)
+    public DefaultUpdateWriter(IUpdater? updater = default)
     {
         if (updater is not null)
             Updater = updater;

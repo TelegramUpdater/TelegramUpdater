@@ -7,7 +7,7 @@
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class CallbackQueryHandler()
-    : AnyHandler<CallbackQuery>(x => x.CallbackQuery)
+    : DefaultHandler<CallbackQuery>(x => x.CallbackQuery)
 {
     #region Extension Methods
     /// <inheritdoc cref="CallbackQuery.From"/>.

@@ -7,6 +7,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TelegramUpdater;
 using TelegramUpdater.UpdateContainer;
+using TelegramUpdater.UpdateContainer.UpdateContainers;
 using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 using Xunit;
 
@@ -22,7 +23,7 @@ namespace TelegramUpdaterTests
 
     class MyMessageHandler : MessageHandler
     {
-        protected override Task HandleAsync(IContainer<Message> updateContainer)
+        protected override Task HandleAsync(DefaultContainer<Message> updateContainer)
         {
             throw new NotImplementedException();
         }
@@ -30,7 +31,7 @@ namespace TelegramUpdaterTests
 
     class MyCallbackQueryHandler : CallbackQueryHandler
     {
-        protected override Task HandleAsync(IContainer<CallbackQuery> updateContainer)
+        protected override Task HandleAsync(DefaultContainer<CallbackQuery> updateContainer)
         {
             throw new NotImplementedException();
         }

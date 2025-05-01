@@ -8,6 +8,6 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 public sealed class BusinessMessageHandler(
     Func<IContainer<Message>, Task> callback,
     Filter<UpdaterFilterInputs<Message>>? filter = default)
-    : AnyHandler<Message>(UpdateType.BusinessMessage, callback, filter, x => x.BusinessMessage)
+    : DefaultHandler<Message>(UpdateType.BusinessMessage, callback, filter, x => x.BusinessMessage)
 {
 }

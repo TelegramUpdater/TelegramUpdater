@@ -9,6 +9,6 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class ChosenInlineResultHandler()
-    : AnyHandler<ChosenInlineResult>(x => x.ChosenInlineResult)
+    : DefaultHandler<ChosenInlineResult>(x => x.ChosenInlineResult)
 {
 }

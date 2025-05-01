@@ -12,6 +12,6 @@ namespace TelegramUpdater.UpdateChannels.ReadyToUse;
 /// <param name="timeOut">Timeout to wait for channel.</param>
 /// <param name="filter">Filter suitable update to channel within <paramref name="timeOut"/>.</param>
 public sealed class ChosenInlineResultChannel(TimeSpan timeOut, IFilter<UpdaterFilterInputs<ChosenInlineResult>>? filter)
-    : AnyChannel<ChosenInlineResult>(UpdateType.ChosenInlineResult, x => x.ChosenInlineResult, timeOut, filter)
+    : DefaultChannel<ChosenInlineResult>(UpdateType.ChosenInlineResult, x => x.ChosenInlineResult, timeOut, filter)
 {
 }

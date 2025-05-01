@@ -7,6 +7,6 @@
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class ChannelPostHandler()
-    : AnyHandler<Message>(x => x.ChannelPost)
+    : DefaultHandler<Message>(x => x.ChannelPost)
 {
 }

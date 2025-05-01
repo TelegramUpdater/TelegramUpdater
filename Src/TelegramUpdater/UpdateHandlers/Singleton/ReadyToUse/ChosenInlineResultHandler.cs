@@ -21,7 +21,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// </param>
 public sealed class ChosenInlineResultHandler(
     Func<IContainer<ChosenInlineResult>, Task> callback,
-    IFilter<UpdaterFilterInputs<ChosenInlineResult>>? filter = default) : AnyHandler<ChosenInlineResult>(UpdateType.ChosenInlineResult,
+    IFilter<UpdaterFilterInputs<ChosenInlineResult>>? filter = default) : DefaultHandler<ChosenInlineResult>(UpdateType.ChosenInlineResult,
           callback,
           filter,
           x => x.ChosenInlineResult)

@@ -7,7 +7,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class BusinessConnectionHandler()
-    : AnyHandler<BusinessConnection>(x => x.BusinessConnection)
+    : DefaultHandler<BusinessConnection>(x => x.BusinessConnection)
 {
     // Add any specific properties or methods for BusinessConnection if needed.
 }

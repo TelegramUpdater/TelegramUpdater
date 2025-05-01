@@ -1,6 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using TelegramUpdater.Filters;
+using TelegramUpdater.RainbowUtilities;
 using TelegramUpdater.StateKeeping.StateKeepers.EnumStateKeepers;
 using TelegramUpdater.StateKeeping.StateKeepers.NumericStateKeepers;
+using TelegramUpdater.UpdateChannels;
 using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateHandlers;
@@ -131,4 +134,67 @@ public abstract class AbstractHandlerProvider<TUpdate>
     {
         throw new ContinuePropagationException();
     }
+
+    #region Channels
+    /// <inheritdoc cref="ChannelsExtensions.OpenChannel{TExp, TCur}(IContainer{TCur}, IGenericUpdateChannel{TExp}, Func{IUpdater, ShiningInfo{long, Update}, Task}?, CancellationToken)"/>
+    public async ValueTask<IContainer<TExp>?> OpenChannel<TExp>(
+        IGenericUpdateChannel<TExp> updateChannel,
+        Func<
+            IUpdater, ShiningInfo<long, Update>,
+            Task>? onUnrelatedUpdate = default,
+        CancellationToken cancellationToken = default)
+        where TExp : class
+    {
+        return await Container.OpenChannel(
+            updateChannel, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Await for an specified <see cref="Message"/> update.
+    /// </summary>
+    /// <param name="timeOut">Maximum allowed time to wait for the update.
+    /// </param>
+    /// <param name="filter">Filter updates to get the right one.</param>
+    /// <param name="onUnrelatedUpdate">
+    /// A callback function to be called if an unrelated update from comes.
+    /// </param>
+    /// <param name="cancellationToken">To cancel the job.</param>
+    /// <returns></returns>
+    public async ValueTask<IContainer<Message>?> AwaitMessage(
+        Filter<UpdaterFilterInputs<Message>>? filter,
+        TimeSpan? timeOut,
+        Func<
+            IUpdater,
+            ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
+        CancellationToken cancellationToken = default)
+    {
+        return await Container.ChannelMessage(
+            filter, timeOut, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Await for a click on inline keyboard buttons from current user.
+    /// </summary>
+    /// <param name="timeOut">Maximum allowed time to wait for the update.
+    /// </param>
+    /// <param name="callbackQueryRegex">
+    /// A regex filter on <see cref="CallbackQuery"/>.
+    /// </param>
+    /// <param name="onUnrelatedUpdate">
+    /// A callback function to be called if an unrelated update from comes.
+    /// </param>
+    /// <param name="cancellationToken">To cancel the job.</param>
+    /// <returns></returns>
+    public async Task<IContainer<CallbackQuery>?> AwaitButtonClick(
+        TimeSpan timeOut,
+        CallbackQueryRegex callbackQueryRegex,
+        Func<
+            IUpdater,
+            ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
+        CancellationToken cancellationToken = default)
+    {
+        return await Container.ChannelButtonClick(
+            timeOut, callbackQueryRegex, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
+    }
+    #endregion
 }

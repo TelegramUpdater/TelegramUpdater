@@ -20,7 +20,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 public sealed class MessageHandler(
     Func<IContainer<Message>, Task> callback,
     IFilter<UpdaterFilterInputs<Message>>? filter = default)
-    : AnyHandler<Message>(UpdateType.Message,
+    : DefaultHandler<Message>(UpdateType.Message,
            callback,
            filter,
            x => x.Message)
