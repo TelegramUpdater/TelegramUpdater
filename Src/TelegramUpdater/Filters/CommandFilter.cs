@@ -198,7 +198,6 @@ public class CommandFilter : UpdaterFilter<Message>
         if (string.IsNullOrEmpty(input.Text)) return false;
 
         var args = input.Text.Split(Options.Separator);
-
         var command = args[0].Trim();
 
         if (Options.ArgumentsMode == ArgumentsMode.Require &&
@@ -219,7 +218,6 @@ public class CommandFilter : UpdaterFilter<Message>
 
         AddOrUpdateData("args", nakedArgs);
         var commandMatch = false;
-
         if (!string.IsNullOrEmpty(Options.BotUsername))
         {
             string fullCommandBuilder(string x) => $"{Prefix}{x}@{Options.BotUsername}";

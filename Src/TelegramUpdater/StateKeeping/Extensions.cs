@@ -44,19 +44,19 @@ public static class Extensions
     /// <param name="updater">The updater.</param>
     /// <param name="name">The name of state keeper.</param>
     /// <returns></returns>
-    /// <exception cref="StateKeeperNotRegistried"></exception>
+    /// <exception cref="StateKeeperNotRegisteredException"></exception>
     public static IStateKeeper<TKey, TState> GetStateKeeper<TKey, TState>(
         this IUpdater updater, string name)
         where TKey : notnull
     {
         var key = StateKeeperKeyPrefix + name;
 
-        if (updater.ContainsKey(key))
+        if (updater.TryGetValue(key, out object? keeper))
         {
-            return (IStateKeeper<TKey, TState>)updater[key];
+            return (IStateKeeper<TKey, TState>)keeper;
         }
 
-        throw new StateKeeperNotRegistried(name);
+        throw new StateKeeperNotRegisteredException(name);
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public static class Extensions
     /// <param name="name">The name of state keeper.</param>
     /// <param name="stateKeeper">The state keeper.</param>
     /// <returns></returns>
-    /// <exception cref="StateKeeperNotRegistried"></exception>
+    /// <exception cref="StateKeeperNotRegisteredException"></exception>
     public static bool TryGetStateKeeper<TKey, TState>(
         this IUpdater updater, string name,
         [NotNullWhen(true)] out IStateKeeper<TKey, TState>? stateKeeper)
@@ -75,9 +75,9 @@ public static class Extensions
     {
         var key = StateKeeperKeyPrefix + name;
 
-        if (updater.ContainsKey(key))
+        if (updater.TryGetValue(key, out var keeper))
         {
-            stateKeeper = (IStateKeeper<TKey, TState>)updater[key];
+            stateKeeper = (IStateKeeper<TKey, TState>)keeper;
             return true;
         }
 

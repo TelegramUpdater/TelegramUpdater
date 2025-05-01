@@ -91,7 +91,7 @@ namespace TelegramUpdater.Helpers
         /// <param name="item">Item to be added.</param>
         public GridCollection<T> AddToRow(T item)
         {
-            _grid.Add(new() { item });
+            _grid.Add([item]);
             return this;
         }
 

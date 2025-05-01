@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net;
 using System.Text.Json;
@@ -54,7 +56,7 @@ public sealed class Updater : IUpdater
     private readonly List<IExceptionHandler> _exceptionHandlers;
     private readonly ILogger<IUpdater> _logger;
     private readonly Type? _preUpdateProcessorType;
-    private readonly Dictionary<string, object> _extraData;
+    private readonly MemoryCache _memoryCache;
     private UpdaterOptions _updaterOptions;
     private User? _me = null;
 
@@ -110,11 +112,10 @@ public sealed class Updater : IUpdater
     {
         _botClient = botClient ??
             throw new ArgumentNullException(nameof(botClient));
-        _extraData = [];
+        _memoryCache = new MemoryCache(new MemoryCacheOptions());
 
         if (outgoingRateControl)
             _botClient.OnApiResponseReceived += OnApiResponseReceived;
-
         _updaterOptions = updaterOptions?? new();
         _preUpdateProcessorType = preUpdateProcessorType;
 
@@ -304,10 +305,13 @@ public sealed class Updater : IUpdater
     public IEnumerable<HandlingInfo<ISingletonUpdateHandler>> SingletonUpdateHandlers => _updateHandlers;
 
     /// <inheritdoc/>
-    public object this[string key]
+    public object? this[object key]
     {
-        get => _extraData[key];
-        set => _extraData.Add(key, value);
+        get => _memoryCache.Get(key);
+        set => AddItem(key, value, new MemoryCacheEntryOptions
+        {
+            Priority = CacheItemPriority.NeverRemove,
+        });
     }
 
     /// <inheritdoc/>
@@ -318,7 +322,8 @@ public sealed class Updater : IUpdater
     }
 
     /// <inheritdoc/>
-    public bool ContainsKey(string key) => _extraData.ContainsKey(key);
+    public bool ContainsKey(object key)
+        => _memoryCache.TryGetValue(key, out var _);
 
     /// <inheritdoc/>
     public Updater AddSingletonUpdateHandler(
@@ -614,6 +619,17 @@ public sealed class Updater : IUpdater
         }
 
         return true;
+    }
+
+    /// <inheritdoc/>
+    public bool TryGetValue(object key, [NotNullWhen(true)] out object? value)
+        => _memoryCache.TryGetValue(key, out value);
+
+    /// <inheritdoc/>
+    public void AddItem<T>(
+        object key, T value, MemoryCacheEntryOptions? options = null)
+    {
+        _memoryCache.Set(key, value, options);
     }
 }
 

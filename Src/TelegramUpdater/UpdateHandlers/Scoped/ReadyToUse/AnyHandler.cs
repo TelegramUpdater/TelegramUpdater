@@ -14,7 +14,6 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// Create a new instance of <see cref="AnyHandler{T}"/>.
 /// </remarks>
 /// <param name="getT">To extract <typeparamref name="T"/> from <see cref="Update"/>.</param>
-/// <param name="group">Handling priority.</param>
 public abstract class AnyHandler<T>(Func<Update, T?> getT)
     : AbstractScopedUpdateHandler<T>(getT)
     where T : class

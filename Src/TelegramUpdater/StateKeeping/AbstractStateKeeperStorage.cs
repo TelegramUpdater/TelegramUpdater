@@ -1,4 +1,6 @@
-﻿namespace TelegramUpdater.StateKeeping;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace TelegramUpdater.StateKeeping;
 
 /// <summary>
 /// Storage for state keepers.
@@ -53,4 +55,7 @@ public abstract class AbstractStateKeeperStorage<TKey, TState>
             Update(key, newState);
         }
     }
+
+    /// <inheritdoc/>
+    public abstract bool TryGetValue(TKey key, [NotNullWhen(true)] out TState? value);
 }

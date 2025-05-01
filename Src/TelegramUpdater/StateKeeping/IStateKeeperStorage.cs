@@ -1,4 +1,6 @@
-﻿namespace TelegramUpdater.StateKeeping;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace TelegramUpdater.StateKeeping;
 
 /// <summary>
 /// Storage for state keepers.
@@ -41,4 +43,12 @@ public interface IStateKeeperStorage<TKey, TState>
     /// <param name="key"></param>
     /// <returns></returns>
     bool Exists(TKey key);
+
+    /// <summary>
+    /// Tries to get a value.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    bool TryGetValue(TKey key, [NotNullWhen(true)] out TState? value);
 }

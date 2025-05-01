@@ -347,8 +347,8 @@ public sealed class UpdaterBuilderStep3
     /// <param name="callback">Your callback function.</param>
     /// <param name="filter">Your filter.</param>
     /// <remarks>
-    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler)"/>
-    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer)"/>
+    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, int)"/>
+    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, int)"/>
     /// later to add more update handler.
     /// You can finally call <see cref="IUpdater.StartAsync{TWriter}(CancellationToken)"/> to fire up your bot.
     /// </remarks>
@@ -406,8 +406,8 @@ public sealed class UpdaterBuilderStep3
     /// Use classes like <see cref="UpdateHandlers.Singleton.ReadyToUse.MessageHandler"/> to create a message handler and such.
     /// </param>
     /// <remarks>
-    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler)"/>
-    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer)"/>
+    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, int)"/>
+    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, int)"/>
     /// later to add more update handler.
     /// You can finally call <see cref="IUpdater.StartAsync{TWriter}(CancellationToken)"/> to fire up your bot.
     /// </remarks>
@@ -465,8 +465,8 @@ public sealed class UpdaterBuilderStep3
     /// their underlying handler per each request.
     /// </param>
     /// <remarks>
-    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler)"/>
-    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer)"/>
+    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, int)"/>
+    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, int)"/>
     /// later to add more update handler.
     /// You can finally call <see cref="IUpdater.StartAsync{TWriter}(CancellationToken)"/> to fire up your bot.
     /// </remarks>
@@ -521,8 +521,8 @@ public sealed class UpdaterBuilderStep3
     /// otherwise dose nothing to add a handler later.
     /// </param>
     /// <remarks>
-    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler)"/>
-    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer)"/>
+    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, int)"/>
+    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, int)"/>
     /// later to add more update handler.
     /// You can finally call <see cref="IUpdater.StartAsync{TWriter}(CancellationToken)"/> to fire up your bot.
     /// </remarks>

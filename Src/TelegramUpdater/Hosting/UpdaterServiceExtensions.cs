@@ -31,7 +31,6 @@ public static class UpdaterServiceExtensions
     /// </summary>
     /// <remarks>
     /// This method will also adds <see cref="ITelegramBotClient"/> to the service collection as Singleton.
-    /// If you already did that, Pass an instance of <see cref="ITelegramBotClient"/> instead of <paramref name="botToken"/>.
     /// <para>
     /// <paramref name="preUpdateProcessorType"/> will be added to services if it's available.
     /// </para>

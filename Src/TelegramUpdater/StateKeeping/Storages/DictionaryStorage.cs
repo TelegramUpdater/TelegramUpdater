@@ -1,4 +1,6 @@
-﻿namespace TelegramUpdater.StateKeeping.Storages;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace TelegramUpdater.StateKeeping.Storages;
 
 /// <summary>
 /// <see cref="Dictionary{TKey, TValue}"/> storage for state keepers.
@@ -28,6 +30,10 @@ public sealed class DictionaryStorage<TKey, TState>
 
     /// <inheritdoc/>
     public override TState? Read(TKey key) => _storage[key];
+
+    /// <inheritdoc/>
+    public override bool TryGetValue(TKey key, [NotNullWhen(true)] out TState? value)
+        => _storage.TryGetValue(key, out value);
 
     /// <inheritdoc/>
     public override void Update(TKey key, TState newState)

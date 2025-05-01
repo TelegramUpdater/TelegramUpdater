@@ -245,27 +245,56 @@ public class OrFilter<T>(IFilter<T> filter1, IFilter<T> filter2)
     }
 }
 
+/// <summary>
+/// Inputs for filters inside <see cref="IUpdater"/>
+/// </summary>
+/// <typeparam name="T"></typeparam>
+/// <param name="updater"></param>
+/// <param name="input"></param>
 public class UpdaterFilterInputs<T>(IUpdater updater, T input)
 {
+    /// <summary>
+    /// The updater.
+    /// </summary>
     public IUpdater Updater { get; } = updater;
+
+    /// <summary>
+    /// The actual input.
+    /// </summary>
     public T Input { get; } = input;
 }
 
+/// <summary>
+/// A filter to use inside <see cref="IUpdater"/>.
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public class UpdaterFilter<T> : Filter<UpdaterFilterInputs<T>>
 {
+    /// <summary>
+    /// Creates a new instance of <see cref="UpdaterFilter{T}"/>.
+    /// </summary>
     public UpdaterFilter() : base()
     {
     }
 
+    /// <summary>
+    /// Creates a new instance of <see cref="UpdaterFilter{T}"/>.
+    /// </summary>
     public UpdaterFilter(Func<UpdaterFilterInputs<T>, bool> filter) : base(filter)
     {
     }
 
+    /// <summary>
+    /// Creates a new instance of <see cref="UpdaterFilter{T}"/>.
+    /// </summary>
     public UpdaterFilter(Func<T, bool> filter)
         : base((input) => filter(input.Input))
     {
     }
 
+    /// <summary>
+    /// Creates a new instance of <see cref="UpdaterFilter{T}"/>.
+    /// </summary>
     public UpdaterFilter(Func<IUpdater, T, bool> filter)
         : base((input) => filter(input.Updater, input.Input))
     {

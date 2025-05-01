@@ -80,6 +80,7 @@ public static class ScopedUpdateHandlersExtensions
     /// A function to choose real update from <see cref="Update"/>
     /// <para>Don't touch it if you don't know.</para>
     /// </param>
+    /// <param name="group">Handling priority.</param>
     /// <remarks>This method will add filter attributes if <paramref name="filter"/> is null.</remarks>
     public static IUpdater AddScopedUpdateHandler<THandler, TUpdate>(
         this IUpdater updater,

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.RainbowUtilities;
 using TelegramUpdater.UpdateHandlers.Scoped;
@@ -110,12 +112,28 @@ public interface IUpdater
     /// </summary>
     /// <param name="key">The key.</param>
     /// <returns></returns>
-    public object this[string key] { get; set; }
+    public object? this[object key] { get; set; }
+
+    /// <summary>
+    /// Adds an item to updater's storage.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <param name="options"></param>
+    public void AddItem<T>(object key, T value, MemoryCacheEntryOptions? options = default);
 
     /// <summary>
     /// Check if an <see cref="string"/> key exists in updater extra data.
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
-    public bool ContainsKey(string key);
+    public bool ContainsKey(object key);
+
+    /// <summary>
+    /// Tries to take a value out of this.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public bool TryGetValue(object key, [NotNullWhen(true)] out object? value);
 }
