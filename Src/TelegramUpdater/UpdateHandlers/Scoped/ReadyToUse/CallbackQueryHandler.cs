@@ -1,4 +1,7 @@
-﻿namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
+﻿using TelegramUpdater.RainbowUtilities;
+using TelegramUpdater.UpdateContainer.UpdateContainers;
+
+namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
 /// <summary>
 /// Abstract scoped update handler for <see cref="UpdateType.CallbackQuery"/>.
@@ -7,8 +10,12 @@
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class CallbackQueryHandler()
-    : DefaultHandler<CallbackQuery>(x => x.CallbackQuery)
+    : AbstractScopedUpdateHandler<CallbackQuery, CallbackQueryContainer>(x => x.CallbackQuery)
 {
+    /// <inheritdoc/>
+    protected internal override CallbackQueryContainer ContainerBuilder(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
+        => new(updater, shiningInfo, ExtraData);
+
     #region Extension Methods
     /// <inheritdoc cref="CallbackQuery.From"/>.
     protected User From => ActualUpdate.From;

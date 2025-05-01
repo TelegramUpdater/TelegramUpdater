@@ -8,6 +8,7 @@ using TelegramUpdater;
 using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.Hosting;
 using TelegramUpdater.UpdateContainer;
+using TelegramUpdater.UpdateContainer.UpdateContainers;
 using TelegramUpdater.UpdateHandlers.Singleton.Attributes;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -28,7 +29,7 @@ builder.AddTelegramUpdater(
             // Add a quick handler
             .AddSingletonUpdateHandler(
                 UpdateType.Message,
-                async (container) =>
+                async (MessageContainer container) =>
                 {
                     await container.Response("Want me to help you?!");
                 },

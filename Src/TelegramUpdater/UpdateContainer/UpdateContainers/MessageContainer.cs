@@ -11,7 +11,7 @@ public sealed class MessageContainer : AbstractUpdateContainer<Message>
         IUpdater updater,
         ShiningInfo<long, Update> shiningInfo,
         IReadOnlyDictionary<string, object>? extraObjects = default)
-        : base(x => x.Message, updater, shiningInfo, extraObjects)
+        : base(update => update.GetInnerUpdate<Message>(), updater, shiningInfo, extraObjects)
     {
     }
 }

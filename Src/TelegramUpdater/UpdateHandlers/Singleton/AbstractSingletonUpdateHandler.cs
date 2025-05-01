@@ -7,11 +7,14 @@ namespace TelegramUpdater.UpdateHandlers.Singleton;
 /// Abstract base to create update handlers.
 /// </summary>
 /// <typeparam name="T">Update type.</typeparam>
-public abstract class AbstractSingletonUpdateHandler<T>
-    : AbstractHandlerProvider<T>, IGenericSingletonUpdateHandler<T> where T : class
+/// <typeparam name="TContainer">Type of the container.</typeparam>
+public abstract class AbstractSingletonUpdateHandler<T, TContainer>
+    : AbstractHandlerProvider<T>, IGenericSingletonUpdateHandler<T>
+    where T : class
+    where TContainer : IContainer<T>
 {
     /// <summary>
-    /// Create a new instance of <see cref="AbstractSingletonUpdateHandler{T}"/>
+    /// Create a new instance of <see cref="AbstractSingletonUpdateHandler{T, TContainer}"/>
     /// </summary>
     /// <param name="updateType">Target update type.</param>
     /// <param name="getT">To extract this update from <see cref="Update"/></param>
@@ -54,11 +57,11 @@ public abstract class AbstractSingletonUpdateHandler<T>
     /// <summary>
     /// Here you may handle the incoming update.
     /// </summary>
-    /// <param name="cntr">
+    /// <param name="container">
     /// Provides everything you need and everything you want!
     /// </param>
     /// <returns></returns>
-    protected abstract Task HandleAsync(IContainer<T> cntr);
+    protected abstract Task HandleAsync(TContainer container);
 
     /// <summary>
     /// You can override this method instead of using filters.
@@ -75,8 +78,9 @@ public abstract class AbstractSingletonUpdateHandler<T>
     /// <inheritdoc/>
     async Task IUpdateHandler.HandleAsync(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
     {
-        Container = ContainerBuilder(updater, shiningInfo);
-        await HandleAsync(Container).ConfigureAwait(false);
+        var container = ContainerBuilder(updater, shiningInfo);
+        Container = container;
+        await HandleAsync(container).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -91,7 +95,7 @@ public abstract class AbstractSingletonUpdateHandler<T>
         return ShouldHandle(new UpdaterFilterInputs<T>(inputs.Updater, insider));
     }
 
-    internal abstract IContainer<T> ContainerBuilder(
+    internal abstract TContainer ContainerBuilder(
         IUpdater updater, ShiningInfo<long, Update> shiningInfo);
 
     /// <inheritdoc/>

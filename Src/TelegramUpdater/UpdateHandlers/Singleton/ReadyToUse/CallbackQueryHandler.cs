@@ -1,4 +1,5 @@
-﻿using TelegramUpdater.UpdateContainer;
+﻿using TelegramUpdater.RainbowUtilities;
+using TelegramUpdater.UpdateContainer.UpdateContainers;
 
 namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 
@@ -18,11 +19,16 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// <paramref name="callback"/>.
 /// </param>
 public sealed class CallbackQueryHandler(
-    Func<IContainer<CallbackQuery>, Task> callback,
+    Func<CallbackQueryContainer, Task> callback,
     IFilter<UpdaterFilterInputs<CallbackQuery>>? filter = default)
-    : DefaultHandler<CallbackQuery>(UpdateType.CallbackQuery,
-           callback,
-           filter,
-           x => x.CallbackQuery)
+    : AbstractSingletonUpdateHandler<CallbackQuery, CallbackQueryContainer>(
+        updateType: UpdateType.CallbackQuery,
+        getT: x => x.CallbackQuery,
+        filter: filter)
 {
+    /// <inheritdoc/>
+    protected override Task HandleAsync(CallbackQueryContainer container) => callback(container);
+
+    internal override CallbackQueryContainer ContainerBuilder(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
+        => new(updater, shiningInfo, ExtraData);
 }

@@ -11,7 +11,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped;
 /// Create a new instance of <see cref="AbstractScopedUpdateHandler{T, TContainer}"/>.
 /// </remarks>
 /// <param name="getT">Extract actual update from <see cref="Update"/>.</param>
-/// <typeparam name="TContainer"></typeparam>
+/// <typeparam name="TContainer">Type of the container.</typeparam>
 /// <exception cref="ArgumentNullException"></exception>
 public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?> getT)
     : AbstractHandlerProvider<T>, IScopedUpdateHandler

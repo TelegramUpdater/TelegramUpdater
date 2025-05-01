@@ -1,4 +1,5 @@
-﻿using TelegramUpdater.UpdateContainer;
+﻿using TelegramUpdater.UpdateContainer.UpdateContainers;
+using TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse.Abstraction;
 
 namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 
@@ -18,8 +19,8 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// <paramref name="callback"/>.
 /// </param>
 public sealed class EditedChannelPostHandler(
-    Func<IContainer<Message>, Task> callback,
+    Func<MessageContainer, Task> callback,
     IFilter<UpdaterFilterInputs<Message>>? filter)
-    : DefaultHandler<Message>(UpdateType.EditedChannelPost, callback, filter, x => x.EditedChannelPost)
+    : AbstractMessageHandler(UpdateType.EditedChannelPost, callback, filter, x => x.EditedChannelPost)
 {
 }

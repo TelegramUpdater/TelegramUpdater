@@ -2,7 +2,6 @@
 
 using Microsoft.EntityFrameworkCore;
 using Playground.Models;
-using Telegram.Bot.Types;
 using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
 using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
@@ -12,7 +11,7 @@ namespace Playground.UpdateHandlers.Messages;
 [Command("start"), Private]
 internal class Start(PlaygroundMemory memory) : MessageHandler
 {
-    protected override async Task HandleAsync(DefaultContainer<Message> cntr)
+    protected override async Task HandleAsync(MessageContainer cntr)
     {
         if (From is null) return;
 

@@ -1,3 +1,5 @@
+using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse.Abstraction;
+
 namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 
 /// <summary>
@@ -7,7 +9,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 /// Set handling priority of this handler.
 /// </remarks>
 public abstract class BusinessMessageHandler()
-    : DefaultHandler<Message>(x => x.BusinessMessage)
+    : AbstractMessageHandler(x => x.BusinessMessage)
 {
     // Add any specific properties or methods for BusinessMessage if needed.
 }

@@ -1,4 +1,5 @@
-using TelegramUpdater.UpdateContainer;
+using TelegramUpdater.UpdateContainer.UpdateContainers;
+using TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse.Abstraction;
 
 namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 
@@ -6,8 +7,8 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// Singleton update handler for <see cref="UpdateType.BusinessMessage"/>.
 /// </summary>
 public sealed class BusinessMessageHandler(
-    Func<IContainer<Message>, Task> callback,
+    Func<MessageContainer, Task> callback,
     Filter<UpdaterFilterInputs<Message>>? filter = default)
-    : DefaultHandler<Message>(UpdateType.BusinessMessage, callback, filter, x => x.BusinessMessage)
+    : AbstractMessageHandler(UpdateType.BusinessMessage, callback, filter, x => x.BusinessMessage)
 {
 }

@@ -1,5 +1,6 @@
 ﻿using Telegram.Bot.Types.Payments;
 using TelegramUpdater.UpdateContainer;
+using TelegramUpdater.UpdateContainer.UpdateContainers;
 using TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 
 namespace TelegramUpdater;
@@ -82,7 +83,7 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         UpdateType updateType,
-        Func<IContainer<Message>, Task> callback,
+        Func<MessageContainer, Task> callback,
         UpdaterFilter<Message>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(
@@ -154,7 +155,7 @@ public static class SingletonUpdateHandlerExtensions
     /// </param>
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
-        Func<IContainer<CallbackQuery>, Task> callback,
+        Func<CallbackQueryContainer, Task> callback,
         UpdaterFilter<CallbackQuery>? filter = default,
         int group = default)
         => updater.AddSingletonUpdateHandler(

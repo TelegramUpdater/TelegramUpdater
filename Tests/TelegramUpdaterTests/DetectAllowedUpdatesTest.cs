@@ -23,7 +23,7 @@ namespace TelegramUpdaterTests
 
     class MyMessageHandler : MessageHandler
     {
-        protected override Task HandleAsync(DefaultContainer<Message> updateContainer)
+        protected override Task HandleAsync(MessageContainer updateContainer)
         {
             throw new NotImplementedException();
         }
@@ -31,7 +31,7 @@ namespace TelegramUpdaterTests
 
     class MyCallbackQueryHandler : CallbackQueryHandler
     {
-        protected override Task HandleAsync(DefaultContainer<CallbackQuery> updateContainer)
+        protected override Task HandleAsync(CallbackQueryContainer updateContainer)
         {
             throw new NotImplementedException();
         }
@@ -53,7 +53,7 @@ namespace TelegramUpdaterTests
 
             await testUpdater.StartAsync<FakeWriter>();
 
-            Assert.True(testUpdater.AllowedUpdates.SequenceEqual(
+            Assert.True(testUpdater.AllowedUpdates?.SequenceEqual(
                 [UpdateType.Message, UpdateType.EditedMessage, UpdateType.CallbackQuery]));
         }
 
@@ -65,7 +65,7 @@ namespace TelegramUpdaterTests
 
             await testUpdater.StartAsync<FakeWriter>();
 
-            Assert.True(testUpdater.AllowedUpdates.SequenceEqual(
+            Assert.True(testUpdater.AllowedUpdates?.SequenceEqual(
                 [UpdateType.Message, UpdateType.CallbackQuery]));
         }
 
