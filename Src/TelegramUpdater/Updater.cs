@@ -48,7 +48,7 @@ public class HandlingInfo<T>(T handler, int group = 0)
 /// <summary>
 /// Fetch updates from telegram and handle them.
 /// </summary>
-public sealed class Updater : IUpdater
+public sealed partial class Updater : IUpdater
 {
     private readonly ITelegramBotClient _botClient;
     private readonly List<HandlingInfo<ISingletonUpdateHandler>> _updateHandlers;
@@ -191,9 +191,15 @@ public sealed class Updater : IUpdater
                 .GetString();
 
             if (description is null) return;
-            
+
+#if NET8_0_OR_GREATER
+            var regex = ToManyRequestsRegex();
+#else
             var regex = new Regex(
-                "^Too Many Requests: retry after (?<tryAfter>[0-9]*)$");
+                "^Too Many Requests: retry after (?<tryAfter>[0-9]*)$",
+                RegexOptions.None,
+                TimeSpan.FromSeconds(5));
+#endif
             Match match = regex.Match(description);
             if (match.Success)
             {
@@ -382,7 +388,7 @@ public sealed class Updater : IUpdater
 
             _logger.LogInformation(
                 "Detected allowed updates automatically {allowed}",
-                string.Join(", ", AllowedUpdates.Select(x => x.ToString()))
+                string.Join(", ", _updaterOptions.AllowedUpdates.Select(x => x.ToString()))
             );
         }
 
@@ -641,5 +647,10 @@ public sealed class Updater : IUpdater
     {
         _memoryCache.Set(key, value, options);
     }
+
+#if NET8_0_OR_GREATER
+    [GeneratedRegex("^Too Many Requests: retry after (?<tryAfter>[0-9]*)$", RegexOptions.None, matchTimeoutMilliseconds: 5000)]
+    private static partial Regex ToManyRequestsRegex();
+#endif
 }
 

@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// Ignore Spelling: cntr
+
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
-using TelegramUpdater;
 using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers.Scoped.Attributes;
@@ -25,7 +26,7 @@ internal class Rename : MessageHandler
 
         InitiateState<RenameState>(From);
 
-        // Stop handling below handlers.
+        // Stop handling below handlers (With higher group).
         StopPropagation();
     }
 }
@@ -56,7 +57,7 @@ internal class RenameAskName : MessageHandler
                 break;
         }
 
-        // Stop handling below handlers.
+        // Stop handling below handlers (With higher group).
         StopPropagation();
     }
 }

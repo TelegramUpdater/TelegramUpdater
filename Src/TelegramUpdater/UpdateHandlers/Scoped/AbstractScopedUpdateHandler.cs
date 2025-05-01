@@ -25,7 +25,7 @@ public abstract class AbstractScopedUpdateHandler<T>(Func<Update, T?> getT)
         => _extraData;
 
     /// <summary>
-    /// Here you may handle the incoming update here.
+    /// Here you may handle the incoming update.
     /// </summary>
     /// <param name="cntr">
     /// Provides everything you need and everything you want!
