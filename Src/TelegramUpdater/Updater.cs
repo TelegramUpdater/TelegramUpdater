@@ -116,7 +116,7 @@ public sealed class Updater : IUpdater
 
         if (outgoingRateControl)
             _botClient.OnApiResponseReceived += OnApiResponseReceived;
-        _updaterOptions = updaterOptions?? new();
+        _updaterOptions = updaterOptions?? new UpdaterOptions();
         _preUpdateProcessorType = preUpdateProcessorType;
 
         if (_preUpdateProcessorType is not null)
@@ -375,12 +375,7 @@ public sealed class Updater : IUpdater
         if (_updaterOptions.AllowedUpdates == null)
         {
             // I need to recreate the options since it's readonly.
-            _updaterOptions = new UpdaterOptions(
-                maxDegreeOfParallelism: UpdaterOptions.MaxDegreeOfParallelism,
-                logger: UpdaterOptions.Logger,
-                flushUpdatesQueue: UpdaterOptions.FlushUpdatesQueue,
-                allowedUpdates: DetectAllowedUpdates(),
-                cancellationToken: UpdaterOptions.CancellationToken); // Auto detect allowed updates
+            _updaterOptions.AllowedUpdates = DetectAllowedUpdates();
 
             _logger.LogInformation(
                 "Detected allowed updates automatically {allowed}",

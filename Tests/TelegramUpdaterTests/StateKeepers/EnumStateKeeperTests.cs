@@ -1,12 +1,14 @@
 ﻿using System;
 using TelegramUpdater.StateKeeping.StateKeepers;
+using TelegramUpdater.StateKeeping.Storages;
 using Xunit;
 
 namespace TelegramUpdaterTests.StateKeepers
 {
     public class EnumStateKeeperTests
     {
-        internal sealed class EnumStateKeeper<TEnum> : AbstractEnumStateKeeper<long, TEnum, long>
+        internal sealed class EnumStateKeeper<TEnum>()
+            : AbstractEnumStateKeeper<long, TEnum, long, MemoryCacheStorage<long, TEnum>>(new())
             where TEnum : struct, Enum
         {
             protected override Func<long, long> KeyResolver => x => x;

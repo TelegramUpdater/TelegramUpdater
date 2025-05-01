@@ -21,6 +21,6 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 public sealed class PreCheckoutQueryHandler(
     Func<IContainer<PreCheckoutQuery>, Task> callback,
     IFilter<UpdaterFilterInputs<PreCheckoutQuery>>? filter)
-    : AnyHandler<PreCheckoutQuery>(UpdateType.PreCheckoutQuery, x=> x.PreCheckoutQuery, callback, filter)
+    : AnyHandler<PreCheckoutQuery>(UpdateType.PreCheckoutQuery, callback, filter, x => x.PreCheckoutQuery)
 {
 }

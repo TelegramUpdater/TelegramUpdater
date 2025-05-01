@@ -9,7 +9,29 @@ namespace TelegramUpdater;
 /// <remarks>
 /// Sets options for <see cref="IUpdater"/>.
 /// </remarks>
-public class UpdaterOptions
+/// <param name="botToken">The bot token. Please include this if you're not going to pass an <see cref="ITelegramBotClient"/>.</param>
+/// <param name="maxDegreeOfParallelism">
+/// Maximum number of allowed concurrent update handling tasks.
+/// </param>
+/// <param name="logger">If you want to use your own logger.</param>
+/// <param name="cancellationToken">
+/// Default token to be used in Start method.
+/// </param>
+/// <param name="flushUpdatesQueue">Old updates will gone.</param>
+/// <param name="allowedUpdates">Allowed updates.</param>
+/// <param name="switchChatId">
+/// By enabling this option, the updater will try to resolve
+/// chat id from update and use it
+/// as queue keys. if there's no user id available.
+/// </param>
+public class UpdaterOptions(
+    string? botToken = default,
+    int? maxDegreeOfParallelism = default,
+    ILogger<IUpdater>? logger = default,
+    bool flushUpdatesQueue = default,
+    UpdateType[]? allowedUpdates = default,
+    bool switchChatId = true,
+    CancellationToken cancellationToken = default)
 {
     /// <summary>
     /// Options section name.
@@ -19,22 +41,22 @@ public class UpdaterOptions
     /// <summary>
     /// Bot token to be used.
     /// </summary>
-    public string? BotToken { get; }
+    public string? BotToken { get; } = botToken;
 
     /// <summary>
     /// Maximum number of allowed concurrent update handling tasks.
     /// </summary>
-    public int? MaxDegreeOfParallelism { get; }
+    public int? MaxDegreeOfParallelism { get; } = maxDegreeOfParallelism;
 
     /// <summary>
     /// Old updates will gone.
     /// </summary>
-    public bool FlushUpdatesQueue { get; }
+    public bool FlushUpdatesQueue { get; } = flushUpdatesQueue;
 
     /// <summary>
     /// Allowed updates.
     /// </summary>
-    public UpdateType[] AllowedUpdates { get; }
+    public UpdateType[]? AllowedUpdates { get; internal set; } = allowedUpdates;
 
     /// <summary>
     /// By enabling this option, the updater will try to
@@ -46,51 +68,18 @@ public class UpdaterOptions
     /// from an update and use it as
     /// queue keys.
     /// </remarks>
-    public bool SwitchChatId { get; }
+    public bool SwitchChatId { get; } = switchChatId;
 
     /// <summary>
     /// If you want to use your own logger.
     /// </summary>
     [JsonIgnore]
-    public ILogger<IUpdater>? Logger { get; }
+    public ILogger<IUpdater>? Logger { get; } = logger;
 
     // TODO: Remove this
     /// <summary>
     /// Default token to be used in Start method.
     /// </summary>
     [JsonIgnore]
-    public CancellationToken CancellationToken { get; }
-
-    /// <param name="botToken">The bot token. Please include this if you're not going to pass an <see cref="ITelegramBotClient"/>.</param>
-    /// <param name="maxDegreeOfParallelism">
-    /// Maximum number of allowed concurrent update handling tasks.
-    /// </param>
-    /// <param name="logger">If you want to use your own logger.</param>
-    /// <param name="cancellationToken">
-    /// Default token to be used in Start method.
-    /// </param>
-    /// <param name="flushUpdatesQueue">Old updates will gone.</param>
-    /// <param name="allowedUpdates">Allowed updates.</param>
-    /// <param name="switchChatId">
-    /// By enabling this option, the updater will try to resolve
-    /// chat id from update and use it
-    /// as queue keys. if there's no user id available.
-    /// </param>
-    public UpdaterOptions(
-        string? botToken = default,
-        int? maxDegreeOfParallelism = default,
-        ILogger<IUpdater>? logger = default,
-        bool flushUpdatesQueue = default,
-        UpdateType[]? allowedUpdates = default,
-        bool switchChatId = true,
-        CancellationToken cancellationToken = default)
-    {
-        BotToken = botToken;
-        MaxDegreeOfParallelism = maxDegreeOfParallelism;
-        FlushUpdatesQueue = flushUpdatesQueue;
-        AllowedUpdates = allowedUpdates ?? [];
-        SwitchChatId = switchChatId;
-        Logger = logger;
-        CancellationToken = cancellationToken;
-    }
+    public CancellationToken CancellationToken { get; } = cancellationToken;
 }

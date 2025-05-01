@@ -8,11 +8,8 @@ namespace TelegramUpdater.UpdateHandlers.Singleton;
 /// </summary>
 /// <typeparam name="T">Update type.</typeparam>
 public abstract class AbstractSingletonUpdateHandler<T>
-    : AbstractHandlerProvider<T>, IGenericSingletonUpdateHandler<T>
-    where T : class
+    : AbstractHandlerProvider<T>, IGenericSingletonUpdateHandler<T> where T : class
 {
-    // TODO: use internal protected for GetT like scoped.
-
     /// <summary>
     /// Create a new instance of <see cref="AbstractSingletonUpdateHandler{T}"/>
     /// </summary>
@@ -23,8 +20,8 @@ public abstract class AbstractSingletonUpdateHandler<T>
     /// <exception cref="ArgumentNullException"></exception>
     protected AbstractSingletonUpdateHandler(
         UpdateType updateType,
-        Func<Update, T?> getT,
-        IFilter<UpdaterFilterInputs<T>>? filter)
+        Func<Update, T?>? getT = default,
+        IFilter<UpdaterFilterInputs<T>>? filter = default)
     {
         if (updateType == UpdateType.Unknown)
             throw new ArgumentException(
@@ -42,7 +39,14 @@ public abstract class AbstractSingletonUpdateHandler<T>
     public IFilter<UpdaterFilterInputs<T>>? Filter { get; }
 
     /// <inheritdoc/>
-    public Func<Update, T?> GetActualUpdate { get; }
+    public Func<Update, T?>? GetActualUpdate { get; }
+
+    /// <summary>
+    /// Resolve inner update from <see cref="Update"/> using <see cref="GetActualUpdate"/> if not null or
+    /// using <see cref="UpdaterExtensions.GetInnerUpdate{T}(Update)"/>
+    /// </summary>
+    internal protected Func<Update, T?> ExtractInnerUpdater
+        => GetActualUpdate ?? ((update) => update.GetInnerUpdate<T>());
 
     /// <inheritdoc />
     public UpdateType UpdateType { get; }
@@ -80,19 +84,12 @@ public abstract class AbstractSingletonUpdateHandler<T>
     {
         if (inputs.Input.Type != UpdateType) return false;
 
-        var insider = GetT(inputs.Input);
+        var insider = ExtractInnerUpdater(inputs.Input);
 
         if (insider == null) return false;
 
         return ShouldHandle(new UpdaterFilterInputs<T>(inputs.Updater, insider));
     }
-
-    /// <summary>
-    /// A function to extract actual update from <see cref="Update"/>.
-    /// </summary>
-    /// <param name="update">The update.</param>
-    /// <returns></returns>
-    internal protected T? GetT(Update update) => GetActualUpdate(update);
 
     internal abstract IContainer<T> ContainerBuilder(
         IUpdater updater, ShiningInfo<long, Update> shiningInfo);

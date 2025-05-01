@@ -34,7 +34,7 @@ public class ExtensionsTests
     {
         var method = GetType().GetMethod("HandleMessageUpdate");
         var result = (AnyHandler<Message>?)SingletonAttributesExtensions.GetSingletonUpdateHandler(
-            method!, Telegram.Bot.Types.Enums.UpdateType.Message, 0);
+            method!, Telegram.Bot.Types.Enums.UpdateType.Message);
 
         Assert.NotNull(result);
 
@@ -51,7 +51,7 @@ public class ExtensionsTests
     {
         var method = GetType().GetMethod("HandleChatBoostUpdate");
         var result = (AnyHandler<ChatBoostUpdated>?)SingletonAttributesExtensions.GetSingletonUpdateHandler(
-            method!, Telegram.Bot.Types.Enums.UpdateType.ChatBoost, 0);
+            method!, Telegram.Bot.Types.Enums.UpdateType.ChatBoost);
 
         Assert.NotNull(result);
 
@@ -68,7 +68,7 @@ public class ExtensionsTests
     {
         var method = GetType().GetMethod("HandleWrongChatBoostUpdate");
         var result = SingletonAttributesExtensions.GetSingletonUpdateHandler(
-            method!, Telegram.Bot.Types.Enums.UpdateType.ChatBoost, 0);
+            method!, Telegram.Bot.Types.Enums.UpdateType.ChatBoost);
 
         Assert.Null(result);
     }

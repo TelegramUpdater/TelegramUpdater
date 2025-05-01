@@ -3,7 +3,8 @@
 /// <summary>
 /// Generic interface over <see cref="IScopedUpdateHandlerContainer"/>.
 /// </summary>
-public interface IGenericScopedUpdateHandlerContainer<T> : IScopedUpdateHandlerContainer
+public interface IGenericScopedUpdateHandlerContainer<T>
+    : IScopedUpdateHandlerContainer
     where T : class
 {
     /// <summary>

@@ -44,7 +44,7 @@ public static class SingletonAttributesExtensions
             var callback = (Func<IContainer<T>, Task>)Delegate
                 .CreateDelegate(typeof(Func<IContainer<T>, Task>), method);
 
-            return new AnyHandler<T>(updateType, resolver, callback, filters);
+            return new AnyHandler<T>(updateType, getT: resolver, callback: callback, filter: filters);
         }
         catch (ArgumentException)
         {

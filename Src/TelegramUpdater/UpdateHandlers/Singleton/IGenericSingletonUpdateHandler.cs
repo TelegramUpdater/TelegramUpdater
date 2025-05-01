@@ -15,5 +15,8 @@ public interface IGenericSingletonUpdateHandler<T> : ISingletonUpdateHandler
     /// <summary>
     /// A function to extract actual update from <see cref="Update"/>.
     /// </summary>
-    public Func<Update, T?> GetActualUpdate { get; }
+    /// <remarks>
+    /// The inner update will be resolved from <see cref="UpdateType"/> if this is null.
+    /// </remarks>
+    public Func<Update, T?>? GetActualUpdate { get; }
 }

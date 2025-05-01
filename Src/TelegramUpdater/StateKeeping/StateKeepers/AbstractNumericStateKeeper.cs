@@ -12,10 +12,14 @@ namespace TelegramUpdater.StateKeeping.StateKeepers;
 /// <typeparam name="TFrom">
 /// The master object to extract key from.
 /// </typeparam>
-public abstract class AbstractNumericStateKeeper<TKey, TFrom>
-    : AbstractStateKeeper<TKey, int, TFrom>
+/// <typeparam name="TStorage"></typeparam>
+public abstract class AbstractNumericStateKeeper<TKey, TFrom, TStorage>(
+    TStorage storage)
+    : AbstractStateKeeper<TKey, int, TFrom, TStorage>(storage)
     where TKey : notnull
+    where TStorage : IStateKeeperStorage<TKey, int>
 {
+
     /// <summary>
     /// Defines the acceptable range of state.
     /// </summary>

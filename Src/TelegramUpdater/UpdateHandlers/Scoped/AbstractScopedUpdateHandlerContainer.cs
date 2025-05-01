@@ -62,14 +62,14 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     /// </summary>
     /// <param name="update">The update.</param>
     /// <returns></returns>
-    internal protected abstract TUpdate? GetT(Update update);
+    internal protected abstract TUpdate? ExtractInnerUpdate(Update update);
 
     /// <inheritdoc/>
     public bool ShouldHandle(UpdaterFilterInputs<Update> inputs)
     {
         if (inputs.Input.Type != UpdateType) return false;
 
-        var insider = GetT(inputs.Input);
+        var insider = ExtractInnerUpdate(inputs.Input);
 
         if (insider == null) return false;
 

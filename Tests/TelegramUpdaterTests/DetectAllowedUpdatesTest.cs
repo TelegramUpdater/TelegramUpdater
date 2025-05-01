@@ -43,8 +43,9 @@ namespace TelegramUpdaterTests
         {
             var testUpdater = new Updater(new TelegramBotClient(Extensions.FakeBotToken));
 
-            testUpdater.AddScopedUpdateHandler<MyMessageHandler, Message>();
-            testUpdater.AddScopedUpdateHandler<MyCallbackQueryHandler, CallbackQuery>();
+            testUpdater.AddScopedUpdateHandler<MyMessageHandler>(UpdateType.Message);
+            testUpdater.AddScopedUpdateHandler<MyMessageHandler>(UpdateType.EditedMessage);
+            testUpdater.AddScopedUpdateHandler<MyCallbackQueryHandler>();
 
             testUpdater.AddSingletonUpdateHandler(
                 new TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse.MessageHandler(_T));
@@ -52,7 +53,7 @@ namespace TelegramUpdaterTests
             await testUpdater.StartAsync<FakeWriter>();
 
             Assert.True(testUpdater.AllowedUpdates.SequenceEqual(
-                [UpdateType.Message, UpdateType.CallbackQuery]));
+                [UpdateType.Message, UpdateType.EditedMessage, UpdateType.CallbackQuery]));
         }
 
         [Fact]

@@ -1,17 +1,20 @@
 ﻿using System;
 using TelegramUpdater.StateKeeping.StateKeepers;
+using TelegramUpdater.StateKeeping.Storages;
 using Xunit;
 
 namespace TelegramUpdaterTests.StateKeepers;
 
 public class NumericStateKeeperTests
 {
-    internal class NumericStateKeeperUnbound : AbstractNumericStateKeeper<long, long>
+    internal class NumericStateKeeperUnbound()
+        : AbstractNumericStateKeeper<long, long, MemoryCacheStorage<long, int>>(new ())
     {
         protected override Func<long, long> KeyResolver => x => x;
     }
 
-    internal class NumericStateKeeperBound(Range stateRange) : AbstractNumericStateKeeper<long, long>
+    internal class NumericStateKeeperBound(Range stateRange)
+        : AbstractNumericStateKeeper<long, long, MemoryCacheStorage<long, int>>(new())
     {
         protected override Func<long, long> KeyResolver => x => x;
 

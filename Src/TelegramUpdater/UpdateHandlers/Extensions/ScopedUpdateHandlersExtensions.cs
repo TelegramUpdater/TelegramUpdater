@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Payments;
 using TelegramUpdater.UpdateHandlers.Scoped;
 
@@ -26,8 +27,8 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<TUpdate>(
         this IUpdater updater,
         Type typeOfScopedHandler,
+        UpdateType updateType,
         UpdaterFilter<TUpdate>? filter = default,
-        UpdateType? updateType = default,
         Func<Update, TUpdate>? getT = default,
         int group = default) where TUpdate : class
     {
@@ -38,23 +39,12 @@ public static class ScopedUpdateHandlersExtensions
         }
 
         var _t = typeof(TUpdate);
-        if (updateType == null)
-        {
-            if (Enum.TryParse(_t.Name, out UpdateType ut))
-            {
-                updateType = ut;
-            }
-            else
-            {
-                throw new InvalidCastException($"{_t} is not an Update! Should be Message, CallbackQuery, ...");
-            }
-        }
 
         var containerGeneric = typeof(ScopedUpdateHandlerContainerBuilder<,>).MakeGenericType(
             typeOfScopedHandler, _t);
 
         var container = (IScopedUpdateHandlerContainer?)Activator.CreateInstance(
-            containerGeneric, [updateType.Value, filter, getT]);
+            containerGeneric, [updateType, filter, getT]);
 
         if (container != null)
         {
@@ -84,30 +74,17 @@ public static class ScopedUpdateHandlersExtensions
     /// <remarks>This method will add filter attributes if <paramref name="filter"/> is null.</remarks>
     public static IUpdater AddScopedUpdateHandler<THandler, TUpdate>(
         this IUpdater updater,
+        UpdateType updateType,
         Filter<UpdaterFilterInputs<TUpdate>>? filter = default,
-        UpdateType? updateType = default,
         Func<Update, TUpdate?>? getT = default,
         int group = default)
-        where THandler : IScopedUpdateHandler where TUpdate : class
+        where THandler : AbstractScopedUpdateHandler<TUpdate> where TUpdate : class
     {
-        if (updateType == null)
-        {
-            var _t = typeof(TUpdate);
-            if (Enum.TryParse(_t.Name, out UpdateType ut))
-            {
-                updateType = ut;
-            }
-            else
-            {
-                throw new InvalidCastException($"{_t} is not an Update! Should be Message, CallbackQuery, ...");
-            }
-        }
-
         var _h = typeof(THandler);
 
         return updater.AddScopedUpdateHandler(
             new ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
-                updateType.Value, filter, getT), group);
+                updateType, filter, getT), group);
     }
 
     /// <summary>
@@ -130,9 +107,9 @@ public static class ScopedUpdateHandlersExtensions
         this IUpdater updater,
         UpdateType updateType,
         Filter<UpdaterFilterInputs<Message>>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<Message>
         => updater.AddScopedUpdateHandler<THandler, Message>(
-            filter, updateType, updateType switch
+            updateType, filter, updateType switch
             {
                 UpdateType.Message => x => x.Message,
                 UpdateType.EditedMessage => x => x.EditedMessage,
@@ -168,9 +145,9 @@ public static class ScopedUpdateHandlersExtensions
         this IUpdater updater,
         UpdateType updateType,
         Filter<UpdaterFilterInputs<ChatMemberUpdated>>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<ChatMemberUpdated>
         => updater.AddScopedUpdateHandler<THandler, ChatMemberUpdated>(
-            filter, updateType, updateType switch
+            updateType, filter, updateType switch
             {
                 UpdateType.ChatMember => x => x.ChatMember,
                 UpdateType.MyChatMember => x => x.MyChatMember,
@@ -195,9 +172,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<CallbackQuery>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<CallbackQuery>
         => updater.AddScopedUpdateHandler<THandler, CallbackQuery>(
-            filter, UpdateType.CallbackQuery, x => x.CallbackQuery);
+            UpdateType.CallbackQuery, filter, x => x.CallbackQuery);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -213,9 +190,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<InlineQuery>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<InlineQuery>
         => updater.AddScopedUpdateHandler<THandler, InlineQuery>(
-            filter, UpdateType.InlineQuery, x => x.InlineQuery);
+            UpdateType.InlineQuery, filter, x => x.InlineQuery);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -231,9 +208,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<ChatJoinRequest>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<ChatJoinRequest>
         => updater.AddScopedUpdateHandler<THandler, ChatJoinRequest>(
-            filter, UpdateType.ChatJoinRequest, x => x.ChatJoinRequest);
+            UpdateType.ChatJoinRequest, filter, x => x.ChatJoinRequest);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -249,9 +226,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<ChosenInlineResult>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<ChosenInlineResult>
         => updater.AddScopedUpdateHandler<THandler, ChosenInlineResult>(
-            filter, UpdateType.ChosenInlineResult, x => x.ChosenInlineResult);
+            UpdateType.ChosenInlineResult, filter, x => x.ChosenInlineResult);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -267,9 +244,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<Poll>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<Poll>
         => updater.AddScopedUpdateHandler<THandler, Poll>(
-            filter, UpdateType.Poll, x => x.Poll);
+            UpdateType.Poll, filter, x => x.Poll);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -285,9 +262,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<PollAnswer>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<PollAnswer>
         => updater.AddScopedUpdateHandler<THandler, PollAnswer>(
-            filter, UpdateType.PollAnswer, x => x.PollAnswer);
+            UpdateType.PollAnswer, filter, x => x.PollAnswer);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -303,9 +280,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<PreCheckoutQuery>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<PreCheckoutQuery>
         => updater.AddScopedUpdateHandler<THandler, PreCheckoutQuery>(
-            filter, UpdateType.PreCheckoutQuery, x => x.PreCheckoutQuery);
+            UpdateType.PreCheckoutQuery, filter, x => x.PreCheckoutQuery);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -321,9 +298,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<ShippingQuery>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<ShippingQuery>
         => updater.AddScopedUpdateHandler<THandler, ShippingQuery>(
-            filter, UpdateType.ShippingQuery, x => x.ShippingQuery);
+            UpdateType.ShippingQuery, filter, x => x.ShippingQuery);
 
     // UpdateType.MessageReaction => typeof(MessageReactionUpdated),
     /// <summary>
@@ -340,9 +317,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<MessageReactionUpdated>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<MessageReactionUpdated>
         => updater.AddScopedUpdateHandler<THandler, MessageReactionUpdated>(
-            filter, UpdateType.MessageReaction, x => x.MessageReaction);
+            UpdateType.MessageReaction, filter, x => x.MessageReaction);
 
     // UpdateType.MessageReactionCount => typeof(MessageReactionCountUpdated),
     /// <summary>
@@ -359,9 +336,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<MessageReactionCountUpdated>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<MessageReactionCountUpdated>
         => updater.AddScopedUpdateHandler<THandler, MessageReactionCountUpdated>(
-            filter, UpdateType.MessageReactionCount, x => x.MessageReactionCount);
+            UpdateType.MessageReactionCount, filter, x => x.MessageReactionCount);
 
     // UpdateType.ChatBoost => typeof(ChatBoostUpdated),
     /// <summary>
@@ -378,9 +355,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<ChatBoostUpdated>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<ChatBoostUpdated>
         => updater.AddScopedUpdateHandler<THandler, ChatBoostUpdated>(
-            filter, UpdateType.ChatBoost, x => x.ChatBoost);
+            UpdateType.ChatBoost, filter, x => x.ChatBoost);
 
     // UpdateType.RemovedChatBoost => typeof(ChatBoostRemoved),
     /// <summary>
@@ -397,9 +374,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<ChatBoostRemoved>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<ChatBoostRemoved>
         => updater.AddScopedUpdateHandler<THandler, ChatBoostRemoved>(
-            filter, UpdateType.RemovedChatBoost, x => x.RemovedChatBoost);
+            UpdateType.RemovedChatBoost, filter, x => x.RemovedChatBoost);
 
     // UpdateType.BusinessConnection => typeof(BusinessConnection),
     /// <summary>
@@ -416,9 +393,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<BusinessConnection>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<BusinessConnection>
         => updater.AddScopedUpdateHandler<THandler, BusinessConnection>(
-            filter, UpdateType.BusinessConnection, x => x.BusinessConnection);
+            UpdateType.BusinessConnection, filter, x => x.BusinessConnection);
 
     // UpdateType.DeletedBusinessMessages => typeof(BusinessMessagesDeleted),
     /// <summary>
@@ -435,9 +412,9 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<BusinessMessagesDeleted>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<BusinessMessagesDeleted>
         => updater.AddScopedUpdateHandler<THandler, BusinessMessagesDeleted>(
-            filter, UpdateType.DeletedBusinessMessages, x => x.DeletedBusinessMessages);
+            UpdateType.DeletedBusinessMessages, filter, x => x.DeletedBusinessMessages);
 
     // UpdateType.PurchasedPaidMedia => typeof(PaidMediaPurchased),
     /// <summary>
@@ -454,7 +431,7 @@ public static class ScopedUpdateHandlersExtensions
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<PaidMediaPurchased>? filter = default)
-        where THandler : IScopedUpdateHandler
+        where THandler : AbstractScopedUpdateHandler<PaidMediaPurchased>
         => updater.AddScopedUpdateHandler<THandler, PaidMediaPurchased>(
-            filter, UpdateType.PurchasedPaidMedia, x => x.PurchasedPaidMedia);
+            UpdateType.PurchasedPaidMedia, filter, x => x.PurchasedPaidMedia);
 }

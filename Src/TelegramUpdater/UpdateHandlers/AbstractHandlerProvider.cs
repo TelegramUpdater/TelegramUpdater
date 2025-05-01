@@ -39,25 +39,25 @@ public abstract class AbstractHandlerProvider<TUpdate>
 
     #region Enum State
     /// <inheritdoc cref="Extensions.GetUserEnumStateKeeper{TEnum}(IUpdater, string)"/>
-    public UserEnumStateKeeper<TEnum> GetUserEnumStateKeeper<TEnum>(string name)
+    public MemoryUserEnumStateKeeper<TEnum> GetUserEnumStateKeeper<TEnum>(string name)
         where TEnum : struct, Enum
         => Updater.GetUserEnumStateKeeper<TEnum>(name);
 
     /// <inheritdoc cref="Extensions.GetUserEnumStateKeeper{TEnum}(IUpdater)"/>
-    public UserEnumStateKeeper<TEnum> GetUserEnumStateKeeper<TEnum>()
+    public MemoryUserEnumStateKeeper<TEnum> GetUserEnumStateKeeper<TEnum>()
         where TEnum : struct, Enum
         => Updater.GetUserEnumStateKeeper<TEnum>();
 
-    /// <inheritdoc cref="Extensions.TryGetUserEnumStateKeeper{TEnum}(IUpdater, string, out UserEnumStateKeeper{TEnum}?)"/>
+    /// <inheritdoc cref="Extensions.TryGetUserEnumStateKeeper{TEnum}(IUpdater, string, out MemoryUserEnumStateKeeper{TEnum}?)"/>
     public bool TryGetUserEnumStateKeeper<TEnum>(
         string name,
-        [NotNullWhen(true)] out UserEnumStateKeeper<TEnum>? stateKeeper)
+        [NotNullWhen(true)] out MemoryUserEnumStateKeeper<TEnum>? stateKeeper)
         where TEnum : struct, Enum
         => Updater.TryGetUserEnumStateKeeper(name, out stateKeeper);
 
-    /// <inheritdoc cref="Extensions.TryGetUserEnumStateKeeper{TEnum}(IUpdater, out UserEnumStateKeeper{TEnum}?)"/>
+    /// <inheritdoc cref="Extensions.TryGetUserEnumStateKeeper{TEnum}(IUpdater, out MemoryUserEnumStateKeeper{TEnum}?)"/>
     public bool TryGetUserEnumStateKeeper<TEnum>(
-        [NotNullWhen(true)] out UserEnumStateKeeper<TEnum>? stateKeeper)
+        [NotNullWhen(true)] out MemoryUserEnumStateKeeper<TEnum>? stateKeeper)
         where TEnum : struct, Enum
         => Updater.TryGetUserEnumStateKeeper(out stateKeeper);
 
@@ -147,6 +147,6 @@ public abstract class AbstractHandlerProvider<TUpdate>
     #endregion
 
     /// <inheritdoc cref="Extensions.GetUserNumericStateKeeper(IUpdater, string)"/>
-    public UserNumericStateKeeper GetUserNumericStateKeeper(string name)
+    public MemoryUserNumericStateKeeper GetUserNumericStateKeeper(string name)
         => Updater.GetUserNumericStateKeeper(name);
 }

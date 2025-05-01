@@ -21,6 +21,6 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 public sealed class ShippingQueryHandler(
     Func<IContainer<ShippingQuery>, Task> callback,
     IFilter<UpdaterFilterInputs<ShippingQuery>>? filter)
-    : AnyHandler<ShippingQuery>(UpdateType.ShippingQuery, x=> x.ShippingQuery, callback, filter)
+    : AnyHandler<ShippingQuery>(UpdateType.ShippingQuery, callback, filter, x => x.ShippingQuery)
 {
 }

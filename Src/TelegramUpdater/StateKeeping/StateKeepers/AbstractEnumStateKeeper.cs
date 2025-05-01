@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Net.NetworkInformation;
 
 namespace TelegramUpdater.StateKeeping.StateKeepers;
 
@@ -13,11 +14,15 @@ namespace TelegramUpdater.StateKeeping.StateKeepers;
 /// <typeparam name="TFrom">
 /// The master object to extract key from.
 /// </typeparam>
-public abstract class AbstractEnumStateKeeper<TKey, TEnum, TFrom>
-    : AbstractStateKeeper<TKey, TEnum, TFrom>
+/// <typeparam name="TStorage"></typeparam>
+public abstract class AbstractEnumStateKeeper<TKey, TEnum, TFrom, TStorage>(
+    TStorage storage)
+    : AbstractStateKeeper<TKey, TEnum, TFrom, TStorage>(storage)
     where TEnum : struct, Enum
     where TKey : notnull
+    where TStorage : IStateKeeperStorage<TKey, TEnum>
 {
+
     /// <summary>
     /// Tries to move to the next enum state.
     /// </summary>

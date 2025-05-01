@@ -7,8 +7,16 @@ namespace TelegramUpdater.StateKeeping;
 /// </summary>
 /// <typeparam name="TState">The state itself which must implement <see cref="IEquatable{TState}"/></typeparam>
 /// <typeparam name="TKey">The master object which we extract the state key from</typeparam>
-public interface IStateKeeper<TKey, TState> where TKey: notnull
+/// <typeparam name="TStorage">The storage associated with this state keeper.</typeparam>
+public interface IStateKeeper<TKey, TState, TStorage>
+    where TKey: notnull
+    where TStorage : IStateKeeperStorage<TKey, TState>
 {
+    /// <summary>
+    /// The <typeparamref name="TStorage"/> associated with this state keeper.
+    /// </summary>
+    public TStorage Storage { get; }
+
     /// <summary>
     /// Check if <paramref name="stateOf"/> has any <typeparamref name="TState"/>.
     /// </summary>

@@ -23,8 +23,8 @@ public sealed class InlineQueryHandler(
     Func<IContainer<InlineQuery>, Task> callback,
     IFilter<UpdaterFilterInputs<InlineQuery>>? filter = default) 
     : AnyHandler<InlineQuery>(UpdateType.InlineQuery,
-           x => x.InlineQuery,
            callback,
-           filter)
+           filter,
+           x => x.InlineQuery)
 {
 }

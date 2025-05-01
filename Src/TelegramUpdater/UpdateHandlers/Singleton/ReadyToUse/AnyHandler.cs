@@ -26,9 +26,9 @@ public class AnyHandler<T> : AbstractSingletonUpdateHandler<T> where T : class
     /// <returns></returns>
     internal AnyHandler(
         UpdateType updateType,
-        Func<Update, T?> getT,
         Func<IContainer<T>, Task> callback,
-        IFilter<UpdaterFilterInputs<T>>? filter) : base(updateType, getT, filter)
+        IFilter<UpdaterFilterInputs<T>>? filter = default,
+        Func<Update, T?>? getT = default) : base(updateType, getT, filter)
     {
         _handleAsync = callback ??
             throw new ArgumentNullException(nameof(callback));
@@ -36,7 +36,7 @@ public class AnyHandler<T> : AbstractSingletonUpdateHandler<T> where T : class
 
     internal override IContainer<T> ContainerBuilder(
         IUpdater updater, ShiningInfo<long, Update> shiningInfo)
-        => new AnyContainer<T>(GetT, updater, shiningInfo, ExtraData);
+        => new AnyContainer<T>(ExtractInnerUpdater, updater, shiningInfo, ExtraData);
 
     /// <inheritdoc/>
     protected override async Task HandleAsync(

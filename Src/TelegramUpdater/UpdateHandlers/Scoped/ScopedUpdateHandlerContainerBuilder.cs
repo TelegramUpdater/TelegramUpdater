@@ -35,7 +35,7 @@ public sealed class ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
     /// </summary>
     /// <param name="update">The update.</param>
     /// <returns></returns>
-    internal protected override TUpdate? GetT(Update update)
+    internal protected override TUpdate? ExtractInnerUpdate(Update update)
     {
         if (_getT == null)
         {

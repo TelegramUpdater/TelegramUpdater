@@ -12,8 +12,9 @@ public static class SingletonUpdateHandlerExtensions
     /// <summary>
     /// Adds any singleton update handler to the updater.
     /// </summary>
-    /// <typeparam name="T">Your update type, eg: <see cref="Message"/></typeparam>.
+    /// <typeparam name="T">Your update type, Eg: <see cref="Message"/></typeparam>.
     /// <param name="updater"></param>
+    /// <param name="updateType"></param>
     /// <param name="updateSelector">
     /// A function to select the right update from <see cref="Update"/>
     /// <para>Eg: <code>update => update.Message</code></para>
@@ -27,22 +28,40 @@ public static class SingletonUpdateHandlerExtensions
     /// </param>
     public static IUpdater AddSingletonUpdateHandler<T>(
         this IUpdater updater,
+        UpdateType updateType,
         Func<Update, T?> updateSelector,
         Func<IContainer<T>, Task> callback,
         UpdaterFilter<T>? filter = default,
         int group = 0)
         where T : class
     {
-        var t = typeof(T);
-
-        if (!Enum.TryParse(t.Name, out UpdateType updateType))
-        {
-            throw new InvalidCastException($"{t} is not an Update.");
-        }
-
         return updater.AddSingletonUpdateHandler(
-            new AnyHandler<T>(updateType, updateSelector, callback, filter), group);
+            updateHandler: new AnyHandler<T>(
+                updateType: updateType,
+                getT: updateSelector,
+                callback: callback,
+                filter: filter), group);
     }
+
+    /// <summary>
+    /// Adds a singleton update handler for <typeparamref name="TUpdate"/>.
+    /// </summary>
+    /// <typeparam name="TUpdate"></typeparam>
+    /// <param name="updater"></param>
+    /// <param name="updateType"></param>
+    /// <param name="callback"></param>
+    /// <param name="filter"></param>
+    /// <param name="group"></param>
+    /// <returns></returns>
+    public static IUpdater AddSingletonUpdateHandler<TUpdate>(
+        this IUpdater updater,
+        UpdateType updateType,
+        Func<IContainer<TUpdate>, Task> callback,
+        UpdaterFilter<TUpdate>? filter = default,
+        int group = default) where TUpdate : class
+        => updater.AddSingletonUpdateHandler(
+            updateHandler: new AnyHandler<TUpdate>(
+                updateType: updateType, callback: callback, filter: filter), group);
 
     /// <summary>
     /// Adds a handler for any update that is a <see cref="Message"/>.

@@ -20,6 +20,6 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 public sealed class EditedChannelPostHandler(
     Func<IContainer<Message>, Task> callback,
     IFilter<UpdaterFilterInputs<Message>>? filter)
-    : AnyHandler<Message>(UpdateType.EditedChannelPost, x=> x.EditedChannelPost, callback, filter )
+    : AnyHandler<Message>(UpdateType.EditedChannelPost, callback, filter, x => x.EditedChannelPost)
 {
 }
