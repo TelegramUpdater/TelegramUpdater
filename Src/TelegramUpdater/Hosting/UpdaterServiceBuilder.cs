@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TelegramUpdater.ExceptionHandlers;
+using TelegramUpdater.UpdateContainer;
+using TelegramUpdater.UpdateContainer.UpdateContainers;
 using TelegramUpdater.UpdateHandlers;
 using TelegramUpdater.UpdateHandlers.Scoped;
 
@@ -81,29 +83,19 @@ public class UpdaterServiceBuilder
     /// <para>Don't touch it if you don't know.</para>
     /// </param>
     /// <param name="group"></param>
-    public UpdaterServiceBuilder AddScopedUpdateHandler<THandler, TUpdate>(
+    /// <typeparam name="TContainer">Type of the container.</typeparam>
+    public UpdaterServiceBuilder AddScopedUpdateHandler<THandler, TUpdate, TContainer>(
+        UpdateType updateType,
         UpdaterFilter<TUpdate>? filter = default,
-        UpdateType? updateType = default,
-        Func<Update, TUpdate>? getT = default,
+        Func<Update, TUpdate?>? getT = default,
         int group = default)
-        where THandler : IScopedUpdateHandler where TUpdate : class
+        where THandler : AbstractScopedUpdateHandler<TUpdate, TContainer>
+        where TUpdate : class
+        where TContainer : IContainer<TUpdate>
     {
-        if (updateType == null)
-        {
-            var _t = typeof(TUpdate);
-            if (Enum.TryParse(_t.Name, out UpdateType ut))
-            {
-                updateType = ut;
-            }
-            else
-            {
-                throw new InvalidCastException($"{_t} is not an Update! Should be Message, CallbackQuery, ...");
-            }
-        }
-
         return AddScopedUpdateHandler(
             new ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
-                updateType.Value, filter, getT), group);
+                updateType, filter, getT), group);
     }
 
     /// <summary>
@@ -120,8 +112,8 @@ public class UpdaterServiceBuilder
     /// <param name="group"></param>
     public UpdaterServiceBuilder AddScopedUpdateHandler<TUpdate>(
         Type typeOfScopedHandler,
+        UpdateType updateType,
         UpdaterFilter<TUpdate>? filter = default,
-        UpdateType? updateType = default,
         Func<Update, TUpdate>? getT = default,
         int group = default) where TUpdate : class
     {
@@ -131,23 +123,12 @@ public class UpdaterServiceBuilder
         }
 
         var _t = typeof(TUpdate);
-        if (updateType == null)
-        {
-            if (Enum.TryParse(_t.Name, out UpdateType ut))
-            {
-                updateType = ut;
-            }
-            else
-            {
-                throw new InvalidCastException($"{_t} is not an Update! Should be Message, CallbackQuery, ...");
-            }
-        }
 
         var containerGeneric = typeof(ScopedUpdateHandlerContainerBuilder<,>)
             .MakeGenericType(typeOfScopedHandler, _t);
 
         var container = (IScopedUpdateHandlerContainer?)Activator.CreateInstance(
-            containerGeneric, [updateType.Value, filter, getT]);
+            containerGeneric, [updateType, filter, getT]);
 
         if (container != null)
         {
@@ -168,9 +149,43 @@ public class UpdaterServiceBuilder
     /// Leave empty if you applied your filler using <see cref="ApplyFilterAttribute"/> before.
     /// </para>
     /// </param>
-    public UpdaterServiceBuilder AddMessageHandler<THandler>(UpdaterFilter<Message>? filter = default)
-        where THandler : IScopedUpdateHandler
-        => AddScopedUpdateHandler<THandler, Message>(filter, UpdateType.Message, x => x.Message!);
+    /// <param name="resolver">Optional. inner update resolver.</param>
+    /// <param name="group">Handling priority.</param>
+    /// <typeparam name="TContainer">Type of the container.</typeparam>
+    public UpdaterServiceBuilder AddMessageHandler<THandler, TContainer>(
+        UpdaterFilter<Message>? filter = default,
+        Func<Update, Message>? resolver = default,
+        int group = default)
+        where THandler : AbstractScopedUpdateHandler<Message, TContainer>
+        where TContainer : IContainer<Message>
+        => AddScopedUpdateHandler<THandler, Message, TContainer>(
+            UpdateType.Message,
+            filter,
+            resolver,
+            group);
+
+    /// <summary>
+    /// Adds an scoped <see cref="Message"/> handler to the <see cref="IUpdater"/>.
+    /// </summary>
+    /// <typeparam name="THandler">Your <see cref="Message"/> handler type.</typeparam>
+    /// <param name="filter">
+    /// The filter to choose the right updates to handle.
+    /// <para>
+    /// Leave empty if you applied your filler using <see cref="ApplyFilterAttribute"/> before.
+    /// </para>
+    /// </param>
+    /// <param name="resolver">Optional. inner update resolver.</param>
+    /// <param name="group">Handling priority.</param>
+    public UpdaterServiceBuilder AddMessageHandler<THandler>(
+        UpdaterFilter<Message>? filter = default,
+        Func<Update, Message>? resolver = default,
+        int group = default)
+        where THandler : AbstractScopedUpdateHandler<Message, MessageContainer>
+        => AddScopedUpdateHandler<THandler, Message, MessageContainer>(
+            UpdateType.Message,
+            filter,
+            resolver,
+            group);
 
     /// <summary>
     /// Adds an scoped <see cref="CallbackQuery"/> handler to the updater.
@@ -182,9 +197,39 @@ public class UpdaterServiceBuilder
     /// Leave empty if you applied your filter using <see cref="ApplyFilterAttribute"/> before.
     /// </para>
     /// </param>
-    public UpdaterServiceBuilder AddCallbackQueryHandler<THandler>(UpdaterFilter<CallbackQuery>? filter = default)
-        where THandler : IScopedUpdateHandler
-        => AddScopedUpdateHandler<THandler, CallbackQuery>(filter, UpdateType.Message, x => x.CallbackQuery!);
+    /// <param name="group">Handling priority.</param>
+    /// <typeparam name="TContainer">Type of the container.</typeparam>
+    public UpdaterServiceBuilder AddCallbackQueryHandler<THandler, TContainer>(
+        UpdaterFilter<CallbackQuery>? filter = default,
+        int group = default)
+        where THandler : AbstractScopedUpdateHandler<CallbackQuery, TContainer>
+        where TContainer : IContainer<CallbackQuery>
+        => AddScopedUpdateHandler<THandler, CallbackQuery, TContainer>(
+            UpdateType.Message,
+            filter,
+            x => x.CallbackQuery, 
+            group);
+
+    /// <summary>
+    /// Adds an scoped <see cref="CallbackQuery"/> handler to the updater.
+    /// </summary>
+    /// <typeparam name="THandler">Your <see cref="CallbackQuery"/> handler type.</typeparam>
+    /// <param name="filter">
+    /// The filter to choose the right updates to handle.
+    /// <para>
+    /// Leave empty if you applied your filter using <see cref="ApplyFilterAttribute"/> before.
+    /// </para>
+    /// </param>
+    /// <param name="group">Handling priority.</param>
+    public UpdaterServiceBuilder AddCallbackQueryHandler<THandler>(
+        UpdaterFilter<CallbackQuery>? filter = default,
+        int group = default)
+        where THandler : AbstractScopedUpdateHandler<CallbackQuery, CallbackQueryContainer>
+        => AddScopedUpdateHandler<THandler, CallbackQuery, CallbackQueryContainer>(
+            UpdateType.Message,
+            filter,
+            x => x.CallbackQuery,
+            group);
 
     /// <summary>
     /// Execute any action on the <see cref="IUpdater"/> instance.
