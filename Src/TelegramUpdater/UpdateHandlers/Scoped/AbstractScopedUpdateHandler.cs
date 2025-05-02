@@ -37,9 +37,8 @@ public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?
     protected abstract Task HandleAsync(TContainer container);
 
     /// <inheritdoc/>
-    async Task IUpdateHandler.HandleAsync(
-        IUpdater updater, ShiningInfo<long, Update> shiningInfo)
-        => await HandleAsync(ContainerBuilderWrapper(updater, shiningInfo)).ConfigureAwait(false);
+    async Task IUpdateHandler.HandleAsync(HandlerInput input)
+        => await HandleAsync(ContainerBuilderWrapper(input.Updater, input.ShiningInfo)).ConfigureAwait(false);
 
     void IScopedUpdateHandler.SetExtraData(
         IReadOnlyDictionary<string, object>? extraData)

@@ -81,9 +81,9 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
     }
 
     /// <inheritdoc/>
-    async Task IUpdateHandler.HandleAsync(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
+    async Task IUpdateHandler.HandleAsync(HandlerInput input)
     {
-        var container = ContainerBuilder(updater, shiningInfo);
+        var container = ContainerBuilder(input.Updater, input.ShiningInfo);
         Container = container;
         await HandleAsync(container).ConfigureAwait(false);
     }
