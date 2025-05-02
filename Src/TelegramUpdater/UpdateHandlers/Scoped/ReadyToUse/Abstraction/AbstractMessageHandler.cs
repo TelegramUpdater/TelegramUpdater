@@ -38,7 +38,7 @@ public abstract class AbstractMessageHandler(Func<Update, Message?> resolver)
 
     /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)"/>.
     /// <remarks>This methods sends a message to the <see cref="Message.Chat"/></remarks>
-    protected async Task<Message> Response(
+    protected async Task<IContainer<Message>> Response(
         string text,
         bool sendAsReply = false,
         ParseMode parseMode = default,
@@ -65,11 +65,10 @@ public abstract class AbstractMessageHandler(Func<Update, Message?> resolver)
             messageEffectId: messageEffectId,
             businessConnectionId: businessConnectionId,
             allowPaidBroadcast: allowPaidBroadcast,
-            cancellationToken: cancellationToken).ConfigureAwait(false))
-        .Update;
+            cancellationToken: cancellationToken).ConfigureAwait(false));
 
     /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)"/>.
-    protected async Task<Message> SendMessage(
+    protected async Task<IContainer<Message>> SendMessage(
         ChatId chatId,
         string text,
         ParseMode parseMode = default,
@@ -98,7 +97,9 @@ public abstract class AbstractMessageHandler(Func<Update, Message?> resolver)
             messageEffectId: messageEffectId,
             businessConnectionId: businessConnectionId,
             allowPaidBroadcast: allowPaidBroadcast,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+            cancellationToken: cancellationToken)
+        .WrapMessageAsync(Updater)
+        .ConfigureAwait(false);
 
     /// <inheritdoc cref="TelegramBotClientExtensions.DeleteMessage(ITelegramBotClient, ChatId, int, CancellationToken)"/>
     protected async Task Delete(CancellationToken cancellationToken = default)
@@ -109,7 +110,7 @@ public abstract class AbstractMessageHandler(Func<Update, Message?> resolver)
     /// <summary>
     /// Asks a user to input an text message and waits for it.
     /// </summary>
-    public async Task<string?> AwaitTextInput(
+    public async Task<string?> ChannelText(
         TimeSpan timeOut,
         string text,
         ParseMode parseMode = default,
@@ -137,7 +138,7 @@ public abstract class AbstractMessageHandler(Func<Update, Message?> resolver)
                 replyMarkup: replyMarkup,
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
-        var update = await AwaitMessage(
+        var update = await ChannelMessage(
             FilterCutify.Text(), timeOut, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
         if (update == null)
         {

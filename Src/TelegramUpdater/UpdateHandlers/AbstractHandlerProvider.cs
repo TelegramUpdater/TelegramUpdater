@@ -121,6 +121,7 @@ public abstract class AbstractHandlerProvider<TUpdate>
     /// Stops the updater from handling other handlers after this.
     /// </summary>
     /// <exception cref="StopPropagationException"></exception>
+    [DoesNotReturn]
     public void StopPropagation()
     {
         throw new StopPropagationException();
@@ -130,6 +131,7 @@ public abstract class AbstractHandlerProvider<TUpdate>
     /// Stops the updater from handling this handler and jump to other handlers after this.
     /// </summary>
     /// <exception cref="ContinuePropagationException"></exception>
+    [DoesNotReturn]
     public void ContinuePropagation()
     {
         throw new ContinuePropagationException();
@@ -160,7 +162,7 @@ public abstract class AbstractHandlerProvider<TUpdate>
     /// </param>
     /// <param name="cancellationToken">To cancel the job.</param>
     /// <returns></returns>
-    public async ValueTask<IContainer<Message>?> AwaitMessage(
+    public async ValueTask<IContainer<Message>?> ChannelMessage(
         Filter<UpdaterFilterInputs<Message>>? filter,
         TimeSpan? timeOut,
         Func<
@@ -185,7 +187,7 @@ public abstract class AbstractHandlerProvider<TUpdate>
     /// </param>
     /// <param name="cancellationToken">To cancel the job.</param>
     /// <returns></returns>
-    public async Task<IContainer<CallbackQuery>?> AwaitButtonClick(
+    public async Task<IContainer<CallbackQuery>?> ChannelButtonClick(
         TimeSpan timeOut,
         CallbackQueryRegex callbackQueryRegex,
         Func<
@@ -194,7 +196,8 @@ public abstract class AbstractHandlerProvider<TUpdate>
         CancellationToken cancellationToken = default)
     {
         return await Container.ChannelButtonClick(
-            timeOut, callbackQueryRegex, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
+            timeOut, callbackQueryRegex, onUnrelatedUpdate, cancellationToken)
+            .ConfigureAwait(false);
     }
     #endregion
 }
