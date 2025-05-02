@@ -18,9 +18,15 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// A filter to choose the right update to be handled inside
 /// <paramref name="callback"/>.
 /// </param>
+/// <param name="endpoint">Determines if this is and endpoint handler.</param>
 public sealed class EditedMessageHandler(
     Func<MessageContainer, Task> callback,
-    IFilter<UpdaterFilterInputs<Message>>? filter)
-    : AbstractMessageHandler(UpdateType.EditedMessage, callback, filter, x => x.EditedMessage)
+    IFilter<UpdaterFilterInputs<Message>>? filter,
+    bool endpoint = true)
+    : AbstractMessageHandler(
+        UpdateType.EditedMessage,
+        callback,
+        filter,
+        x => x.EditedMessage, endpoint)
 {
 }

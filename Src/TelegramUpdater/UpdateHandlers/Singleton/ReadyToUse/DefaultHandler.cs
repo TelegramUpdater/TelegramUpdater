@@ -24,16 +24,16 @@ public class DefaultHandler<T>
     /// <param name="callback">
     /// A callback function where you may handle the incoming update.
     /// </param>
+    /// <param name="endpoint">Determines if this is and endpoint handler.</param>
     /// <returns></returns>
     internal DefaultHandler(
         UpdateType updateType,
         Func<IContainer<T>, Task> callback,
         IFilter<UpdaterFilterInputs<T>>? filter = default,
-        Func<Update, T?>? getT = default) : base(updateType, getT, filter)
-    {
-        _handleAsync = callback ??
+        Func<Update, T?>? getT = default,
+        bool endpoint = true) : base(updateType, getT, filter, endpoint)
+        => _handleAsync = callback ??
             throw new ArgumentNullException(nameof(callback));
-    }
 
     internal override DefaultContainer<T> ContainerBuilder(
         IUpdater updater, ShiningInfo<long, Update> shiningInfo)

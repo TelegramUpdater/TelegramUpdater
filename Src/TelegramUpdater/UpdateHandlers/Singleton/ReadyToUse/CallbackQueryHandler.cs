@@ -18,13 +18,16 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// A filter to choose the right update to be handled inside
 /// <paramref name="callback"/>.
 /// </param>
+/// <param name="endpoint"></param>
 public sealed class CallbackQueryHandler(
     Func<CallbackQueryContainer, Task> callback,
-    IFilter<UpdaterFilterInputs<CallbackQuery>>? filter = default)
+    IFilter<UpdaterFilterInputs<CallbackQuery>>? filter = default,
+    bool endpoint = true)
     : AbstractSingletonUpdateHandler<CallbackQuery, CallbackQueryContainer>(
         updateType: UpdateType.CallbackQuery,
         getT: x => x.CallbackQuery,
-        filter: filter)
+        filter: filter,
+        endpoint: endpoint)
 {
     /// <inheritdoc/>
     protected override Task HandleAsync(CallbackQueryContainer container) => callback(container);

@@ -7,7 +7,13 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// </summary>
 public sealed class ChatBoostHandler(
     Func<IContainer<ChatBoostUpdated>, Task> callback,
-    Filter<UpdaterFilterInputs<ChatBoostUpdated>>? filter = default)
-    : DefaultHandler<ChatBoostUpdated>(UpdateType.ChatBoost, callback, filter, x => x.ChatBoost)
+    Filter<UpdaterFilterInputs<ChatBoostUpdated>>? filter = default,
+    bool endpoint = true)
+    : DefaultHandler<ChatBoostUpdated>(
+        UpdateType.ChatBoost,
+        callback,
+        filter,
+        x => x.ChatBoost,
+        endpoint)
 {
 }

@@ -17,9 +17,11 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// A filter to choose the right update to be handled inside
 /// <paramref name="callback"/>.
 /// </param>
+/// <param name="endpoint">Determines if this is and endpoint handler.</param>
 public sealed class PollAnswerHandler(
     Func<IContainer<PollAnswer>, Task> callback,
-    IFilter<UpdaterFilterInputs<PollAnswer>>? filter)
-    : DefaultHandler<PollAnswer>(UpdateType.PollAnswer, callback, filter, x => x.PollAnswer)
+    IFilter<UpdaterFilterInputs<PollAnswer>>? filter,
+    bool endpoint = true)
+    : DefaultHandler<PollAnswer>(UpdateType.PollAnswer, callback, filter, x => x.PollAnswer, endpoint)
 {
 }

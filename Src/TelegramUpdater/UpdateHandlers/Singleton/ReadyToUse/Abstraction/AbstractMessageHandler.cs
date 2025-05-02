@@ -9,13 +9,15 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse.Abstraction;
 /// <param name="updateType"></param>
 /// <param name="callback"></param>
 /// <param name="getT"></param>
+/// <param name="endpoint"></param>
 /// <param name="filter"></param>
 public abstract class AbstractMessageHandler(
     UpdateType updateType,
     Func<MessageContainer, Task> callback,
     IFilter<UpdaterFilterInputs<Message>>? filter = null,
-    Func<Update, Message?>? getT = null)
-    : AbstractSingletonUpdateHandler<Message, MessageContainer>(updateType, getT, filter)
+    Func<Update, Message?>? getT = null,
+    bool endpoint = true)
+    : AbstractSingletonUpdateHandler<Message, MessageContainer>(updateType, getT, filter, endpoint)
 {
     internal override MessageContainer ContainerBuilder(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
         => new(updater, shiningInfo, ExtraData);

@@ -8,7 +8,13 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// </summary>
 public sealed class EditedBusinessMessageHandler(
     Func<MessageContainer, Task> callback,
-    Filter<UpdaterFilterInputs<Message>>? filter = default)
-    : AbstractMessageHandler(UpdateType.EditedBusinessMessage, callback, filter, x => x.EditedBusinessMessage)
+    Filter<UpdaterFilterInputs<Message>>? filter = default,
+    bool endpoint = true)
+    : AbstractMessageHandler(
+        UpdateType.EditedBusinessMessage,
+        callback,
+        filter,
+        x => x.EditedBusinessMessage,
+        endpoint)
 {
 }

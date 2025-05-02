@@ -19,12 +19,14 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
     /// <param name="updateType">Target update type.</param>
     /// <param name="getT">To extract this update from <see cref="Update"/></param>
     /// <param name="filter">Filters.</param>
+    /// <param name="endpoint">Determines if this is and endpoint handler.</param>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="ArgumentNullException"></exception>
     protected AbstractSingletonUpdateHandler(
         UpdateType updateType,
         Func<Update, T?>? getT = default,
-        IFilter<UpdaterFilterInputs<T>>? filter = default)
+        IFilter<UpdaterFilterInputs<T>>? filter = default,
+        bool endpoint = true)
     {
         if (updateType == UpdateType.Unknown)
             throw new ArgumentException(
@@ -33,6 +35,9 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
         Filter = filter;
         GetActualUpdate = getT ?? throw new ArgumentNullException(nameof(getT));
         UpdateType = updateType;
+#pragma warning disable MA0056 // Do not call overridable members in constructor
+        Endpoint = endpoint;
+#pragma warning restore MA0056 // Do not call overridable members in constructor
     }
 
     internal IReadOnlyDictionary<string, object>? ExtraData
@@ -102,5 +107,5 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
     public override IContainer<T> Container { get; protected set; } = default!;
 
     /// <inheritdoc/>
-    public virtual bool Endpoint { get; protected set; } = true;
+    public virtual bool Endpoint { get; protected set; }
 }

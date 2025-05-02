@@ -17,9 +17,16 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// A filter to choose the right update to be handled inside
 /// <paramref name="callback"/>.
 /// </param>
+/// <param name="endpoint"></param>
 public sealed class ChatMemberHandler(
     Func<IContainer<ChatMemberUpdated>, Task> callback,
-    IFilter<UpdaterFilterInputs<ChatMemberUpdated>>? filter)
-    : DefaultHandler<ChatMemberUpdated>(UpdateType.ChatMember, callback, filter, x => x.ChatMember)
+    IFilter<UpdaterFilterInputs<ChatMemberUpdated>>? filter,
+    bool endpoint = true)
+    : DefaultHandler<ChatMemberUpdated>(
+        UpdateType.ChatMember,
+        callback,
+        filter,
+        x => x.ChatMember,
+        endpoint)
 {
 }

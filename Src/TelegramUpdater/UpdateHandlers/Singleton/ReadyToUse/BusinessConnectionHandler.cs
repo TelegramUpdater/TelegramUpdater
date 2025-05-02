@@ -7,7 +7,13 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// </summary>
 public sealed class BusinessConnectionHandler(
     Func<IContainer<BusinessConnection>, Task> callback,
-    Filter<UpdaterFilterInputs<BusinessConnection>>? filter = default)
-    : DefaultHandler<BusinessConnection>(UpdateType.BusinessConnection, callback, filter, x => x.BusinessConnection)
+    Filter<UpdaterFilterInputs<BusinessConnection>>? filter = default,
+    bool endpoint = true)
+    : DefaultHandler<BusinessConnection>(
+        UpdateType.BusinessConnection,
+        callback,
+        filter,
+        x => x.BusinessConnection,
+        endpoint)
 {
 }

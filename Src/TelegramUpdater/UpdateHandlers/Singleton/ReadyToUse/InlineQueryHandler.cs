@@ -19,12 +19,15 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// A filter to choose the right update to be handled inside
 /// <paramref name="callback"/>.
 /// </param>
+/// <param name="endpoint">Determines if this is and endpoint handler.</param>
 public sealed class InlineQueryHandler(
     Func<IContainer<InlineQuery>, Task> callback,
-    IFilter<UpdaterFilterInputs<InlineQuery>>? filter = default) 
+    IFilter<UpdaterFilterInputs<InlineQuery>>? filter = default,
+    bool endpoint = true) 
     : DefaultHandler<InlineQuery>(UpdateType.InlineQuery,
            callback,
            filter,
-           x => x.InlineQuery)
+           x => x.InlineQuery,
+           endpoint)
 {
 }
