@@ -4,10 +4,15 @@
 /// Extra info about an <see cref="IScopedUpdateHandler"/>.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class ScopedHandlerAttribute : Attribute
+public class ScopedHandlerAttribute : Attribute, IGetHandlingOptions
 {
-    /// <summary>
-    /// Handling priority.
-    /// </summary>
+    /// <inheritdoc cref="HandlingOptions.Group"/>
     public int Group { get; set; } = default;
+
+    /// <inheritdoc cref="HandlingOptions.LayerId"/>
+    public object LayerId { get; set; } = HandlingOptions.DefaultLayer;
+
+    /// <inheritdoc/>
+    public HandlingOptions GetHandlingOptions()
+        => new(group: Group, layerId: LayerId);
 }

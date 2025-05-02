@@ -109,7 +109,7 @@ public static class SingletonAttributesExtensions
 
                     if (handler is not null)
                     {
-                        yield return new(handler, singletonAttr.Group);
+                        yield return new(handler, singletonAttr.GetHandlingOptions());
                     }
                 }
             }
@@ -129,7 +129,7 @@ public static class SingletonAttributesExtensions
     {
         foreach (var handler in IterSingletonUpdateHandlerCallbacks())
         {
-            updater.AddSingletonUpdateHandler(handler.Handler, handler.Group);
+            updater.AddSingletonUpdateHandler(handler.Handler, handler.Options);
         }
 
         return updater;

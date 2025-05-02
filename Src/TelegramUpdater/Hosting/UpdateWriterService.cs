@@ -23,8 +23,11 @@ public class UpdateWriterService<TWriter>(TWriter writer)
     /// <inheritdoc/>
     public virtual Task StartAsync(CancellationToken cancellationToken)
     {
+        var linked = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken, _stoppingCts.Token);
+
         // Store the task we're executing
-        _executingTask = Writer.ExecuteAsync(_stoppingCts.Token);
+        _executingTask = Writer.ExecuteAsync(linked.Token);
 
         // If the task is completed then return it,
         // this will bubble cancellation and failure to the caller

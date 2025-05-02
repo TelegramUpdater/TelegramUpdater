@@ -23,7 +23,7 @@ public static class ScopedUpdateHandlersExtensions
     /// A function to choose real update from <see cref="Update"/>
     /// <para>Don't touch it if you don't know.</para>
     /// </param>
-    /// <param name="group"></param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <remarks>This method will add filter attributes if <paramref name="filter"/> is null.</remarks>
     public static IUpdater AddScopedUpdateHandler<TUpdate>(
         this IUpdater updater,
@@ -31,7 +31,7 @@ public static class ScopedUpdateHandlersExtensions
         UpdateType updateType,
         UpdaterFilter<TUpdate>? filter = default,
         Func<Update, TUpdate>? getT = default,
-        int group = default) where TUpdate : class
+        HandlingOptions? options = default) where TUpdate : class
     {
         if (!typeof(IScopedUpdateHandler).IsAssignableFrom(typeOfScopedHandler))
         {
@@ -49,7 +49,7 @@ public static class ScopedUpdateHandlersExtensions
 
         if (container != null)
         {
-            return updater.AddScopedUpdateHandler(container, group);
+            return updater.AddScopedUpdateHandler(container, options);
         }
 
         updater.Logger.LogWarning(
@@ -71,7 +71,7 @@ public static class ScopedUpdateHandlersExtensions
     /// A function to choose real update from <see cref="Update"/>
     /// <para>Don't touch it if you don't know.</para>
     /// </param>
-    /// <param name="group">Handling priority.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <remarks>This method will add filter attributes if <paramref name="filter"/> is null.</remarks>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TUpdate, TContainer>(
@@ -79,7 +79,7 @@ public static class ScopedUpdateHandlersExtensions
         UpdateType updateType,
         Filter<UpdaterFilterInputs<TUpdate>>? filter = default,
         Func<Update, TUpdate?>? getT = default,
-        int group = default)
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<TUpdate, TContainer>
         where TUpdate : class
         where TContainer: IContainer<TUpdate>
@@ -88,7 +88,7 @@ public static class ScopedUpdateHandlersExtensions
 
         return updater.AddScopedUpdateHandler(
             new ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
-                updateType, filter, getT), group);
+                updateType, filter, getT), options);
     }
 
     /// <summary>
@@ -107,11 +107,13 @@ public static class ScopedUpdateHandlersExtensions
     /// </param>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
         UpdateType updateType,
-        Filter<UpdaterFilterInputs<Message>>? filter = default)
+        Filter<UpdaterFilterInputs<Message>>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<Message, TContainer>
         where TContainer: IContainer<Message>
         => updater.AddScopedUpdateHandler<THandler, Message, TContainer>(
@@ -130,15 +132,16 @@ public static class ScopedUpdateHandlersExtensions
                     $"Update type {updateType} is not a Message.",
                     nameof(updateType)
                 ),
-            });
+            }, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdateType, Filter{UpdaterFilterInputs{Message}}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdateType, Filter{UpdaterFilterInputs{Message}}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdateType updateType,
-        Filter<UpdaterFilterInputs<Message>>? filter = default)
+        Filter<UpdaterFilterInputs<Message>>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<Message, MessageContainer>
-        => updater.AddScopedUpdateHandler<THandler, Message, MessageContainer>(updateType, filter);
+        => updater.AddScopedUpdateHandler<THandler, Message, MessageContainer>(updateType, filter, options: options);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -155,11 +158,13 @@ public static class ScopedUpdateHandlersExtensions
     /// </param>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
         UpdateType updateType,
-        Filter<UpdaterFilterInputs<ChatMemberUpdated>>? filter = default)
+        Filter<UpdaterFilterInputs<ChatMemberUpdated>>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<ChatMemberUpdated, TContainer>
         where TContainer : IContainer<ChatMemberUpdated>
         => updater.AddScopedUpdateHandler<THandler, ChatMemberUpdated, TContainer>(
@@ -172,15 +177,16 @@ public static class ScopedUpdateHandlersExtensions
                     $"Update type {updateType} is not a ChatMemberUpdated.",
                     nameof(updateType)
                 ),
-            });
+            }, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdateType, Filter{UpdaterFilterInputs{ChatMemberUpdated}}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdateType, Filter{UpdaterFilterInputs{ChatMemberUpdated}}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
         UpdateType updateType,
-        Filter<UpdaterFilterInputs<ChatMemberUpdated>>? filter = default)
+        Filter<UpdaterFilterInputs<ChatMemberUpdated>>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<ChatMemberUpdated, DefaultContainer<ChatMemberUpdated>>
-        => updater.AddScopedUpdateHandler<THandler, ChatMemberUpdated, DefaultContainer<ChatMemberUpdated>>(updateType, filter);
+        => updater.AddScopedUpdateHandler<THandler, ChatMemberUpdated, DefaultContainer<ChatMemberUpdated>>(updateType, filter, options: options);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -196,21 +202,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<CallbackQuery>? filter = default)
+        UpdaterFilter<CallbackQuery>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<CallbackQuery, TContainer>
         where TContainer : IContainer<CallbackQuery>
         => updater.AddScopedUpdateHandler<THandler, CallbackQuery, TContainer>(
-            UpdateType.CallbackQuery, filter, x => x.CallbackQuery);
+            UpdateType.CallbackQuery, filter, x => x.CallbackQuery, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{CallbackQuery}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{CallbackQuery}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<CallbackQuery>? filter = default)
+        UpdaterFilter<CallbackQuery>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<CallbackQuery, CallbackQueryContainer>
-        => updater.AddScopedUpdateHandler<THandler, CallbackQueryContainer>(filter);
+        => updater.AddScopedUpdateHandler<THandler, CallbackQueryContainer>(filter, options);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -223,21 +232,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<InlineQuery>? filter = default)
+        UpdaterFilter<InlineQuery>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<InlineQuery, TContainer>
         where TContainer : IContainer<InlineQuery>
         => updater.AddScopedUpdateHandler<THandler, InlineQuery, TContainer>(
-            UpdateType.InlineQuery, filter, x => x.InlineQuery);
+            UpdateType.InlineQuery, filter, x => x.InlineQuery, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{InlineQuery}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{InlineQuery}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<InlineQuery>? filter = default)
+        UpdaterFilter<InlineQuery>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<InlineQuery, DefaultContainer<InlineQuery>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<InlineQuery>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<InlineQuery>>(filter, options);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -250,21 +262,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<ChatJoinRequest>? filter = default)
+        UpdaterFilter<ChatJoinRequest>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<ChatJoinRequest, TContainer>
         where TContainer : IContainer<ChatJoinRequest>
         => updater.AddScopedUpdateHandler<THandler, ChatJoinRequest, TContainer>(
-            UpdateType.ChatJoinRequest, filter, x => x.ChatJoinRequest);
+            UpdateType.ChatJoinRequest, filter, x => x.ChatJoinRequest, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{ChatJoinRequest}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{ChatJoinRequest}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<ChatJoinRequest>? filter = default)
+        UpdaterFilter<ChatJoinRequest>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<ChatJoinRequest, DefaultContainer<ChatJoinRequest>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<ChatJoinRequest>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<ChatJoinRequest>>(filter, options);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -277,21 +292,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<ChosenInlineResult>? filter = default)
+        UpdaterFilter<ChosenInlineResult>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<ChosenInlineResult, TContainer>
         where TContainer : IContainer<ChosenInlineResult>
         => updater.AddScopedUpdateHandler<THandler, ChosenInlineResult, TContainer>(
-            UpdateType.ChosenInlineResult, filter, x => x.ChosenInlineResult);
+            UpdateType.ChosenInlineResult, filter, x => x.ChosenInlineResult, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{ChosenInlineResult}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{ChosenInlineResult}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<ChosenInlineResult>? filter = default)
+        UpdaterFilter<ChosenInlineResult>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<ChosenInlineResult, DefaultContainer<ChosenInlineResult>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<ChosenInlineResult>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<ChosenInlineResult>>(filter, options);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -304,21 +322,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<Poll>? filter = default)
+        UpdaterFilter<Poll>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<Poll, TContainer>
         where TContainer : IContainer<Poll>
         => updater.AddScopedUpdateHandler<THandler, Poll, TContainer>(
-            UpdateType.Poll, filter, x => x.Poll);
+            UpdateType.Poll, filter, x => x.Poll, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{Poll}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{Poll}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<Poll>? filter = default)
+        UpdaterFilter<Poll>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<Poll, DefaultContainer<Poll>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<Poll>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<Poll>>(filter, options);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -331,21 +352,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<PollAnswer>? filter = default)
+        UpdaterFilter<PollAnswer>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<PollAnswer, TContainer>
         where TContainer : IContainer<PollAnswer>
         => updater.AddScopedUpdateHandler<THandler, PollAnswer, TContainer>(
-            UpdateType.PollAnswer, filter, x => x.PollAnswer);
+            UpdateType.PollAnswer, filter, x => x.PollAnswer, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{PollAnswer}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{PollAnswer}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<PollAnswer>? filter = default)
+        UpdaterFilter<PollAnswer>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<PollAnswer, DefaultContainer<PollAnswer>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<PollAnswer>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<PollAnswer>>(filter, options);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -358,21 +382,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<PreCheckoutQuery>? filter = default)
+        UpdaterFilter<PreCheckoutQuery>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<PreCheckoutQuery, TContainer>
         where TContainer : IContainer<PreCheckoutQuery>
         => updater.AddScopedUpdateHandler<THandler, PreCheckoutQuery, TContainer>(
-            UpdateType.PreCheckoutQuery, filter, x => x.PreCheckoutQuery);
+            UpdateType.PreCheckoutQuery, filter, x => x.PreCheckoutQuery, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{PreCheckoutQuery}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{PreCheckoutQuery}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<PreCheckoutQuery>? filter = default)
+        UpdaterFilter<PreCheckoutQuery>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<PreCheckoutQuery, DefaultContainer<PreCheckoutQuery>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<PreCheckoutQuery>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<PreCheckoutQuery>>(filter, options);
 
     /// <summary>
     /// Adds an scoped update handler to the updater
@@ -385,21 +412,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<ShippingQuery>? filter = default)
+        UpdaterFilter<ShippingQuery>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<ShippingQuery, TContainer>
         where TContainer : IContainer<ShippingQuery>
         => updater.AddScopedUpdateHandler<THandler, ShippingQuery, TContainer>(
-            UpdateType.ShippingQuery, filter, x => x.ShippingQuery);
+            UpdateType.ShippingQuery, filter, x => x.ShippingQuery, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{ShippingQuery}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{ShippingQuery}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<ShippingQuery>? filter = default)
+        UpdaterFilter<ShippingQuery>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<ShippingQuery, DefaultContainer<ShippingQuery>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<ShippingQuery>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<ShippingQuery>>(filter, options);
 
     // UpdateType.MessageReaction => typeof(MessageReactionUpdated),
     /// <summary>
@@ -413,21 +443,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<MessageReactionUpdated>? filter = default)
+        UpdaterFilter<MessageReactionUpdated>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<MessageReactionUpdated, TContainer>
         where TContainer : IContainer<MessageReactionUpdated>
         => updater.AddScopedUpdateHandler<THandler, MessageReactionUpdated, TContainer>(
-            UpdateType.MessageReaction, filter, x => x.MessageReaction);
+            UpdateType.MessageReaction, filter, x => x.MessageReaction, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{MessageReactionUpdated}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{MessageReactionUpdated}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<MessageReactionUpdated>? filter = default)
+        UpdaterFilter<MessageReactionUpdated>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<MessageReactionUpdated, DefaultContainer<MessageReactionUpdated>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<MessageReactionUpdated>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<MessageReactionUpdated>>(filter, options);
 
     // UpdateType.MessageReactionCount => typeof(MessageReactionCountUpdated),
     /// <summary>
@@ -441,21 +474,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<MessageReactionCountUpdated>? filter = default)
+        UpdaterFilter<MessageReactionCountUpdated>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<MessageReactionCountUpdated, TContainer>
         where TContainer : IContainer<MessageReactionCountUpdated>
         => updater.AddScopedUpdateHandler<THandler, MessageReactionCountUpdated, TContainer>(
-            UpdateType.MessageReactionCount, filter, x => x.MessageReactionCount);
+            UpdateType.MessageReactionCount, filter, x => x.MessageReactionCount, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{MessageReactionCountUpdated}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{MessageReactionCountUpdated}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<MessageReactionCountUpdated>? filter = default)
+        UpdaterFilter<MessageReactionCountUpdated>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<MessageReactionCountUpdated, DefaultContainer<MessageReactionCountUpdated>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<MessageReactionCountUpdated>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<MessageReactionCountUpdated>>(filter, options);
 
     // UpdateType.ChatBoost => typeof(ChatBoostUpdated),
     /// <summary>
@@ -469,21 +505,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<ChatBoostUpdated>? filter = default)
+        UpdaterFilter<ChatBoostUpdated>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<ChatBoostUpdated, TContainer>
         where TContainer : IContainer<ChatBoostUpdated>
         => updater.AddScopedUpdateHandler<THandler, ChatBoostUpdated, TContainer>(
-            UpdateType.ChatBoost, filter, x => x.ChatBoost);
+            UpdateType.ChatBoost, filter, x => x.ChatBoost, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{ChatBoostUpdated}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{ChatBoostUpdated}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<ChatBoostUpdated>? filter = default)
+        UpdaterFilter<ChatBoostUpdated>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<ChatBoostUpdated, DefaultContainer<ChatBoostUpdated>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<ChatBoostUpdated>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<ChatBoostUpdated>>(filter, options);
 
     // UpdateType.RemovedChatBoost => typeof(ChatBoostRemoved),
     /// <summary>
@@ -497,21 +536,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<ChatBoostRemoved>? filter = default)
+        UpdaterFilter<ChatBoostRemoved>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<ChatBoostRemoved, TContainer>
         where TContainer : IContainer<ChatBoostRemoved>
         => updater.AddScopedUpdateHandler<THandler, ChatBoostRemoved, TContainer>(
-            UpdateType.RemovedChatBoost, filter, x => x.RemovedChatBoost);
+            UpdateType.RemovedChatBoost, filter, x => x.RemovedChatBoost, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{ChatBoostRemoved}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{ChatBoostRemoved}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<ChatBoostRemoved>? filter = default)
+        UpdaterFilter<ChatBoostRemoved>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<ChatBoostRemoved, DefaultContainer<ChatBoostRemoved>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<ChatBoostRemoved>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<ChatBoostRemoved>>(filter, options);
 
     // UpdateType.BusinessConnection => typeof(BusinessConnection),
     /// <summary>
@@ -525,21 +567,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<BusinessConnection>? filter = default)
+        UpdaterFilter<BusinessConnection>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<BusinessConnection, TContainer>
         where TContainer : IContainer<BusinessConnection>
         => updater.AddScopedUpdateHandler<THandler, BusinessConnection, TContainer>(
-            UpdateType.BusinessConnection, filter, x => x.BusinessConnection);
+            UpdateType.BusinessConnection, filter, x => x.BusinessConnection, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{BusinessConnection}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{BusinessConnection}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<BusinessConnection>? filter = default)
+        UpdaterFilter<BusinessConnection>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<BusinessConnection, DefaultContainer<BusinessConnection>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<BusinessConnection>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<BusinessConnection>>(filter, options);
 
     // UpdateType.DeletedBusinessMessages => typeof(BusinessMessagesDeleted),
     /// <summary>
@@ -553,21 +598,24 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<BusinessMessagesDeleted>? filter = default)
+        UpdaterFilter<BusinessMessagesDeleted>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<BusinessMessagesDeleted, TContainer>
         where TContainer : IContainer<BusinessMessagesDeleted>
         => updater.AddScopedUpdateHandler<THandler, BusinessMessagesDeleted, TContainer>(
-            UpdateType.DeletedBusinessMessages, filter, x => x.DeletedBusinessMessages);
+            UpdateType.DeletedBusinessMessages, filter, x => x.DeletedBusinessMessages, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{BusinessMessagesDeleted}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{BusinessMessagesDeleted}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<BusinessMessagesDeleted>? filter = default)
+        UpdaterFilter<BusinessMessagesDeleted>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<BusinessMessagesDeleted, DefaultContainer<BusinessMessagesDeleted>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<BusinessMessagesDeleted>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<BusinessMessagesDeleted>>(filter, options);
 
     // UpdateType.PurchasedPaidMedia => typeof(PaidMediaPurchased),
     /// <summary>
@@ -581,19 +629,22 @@ public static class ScopedUpdateHandlersExtensions
     /// <typeparam name="THandler">Handler type.</typeparam>
     /// <param name="updater">The updater.</param>
     /// <param name="filter">The filter.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public static IUpdater AddScopedUpdateHandler<THandler, TContainer>(
         this IUpdater updater,
-        UpdaterFilter<PaidMediaPurchased>? filter = default)
+        UpdaterFilter<PaidMediaPurchased>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<PaidMediaPurchased, TContainer>
         where TContainer : IContainer<PaidMediaPurchased>
         => updater.AddScopedUpdateHandler<THandler, PaidMediaPurchased, TContainer>(
-            UpdateType.PurchasedPaidMedia, filter, x => x.PurchasedPaidMedia);
+            UpdateType.PurchasedPaidMedia, filter, x => x.PurchasedPaidMedia, options);
 
-    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{PaidMediaPurchased}?)"/>
+    /// <inheritdoc cref="AddScopedUpdateHandler{THandler, TContainer}(IUpdater, UpdaterFilter{PaidMediaPurchased}?, HandlingOptions?)"/>
     public static IUpdater AddScopedUpdateHandler<THandler>(
         this IUpdater updater,
-        UpdaterFilter<PaidMediaPurchased>? filter = default)
+        UpdaterFilter<PaidMediaPurchased>? filter = default,
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<PaidMediaPurchased, DefaultContainer<PaidMediaPurchased>>
-        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<PaidMediaPurchased>>(filter);
+        => updater.AddScopedUpdateHandler<THandler, DefaultContainer<PaidMediaPurchased>>(filter, options);
 }

@@ -29,7 +29,7 @@ public class UpdaterServiceBuilder
     {
         foreach (var container in _scopedHandlerContainers)
         {
-            updater.AddScopedUpdateHandler(container.Handler, container.Group);
+            updater.AddScopedUpdateHandler(container.Handler, container.Options);
         }
 
         foreach (var execution in _otherExecutions)
@@ -63,11 +63,11 @@ public class UpdaterServiceBuilder
     /// Use <see cref="ScopedUpdateHandlerContainerBuilder{THandler, TUpdate}"/>
     /// To Create a new <see cref="IScopedUpdateHandlerContainer"/>
     /// </param>
-    /// <param name="group"></param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     public UpdaterServiceBuilder AddScopedUpdateHandler(
-        IScopedUpdateHandlerContainer scopedHandlerContainer, int group)
+        IScopedUpdateHandlerContainer scopedHandlerContainer, HandlingOptions? options)
     {
-        _scopedHandlerContainers.Add(new(scopedHandlerContainer, group));
+        _scopedHandlerContainers.Add(new(scopedHandlerContainer, options));
         return this;
     }
 
@@ -82,20 +82,20 @@ public class UpdaterServiceBuilder
     /// A function to choose real update from <see cref="Update"/>
     /// <para>Don't touch it if you don't know.</para>
     /// </param>
-    /// <param name="group"></param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public UpdaterServiceBuilder AddScopedUpdateHandler<THandler, TUpdate, TContainer>(
         UpdateType updateType,
         UpdaterFilter<TUpdate>? filter = default,
         Func<Update, TUpdate?>? getT = default,
-        int group = default)
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<TUpdate, TContainer>
         where TUpdate : class
         where TContainer : IContainer<TUpdate>
     {
         return AddScopedUpdateHandler(
             new ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
-                updateType, filter, getT), group);
+                updateType, filter, getT), options);
     }
 
     /// <summary>
@@ -109,13 +109,13 @@ public class UpdaterServiceBuilder
     /// A function to choose real update from <see cref="Update"/>
     /// <para>Don't touch it if you don't know.</para>
     /// </param>
-    /// <param name="group"></param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     public UpdaterServiceBuilder AddScopedUpdateHandler<TUpdate>(
         Type typeOfScopedHandler,
         UpdateType updateType,
         UpdaterFilter<TUpdate>? filter = default,
         Func<Update, TUpdate>? getT = default,
-        int group = default) where TUpdate : class
+        HandlingOptions? options = default) where TUpdate : class
     {
         if (!typeof(IScopedUpdateHandler).IsAssignableFrom(typeOfScopedHandler))
         {
@@ -132,7 +132,7 @@ public class UpdaterServiceBuilder
 
         if (container != null)
         {
-            return AddScopedUpdateHandler(container, group);
+            return AddScopedUpdateHandler(container, options);
         }
 
         throw new InvalidOperationException(
@@ -150,19 +150,19 @@ public class UpdaterServiceBuilder
     /// </para>
     /// </param>
     /// <param name="resolver">Optional. inner update resolver.</param>
-    /// <param name="group">Handling priority.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public UpdaterServiceBuilder AddMessageHandler<THandler, TContainer>(
         UpdaterFilter<Message>? filter = default,
         Func<Update, Message>? resolver = default,
-        int group = default)
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<Message, TContainer>
         where TContainer : IContainer<Message>
         => AddScopedUpdateHandler<THandler, Message, TContainer>(
             UpdateType.Message,
             filter,
             resolver,
-            group);
+            options);
 
     /// <summary>
     /// Adds an scoped <see cref="Message"/> handler to the <see cref="IUpdater"/>.
@@ -175,17 +175,17 @@ public class UpdaterServiceBuilder
     /// </para>
     /// </param>
     /// <param name="resolver">Optional. inner update resolver.</param>
-    /// <param name="group">Handling priority.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     public UpdaterServiceBuilder AddMessageHandler<THandler>(
         UpdaterFilter<Message>? filter = default,
         Func<Update, Message>? resolver = default,
-        int group = default)
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<Message, MessageContainer>
         => AddScopedUpdateHandler<THandler, Message, MessageContainer>(
             UpdateType.Message,
             filter,
             resolver,
-            group);
+            options);
 
     /// <summary>
     /// Adds an scoped <see cref="CallbackQuery"/> handler to the updater.
@@ -197,18 +197,18 @@ public class UpdaterServiceBuilder
     /// Leave empty if you applied your filter using <see cref="ApplyFilterAttribute"/> before.
     /// </para>
     /// </param>
-    /// <param name="group">Handling priority.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     /// <typeparam name="TContainer">Type of the container.</typeparam>
     public UpdaterServiceBuilder AddCallbackQueryHandler<THandler, TContainer>(
         UpdaterFilter<CallbackQuery>? filter = default,
-        int group = default)
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<CallbackQuery, TContainer>
         where TContainer : IContainer<CallbackQuery>
         => AddScopedUpdateHandler<THandler, CallbackQuery, TContainer>(
             UpdateType.Message,
             filter,
-            x => x.CallbackQuery, 
-            group);
+            x => x.CallbackQuery,
+            options);
 
     /// <summary>
     /// Adds an scoped <see cref="CallbackQuery"/> handler to the updater.
@@ -220,16 +220,16 @@ public class UpdaterServiceBuilder
     /// Leave empty if you applied your filter using <see cref="ApplyFilterAttribute"/> before.
     /// </para>
     /// </param>
-    /// <param name="group">Handling priority.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
     public UpdaterServiceBuilder AddCallbackQueryHandler<THandler>(
         UpdaterFilter<CallbackQuery>? filter = default,
-        int group = default)
+        HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<CallbackQuery, CallbackQueryContainer>
         => AddScopedUpdateHandler<THandler, CallbackQuery, CallbackQueryContainer>(
             UpdateType.Message,
             filter,
             x => x.CallbackQuery,
-            group);
+            options);
 
     /// <summary>
     /// Execute any action on the <see cref="IUpdater"/> instance.
@@ -341,7 +341,7 @@ public class UpdaterServiceBuilder
         {
             if (container is null) continue;
 
-            AddScopedUpdateHandler(container.Handler, container.Group);
+            AddScopedUpdateHandler(container.Handler, container.Options);
         }
 
         return this;

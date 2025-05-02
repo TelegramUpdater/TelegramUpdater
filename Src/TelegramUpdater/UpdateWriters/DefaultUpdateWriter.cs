@@ -30,6 +30,16 @@ internal class DefaultUpdateWriter : AbstractUpdateWriter
 
     public override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        if (UpdaterOptions.AllowedUpdates == null)
+        {
+            UpdaterOptions.AllowedUpdates = Updater.DetectAllowedUpdates();
+
+            Logger.LogInformation(
+                "Detected allowed updates automatically {allowed}",
+                string.Join(", ", UpdaterOptions.AllowedUpdates.Select(x => x.ToString()))
+            );
+        }
+
         var receiverOptions = new ReceiverOptions
         {
             DropPendingUpdates = UpdaterOptions.FlushUpdatesQueue,

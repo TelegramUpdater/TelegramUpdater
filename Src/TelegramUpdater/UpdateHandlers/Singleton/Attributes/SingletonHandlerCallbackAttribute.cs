@@ -23,7 +23,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.Attributes;
 /// </list>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-public sealed class SingletonHandlerCallbackAttribute : Attribute
+public sealed class SingletonHandlerCallbackAttribute : Attribute, IGetHandlingOptions
 {
     /// <summary>
     /// Initialize a new instance of <see cref="SingletonHandlerCallbackAttribute"/>.
@@ -37,13 +37,18 @@ public sealed class SingletonHandlerCallbackAttribute : Attribute
         UpdateType = updateType;
     }
 
-    /// <summary>
-    /// Handling priority.
-    /// </summary>
+    /// <inheritdoc cref="HandlingOptions.Group"/>
     public int Group { get; set; } = default;
+
+    /// <inheritdoc cref="HandlingOptions.LayerId"/>
+    public object LayerId { get; set; } = HandlingOptions.DefaultLayer;
 
     /// <summary>
     /// Type of update.
     /// </summary>
     public UpdateType UpdateType { get; }
+
+    /// <inheritdoc/>
+    public HandlingOptions GetHandlingOptions()
+        => new(group: Group, layerId: LayerId);
 }

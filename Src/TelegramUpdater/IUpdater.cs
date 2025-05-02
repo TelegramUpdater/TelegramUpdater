@@ -40,6 +40,12 @@ public interface IUpdater
     public UpdateType[]? AllowedUpdates { get; }
 
     /// <summary>
+    /// Detects allowed updates from handlers.
+    /// </summary>
+    /// <returns></returns>
+    public UpdateType[] DetectAllowedUpdates();
+
+    /// <summary>
     /// Enumerate over <see cref="IScopedUpdateHandlerContainer"/>s,
     /// registered to this instance
     /// of <see cref="IUpdater"/>.
@@ -71,15 +77,15 @@ public interface IUpdater
     /// Use <see cref="ScopedUpdateHandlerContainerBuilder{THandler, TUpdate}"/>
     /// To Create a new <see cref="IScopedUpdateHandlerContainer"/>
     /// </param>
-    /// <param name="group"></param>
-    Updater AddScopedUpdateHandler(IScopedUpdateHandlerContainer scopedHandlerContainer, int group = 0);
+    /// <param name="options">Information about how a handler should be handled.</param>
+    Updater AddScopedUpdateHandler(IScopedUpdateHandlerContainer scopedHandlerContainer, HandlingOptions? options = default);
 
     /// <summary>
     /// Add your handler to this updater.
     /// </summary>
     /// <param name="updateHandler"></param>
-    /// <param name="group"></param>
-    Updater AddSingletonUpdateHandler(ISingletonUpdateHandler updateHandler, int group = 0);
+    /// <param name="options">Information about how a handler should be handled.</param>
+    Updater AddSingletonUpdateHandler(ISingletonUpdateHandler updateHandler, HandlingOptions? options = default);
 
     /// <summary>
     /// Get current <see cref="TelegramBotClient"/>'s user information.

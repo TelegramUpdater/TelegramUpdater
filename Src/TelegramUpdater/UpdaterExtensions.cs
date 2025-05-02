@@ -3,7 +3,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Telegram.Bot.Types.Payments;
@@ -11,6 +10,7 @@ using TelegramUpdater.Filters;
 using TelegramUpdater.UpdateHandlers.Scoped;
 using TelegramUpdater.UpdateHandlers.Scoped.Attributes;
 using TelegramUpdater.UpdateHandlers.Singleton;
+using TelegramUpdater.UpdateHandlers.Singleton.Attributes;
 using TelegramUpdater.UpdateWriters;
 
 namespace TelegramUpdater;
@@ -257,9 +257,10 @@ public static class UpdaterExtensions
 
             if (container is null) continue;
 
-            var extrainfo = handler.GetCustomAttribute<ScopedHandlerAttribute>();
+            // This will be done in the updater main method
+            //var extraInfo = handler.GetCustomAttribute<ScopedHandlerAttribute>();
 
-            yield return new(container, extrainfo?.Group?? default);
+            yield return new(container);
         }
     }
 
@@ -295,7 +296,7 @@ public static class UpdaterExtensions
 
             updater.Logger.LogInformation(
                 "Scoped handler collected! ( {Name} )", container.Handler.ScopedHandlerType.Name);
-            updater.AddScopedUpdateHandler(container.Handler, container.Group);
+            updater.AddScopedUpdateHandler(container.Handler);
         }
 
         return updater;
@@ -359,6 +360,23 @@ public static class UpdaterExtensions
                 "Set {count} commands to scope {scope}.",
                 scope.Count(), commandScope?.Type?? BotCommandScopeType.Default);
         }
+    }
+
+    internal static HandlingOptions? GetHandlingOptionsFromAttibute(
+        this IScopedUpdateHandlerContainer container)
+    {
+        return container.ScopedHandlerType
+            .GetCustomAttribute<ScopedHandlerAttribute>()?
+            .GetHandlingOptions();
+    }
+
+    internal static HandlingOptions? GetHandlingOptionsFromAttibute(
+        this ISingletonUpdateHandler container)
+    {
+        return container
+            .GetType()
+            .GetCustomAttribute<SingletonHandlerCallbackAttribute>()?
+            .GetHandlingOptions();
     }
 
     internal static UpdaterOptions RedesignOptions(

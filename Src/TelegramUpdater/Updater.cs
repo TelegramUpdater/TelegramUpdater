@@ -16,36 +16,6 @@ using TelegramUpdater.UpdateHandlers.Singleton;
 namespace TelegramUpdater;
 
 /// <summary>
-/// The handler and some more info about it.
-/// </summary>
-/// <typeparam name="T">Type of the handler.</typeparam>
-/// <param name="handler">The handler.</param>
-/// <param name="group">Handling priority.</param>
-public class HandlingInfo<T>(T handler, int group = 0)
-{
-    /// <summary>
-    /// The handler.
-    /// </summary>
-    public T Handler { get; } = handler;
-
-    /// <summary>
-    /// Handling priority.
-    /// </summary>
-    public int Group { get; } = group;
-
-    /// <summary>
-    /// Swap this handle with something else, while keeping the extra as before.
-    /// </summary>
-    /// <typeparam name="Q"></typeparam>
-    /// <param name="func"></param>
-    /// <returns></returns>
-    public HandlingInfo<Q> SwapFace<Q>(Func<T, Q> func)
-    {
-        return new(func(Handler), Group);
-    }
-}
-
-/// <summary>
 /// Fetch updates from telegram and handle them.
 /// </summary>
 public sealed partial class Updater : IUpdater
@@ -336,18 +306,44 @@ public sealed partial class Updater : IUpdater
 
     /// <inheritdoc/>
     public Updater AddSingletonUpdateHandler(
-        ISingletonUpdateHandler updateHandler, int group = 0)
+        ISingletonUpdateHandler singletonUpdateHandler,
+        HandlingOptions? options = default)
     {
-        _updateHandlers.Add(new(updateHandler, group: group));
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(singletonUpdateHandler);
+#else
+        if (singletonUpdateHandler is null)
+        {
+            throw new ArgumentNullException(nameof(singletonUpdateHandler));
+        }
+#endif
+
+        options ??= singletonUpdateHandler
+            .GetHandlingOptionsFromAttibute();
+
+        _updateHandlers.Add(new(singletonUpdateHandler, options: options));
         _logger.LogInformation($"Added new singleton handler.");
         return this;
     }
 
     /// <inheritdoc/>
     public Updater AddScopedUpdateHandler(
-        IScopedUpdateHandlerContainer scopedHandlerContainer, int group = 0)
+        IScopedUpdateHandlerContainer scopedHandlerContainer,
+        HandlingOptions? options = default)
     {
-        _scopedHandlerContainers.Add(new(scopedHandlerContainer, group: group));
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(scopedHandlerContainer);
+#else
+        if (scopedHandlerContainer is null)
+        {
+            throw new ArgumentNullException(nameof(scopedHandlerContainer));
+        }
+#endif
+
+        options ??= scopedHandlerContainer
+            .GetHandlingOptionsFromAttibute();
+
+        _scopedHandlerContainers.Add(new(scopedHandlerContainer, options: options));
         _logger.LogInformation("Added new scoped handler {handler}",
             scopedHandlerContainer.ScopedHandlerType);
         return this;
@@ -379,17 +375,6 @@ public sealed partial class Updater : IUpdater
                 "Start's CancellationToken set to " +
                 "CancellationToken in UpdaterOptions");
             cancellationToken = _updaterOptions.CancellationToken;
-        }
-
-        if (_updaterOptions.AllowedUpdates == null)
-        {
-            // I need to recreate the options since it's readonly.
-            _updaterOptions.AllowedUpdates = DetectAllowedUpdates();
-
-            _logger.LogInformation(
-                "Detected allowed updates automatically {allowed}",
-                string.Join(", ", _updaterOptions.AllowedUpdates.Select(x => x.ToString()))
-            );
         }
 
         // Link tokens. so we can use _emergencyCancel when required.
@@ -431,7 +416,8 @@ public sealed partial class Updater : IUpdater
         return userId.Value;
     }
 
-    private UpdateType[] DetectAllowedUpdates()
+    /// <inheritdoc />
+    public UpdateType[] DetectAllowedUpdates()
         => _updateHandlers
             .Select(x => x.Handler.UpdateType)
             .Concat(_scopedHandlerContainers.Select(x => x.Handler.UpdateType))
@@ -520,18 +506,21 @@ public sealed partial class Updater : IUpdater
     }
 
     class HandlingJobInfo(
-        int group,
+        HandlingOptions options,
         Func<IServiceScope?, ShiningInfo<long, Update>, CancellationToken, Task<bool>> handler,
         Func<UpdaterFilterInputs<Update>, bool> filter)
     {
-        public int Group { get; } = group;
+        public HandlingOptions Options { get; } = options;
 
         public Func<IServiceScope?, ShiningInfo<long, Update>, CancellationToken, Task<bool>> Handler { get; } = handler;
 
         public Func<UpdaterFilterInputs<Update>, bool> Filter { get; } = filter;
     }
 
+    // I know
+#pragma warning disable MA0051 // Method is too long
     private async Task ProcessUpdate(
+#pragma warning restore MA0051 // Method is too long
         ShiningInfo<long, Update> shiningInfo,
         CancellationToken cancellationToken)
     {
@@ -549,33 +538,52 @@ public sealed partial class Updater : IUpdater
                 serviceScope = _scopeFactory.CreateAsyncScope();
 
             var singletonhandlers = _updateHandlers
-                .Select(x => new HandlingJobInfo(x.Group, GetHandlingJob(x.Handler), x.Handler.ShouldHandle));
+                .Select(x => new HandlingJobInfo(
+                    HandlingOptions.OrDefault(x.Options),
+                    GetHandlingJob(x.Handler),
+                    x.Handler.ShouldHandle));
 
             var scopedHandlers = _scopedHandlerContainers
-                .Select(x => new HandlingJobInfo(x.Group, GetHandlingJob(x.Handler), x.Handler.ShouldHandle));
+                .Select(x => new HandlingJobInfo(
+                    HandlingOptions.OrDefault(x.Options),
+                    GetHandlingJob(x.Handler),
+                    x.Handler.ShouldHandle));
 
             var handlers = singletonhandlers.Concat(scopedHandlers);
 
             if (!handlers.Any()) return;
 
-            // valid handlers for an update should process one by one
-            // This change can be cut off when throwing an specified exception
-            // Other exceptions are redirected to ExceptionHandler.
-            foreach (var handlingInfo in handlers.OrderBy(x => x.Group))
+            // Group handler by layer id
+            var layerd = handlers.GroupBy(x => x.Options.LayerId);
+
+            // The otter loop is over separate layers, so breaking inner loop won't effect this
+            foreach (var layer in layerd)
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
                     break;
                 }
 
-                if (!handlingInfo.Filter(new(this, shiningInfo.Value)))
-                    // Filter didn't pass, ignore
-                    continue;
-
-                if (await handlingInfo.Handler(serviceScope, shiningInfo, cancellationToken)
-                    .ConfigureAwait(false))
+                // valid handlers for an update should process one by one
+                // This change can be cut off when throwing an specified exception
+                // Other exceptions are redirected to ExceptionHandler.
+                foreach (var handlingInfo in layer.OrderBy(x => x.Options.Group))
                 {
-                    break;
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    if (!handlingInfo.Filter(new(this, shiningInfo.Value)))
+                        // Filter didn't pass, ignore
+                        continue;
+
+                    if (await handlingInfo.Handler(serviceScope, shiningInfo, cancellationToken)
+                        .ConfigureAwait(false))
+                    {
+                        // Propagation stop only effects handler in the same layer.
+                        break;
+                    }
                 }
             }
 
