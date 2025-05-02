@@ -481,9 +481,11 @@ public sealed partial class Updater : IUpdater
                 if (!await HandleHandler(
                     shiningInfo, handler, cancellationToken).ConfigureAwait(false))
                 {
+                    // Means stop propagation
                     return true;
                 }
 
+                return handler.Endpoint;
             }
 
             return false;
@@ -491,17 +493,18 @@ public sealed partial class Updater : IUpdater
     }
 
     Func<IServiceScope?, ShiningInfo<long, Update>, CancellationToken, Task<bool>> GetHandlingJob(
-        ISingletonUpdateHandler container)
+        ISingletonUpdateHandler handler)
     {
         return async (_, shiningInfo, cancellationToken) =>
         {
             if (!await HandleHandler(
-                shiningInfo, container, cancellationToken).ConfigureAwait(false))
+                shiningInfo, handler, cancellationToken).ConfigureAwait(false))
             {
+                // Means stop propagation
                 return true;
             }
 
-            return false;
+            return handler.Endpoint;
         };
     }
 
@@ -557,7 +560,7 @@ public sealed partial class Updater : IUpdater
             var layerd = handlers.GroupBy(x => x.Options.LayerId);
 
             // The otter loop is over separate layers, so breaking inner loop won't effect this
-            foreach (var layer in layerd)
+            foreach (var layer in layerd.OrderBy(x=> x.Key))
             {
                 if (cancellationToken.IsCancellationRequested)
                 {

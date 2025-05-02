@@ -41,7 +41,7 @@ public sealed class SingletonHandlerCallbackAttribute : Attribute, IGetHandlingO
     public int Group { get; set; } = default;
 
     /// <inheritdoc cref="HandlingOptions.LayerId"/>
-    public object LayerId { get; set; } = HandlingOptions.DefaultLayer;
+    public int LayerId { get; set; } = default;
 
     /// <summary>
     /// Type of update.

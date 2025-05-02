@@ -10,7 +10,7 @@ public class ScopedHandlerAttribute : Attribute, IGetHandlingOptions
     public int Group { get; set; } = default;
 
     /// <inheritdoc cref="HandlingOptions.LayerId"/>
-    public object LayerId { get; set; } = HandlingOptions.DefaultLayer;
+    public int LayerId { get; set; } = default;
 
     /// <inheritdoc/>
     public HandlingOptions GetHandlingOptions()

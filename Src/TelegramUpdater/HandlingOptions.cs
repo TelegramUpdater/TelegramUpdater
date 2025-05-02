@@ -8,8 +8,8 @@
 /// Handling layer.
 /// </param>
 public class HandlingOptions(
-    int group = 0,
-    object? layerId = default)
+    int group = default,
+    int layerId = default)
 {
     /// <summary>
     /// The default layer.
@@ -34,7 +34,7 @@ public class HandlingOptions(
     /// only effects handlers in the same layer.
     /// </para>
     /// </remarks>
-    public object LayerId { get; } = layerId?? DefaultLayer;
+    public int LayerId { get; } = layerId;
 
     /// <summary>
     /// Get input handling options or default.
@@ -42,7 +42,7 @@ public class HandlingOptions(
     /// <param name="options"></param>
     /// <returns></returns>
     public static HandlingOptions OrDefault(HandlingOptions? options)
-        => options ?? new(layerId: DefaultLayer);
+        => options ?? new();
 }
 
 internal interface IGetHandlingOptions

@@ -2,7 +2,6 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.UpdateContainer;
@@ -26,9 +25,6 @@ internal class Rename : MessageHandler
             replyMarkup: new ForceReplyMarkup());
 
         InitiateState<RenameState>(From);
-
-        // Stop handling below handlers (With higher group).
-        StopPropagation();
     }
 }
 
@@ -57,9 +53,6 @@ internal class RenameAskName : MessageHandler
                 await cntr.Response("Please provide a name.");
                 break;
         }
-
-        // Stop handling below handlers (With higher group).
-        StopPropagation();
     }
 }
 

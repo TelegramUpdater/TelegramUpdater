@@ -8,6 +8,11 @@ namespace TelegramUpdater.UpdateHandlers;
 public interface IUpdateHandler
 {
     /// <summary>
+    /// Determines if this handler is an end point for it's layer.
+    /// </summary>
+    public bool Endpoint { get; }
+
+    /// <summary>
     /// Handle the update.
     /// </summary>
     /// <param name="updater">

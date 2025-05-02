@@ -7,9 +7,12 @@ using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 namespace Playground.UpdateHandlers.Messages;
 
 [Command("status"), Private]
-[ScopedHandler(Group = 0, LayerId = "StatusLayer")]
+[ScopedHandler(Group = 0, LayerId = 1)]
 internal class StatusFilter(PlaygroundMemory memory) : MessageHandler
 {
+    // This is not the end
+    public override bool Endpoint => false;
+
     protected override async Task HandleAsync(MessageContainer container)
     {
         if (From == null)
@@ -26,7 +29,7 @@ internal class StatusFilter(PlaygroundMemory memory) : MessageHandler
 }
 
 [Command("status"), Private]
-[ScopedHandler(Group = 1, LayerId = "StatusLayer")]
+[ScopedHandler(Group = 1, LayerId = 1)]
 internal class StatusSeen : MessageHandler
 {
     protected override async Task HandleAsync(MessageContainer container)

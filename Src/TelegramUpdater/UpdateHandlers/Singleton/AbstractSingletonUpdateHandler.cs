@@ -100,4 +100,7 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
 
     /// <inheritdoc/>
     public override IContainer<T> Container { get; protected set; } = default!;
+
+    /// <inheritdoc/>
+    public virtual bool Endpoint { get; protected set; } = true;
 }
