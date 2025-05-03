@@ -18,7 +18,7 @@ internal class DefaultUpdateWriter : AbstractUpdateWriter
 
     async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
-        await EnqueueUpdateAsync(update, cancellationToken).ConfigureAwait(false);
+        await EnqueueUpdate(update, cancellationToken).ConfigureAwait(false);
     }
 
     Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
@@ -28,18 +28,8 @@ internal class DefaultUpdateWriter : AbstractUpdateWriter
         return Task.CompletedTask;
     }
 
-    public override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task Execute(CancellationToken stoppingToken)
     {
-        if (UpdaterOptions.AllowedUpdates == null)
-        {
-            UpdaterOptions.AllowedUpdates = Updater.DetectAllowedUpdates();
-
-            Logger.LogInformation(
-                "Detected allowed updates automatically {allowed}",
-                string.Join(", ", UpdaterOptions.AllowedUpdates.Select(x => x.ToString()))
-            );
-        }
-
         var receiverOptions = new ReceiverOptions
         {
             DropPendingUpdates = UpdaterOptions.FlushUpdatesQueue,

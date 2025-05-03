@@ -35,12 +35,46 @@ public abstract class AbstractUpdateWriter
     }
 
     /// <summary>
+    /// Jobs you wanna do before running the <see cref="Execute(CancellationToken)"/>.
+    /// </summary>
+    /// <remarks>
+    /// By default, it just detects <see cref="UpdaterOptions.AllowedUpdates"/> automatically if it's null using
+    /// <see cref="IUpdater.DetectAllowedUpdates"/>.
+    /// </remarks>
+    /// <returns></returns>
+    protected virtual Task BeforeExecution(CancellationToken stoppingToken)
+    {
+        if (UpdaterOptions.AllowedUpdates == null)
+        {
+            UpdaterOptions.AllowedUpdates = Updater.DetectAllowedUpdates();
+
+            Logger.LogInformation(
+                "Detected allowed updates automatically {allowed}",
+                string.Join(", ", UpdaterOptions.AllowedUpdates.Select(x => x.ToString()))
+            );
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
     /// Implement your stuff to get updates and write them to the updater
-    /// Using <see cref="EnqueueUpdateAsync(Update, CancellationToken)"/>.
+    /// Using <see cref="EnqueueUpdate(Update, CancellationToken)"/>.
     /// </summary>
     /// <param name="stoppingToken">Cancel the job.</param>
     /// <returns></returns>
-    public abstract Task ExecuteAsync(CancellationToken stoppingToken);
+    protected abstract Task Execute(CancellationToken stoppingToken);
+
+    /// <summary>
+    /// Start running the writer.
+    /// </summary>
+    /// <param name="stoppingToken">Cancel the job.</param>
+    /// <returns></returns>
+    public async Task Run(CancellationToken stoppingToken)
+    {
+        await BeforeExecution(stoppingToken).ConfigureAwait(false);
+        await Execute(stoppingToken).ConfigureAwait(false);
+    }
 
     /// <summary>
     /// Updater instance.
@@ -68,10 +102,10 @@ public abstract class AbstractUpdateWriter
     /// <param name="update">The update.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    protected async ValueTask EnqueueUpdateAsync(
+    protected async ValueTask EnqueueUpdate(
         Update update, CancellationToken cancellationToken)
     {
-        await Updater.WriteAsync(update, cancellationToken).ConfigureAwait(false);
+        await Updater.Write(update, cancellationToken).ConfigureAwait(false);
     }
 
     internal static AbstractUpdateWriter Create<TWriter>(IUpdater updater)

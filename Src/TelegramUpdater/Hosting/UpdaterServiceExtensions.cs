@@ -612,5 +612,5 @@ public static class UpdaterServiceExtensions
         this IUpdater updater,
         Update update,
         CancellationToken cancellationToken = default)
-        => await updater.WriteAsync(update, cancellationToken).ConfigureAwait(false);
+        => await updater.Write(update, cancellationToken).ConfigureAwait(false);
 }

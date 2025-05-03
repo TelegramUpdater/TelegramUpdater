@@ -362,12 +362,12 @@ public sealed partial class Updater : IUpdater
     }
 
     /// <inheritdoc/>
-    public ValueTask WriteAsync(
+    public ValueTask Write(
         Update update, CancellationToken cancellationToken = default)
         => Rainbow.EnqueueAsync(update, cancellationToken);
 
     /// <inheritdoc/>
-    public async Task StartAsync<TWriter>(
+    public async Task Start<TWriter>(
         CancellationToken cancellationToken = default)
         where TWriter : AbstractUpdateWriter, new()
     {
@@ -389,7 +389,7 @@ public sealed partial class Updater : IUpdater
 
         _logger.LogInformation(
             "Start reading updates from {writer}", typeof(TWriter));
-        await writer.ExecuteAsync(liked.Token).ConfigureAwait(false);
+        await writer.Run(liked.Token).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -703,7 +703,7 @@ public sealed partial class Updater : IUpdater
     }
 
     /// <inheritdoc/>
-    public void RemoveItem<T>(T key)
+    public void RemoveItem(object key)
     {
         _memoryCache.Remove(key);
     }

@@ -98,18 +98,18 @@ public interface IUpdater
     /// <summary>
     /// Manually write an update to the <see cref="Rainbow"/>
     /// </summary>
-    ValueTask WriteAsync(Update update, CancellationToken cancellationToken = default);
+    ValueTask Write(Update update, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Use this to start writing updates
-    /// ( using your custom writer <typeparamref name="TWriter"/> )
-    /// to the updater. ( Blocking )
+    /// (using your custom writer <typeparamref name="TWriter"/>)
+    /// to the updater.
     /// </summary>
     /// <typeparam name="TWriter">
     /// Your custom update writer. a sub-class of
     /// <see cref="AbstractUpdateWriter"/>.</typeparam>
     /// <param name="cancellationToken">To cancel the job manually,</param>
-    public Task StartAsync<TWriter>(CancellationToken cancellationToken = default)
+    public Task Start<TWriter>(CancellationToken cancellationToken = default)
         where TWriter : AbstractUpdateWriter, new();
 
     /// <summary>
@@ -132,7 +132,7 @@ public interface IUpdater
     /// Remove item from updater's storage
     /// </summary>
     /// <param name="key"></param>
-    public void RemoveItem<T>(T key);
+    public void RemoveItem(object key);
 
     /// <summary>
     /// Check if an <see cref="string"/> key exists in updater extra data.

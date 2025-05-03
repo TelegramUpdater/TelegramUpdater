@@ -27,7 +27,7 @@ public class UpdateWriterService<TWriter>(TWriter writer)
             cancellationToken, _stoppingCts.Token);
 
         // Store the task we're executing
-        _executingTask = Writer.ExecuteAsync(linked.Token);
+        _executingTask = Writer.Run(linked.Token);
 
         // If the task is completed then return it,
         // this will bubble cancellation and failure to the caller

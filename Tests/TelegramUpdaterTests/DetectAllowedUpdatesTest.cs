@@ -15,7 +15,7 @@ namespace TelegramUpdaterTests
 {
     class FakeWriter : AbstractUpdateWriter
     {
-        public override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override Task Execute(CancellationToken stoppingToken)
         {
             return Task.CompletedTask;
         }
@@ -51,7 +51,8 @@ namespace TelegramUpdaterTests
             testUpdater.AddSingletonUpdateHandler(
                 new TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse.MessageHandler(_T));
 
-            await testUpdater.StartAsync<FakeWriter>();
+            // Writer's BeforeExecution method will fill up allowed updates.
+            await testUpdater.Start<FakeWriter>();
 
             Assert.True(testUpdater.AllowedUpdates?.SequenceEqual(
                 [UpdateType.Message, UpdateType.EditedMessage, UpdateType.CallbackQuery]));
@@ -63,7 +64,7 @@ namespace TelegramUpdaterTests
             var testUpdater = new Updater(new TelegramBotClient(Extensions.FakeBotToken),
                 new UpdaterOptions(allowedUpdates: [UpdateType.Message, UpdateType.CallbackQuery]));
 
-            await testUpdater.StartAsync<FakeWriter>();
+            await testUpdater.Start<FakeWriter>();
 
             Assert.True(testUpdater.AllowedUpdates?.SequenceEqual(
                 [UpdateType.Message, UpdateType.CallbackQuery]));
