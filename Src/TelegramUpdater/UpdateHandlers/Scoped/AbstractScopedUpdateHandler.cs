@@ -38,7 +38,7 @@ public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?
 
     /// <inheritdoc/>
     async Task IUpdateHandler.HandleAsync(HandlerInput input)
-        => await HandleAsync(ContainerBuilderWrapper(input.Updater, input.ShiningInfo)).ConfigureAwait(false);
+        => await HandleAsync(ContainerBuilderWrapper(input)).ConfigureAwait(false);
 
     void IScopedUpdateHandler.SetExtraData(
         IReadOnlyDictionary<string, object>? extraData)
@@ -54,13 +54,11 @@ public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?
     /// <summary>
     /// Create update container for this handler.
     /// </summary>
-    internal protected abstract TContainer ContainerBuilder(
-        IUpdater updater, ShiningInfo<long, Update> shiningInfo);
+    internal protected abstract TContainer ContainerBuilder(HandlerInput input);
 
-    private TContainer ContainerBuilderWrapper(
-        IUpdater updater, ShiningInfo<long, Update> shiningInfo)
+    private TContainer ContainerBuilderWrapper(HandlerInput input)
     {
-        var container = ContainerBuilder(updater, shiningInfo);
+        var container = ContainerBuilder(input);
         Container = container;
         return container;
     }

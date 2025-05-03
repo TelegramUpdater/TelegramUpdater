@@ -1,6 +1,4 @@
-﻿using TelegramUpdater.RainbowUtilities;
-
-namespace TelegramUpdater.UpdateContainer.UpdateContainers;
+﻿namespace TelegramUpdater.UpdateContainer.UpdateContainers;
 
 /// <summary>
 /// Create an update container for any type of update.
@@ -10,9 +8,8 @@ public class DefaultContainer<T> : AbstractUpdateContainer<T> where T : class
 {
     internal DefaultContainer(
         Func<Update, T?> insiderResolver,
-        IUpdater updater,
-        ShiningInfo<long, Update> shiningInfo,
+        HandlerInput input,
         IReadOnlyDictionary<string, object>? extraObjects = default)
-        : base(insiderResolver, updater, shiningInfo, extraObjects)
+        : base(insiderResolver, input, extraObjects)
     { }
 }

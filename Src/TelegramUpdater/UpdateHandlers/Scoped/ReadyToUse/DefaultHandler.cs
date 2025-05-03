@@ -16,9 +16,6 @@ public abstract class DefaultHandler<T>(Func<Update, T?> getT)
     where T : class
 {
     /// <inheritdoc/>
-    internal protected sealed override DefaultContainer<T> ContainerBuilder(
-        IUpdater updater, ShiningInfo<long, Update> shiningInfo)
-    {
-        return new DefaultContainer<T>(GetT, updater, shiningInfo, ExtraData);
-    }
+    protected internal sealed override DefaultContainer<T> ContainerBuilder(HandlerInput input)
+        => new(GetT, input, ExtraData);
 }

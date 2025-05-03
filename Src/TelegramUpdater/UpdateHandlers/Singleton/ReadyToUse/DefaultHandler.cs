@@ -35,9 +35,8 @@ public class DefaultHandler<T>
         => _handleAsync = callback ??
             throw new ArgumentNullException(nameof(callback));
 
-    internal override DefaultContainer<T> ContainerBuilder(
-        IUpdater updater, ShiningInfo<long, Update> shiningInfo)
-        => new(ExtractInnerUpdater, updater, shiningInfo, ExtraData);
+    internal override DefaultContainer<T> ContainerBuilder(HandlerInput input)
+        => new(ExtractInnerUpdater, input, ExtraData);
 
     /// <inheritdoc/>
     protected override async Task HandleAsync(

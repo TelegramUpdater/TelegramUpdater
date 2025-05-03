@@ -68,8 +68,7 @@ public static class ChannelsExtensions
                 {
                     return new DefaultContainer<TExp>(
                         updateChannel.GetActualUpdate,
-                        container.Updater,
-                        update,
+                        new(container.Updater, update, default, 0, 0, 0),
                         updateChannel.ExtraData
                     );
                 }

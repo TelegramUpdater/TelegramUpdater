@@ -8,10 +8,9 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers;
 public sealed class MessageContainer : AbstractUpdateContainer<Message>
 {
     internal MessageContainer(
-        IUpdater updater,
-        ShiningInfo<long, Update> shiningInfo,
+        HandlerInput input,
         IReadOnlyDictionary<string, object>? extraObjects = default)
-        : base(update => update.GetInnerUpdate<Message>(), updater, shiningInfo, extraObjects)
+        : base(update => update.GetInnerUpdate<Message>(), input, extraObjects)
     {
     }
 }

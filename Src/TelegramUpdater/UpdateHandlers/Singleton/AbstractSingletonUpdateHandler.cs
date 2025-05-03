@@ -83,7 +83,7 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
     /// <inheritdoc/>
     async Task IUpdateHandler.HandleAsync(HandlerInput input)
     {
-        var container = ContainerBuilder(input.Updater, input.ShiningInfo);
+        var container = ContainerBuilder(input);
         Container = container;
         await HandleAsync(container).ConfigureAwait(false);
     }
@@ -100,8 +100,7 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
         return ShouldHandle(new UpdaterFilterInputs<T>(inputs.Updater, insider));
     }
 
-    internal abstract TContainer ContainerBuilder(
-        IUpdater updater, ShiningInfo<long, Update> shiningInfo);
+    internal abstract TContainer ContainerBuilder(HandlerInput input);
 
     /// <inheritdoc/>
     public override IContainer<T> Container { get; protected set; } = default!;

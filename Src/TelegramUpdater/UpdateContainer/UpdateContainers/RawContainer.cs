@@ -9,17 +9,14 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers;
 /// <remarks>
 /// Create an instance of <see cref="RawContainer"/>
 /// </remarks>
-/// <param name="updater">The <see cref="IUpdater"/> instance</param>
-/// <param name="shiningInfo">
-/// Shining info about the received update.
-/// </param>
+/// <param name="input"></param>
 /// <param name="extraObjects">
 /// A dictionary of extra data for this container.
 /// </param>
 public sealed class RawContainer(
-    IUpdater updater,
-    ShiningInfo<long, Update> shiningInfo,
-    IReadOnlyDictionary<string, object>? extraObjects = default) : IUpdateContainer
+    HandlerInput input,
+    IReadOnlyDictionary<string, object>? extraObjects = default)
+    : IUpdateContainer
 {
     private readonly IReadOnlyDictionary<string, object> _extraObjects = extraObjects
         ?? new Dictionary<string, object>(StringComparer.Ordinal);
@@ -28,16 +25,19 @@ public sealed class RawContainer(
     public object this[string key] => _extraObjects[key];
 
     /// <inheritdoc/>
-    public IUpdater Updater { get; } = updater;
+    public IUpdater Updater => Input.Updater;
 
     /// <inheritdoc/>
     public Update Container => ShiningInfo.Value;
 
     /// <inheritdoc/>
-    public ShiningInfo<long, Update> ShiningInfo { get; } = shiningInfo;
+    public ShiningInfo<long, Update> ShiningInfo => Input.ShiningInfo;
 
     /// <inheritdoc/>
     public ITelegramBotClient BotClient => Updater.BotClient;
+
+    /// <inheritdoc/>
+    public HandlerInput Input => input;
 
     /// <inheritdoc/>
     public bool ContainsKey(string key) => _extraObjects.ContainsKey(key);

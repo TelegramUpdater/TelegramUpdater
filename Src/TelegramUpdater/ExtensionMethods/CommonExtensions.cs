@@ -11,7 +11,7 @@ public static class CommonExtensions
 {
     internal static RawContainer RebaseAsRaw<T>(
         this IContainer<T> container, ShiningInfo<long, Update> shiningInfo) where T : class
-        => new(container.Updater, shiningInfo);
+        => new(new(container.Updater, shiningInfo, default, default, default, default));
 
     internal static async Task<IContainer<T>> WrapAsync<T>(
         this Task<T> t, Expression<Func<Update, T?>> insiderResovler, IUpdater updater) where T : class

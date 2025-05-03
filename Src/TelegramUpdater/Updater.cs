@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Telegram.Bot.Args;
 using TelegramUpdater.ExceptionHandlers;
+using TelegramUpdater.Helpers;
 using TelegramUpdater.RainbowUtilities;
 using TelegramUpdater.UpdateHandlers;
 using TelegramUpdater.UpdateHandlers.Scoped;
@@ -569,6 +570,7 @@ public sealed partial class Updater : IUpdater
             if (!handlers.Any()) return;
 
             var scopeId = Guid.NewGuid();
+            var wrapedScopedId = new HandlingStoragesKeys.ScopeId(scopeId);
 
             // Group handler by layer id
             var layerd = handlers.GroupBy(x => x.Options.LayerId);
@@ -576,6 +578,8 @@ public sealed partial class Updater : IUpdater
             // The otter loop is over separate layers, so breaking inner loop won't effect this
             foreach (var layer in layerd.OrderBy(x=> x.Key))
             {
+                var layerId = new HandlingStoragesKeys.LayerId(scopeId, layer.Key);
+
                 if (cancellationToken.IsCancellationRequested)
                 {
                     break;
@@ -588,6 +592,8 @@ public sealed partial class Updater : IUpdater
                     .OrderBy(x => x.Options.Group)
                     .Select((x, i) => (x, i)))
                 {
+                    //var groupId = new HandlingStoragesKeys.GroupId(scopeId, layer.Key, handlingInfo.Options.Group);
+
                     if (cancellationToken.IsCancellationRequested)
                     {
                         break;

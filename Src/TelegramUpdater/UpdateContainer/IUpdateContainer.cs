@@ -8,25 +8,30 @@ namespace TelegramUpdater.UpdateContainer;
 public interface IUpdateContainer
 {
     /// <summary>
+    /// Raw inputs of the handler.
+    /// </summary>
+    public HandlerInput Input { get; }
+
+    /// <summary>
     /// <see cref="TelegramUpdater.Updater"/> instance which is responsible.
     /// for this container.
     /// </summary>
-    public IUpdater Updater { get; }
+    public IUpdater Updater => Input.Updater;
 
     /// <summary>
     /// The received update.
     /// </summary>
-    public Update Container { get; }
+    public Update Container => ShiningInfo.Value;
 
     /// <summary>
     /// Processing info for this update.
     /// </summary>
-    ShiningInfo<long, Update> ShiningInfo { get; }
+    public ShiningInfo<long, Update> ShiningInfo => Input.ShiningInfo;
 
     /// <summary>
     /// <see cref="ITelegramBotClient"/> which is responsible for this container.
     /// </summary>
-    public ITelegramBotClient BotClient { get; }
+    public ITelegramBotClient BotClient => Updater.BotClient;
 
     /// <summary>
     /// Container may contain extra data based on the filter applied on handler.

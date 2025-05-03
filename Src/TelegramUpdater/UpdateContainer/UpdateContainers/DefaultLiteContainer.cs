@@ -9,7 +9,7 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers;
 /// outside of updater. Eg: the result of requests.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class DefaultLiteContainer<T> : AbstractUpdateContainer<T> where T : class
+public class DefaultLiteContainer<T> : IContainer<T> where T : class
 {
     /// <summary>
     /// Create a lite container.
@@ -17,25 +17,42 @@ public class DefaultLiteContainer<T> : AbstractUpdateContainer<T> where T : clas
     /// <param name="insiderResolver">
     /// A function to resolve inner update.
     /// </param>
-    /// <param name="update">The update itself.</param>
-    /// <param name="updater">The updater instance</param>
-    /// <param name="extraObjects"></param>
+    /// <param name="updater"></param>
+    /// <param name="update"></param>
     internal DefaultLiteContainer(
         Func<Update, T?> insiderResolver,
-        Update update,
         IUpdater updater,
-        IReadOnlyDictionary<string, object>? extraObjects = default)
-        : base(insiderResolver,
-               updater,
-               insider: update,
-               extraObjects: extraObjects)
-    { }
+        Update update)
+    {
+        var input = new HandlerInput(
+            updater,
+            new ShiningInfo<long, Update>(update, default!, default),
+            default, default, default, default);
 
+        Input = input;
+        Update = insiderResolver(update) 
+            ?? throw new InvalidOperationException("Inner update can't be null.");
+    }
 
     /// <inheritdoc/>
-    public override ShiningInfo<long, Update> ShiningInfo
+    public ShiningInfo<long, Update> ShiningInfo
         => throw new InvalidOperationException(
             "Lite containers have no ShiningInfo, since they're not received from updater.");
+
+    /// <inheritdoc />
+    public T Update { get; }
+
+    HandlerInput IUpdateContainer.Input => Input;
+
+    ShiningInfo<long, Update> IUpdateContainer.ShiningInfo
+        => throw new InvalidOperationException(
+            "Lite containers have no ShiningInfo, since they're not received from updater.");
+
+    object IUpdateContainer.this[string key]
+        => throw new InvalidOperationException("Lite container doesn't have any extra data.");
+
+    /// <inheritdoc />
+    public HandlerInput Input { get; }
 
     internal static IContainer<U> CreateLiteContainer<U>(
         Expression<Func<Update, U?>> insiderResolver,
@@ -49,7 +66,7 @@ public class DefaultLiteContainer<T> : AbstractUpdateContainer<T> where T : clas
         prop.SetValue(u, update);
 
         return new DefaultLiteContainer<U>(
-            insiderResolver.Compile(), u, updater);
+            insiderResolver.Compile(), updater, u);
     }
 
     internal static IContainer<Message> MessageLiteContainer(
@@ -59,4 +76,9 @@ public class DefaultLiteContainer<T> : AbstractUpdateContainer<T> where T : clas
     internal static IContainer<CallbackQuery> CallbackQueryLiteContainer(
         CallbackQuery update, IUpdater updater)
         => CreateLiteContainer(x => x.CallbackQuery, update, updater);
+
+    bool IUpdateContainer.ContainsKey(string key)
+    {
+        throw new InvalidOperationException("Lite container doesn't have any extra data.");
+    }
 }

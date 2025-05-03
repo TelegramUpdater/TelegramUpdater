@@ -9,10 +9,9 @@ public sealed class CallbackQueryContainer
     : AbstractUpdateContainer<CallbackQuery>
 {
     internal CallbackQueryContainer(
-        IUpdater updater,
-        ShiningInfo<long, Update> shiningInfo,
+        HandlerInput input,
         IReadOnlyDictionary<string, object>? extraObjects = default)
-        : base(x => x.CallbackQuery, updater, shiningInfo, extraObjects)
+        : base(x => x.CallbackQuery, input, extraObjects)
     {
     }
 }

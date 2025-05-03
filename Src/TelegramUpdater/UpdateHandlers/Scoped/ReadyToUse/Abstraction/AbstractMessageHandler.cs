@@ -15,8 +15,8 @@ public abstract class AbstractMessageHandler(Func<Update, Message?> resolver)
     : AbstractScopedUpdateHandler<Message, MessageContainer>(resolver)
 {
     /// <inheritdoc/>
-    protected internal override MessageContainer ContainerBuilder(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
-        => new(updater, shiningInfo, ExtraData);
+    protected internal override MessageContainer ContainerBuilder(HandlerInput input)
+        => new(input, ExtraData);
 
     #region Extension Methods
     /// <inheritdoc cref="Message.From"/>.

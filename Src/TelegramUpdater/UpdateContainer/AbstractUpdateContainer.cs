@@ -7,56 +7,20 @@ namespace TelegramUpdater.UpdateContainer;
 /// <typeparamref name="T"/> as your update.
 /// </summary>
 /// <typeparam name="T">Update type.</typeparam>
-public abstract class AbstractUpdateContainer<T> : IContainer<T>
+/// <remarks>
+/// Create a new instance of <see cref="AbstractUpdateContainer{T}"/>
+/// </remarks>
+/// <param name="insiderResolver"></param>
+/// <param name="input"></param>
+/// <param name="extraObjects"></param>
+public abstract class AbstractUpdateContainer<T>(
+    Func<Update, T?> insiderResolver,
+    HandlerInput input,
+    IReadOnlyDictionary<string, object>? extraObjects = default) : IContainer<T>
     where T : class
 {
-    private readonly Func<Update, T?> _insiderResolver;
-    private readonly IReadOnlyDictionary<string, object> _extraObjects;
-
-    /// <summary>
-    /// Create a new instance of <see cref="AbstractUpdateContainer{T}"/>
-    /// </summary>
-    /// <param name="insiderResolver"></param>
-    /// <param name="updater"></param>
-    /// <param name="shiningInsider"></param>
-    /// <param name="extraObjects"></param>
-    /// <exception cref="ArgumentNullException"></exception>
-    protected AbstractUpdateContainer(
-        Func<Update, T?> insiderResolver,
-        IUpdater updater,
-        ShiningInfo<long, Update> shiningInsider,
-        IReadOnlyDictionary<string, object>? extraObjects = default)
-    {
-        Updater = updater ??
-            throw new ArgumentNullException(nameof(updater));
-        ShiningInfo = shiningInsider;
-        Container = shiningInsider.Value;
-        BotClient = updater.BotClient;
-        _insiderResolver = insiderResolver ??
-            throw new ArgumentNullException(nameof(insiderResolver));
-        _extraObjects = extraObjects ?? new Dictionary<string, object>(StringComparer.Ordinal);
-    }
-
-    /// <summary>
-    /// Create a new instance of <see cref="AbstractUpdateContainer{T}"/>
-    /// </summary>
-    /// <param name="insiderResolver"></param>
-    /// <param name="updater"></param>
-    /// <param name="insider"></param>
-    /// <param name="extraObjects"></param>
-    protected AbstractUpdateContainer(
-        Func<Update, T?> insiderResolver,
-        IUpdater updater,
-        Update insider,
-        IReadOnlyDictionary<string, object>? extraObjects = default)
-    {
-        ShiningInfo = null!;
-        Updater = updater;
-        Container = insider;
-        BotClient = updater.BotClient;
-        _insiderResolver = insiderResolver;
-        _extraObjects = extraObjects ?? new Dictionary<string, object>(StringComparer.Ordinal);
-    }
+    private readonly Func<Update, T?> _insiderResolver = insiderResolver;
+    private readonly IReadOnlyDictionary<string, object> _extraObjects = extraObjects ?? new Dictionary<string, object>(StringComparer.Ordinal);
 
     /// <inheritdoc/>
     public object this[string key] => _extraObjects[key];
@@ -77,16 +41,19 @@ public abstract class AbstractUpdateContainer<T> : IContainer<T>
     }
 
     /// <inheritdoc/>
-    public virtual Update Container { get; }
+    public HandlerInput Input { get; init; } = input;
 
     /// <inheritdoc/>
-    public virtual ITelegramBotClient BotClient { get; }
+    public IUpdater Updater => Input.Updater;
 
     /// <inheritdoc/>
-    public virtual ShiningInfo<long, Update> ShiningInfo { get; }
+    public Update Container => ShiningInfo.Value;
 
     /// <inheritdoc/>
-    public virtual IUpdater Updater { get; }
+    public ShiningInfo<long, Update> ShiningInfo => Input.ShiningInfo;
+
+    /// <inheritdoc/>
+    public ITelegramBotClient BotClient => Updater.BotClient;
 
     /// <inheritdoc/>
     public bool ContainsKey(string key) => _extraObjects.ContainsKey(key);

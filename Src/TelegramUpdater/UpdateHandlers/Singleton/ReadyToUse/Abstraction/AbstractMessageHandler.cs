@@ -19,8 +19,8 @@ public abstract class AbstractMessageHandler(
     bool endpoint = true)
     : AbstractSingletonUpdateHandler<Message, MessageContainer>(updateType, getT, filter, endpoint)
 {
-    internal override MessageContainer ContainerBuilder(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
-        => new(updater, shiningInfo, ExtraData);
+    internal override MessageContainer ContainerBuilder(HandlerInput input)
+        => new(input, ExtraData);
 
     /// <inheritdoc/>
     protected override Task HandleAsync(MessageContainer updateContainer) => callback(updateContainer);

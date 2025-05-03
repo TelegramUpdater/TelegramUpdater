@@ -32,6 +32,6 @@ public sealed class CallbackQueryHandler(
     /// <inheritdoc/>
     protected override Task HandleAsync(CallbackQueryContainer container) => callback(container);
 
-    internal override CallbackQueryContainer ContainerBuilder(IUpdater updater, ShiningInfo<long, Update> shiningInfo)
-        => new(updater, shiningInfo, ExtraData);
+    internal override CallbackQueryContainer ContainerBuilder(HandlerInput input)
+        => new(input, ExtraData);
 }
