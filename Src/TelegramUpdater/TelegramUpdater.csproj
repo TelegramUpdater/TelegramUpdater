@@ -62,5 +62,10 @@
 			<_Parameter1>TelegramUpdaterTests</_Parameter1>
 		</AssemblyAttribute>
 	</ItemGroup>
+
+
+	<ItemGroup>
+	  <Folder Include="Storage\" />
+	</ItemGroup>
 	
 </Project>

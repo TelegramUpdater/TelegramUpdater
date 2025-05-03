@@ -4,10 +4,13 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Telegram.Bot.Types.Payments;
 using TelegramUpdater.Filters;
+using TelegramUpdater.Helpers;
 using TelegramUpdater.UpdateHandlers.Scoped;
 using TelegramUpdater.UpdateHandlers.Scoped.Attributes;
 using TelegramUpdater.UpdateHandlers.Singleton;
@@ -362,6 +365,82 @@ public static class UpdaterExtensions
                 scope.Count(), commandScope?.Type?? BotCommandScopeType.Default);
         }
     }
+
+    /// <summary>
+    /// Create a composite key with two values.
+    /// </summary>
+    /// <typeparam name="TF">First value struct type.</typeparam>
+    /// <typeparam name="TS">Second value struct type.</typeparam>
+    /// <param name="First"></param>
+    /// <param name="Second"></param>
+    [StructLayout(LayoutKind.Sequential)]
+    internal readonly record struct CompositeKey<TF, TS>(TF First, TS Second)
+        where TF: struct;
+
+    internal static void SetCompositeItem<TOuterKey, TKey, TValue>(
+        this IUpdater updater,
+        IChangeToken expirationToken,
+        TOuterKey outerKey,
+        TKey key,
+        TValue value)
+        where TOuterKey : struct
+    {
+        var options = new MemoryCacheEntryOptions
+        {
+            Priority = CacheItemPriority.NeverRemove,
+        };
+
+        options.AddExpirationToken(expirationToken);
+
+        updater.SetItem(new CompositeKey<TOuterKey, TKey>(outerKey, key), value, options);
+    }
+
+    internal static void RemoveCompositeItem<TOuterKey, TKey>(
+        this IUpdater updater, TOuterKey outerKey, TKey key)
+        where TOuterKey : struct
+    {
+        updater.RemoveItem(new CompositeKey<TOuterKey, TKey>(outerKey, key));
+    }
+
+    internal static void SetScopeItem<TKey, TValue>(
+        this IUpdater updater,
+        IChangeToken expirationToken,
+        HandlingStoragesKeys.ScopeId scopeId,
+        TKey key,
+        TValue value)
+    {
+        updater.SetCompositeItem(expirationToken, scopeId, key, value);
+    }
+
+    internal static void SetLayerItem<TKey, TValue>(
+        this IUpdater updater,
+        IChangeToken expirationToken,
+        HandlingStoragesKeys.LayerId layerId,
+        TKey key,
+        TValue value)
+    {
+        updater.SetCompositeItem(expirationToken, layerId, key, value);
+    }
+
+    internal static void RemoveScopeItem<TKey>(
+        this IUpdater updater, HandlingStoragesKeys.ScopeId scopeId, TKey key)
+    {
+        updater.RemoveItem(new CompositeKey<HandlingStoragesKeys.ScopeId, TKey>(scopeId, key));
+    }
+
+    internal static void RemoveLayerItem<TKey>(
+        this IUpdater updater, HandlingStoragesKeys.LayerId layerId, TKey key)
+    {
+        updater.RemoveItem(new CompositeKey<HandlingStoragesKeys.LayerId, TKey>(layerId, key));
+    }
+
+    internal static bool TryGetScopeItem<TKey>(
+        this IUpdater updater, HandlingStoragesKeys.ScopeId scopeId, TKey key, [NotNullWhen(true)] out object? value)
+        => updater.TryGetValue(new CompositeKey<HandlingStoragesKeys.ScopeId, TKey>(scopeId, key), out value);
+
+    internal static bool TryGetLayerItem<TKey>(
+        this IUpdater updater, HandlingStoragesKeys.LayerId layerId, TKey key, [NotNullWhen(true)] out object? value)
+        => updater.TryGetValue(new CompositeKey<HandlingStoragesKeys.LayerId, TKey>(layerId, key), out value);
 
     internal static HandlingOptions? GetHandlingOptionsFromAttibute(
         this IScopedUpdateHandlerContainer container)

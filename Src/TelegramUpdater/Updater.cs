@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net;
@@ -288,7 +289,7 @@ public sealed partial class Updater : IUpdater
     public object? this[object key]
     {
         get => _memoryCache.Get(key);
-        set => AddItem(key, value, new MemoryCacheEntryOptions
+        set => SetItem(key, value, new MemoryCacheEntryOptions
         {
             Priority = CacheItemPriority.NeverRemove,
         });
@@ -470,22 +471,18 @@ public sealed partial class Updater : IUpdater
         await ProcessUpdate(shiningInfo, cancellationToken).ConfigureAwait(false);
     }
 
-    Func<IServiceScope?, ShiningInfo<long, Update>, Guid, int, int, int, CancellationToken, Task<bool>> GetHandlingJob(
+    Func<IServiceScope?, HandlerInput, CancellationToken, Task<bool>> GetHandlingJob(
         IScopedUpdateHandlerContainer container)
     {
-        return async (scope, shiningInfo, scopeId, layer, group, index, cancellationToken) =>
+        return async (scope, input, cancellationToken) =>
         {
             var handler = container.CreateInstance(scope, logger: Logger);
 
             if (handler != null)
             {
                 if (!await HandleHandler(
-                    shiningInfo: shiningInfo,
                     handler: handler,
-                    scopeId: scopeId,
-                    layer: layer,
-                    group: group,
-                    index: index,
+                    input: input,
                     cancellationToken: cancellationToken).ConfigureAwait(false))
                 {
                     // Means stop propagation
@@ -499,18 +496,14 @@ public sealed partial class Updater : IUpdater
         };
     }
 
-    Func<IServiceScope?, ShiningInfo<long, Update>, Guid, int, int, int, CancellationToken, Task<bool>> GetHandlingJob(
+    Func<IServiceScope?, HandlerInput, CancellationToken, Task<bool>> GetHandlingJob(
         ISingletonUpdateHandler handler)
     {
-        return async (_, shiningInfo, scopeId, layer, group, index, cancellationToken) =>
+        return async (_, input, cancellationToken) =>
         {
             if (!await HandleHandler(
-                shiningInfo: shiningInfo,
                 handler: handler,
-                scopeId: scopeId,
-                layer: layer,
-                group: group,
-                index: index,
+                input: input,
                 cancellationToken: cancellationToken).ConfigureAwait(false))
             {
                 // Means stop propagation
@@ -523,12 +516,12 @@ public sealed partial class Updater : IUpdater
 
     class HandlingJobInfo(
         HandlingOptions options,
-        Func<IServiceScope?, ShiningInfo<long, Update>, Guid, int, int, int, CancellationToken, Task<bool>> handler,
+        Func<IServiceScope?, HandlerInput, CancellationToken, Task<bool>> handler,
         Func<UpdaterFilterInputs<Update>, bool> filter)
     {
         public HandlingOptions Options { get; } = options;
 
-        public Func<IServiceScope?, ShiningInfo<long, Update>, Guid, int, int, int, CancellationToken, Task<bool>> Handler { get; } = handler;
+        public Func<IServiceScope?, HandlerInput, CancellationToken, Task<bool>> Handler { get; } = handler;
 
         public Func<UpdaterFilterInputs<Update>, bool> Filter { get; } = filter;
     }
@@ -571,6 +564,8 @@ public sealed partial class Updater : IUpdater
 
             var scopeId = Guid.NewGuid();
             var wrapedScopedId = new HandlingStoragesKeys.ScopeId(scopeId);
+            var scopeCts = new CancellationTokenSource();
+            var scopeEndedToken = new CancellationChangeToken(scopeCts.Token);
 
             // Group handler by layer id
             var layerd = handlers.GroupBy(x => x.Options.LayerId);
@@ -579,6 +574,8 @@ public sealed partial class Updater : IUpdater
             foreach (var layer in layerd.OrderBy(x=> x.Key))
             {
                 var layerId = new HandlingStoragesKeys.LayerId(scopeId, layer.Key);
+                var layerCts = new CancellationTokenSource();
+                var layerEndedToken = new CancellationChangeToken(layerCts.Token);
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -605,11 +602,15 @@ public sealed partial class Updater : IUpdater
 
                     if (await handlingInfo.Handler(
                         serviceScope,
-                        shiningInfo,
-                        scopeId,
-                        handlingInfo.Options.LayerId,
-                        handlingInfo.Options.Group,
-                        indexInLayer,
+                        new HandlerInput(
+                            updater: this,
+                            shiningInfo: shiningInfo,
+                            scopeId: scopeId,
+                            layerId: handlingInfo.Options.LayerId,
+                            group: handlingInfo.Options.Group,
+                            index: indexInLayer,
+                            scopeChangeToken: scopeEndedToken,
+                            layerChangeToken: layerEndedToken),
                         cancellationToken)
                         .ConfigureAwait(false))
                     {
@@ -617,8 +618,21 @@ public sealed partial class Updater : IUpdater
                         break;
                     }
                 }
+
+                // End of the layer
+#if NET8_0_OR_GREATER
+                await layerCts.CancelAsync().ConfigureAwait(false);
+#else
+                layerCts.Cancel();
+#endif
             }
 
+            // End of the scope
+#if NET8_0_OR_GREATER
+            await scopeCts.CancelAsync().ConfigureAwait(false);
+#else
+            scopeCts.Cancel();
+#endif
             if (serviceScope is not null)
                 await serviceScope.Value.DisposeAsync().ConfigureAwait(false);
         }
@@ -632,12 +646,8 @@ public sealed partial class Updater : IUpdater
     /// Returns false to break.
     /// </summary>
     private async Task<bool> HandleHandler(
-        ShiningInfo<long, Update> shiningInfo,
         IUpdateHandler handler,
-        Guid scopeId,
-        int layer,
-        int group,
-        int index,
+        HandlerInput input,
         CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
@@ -648,9 +658,7 @@ public sealed partial class Updater : IUpdater
         // Handle the shit.
         try
         {
-            await handler.HandleAsync(
-                new HandlerInput(this, shiningInfo, scopeId, layer, group, index))
-                .ConfigureAwait(false);
+            await handler.HandleAsync(input).ConfigureAwait(false);
         }
         // Cut handlers chain.
         catch (StopPropagationException)
@@ -688,10 +696,16 @@ public sealed partial class Updater : IUpdater
         => _memoryCache.TryGetValue(key, out value);
 
     /// <inheritdoc/>
-    public void AddItem<T>(
+    public void SetItem<T>(
         object key, T value, MemoryCacheEntryOptions? options = null)
     {
         _memoryCache.Set(key, value, options);
+    }
+
+    /// <inheritdoc/>
+    public void RemoveItem<T>(T key)
+    {
+        _memoryCache.Remove(key);
     }
 
 #if NET8_0_OR_GREATER

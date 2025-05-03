@@ -1,4 +1,5 @@
-﻿using TelegramUpdater.RainbowUtilities;
+﻿using Microsoft.Extensions.Primitives;
+using TelegramUpdater.RainbowUtilities;
 
 namespace TelegramUpdater.UpdateContainer;
 
@@ -54,6 +55,10 @@ public abstract class AbstractUpdateContainer<T>(
 
     /// <inheritdoc/>
     public ITelegramBotClient BotClient => Updater.BotClient;
+
+    internal IChangeToken? ScopeChangeToken => Input.ScopeChangeToken;
+
+    internal IChangeToken? LayerChangeToken => Input.LayerChangeToken;
 
     /// <inheritdoc/>
     public bool ContainsKey(string key) => _extraObjects.ContainsKey(key);

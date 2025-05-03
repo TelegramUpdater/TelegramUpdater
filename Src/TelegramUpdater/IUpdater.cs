@@ -126,7 +126,13 @@ public interface IUpdater
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <param name="options"></param>
-    public void AddItem<T>(object key, T value, MemoryCacheEntryOptions? options = default);
+    public void SetItem<T>(object key, T value, MemoryCacheEntryOptions? options = default);
+
+    /// <summary>
+    /// Remove item from updater's storage
+    /// </summary>
+    /// <param name="key"></param>
+    public void RemoveItem<T>(T key);
 
     /// <summary>
     /// Check if an <see cref="string"/> key exists in updater extra data.
