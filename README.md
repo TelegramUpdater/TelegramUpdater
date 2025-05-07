@@ -85,6 +85,10 @@ partial class Program
 
 This should work the same as before. (Filters are applied as attributes)
 
+> [!WARNING]
+> If you add scoped handlers but your `Updater` without having access to the DI (`IServiceProvider`), the updater will still try to make an instance of you scoped handler
+> if its filters passes, by its parameterless constructor.
+
 #### Worker service
 
 If your project is a worker service or anything that has HostBuilder and DI (dependency injection)
@@ -125,9 +129,9 @@ You can add them like this:
   ...
 }
 ```
-
-**Note**: Updater can and will figure out `AllowedUpdates` if not specified by looking
-into you registered handlers.
+> [!NOTE]
+> Updater can and will figure out `AllowedUpdates` if not specified by looking
+> into you registered handlers.
 
 For singleton handlers it's just like before, but if your going to use scoped handlers,
 put them into the right place as mentioned in the example.
@@ -203,5 +207,7 @@ public static async Task AboutCommand(IContainer<Message> container)
 Extension methods return containerized results.
 
 ## What's Next ?!
+
+The [Examples/Playground](https://github.com/TelegramUpdater/TelegramUpdater/tree/dev/Examples/Playground) is a good worker service example that uses many of TelegramUpdater's features.
 
 There are plenty of various examples available at [Examples](https://github.com/TelegramUpdater/TelegramUpdater.Examples)
