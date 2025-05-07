@@ -62,7 +62,12 @@ internal class RenameAskName : MessageHandler
 }
 
 [ScopedHandler(Group = 2)]
-[Text, Renameing(RenameState.AskingLastName), Private]
+[
+    Private,
+    Text, 
+    Renameing(RenameState.AskingLastName),
+    UserUpdaterDataExists("name")
+]
 internal class RenameAskLastName(PlaygroundMemory memory) : MessageHandler
 {
     protected override async Task HandleAsync(MessageContainer cntr)
@@ -80,8 +85,6 @@ internal class RenameAskLastName(PlaygroundMemory memory) : MessageHandler
                 }
                 else
                 {
-                    await cntr.Response("First name is not set.");
-                    DeleteState<RenameState>(From);
                     return;
                 }
 
@@ -110,6 +113,26 @@ internal class RenameAskLastName(PlaygroundMemory memory) : MessageHandler
                 break;
                 
         }
+    }
+}
+
+// This handler is processed after RenameAskLastName because of its group.
+// Which is when UserUpdaterDataExists("name") filter don't pass.
+// Remove cntr.SetUserItem("name", ...) in RenameAskName to trigger this.
+[ScopedHandler(Group = 3)]
+[
+    Private,
+    Text,
+    Renameing(RenameState.AskingLastName),
+]
+internal class RenameAskLastNameNoName : MessageHandler
+{
+    protected override async Task HandleAsync(MessageContainer cntr)
+    {
+        if (From is null) return;
+
+        await Response("Where is your first name? Try again.");
+        DeleteState<RenameState>(From);
     }
 }
 
