@@ -16,7 +16,7 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers;
 public sealed class RawContainer(
     HandlerInput input,
     IReadOnlyDictionary<string, object>? extraObjects = default)
-    : IUpdateContainer
+    : IContainer
 {
     private readonly IReadOnlyDictionary<string, object> _extraObjects = extraObjects
         ?? new Dictionary<string, object>(StringComparer.Ordinal);

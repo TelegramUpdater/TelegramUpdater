@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using TelegramUpdater.UpdateContainer.Tags;
-using static TelegramUpdater.UpdaterExtensions;
 
 namespace TelegramUpdater.UpdateContainer;
 
@@ -17,7 +16,7 @@ public static class TaggedExtensions
     /// </summary>
     public static bool SetUserItem<C, TValue>(
         this C container, string key, TValue value, MemoryCacheEntryOptions? options = default)
-        where C : IUpdateContainer, ISenderIdExtractable
+        where C : IContainer, ISenderIdExtractable
     {
         var senderId = container.GetSenderId();
 
@@ -36,7 +35,7 @@ public static class TaggedExtensions
     /// Set a user item.
     /// </summary>
     public static void RemoveUserItem<C>(this C container, string key)
-        where C : IUpdateContainer, ISenderIdExtractable
+        where C : IContainer, ISenderIdExtractable
     {
         var senderId = container.GetSenderId();
 
@@ -53,7 +52,7 @@ public static class TaggedExtensions
         this C container,
         string key,
         [NotNullWhen(true)] out TValue? value)
-        where C : IUpdateContainer, ISenderIdExtractable
+        where C : IContainer, ISenderIdExtractable
     {
         var senderId = container.GetSenderId();
 
@@ -72,7 +71,7 @@ public static class TaggedExtensions
     /// </summary>
     public static bool SetUserScopeItem<C, TValue>(
         this C container, string key, TValue value)
-        where C : IUpdateContainer, ISenderIdExtractable
+        where C : IContainer, ISenderIdExtractable
     {
         var senderId = container.GetSenderId();
 
@@ -89,7 +88,7 @@ public static class TaggedExtensions
     /// </summary>
     public static void RemoveUserScopeItem<C>(
         this C container, string key)
-        where C : IUpdateContainer, ISenderIdExtractable
+        where C : IContainer, ISenderIdExtractable
     {
         if (container.GetSenderId() is long senderId)
             container.Updater.RemoveCompositeScopeItem(container.ScopeId(), senderId.ToString(CultureInfo.InvariantCulture), key);
@@ -100,7 +99,7 @@ public static class TaggedExtensions
     /// </summary>
     public static bool TryGetUserScopeItem<C, TValue>(
         this C container, string key, [NotNullWhen(true)] out TValue? value)
-        where C : IUpdateContainer, ISenderIdExtractable
+        where C : IContainer, ISenderIdExtractable
     {
         if (container.GetSenderId() is long senderId)
             return container.Updater.TryGetCompositeScopeItem(container.ScopeId(), senderId.ToString(CultureInfo.InvariantCulture), key, out value);
@@ -114,7 +113,7 @@ public static class TaggedExtensions
     /// </summary>
     public static bool SetUserLayerItem<C, TValue>(
         this C container, string key, TValue value)
-        where C : IUpdateContainer, ISenderIdExtractable
+        where C : IContainer, ISenderIdExtractable
     {
         var senderId = container.GetSenderId();
 
@@ -131,7 +130,7 @@ public static class TaggedExtensions
     /// </summary>
     public static void RemoveUserLayerItem<C>(
         this C container, string key)
-        where C : IUpdateContainer, ISenderIdExtractable
+        where C : IContainer, ISenderIdExtractable
     {
         if (container.GetSenderId() is long senderId)
             container.Updater.RemoveCompositeLayerItem(container.LayerId(), senderId.ToString(CultureInfo.InvariantCulture), key);
@@ -142,7 +141,7 @@ public static class TaggedExtensions
     /// </summary>
     public static bool TryGetUserLayerItem<C>(
         this C container, string key, [NotNullWhen(true)] out object? value)
-        where C : IUpdateContainer, ISenderIdExtractable
+        where C : IContainer, ISenderIdExtractable
     {
         if (container.GetSenderId() is long senderId)
             return container.Updater.TryGetCompositeLayerItem(container.LayerId(), senderId.ToString(CultureInfo.InvariantCulture), key, out value);

@@ -42,13 +42,13 @@ public class DefaultLiteContainer<T> : IContainer<T> where T : class
     /// <inheritdoc />
     public T Update { get; }
 
-    HandlerInput IUpdateContainer.Input => Input;
+    HandlerInput IContainer.Input => Input;
 
-    ShiningInfo<long, Update> IUpdateContainer.ShiningInfo
+    ShiningInfo<long, Update> IContainer.ShiningInfo
         => throw new InvalidOperationException(
             "Lite containers have no ShiningInfo, since they're not received from updater.");
 
-    object IUpdateContainer.this[string key]
+    object IContainer.this[string key]
         => throw new InvalidOperationException("Lite container doesn't have any extra data.");
 
     /// <inheritdoc />
@@ -77,7 +77,7 @@ public class DefaultLiteContainer<T> : IContainer<T> where T : class
         CallbackQuery update, IUpdater updater)
         => CreateLiteContainer(x => x.CallbackQuery, update, updater);
 
-    bool IUpdateContainer.ContainsKey(string key)
+    bool IContainer.ContainsKey(string key)
     {
         throw new InvalidOperationException("Lite container doesn't have any extra data.");
     }
