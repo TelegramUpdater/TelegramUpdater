@@ -692,7 +692,7 @@ public sealed partial class Updater : IUpdater
     }
 
     /// <inheritdoc/>
-    public bool TryGetValue(string key, [NotNullWhen(true)] out object? value)
+    public bool TryGetValue<TValue>(string key, [NotNullWhen(true)] out TValue? value)
     {
         var result = _memoryCache.TryGetValue(key, out value);
 

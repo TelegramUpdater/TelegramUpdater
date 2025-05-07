@@ -45,6 +45,11 @@ internal class RenameAskName : MessageHandler
 
                 Updater.MemoryCache.Set(From.Id, text, TimeSpan.FromSeconds(30));
 
+                cntr.SetUserItem("name", text, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
+                });
+
                 ForwardState<RenameState>(From);
 
                 break;
@@ -67,7 +72,18 @@ internal class RenameAskLastName(PlaygroundMemory memory) : MessageHandler
         switch (ActualUpdate)
         {
             case { Text: { } text } when !string.IsNullOrWhiteSpace(text):
-                var fullName = $"{Updater[From.Id.ToString()]} {text}";
+
+                string fullName;
+                if (cntr.TryGetUserItem("name", out string? name))
+                {
+                    fullName = $"{name} {text}";
+                }
+                else
+                {
+                    await cntr.Response("First name is not set.");
+                    DeleteState<RenameState>(From);
+                    return;
+                }
 
                 var updated = await memory.SeenUsers
                     .Where(x => x.TelegramId == From.Id)
@@ -84,7 +100,7 @@ internal class RenameAskLastName(PlaygroundMemory memory) : MessageHandler
                     await Response("Did you called /start?");
                 }
 
-                Updater.MemoryCache.Remove(From.Id);
+                cntr.RemoveUserItem("name");
                 DeleteState<RenameState>(From);
 
                 break;

@@ -14,7 +14,8 @@ public static class MarkupExtensions
     /// <param name="rowCapacity">Maximum buttons in a row.</param>
     /// <returns></returns>
     public static InlineKeyboardMarkup BuildInlineKeyboards(
-        Action<GridCollection<InlineKeyboardButton>> buildButtonsGrid, int? rowCapacity = default)
+        Action<GridCollection<InlineKeyboardButton>> buildButtonsGrid,
+        int? rowCapacity = default)
     {
         var grid = new GridCollection<InlineKeyboardButton>(rowCapacity);
         buildButtonsGrid(grid);
@@ -27,7 +28,8 @@ public static class MarkupExtensions
     /// <param name="buildButtonsGrid">An action to build your reply markup.</param>
     /// <param name="rowCapacity">Maximum buttons in a row.</param>
     public static ReplyKeyboardMarkup BuildReplyKeyboards(
-        Action<GridCollection<KeyboardButton>> buildButtonsGrid, int? rowCapacity = default)
+        Action<GridCollection<KeyboardButton>> buildButtonsGrid,
+        int? rowCapacity = default)
     {
         var grid = new GridCollection<KeyboardButton>(rowCapacity);
         buildButtonsGrid(grid);

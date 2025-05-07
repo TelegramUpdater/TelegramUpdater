@@ -54,9 +54,9 @@ public static class Extensions
     {
         var key = StateKeeperKeyPrefix + name;
 
-        if (updater.TryGetValue(key, out object? keeper))
+        if (updater.TryGetValue(key, out IStateKeeper<TKey, TState, TStorage>? keeper))
         {
-            return (IStateKeeper<TKey, TState, TStorage>)keeper;
+            return keeper;
         }
 
         throw new StateKeeperNotRegisteredException(name);
@@ -79,9 +79,9 @@ public static class Extensions
     {
         var key = StateKeeperKeyPrefix + name;
 
-        if (updater.TryGetValue(key, out var keeper))
+        if (updater.TryGetValue(key, out IStateKeeper<TKey, TState, TStorage>? keeper))
         {
-            stateKeeper = (IStateKeeper<TKey, TState, TStorage>)keeper;
+            stateKeeper = keeper;
             return true;
         }
 

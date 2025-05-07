@@ -16,11 +16,11 @@ public class CompositeKeyTests
     {
         var scopeId = new HandlingStoragesKeys.ScopeId(Guid.NewGuid());
 
-        var key1 = new CompositeKey<HandlingStoragesKeys.ScopeId, CompositeKey<long, string>>(
-            scopeId, new CompositeKey<long, string>(12345, "test"));
+        var key1 = new CompositeKey(
+            scopeId.ToString(), new CompositeKey("12345", "test"));
 
-        var key2 = new CompositeKey<HandlingStoragesKeys.ScopeId, CompositeKey<long, string>>(
-            scopeId, new CompositeKey<long, string>(12345, "test"));
+        var key2 = new CompositeKey(
+            scopeId.ToString(), new CompositeKey("12345", "test"));
 
         Assert.Equal(key1, key2);
     }

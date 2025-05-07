@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Telegram.Bot.Types;
 using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.Filters;
 using TelegramUpdater.UpdateContainer;
@@ -43,13 +42,13 @@ internal class StatusSeen(ILogger<StatusSeen> logger) : MessageHandler
     {
         if (From is null) return;
 
-        if (!container.TryGetScopeItem("scopeObject", out var _))
+        if (!container.TryGetScopeItem("scopeObject", out object? _))
             logger.LogCritical("I MUST have access to 'scopeObject' since we are on a same scope.");
 
-        if (!container.TryGetLayerItem("layerObject", out var _))
+        if (!container.TryGetLayerItem("layerObject", out object? _))
             logger.LogCritical("I MUST have access to 'layerObject' since we are on a same layer.");
 
-        container.SetCompositeScopeItem(From.Id.ToString(), "seen", true);
+        container.SetUserScopeItem("seen", true);
         await Response("Hooray! you have been seen");
     }
 }
@@ -63,11 +62,14 @@ internal class StatusNotSeen(ILogger<StatusNotSeen> logger) : MessageHandler
     {
         if (From is null) return;
 
-        if (!container.TryGetScopeItem("scopeObject", out var _))
+        if (!container.TryGetScopeItem("scopeObject", out object? _))
             logger.LogCritical("I MUST have access to 'scopeObject' since we are on a same scope.");
 
-        if (container.TryGetLayerItem("layerObject", out var _))
+        if (container.TryGetLayerItem("layerObject", out object? _))
             logger.LogCritical("I MUST NOT have access to 'layerObject' since we are not on a same layer.");
+
+        if (container.TryGetUserScopeItem("seen", out bool? _))
+            logger.LogCritical("I MUST NOT have access to 'seen' because of ThenRemove = true.");
 
         await Response("Oh! i have not seen you yet");
     }

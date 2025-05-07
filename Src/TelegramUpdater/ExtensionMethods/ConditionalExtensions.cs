@@ -14,11 +14,12 @@ public static class ConditionalExtensions
     /// <summary>
     /// Do something when a regex matched.
     /// </summary>
-    public static MatchContext<T> If<T>(this IContainer<T> simpleContext,
-                                        Func<T, string?> getText,
-                                        string pattern,
-                                        Action<IContainer<T>> func,
-                                        RegexOptions? regexOptions = default) where T : class
+    public static MatchContext<T> If<T>(
+        this IContainer<T> simpleContext,
+        Func<T, string?> getText,
+        string pattern,
+        Action<IContainer<T>> func,
+        RegexOptions? regexOptions = default) where T : class
     {
         var match = MatchContext<T>.Check(simpleContext, getText, pattern, regexOptions);
 
@@ -33,9 +34,10 @@ public static class ConditionalExtensions
     /// <summary>
     /// Do something when a condition is true.
     /// </summary>
-    public static MatchContext<T> If<T>(this IContainer<T> simpleContext,
-                                        Func<IContainer<T>, bool> predict,
-                                        Action<IContainer<T>> func) where T : class
+    public static MatchContext<T> If<T>(
+        this IContainer<T> simpleContext,
+        Func<IContainer<T>, bool> predict,
+        Action<IContainer<T>> func) where T : class
     {
         if (predict(simpleContext))
         {
@@ -49,8 +51,9 @@ public static class ConditionalExtensions
     /// <summary>
     /// Do something when a regex not matched.
     /// </summary>
-    public static void Else<T>(this MatchContext<T> matchContext,
-                               Action<IContainer<T>> func) where T : class
+    public static void Else<T>(
+        this MatchContext<T> matchContext,
+        Action<IContainer<T>> func) where T : class
     {
         var match = matchContext;
         if (!match)
@@ -62,11 +65,12 @@ public static class ConditionalExtensions
     /// <summary>
     /// Do something when a regex not matched but something else matched.
     /// </summary>
-    public static MatchContext<T> ElseIf<T>(this MatchContext<T> matchContext,
-                                            Func<T, string?> getText,
-                                            string pattern,
-                                            Action<IContainer<T>> func,
-                                            RegexOptions? regexOptions = default) where T : class
+    public static MatchContext<T> ElseIf<T>(
+        this MatchContext<T> matchContext,
+        Func<T, string?> getText,
+        string pattern,
+        Action<IContainer<T>> func,
+        RegexOptions? regexOptions = default) where T : class
     {
         if (!matchContext)
         {
@@ -86,9 +90,10 @@ public static class ConditionalExtensions
     /// <summary>
     /// Do something when a regex not matched but something else matched.
     /// </summary>
-    public static MatchContext<T> ElseIf<T>(this MatchContext<T> matchContext,
-                                            Func<IContainer<T>, bool> predict,
-                                            Action<IContainer<T>> func) where T : class
+    public static MatchContext<T> ElseIf<T>(
+        this MatchContext<T> matchContext,
+        Func<IContainer<T>, bool> predict,
+        Action<IContainer<T>> func) where T : class
     {
         if (!matchContext)
         {
@@ -111,8 +116,9 @@ public static class ConditionalExtensions
     /// <param name="simpleContext"></param>
     /// <param name="func"></param>
     /// <returns></returns>
-    public static MatchContext<T> IfNotNull<T>(this IContainer<T>? simpleContext,
-                                               Action<IContainer<T>> func) where T : class
+    public static MatchContext<T> IfNotNull<T>(
+        this IContainer<T>? simpleContext,
+        Action<IContainer<T>> func) where T : class
     {
         if (simpleContext != null)
         {
@@ -149,11 +155,12 @@ public static class ConditionalExtensions
     /// <summary>
     /// Do something when a regex matched.
     /// </summary>
-    public static async Task<MatchContext<T>> If<T>(this IContainer<T> simpleContext,
-                                                    Func<T, string?> getText,
-                                                    string pattern,
-                                                    Func<IContainer<T>, Task> func,
-                                                    RegexOptions? regexOptions = default) where T : class
+    public static async Task<MatchContext<T>> If<T>(
+        this IContainer<T> simpleContext,
+        Func<T, string?> getText,
+        string pattern,
+        Func<IContainer<T>, Task> func,
+        RegexOptions? regexOptions = default) where T : class
     {
         var match = MatchContext<T>.Check(simpleContext, getText, pattern, regexOptions);
 
@@ -168,11 +175,12 @@ public static class ConditionalExtensions
     /// <summary>
     /// Do something when a regex matched.
     /// </summary>
-    public static async Task<MatchContext<T>> If<T>(this Task<IContainer<T>> simpleContext,
-                                                    Func<T, string?> getText,
-                                                    string pattern,
-                                                    Func<IContainer<T>, Task> func,
-                                                    RegexOptions? regexOptions = default) where T : class
+    public static async Task<MatchContext<T>> If<T>(
+        this Task<IContainer<T>> simpleContext,
+        Func<T, string?> getText,
+        string pattern,
+        Func<IContainer<T>, Task> func,
+        RegexOptions? regexOptions = default) where T : class
     {
         var gottenContext = await simpleContext.ConfigureAwait(false);
 
@@ -189,9 +197,10 @@ public static class ConditionalExtensions
     /// <summary>
     /// Do something when a condition is true.
     /// </summary>
-    public static async Task<MatchContext<T>> If<T>(this IContainer<T> simpleContext,
-                                                    Func<IContainer<T>, bool> predict,
-                                                    Func<IContainer<T>, Task> func) where T : class
+    public static async Task<MatchContext<T>> If<T>(
+        this IContainer<T> simpleContext,
+        Func<IContainer<T>, bool> predict,
+        Func<IContainer<T>, Task> func) where T : class
     {
         if (predict(simpleContext))
         {
@@ -205,9 +214,10 @@ public static class ConditionalExtensions
     /// <summary>
     /// Do something when a condition is true.
     /// </summary>
-    public static async Task<MatchContext<T>> If<T>(this Task<IContainer<T>> simpleContext,
-                                                    Func<IContainer<T>, bool> predict,
-                                                    Func<IContainer<T>, Task> func) where T : class
+    public static async Task<MatchContext<T>> If<T>(
+        this Task<IContainer<T>> simpleContext,
+        Func<IContainer<T>, bool> predict,
+        Func<IContainer<T>, Task> func) where T : class
     {
         var gottenContext = await simpleContext.ConfigureAwait(false);
 
@@ -223,8 +233,9 @@ public static class ConditionalExtensions
     /// <summary>
     /// If this <see cref="AbstractUpdateContainer{T}"/> is not null
     /// </summary>
-    public static async Task<MatchContext<T>> IfNotNull<T>(this IContainer<T>? simpleContext,
-                                                           Func<IContainer<T>, Task> func) where T : class
+    public static async Task<MatchContext<T>> IfNotNull<T>(
+        this IContainer<T>? simpleContext,
+        Func<IContainer<T>, Task> func) where T : class
     {
         if (simpleContext != null)
         {
@@ -238,8 +249,9 @@ public static class ConditionalExtensions
     /// <summary>
     /// If this <see cref="AbstractUpdateContainer{T}"/> is not null
     /// </summary>
-    public static async Task<MatchContext<T>> IfNotNull<T>(this Task<IContainer<T>?> simpleContext,
-                                                           Func<IContainer<T>, Task> func) where T : class
+    public static async Task<MatchContext<T>> IfNotNull<T>(
+        this Task<IContainer<T>?> simpleContext,
+        Func<IContainer<T>, Task> func) where T : class
     {
         var gottenContext = await simpleContext.ConfigureAwait(false);
 
@@ -255,8 +267,9 @@ public static class ConditionalExtensions
     /// <summary>
     /// Do something when a regex not matched.
     /// </summary>
-    public static async Task Else<T>(this Task<MatchContext<T>> matchContext,
-                                     Func<IContainer<T>, Task> func) where T : class
+    public static async Task Else<T>(
+        this Task<MatchContext<T>> matchContext,
+        Func<IContainer<T>, Task> func) where T : class
     {
         var match = await matchContext.ConfigureAwait(false);
         if (!match)
@@ -268,11 +281,12 @@ public static class ConditionalExtensions
     /// <summary>
     /// Do something when a regex not matched but something else matched.
     /// </summary>
-    public static async Task<MatchContext<T>> ElseIf<T>(this Task<MatchContext<T>> matchContext,
-                                                        Func<T, string?> getText,
-                                                        string pattern,
-                                                        Func<IContainer<T>, Task> func,
-                                                        RegexOptions? regexOptions = default) where T : class
+    public static async Task<MatchContext<T>> ElseIf<T>(
+        this Task<MatchContext<T>> matchContext,
+        Func<T, string?> getText,
+        string pattern,
+        Func<IContainer<T>, Task> func,
+        RegexOptions? regexOptions = default) where T : class
     {
         var prevMatch = await matchContext.ConfigureAwait(false);
         if (!prevMatch)
@@ -293,9 +307,10 @@ public static class ConditionalExtensions
     /// <summary>
     /// Do something when a regex not matched but something else matched.
     /// </summary>
-    public static async Task<MatchContext<T>> ElseIf<T>(this Task<MatchContext<T>> matchContext,
-                                                        Func<IContainer<T>, bool> predict,
-                                                        Func<IContainer<T>, Task> func) where T : class
+    public static async Task<MatchContext<T>> ElseIf<T>(
+        this Task<MatchContext<T>> matchContext,
+        Func<IContainer<T>, bool> predict,
+        Func<IContainer<T>, Task> func) where T : class
     {
         var prevMatch = await matchContext.ConfigureAwait(false);
         if (!prevMatch)
@@ -319,37 +334,41 @@ public static class ConditionalExtensions
     /// <summary>
     /// Do something when a regex matched.
     /// </summary>
-    public static async Task<MatchContext<Message>> If(this IContainer<Message> simpleContext,
-                                                       string pattern,
-                                                       Func<IContainer<Message>, Task> func,
-                                                       RegexOptions? regexOptions = default)
+    public static async Task<MatchContext<Message>> If(
+        this IContainer<Message> simpleContext,
+        string pattern,
+        Func<IContainer<Message>, Task> func,
+        RegexOptions? regexOptions = default)
         => await simpleContext.If(x => x.Text, pattern, func, regexOptions).ConfigureAwait(false);
 
     /// <summary>
     /// Do something when a regex matched.
     /// </summary>
-    public static async Task<MatchContext<CallbackQuery>> If(this IContainer<CallbackQuery> simpleContext,
-                                                             string pattern,
-                                                             Func<IContainer<CallbackQuery>, Task> func,
-                                                             RegexOptions? regexOptions = default)
+    public static async Task<MatchContext<CallbackQuery>> If(
+        this IContainer<CallbackQuery> simpleContext,
+        string pattern,
+        Func<IContainer<CallbackQuery>, Task> func,
+        RegexOptions? regexOptions = default)
         => await simpleContext.If(x => x.Data, pattern, func, regexOptions).ConfigureAwait(false);
 
     /// <summary>
     /// Do something when a regex not matched but something else matched.
     /// </summary>
-    public static async Task<MatchContext<CallbackQuery>> ElseIf(this Task<MatchContext<CallbackQuery>> matchContext,
-                                                                 string pattern,
-                                                                 Func<IContainer<CallbackQuery>, Task> func,
-                                                                 RegexOptions? regexOptions = default)
+    public static async Task<MatchContext<CallbackQuery>> ElseIf(
+        this Task<MatchContext<CallbackQuery>> matchContext,
+        string pattern,
+        Func<IContainer<CallbackQuery>, Task> func,
+        RegexOptions? regexOptions = default)
         => await matchContext.ElseIf(x => x.Data, pattern, func, regexOptions).ConfigureAwait(false);
 
     /// <summary>
     /// Do something when a regex not matched but something else matched.
     /// </summary>
-    public static async Task<MatchContext<Message>> ElseIf(this Task<MatchContext<Message>> matchContext,
-                                                           string pattern,
-                                                           Func<IContainer<Message>, Task> func,
-                                                           RegexOptions? regexOptions = default)
+    public static async Task<MatchContext<Message>> ElseIf(
+        this Task<MatchContext<Message>> matchContext,
+        string pattern,
+        Func<IContainer<Message>, Task> func,
+        RegexOptions? regexOptions = default)
         => await matchContext.ElseIf(x => x.Text, pattern, func, regexOptions).ConfigureAwait(false);
 
     #endregion
