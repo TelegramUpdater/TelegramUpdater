@@ -8,7 +8,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// </summary>
 public sealed class PurchasedPaidMediaHandler(
     Func<IContainer<PaidMediaPurchased>, Task> callback,
-    Filter<UpdaterFilterInputs<PaidMediaPurchased>>? filter = default,
+    IFilter<UpdaterFilterInputs<PaidMediaPurchased>>? filter = default,
     bool endpoint = true)
     : DefaultHandler<PaidMediaPurchased>(UpdateType.PurchasedPaidMedia, callback, filter, x => x.PurchasedPaidMedia, endpoint)
 {

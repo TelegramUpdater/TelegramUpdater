@@ -139,7 +139,7 @@ public abstract class AbstractMessageHandler(Func<Update, Message?> resolver)
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
         var update = await ChannelMessage(
-            FilterCutify.Text(), timeOut, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
+            ReadyFilters.Text(), timeOut, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
         if (update == null)
         {
             if (onTimeOut is not null)

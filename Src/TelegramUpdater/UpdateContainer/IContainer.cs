@@ -43,7 +43,7 @@ public interface IContainer
     /// You can find that data here.
     /// </summary>
     /// <remarks>
-    /// Eg: a <see cref="FilterCutify.OnCommand(string[])"/> may insert an string array with key <c>args</c>.
+    /// Eg: a <see cref="Filters.OnCommand(string[])"/> may insert an string array with key <c>args</c>.
     /// </remarks>
     /// <param name="key">Data key, based on applied filter.</param>
     /// <returns>

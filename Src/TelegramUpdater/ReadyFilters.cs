@@ -7,9 +7,9 @@ using TelegramUpdater.Helpers;
 namespace TelegramUpdater;
 
 /// <summary>
-/// A collection of cutified filters for kids.
+/// A collection of filters.
 /// </summary>
-public static class FilterCutify
+public static class ReadyFilters
 {
     /// <summary>
     /// The handler will always be triggered on specified update type of <typeparamref name="T"/>

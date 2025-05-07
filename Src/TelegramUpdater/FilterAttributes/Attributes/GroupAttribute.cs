@@ -1,7 +1,7 @@
 ﻿namespace TelegramUpdater.FilterAttributes.Attributes;
 
 /// <summary>
-/// Filter attribute for <see cref="FilterCutify.Group"/>
+/// Filter attribute for <see cref="ReadyFilters.Group"/>
 /// </summary>
 public sealed class GroupAttribute : FilterAttributeBuilder
 {
@@ -9,7 +9,7 @@ public sealed class GroupAttribute : FilterAttributeBuilder
     /// Initialize a new instance of <see cref="GroupAttribute"/>.
     /// </summary>
     public GroupAttribute()
-        : base(x => x.AddFilterForUpdate(FilterCutify.Group()))
+        : base(x => x.AddFilterForUpdate(ReadyFilters.Group()))
     {
     }
 }

@@ -334,10 +334,10 @@ public sealed class UpdaterBuilderStep3
     /// </list>
     /// </para>
     /// <para>
-    /// You can use <see cref="FilterCutify"/> class to create your filter.
+    /// You can use <see cref="Filters"/> class to create your filter.
     /// </para>
     /// <para>
-    /// <see cref="FilterCutify.OnCommand(string[])"/> is a good start to handle commands like
+    /// <see cref="Filters.OnCommand(string[])"/> is a good start to handle commands like
     /// <c>/start</c>.
     /// </para>
     /// <para>
@@ -392,10 +392,10 @@ public sealed class UpdaterBuilderStep3
     /// </list>
     /// </para>
     /// <para>
-    /// You can use <see cref="FilterCutify"/> class to create your filter.
+    /// You can use <see cref="Filters"/> class to create your filter.
     /// </para>
     /// <para>
-    /// <see cref="FilterCutify.OnCommand(string[])"/> is a good start to handle commands like
+    /// <see cref="Filters.OnCommand(string[])"/> is a good start to handle commands like
     /// <c>/start</c>.
     /// </para>
     /// <para>
@@ -449,10 +449,10 @@ public sealed class UpdaterBuilderStep3
     /// </list>
     /// </para>
     /// <para>
-    /// You can use <see cref="FilterCutify"/> class to create your filter.
+    /// You can use <see cref="Filters"/> class to create your filter.
     /// </para>
     /// <para>
-    /// <see cref="FilterCutify.OnCommand(string[])"/> is a good start to handle commands like
+    /// <see cref="Filters.OnCommand(string[])"/> is a good start to handle commands like
     /// <c>/start</c>.
     /// </para>
     /// <para>
@@ -508,10 +508,10 @@ public sealed class UpdaterBuilderStep3
     /// </list>
     /// </para>
     /// <para>
-    /// You can use <see cref="FilterCutify"/> class to create your filter.
+    /// You can use <see cref="Filters"/> class to create your filter.
     /// </para>
     /// <para>
-    /// <see cref="FilterCutify.OnCommand(string[])"/> is a good start to handle commands like
+    /// <see cref="Filters.OnCommand(string[])"/> is a good start to handle commands like
     /// <c>/start</c>.
     /// </para>
     /// </summary>

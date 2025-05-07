@@ -33,7 +33,7 @@ builder.AddTelegramUpdater(
                 {
                     await container.Response("Want me to help you?!");
                 },
-                FilterCutify.OnCommand("help"))
+                ReadyFilters.OnCommand("help"))
 
             // Collects static methods marked with `SingletonHandlerCallback` attribute.
             .CollectSingletonUpdateHandlerCallbacks()

@@ -1,6 +1,7 @@
 ﻿using Telegram.Bot.Types.Payments;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
+using TelegramUpdater.UpdateHandlers.Singleton;
 using TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 
 namespace TelegramUpdater;
@@ -30,7 +31,7 @@ public static class SingletonUpdateHandlerExtensions
         UpdateType updateType,
         Func<Update, T?> updateSelector,
         Func<IContainer<T>, Task> callback,
-        UpdaterFilter<T>? filter = default,
+        IFilter<UpdaterFilterInputs<T>>? filter = default,
         HandlingOptions? options = default)
         where T : class
     {
@@ -57,7 +58,7 @@ public static class SingletonUpdateHandlerExtensions
         this IUpdater updater,
         UpdateType updateType,
         Func<IContainer<TUpdate>, Task> callback,
-        UpdaterFilter<TUpdate>? filter = default,
+        IFilter<UpdaterFilterInputs<TUpdate>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true) where TUpdate : class
         => updater.AddSingletonUpdateHandler(
@@ -83,7 +84,7 @@ public static class SingletonUpdateHandlerExtensions
         this IUpdater updater,
         UpdateType updateType,
         Func<MessageContainer, Task> callback,
-        UpdaterFilter<Message>? filter = default,
+        IFilter<UpdaterFilterInputs<Message>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -109,6 +110,126 @@ public static class SingletonUpdateHandlerExtensions
             }, options);
 
     /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.Message"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddMessageHandler(
+        this IUpdater updater,
+        Func<MessageContainer, Task> callback,
+        IFilter<UpdaterFilterInputs<Message>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new MessageHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.EditedMessage"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddEditedMessageHandler(
+        this IUpdater updater,
+        Func<MessageContainer, Task> callback,
+        IFilter<UpdaterFilterInputs<Message>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new EditedMessageHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.ChannelPost"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddChannelPostHandler(
+        this IUpdater updater,
+        Func<MessageContainer, Task> callback,
+        IFilter<UpdaterFilterInputs<Message>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new ChannelPostHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.EditedChannelPost"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddEditedChannelPostHandler(
+        this IUpdater updater,
+        Func<MessageContainer, Task> callback,
+        IFilter<UpdaterFilterInputs<Message>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new EditedChannelPostHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.BusinessMessage"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddBusinessMessageHandler(
+        this IUpdater updater,
+        Func<MessageContainer, Task> callback,
+        IFilter<UpdaterFilterInputs<Message>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new BusinessMessageHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.EditedBusinessMessage"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddEditedBusinessMessageHandler(
+        this IUpdater updater,
+        Func<MessageContainer, Task> callback,
+        IFilter<UpdaterFilterInputs<Message>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new EditedBusinessMessageHandler(callback, filter, endpoint), options);
+
+    /// <summary>
     /// Adds a handler for any update that is a <see cref="ChatMemberUpdated"/>.
     /// </summary>
     /// <param name="updateType">
@@ -126,7 +247,7 @@ public static class SingletonUpdateHandlerExtensions
         this IUpdater updater,
         UpdateType updateType,
         Func<IContainer<ChatMemberUpdated>, Task> callback,
-        UpdaterFilter<ChatMemberUpdated>? filter = default,
+        IFilter<UpdaterFilterInputs<ChatMemberUpdated>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -143,6 +264,46 @@ public static class SingletonUpdateHandlerExtensions
             }, options);
 
     /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.ChatMember"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddChatMemberHandler(
+        this IUpdater updater,
+        Func<IContainer<ChatMemberUpdated>, Task> callback,
+        IFilter<UpdaterFilterInputs<ChatMemberUpdated>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new ChatMemberHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.MyChatMember"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddMyChatMemberHandler(
+        this IUpdater updater,
+        Func<IContainer<ChatMemberUpdated>, Task> callback,
+        IFilter<UpdaterFilterInputs<ChatMemberUpdated>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new MyChatMemberHandler(callback, filter, endpoint), options);
+
+    /// <summary>
     /// Adds a handler for <see cref="UpdateType.CallbackQuery"/>.
     /// </summary>
     /// <param name="updater">The updater.</param>
@@ -155,7 +316,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<CallbackQueryContainer, Task> callback,
-        UpdaterFilter<CallbackQuery>? filter = default,
+        IFilter<UpdaterFilterInputs<CallbackQuery>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new CallbackQueryHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.CallbackQuery"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddCallbackQueryHandler(
+        this IUpdater updater,
+        Func<CallbackQueryContainer, Task> callback,
+        IFilter<UpdaterFilterInputs<CallbackQuery>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -174,7 +355,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<InlineQuery>, Task> callback,
-        UpdaterFilter<InlineQuery>? filter = default,
+        IFilter<UpdaterFilterInputs<InlineQuery>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new InlineQueryHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.InlineQuery"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddInlineQueryHandler(
+        this IUpdater updater,
+        Func<IContainer<InlineQuery>, Task> callback,
+        IFilter<UpdaterFilterInputs<InlineQuery>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -193,7 +394,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<ChosenInlineResult>, Task> callback,
-        UpdaterFilter<ChosenInlineResult>? filter = default,
+        IFilter<UpdaterFilterInputs<ChosenInlineResult>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new ChosenInlineResultHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.ChosenInlineResult"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddChosenInlineResultHandler(
+        this IUpdater updater,
+        Func<IContainer<ChosenInlineResult>, Task> callback,
+        IFilter<UpdaterFilterInputs<ChosenInlineResult>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -212,7 +433,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<ChatJoinRequest>, Task> callback,
-        UpdaterFilter<ChatJoinRequest>? filter = default,
+        IFilter<UpdaterFilterInputs<ChatJoinRequest>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new ChatJoinRequestHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.ChatJoinRequest"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddChatJoinRequestHandler(
+        this IUpdater updater,
+        Func<IContainer<ChatJoinRequest>, Task> callback,
+        IFilter<UpdaterFilterInputs<ChatJoinRequest>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -231,7 +472,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<Poll>, Task> callback,
-        UpdaterFilter<Poll>? filter = default,
+        IFilter<UpdaterFilterInputs<Poll>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new PollHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.Poll"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddPollHandler(
+        this IUpdater updater,
+        Func<IContainer<Poll>, Task> callback,
+        IFilter<UpdaterFilterInputs<Poll>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -250,7 +511,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<PollAnswer>, Task> callback,
-        UpdaterFilter<PollAnswer>? filter = default,
+        IFilter<UpdaterFilterInputs<PollAnswer>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new PollAnswerHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.PollAnswer"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddPollAnswerHandler(
+        this IUpdater updater,
+        Func<IContainer<PollAnswer>, Task> callback,
+        IFilter<UpdaterFilterInputs<PollAnswer>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -269,7 +550,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<PreCheckoutQuery>, Task> callback,
-        UpdaterFilter<PreCheckoutQuery>? filter = default,
+        IFilter<UpdaterFilterInputs<PreCheckoutQuery>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new PreCheckoutQueryHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.PreCheckoutQuery"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddPreCheckoutQueryHandler(
+        this IUpdater updater,
+        Func<IContainer<PreCheckoutQuery>, Task> callback,
+        IFilter<UpdaterFilterInputs<PreCheckoutQuery>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -288,7 +589,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<ShippingQuery>, Task> callback,
-        UpdaterFilter<ShippingQuery>? filter = default,
+        IFilter<UpdaterFilterInputs<ShippingQuery>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new ShippingQueryHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.ShippingQuery"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddShippingQueryHandler(
+        this IUpdater updater,
+        Func<IContainer<ShippingQuery>, Task> callback,
+        IFilter<UpdaterFilterInputs<ShippingQuery>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -308,7 +629,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<MessageReactionUpdated>, Task> callback,
-        UpdaterFilter<MessageReactionUpdated>? filter = default,
+        IFilter<UpdaterFilterInputs<MessageReactionUpdated>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new MessageReactionHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.MessageReaction"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddMessageReactionHandler(
+        this IUpdater updater,
+        Func<IContainer<MessageReactionUpdated>, Task> callback,
+        IFilter<UpdaterFilterInputs<MessageReactionUpdated>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -328,7 +669,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<MessageReactionCountUpdated>, Task> callback,
-        UpdaterFilter<MessageReactionCountUpdated>? filter = default,
+        IFilter<UpdaterFilterInputs<MessageReactionCountUpdated>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new MessageReactionCountHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.MessageReactionCount"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddMessageReactionCountHandler(
+        this IUpdater updater,
+        Func<IContainer<MessageReactionCountUpdated>, Task> callback,
+        IFilter<UpdaterFilterInputs<MessageReactionCountUpdated>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -348,7 +709,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<ChatBoostUpdated>, Task> callback,
-        UpdaterFilter<ChatBoostUpdated>? filter = default,
+        IFilter<UpdaterFilterInputs<ChatBoostUpdated>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new ChatBoostHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.ChatBoost"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddChatBoostHandler(
+        this IUpdater updater,
+        Func<IContainer<ChatBoostUpdated>, Task> callback,
+        IFilter<UpdaterFilterInputs<ChatBoostUpdated>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -368,7 +749,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<ChatBoostRemoved>, Task> callback,
-        UpdaterFilter<ChatBoostRemoved>? filter = default,
+        IFilter<UpdaterFilterInputs<ChatBoostRemoved>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new RemovedChatBoostHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.RemovedChatBoost"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddRemovedChatBoostHandler(
+        this IUpdater updater,
+        Func<IContainer<ChatBoostRemoved>, Task> callback,
+        IFilter<UpdaterFilterInputs<ChatBoostRemoved>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -388,7 +789,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<BusinessConnection>, Task> callback,
-        UpdaterFilter<BusinessConnection>? filter = default,
+        IFilter<UpdaterFilterInputs<BusinessConnection>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new BusinessConnectionHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.BusinessConnection"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddBusinessConnectionHandler(
+        this IUpdater updater,
+        Func<IContainer<BusinessConnection>, Task> callback,
+        IFilter<UpdaterFilterInputs<BusinessConnection>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -408,7 +829,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<BusinessMessagesDeleted>, Task> callback,
-        UpdaterFilter<BusinessMessagesDeleted>? filter = default,
+        IFilter<UpdaterFilterInputs<BusinessMessagesDeleted>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new DeletedBusinessMessagesHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.DeletedBusinessMessages"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddDeletedBusinessMessagesHandler(
+        this IUpdater updater,
+        Func<IContainer<BusinessMessagesDeleted>, Task> callback,
+        IFilter<UpdaterFilterInputs<BusinessMessagesDeleted>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(
@@ -428,7 +869,27 @@ public static class SingletonUpdateHandlerExtensions
     public static IUpdater AddSingletonUpdateHandler(
         this IUpdater updater,
         Func<IContainer<PaidMediaPurchased>, Task> callback,
-        UpdaterFilter<PaidMediaPurchased>? filter = default,
+        IFilter<UpdaterFilterInputs<PaidMediaPurchased>>? filter = default,
+        HandlingOptions? options = default,
+        bool endpoint = true)
+        => updater.AddSingletonUpdateHandler(
+            new PurchasedPaidMediaHandler(callback, filter, endpoint), options);
+
+    /// <summary>
+    /// Adds a new <see cref="ISingletonUpdateHandler"/> for <see cref="UpdateType.PurchasedPaidMedia"/>.
+    /// </summary>
+    /// <param name="updater"></param>
+    /// <param name="callback">
+    /// Callback function to handle your update.
+    /// </param>
+    /// <param name="filter">Filters.</param>
+    /// <param name="options">Options about how a handler should be handled.</param>
+    /// <param name="endpoint">Determines if this an endpoint handler.</param>
+    /// <returns></returns>
+    public static IUpdater AddInlineQueryHandler(
+        this IUpdater updater,
+        Func<IContainer<PaidMediaPurchased>, Task> callback,
+        IFilter<UpdaterFilterInputs<PaidMediaPurchased>>? filter = default,
         HandlingOptions? options = default,
         bool endpoint = true)
         => updater.AddSingletonUpdateHandler(

@@ -312,7 +312,7 @@ public static class UpdaterExtensions
     /// </summary>
     /// <param name="cancellationToken">To cancel the job manually,</param>
     /// <param name="updater">The updater.</param>
-    public static async Task StartAsync(
+    public static async Task Start(
         this IUpdater updater, CancellationToken cancellationToken = default)
     {
         await updater.Start<DefaultUpdateWriter>(cancellationToken).ConfigureAwait(false);
@@ -324,7 +324,7 @@ public static class UpdaterExtensions
     /// </summary>
     /// <param name="updater"></param>
     /// <returns></returns>
-    public static async Task SetCommandsAsync(this IUpdater updater)
+    public static async Task SetCommands(this IUpdater updater)
     {
         var singletonHandlerFilters = updater.SingletonUpdateHandlers
             .Where(x => x is IGenericSingletonUpdateHandler<Message>)

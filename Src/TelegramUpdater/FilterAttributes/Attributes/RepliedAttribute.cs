@@ -9,7 +9,7 @@ public sealed class RepliedAttribute : FilterAttributeBuilder
     /// Initialize a new instance of <see cref="RepliedAttribute"/>.
     /// </summary>
     public RepliedAttribute()
-        : base(x => x.AddFilterForUpdate(FilterCutify.Replied()))
+        : base(x => x.AddFilterForUpdate(ReadyFilters.Replied()))
     {
     }
 }
