@@ -67,7 +67,7 @@ internal class RenameAskLastName(PlaygroundMemory memory) : MessageHandler
         switch (ActualUpdate)
         {
             case { Text: { } text } when !string.IsNullOrWhiteSpace(text):
-                var fullName = $"{Updater[From.Id]} {text}";
+                var fullName = $"{Updater[From.Id.ToString()]} {text}";
 
                 var updated = await memory.SeenUsers
                     .Where(x => x.TelegramId == From.Id)

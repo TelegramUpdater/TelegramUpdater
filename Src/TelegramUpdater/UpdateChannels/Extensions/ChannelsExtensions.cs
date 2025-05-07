@@ -64,7 +64,8 @@ public static class ChannelsExtensions
                 if (update == null)
                     return null;
 
-                if (updateChannel.ShouldChannel(new(container.Updater, update.Value)))
+                if (updateChannel.ShouldChannel(
+                    new(container.Updater, update.Value, default, default, default, default)))
                 {
                     return new DefaultContainer<TExp>(
                         updateChannel.GetActualUpdate,

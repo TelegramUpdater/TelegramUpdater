@@ -369,21 +369,32 @@ public static class UpdaterExtensions
     /// <summary>
     /// Create a composite key with two values.
     /// </summary>
-    /// <typeparam name="TF">First value struct type.</typeparam>
-    /// <typeparam name="TS">Second value struct type.</typeparam>
     /// <param name="First"></param>
     /// <param name="Second"></param>
-    [StructLayout(LayoutKind.Sequential)]
-    internal readonly record struct CompositeKey<TF, TS>(TF First, TS Second)
-        where TF: struct;
+    public readonly record struct CompositeKey(string First, string Second)
+    {
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"({First},{Second})";
+        }
 
-    internal static void SetCompositeItem<TOuterKey, TKey, TValue>(
+        /// <summary>
+        /// Converts to string.
+        /// </summary>
+        /// <param name="key"></param>
+        public static implicit operator string(CompositeKey key)
+        {
+            return key.ToString();
+        }
+    }
+
+    internal static void SetCompositeItem<TValue>(
         this IUpdater updater,
         IChangeToken expirationToken,
-        TOuterKey outerKey,
-        TKey key,
+        string outerKey,
+        string key,
         TValue value)
-        where TOuterKey : struct
     {
         var options = new MemoryCacheEntryOptions
         {
@@ -392,55 +403,109 @@ public static class UpdaterExtensions
 
         options.AddExpirationToken(expirationToken);
 
-        updater.SetItem(new CompositeKey<TOuterKey, TKey>(outerKey, key), value, options);
+        updater.SetItem(new CompositeKey(outerKey, key), value, options);
     }
 
-    internal static void RemoveCompositeItem<TOuterKey, TKey>(
-        this IUpdater updater, TOuterKey outerKey, TKey key)
-        where TOuterKey : struct
+    internal static void RemoveCompositeItem(
+        this IUpdater updater, string outerKey, string key)
     {
-        updater.RemoveItem(new CompositeKey<TOuterKey, TKey>(outerKey, key));
+        updater.RemoveItem(new CompositeKey(outerKey, key));
     }
 
-    internal static void SetScopeItem<TKey, TValue>(
+    internal static void SetScopeItem<TValue>(
         this IUpdater updater,
         IChangeToken expirationToken,
         HandlingStoragesKeys.ScopeId scopeId,
-        TKey key,
+        string key,
         TValue value)
     {
-        updater.SetCompositeItem(expirationToken, scopeId, key, value);
+        updater.SetCompositeItem(expirationToken, scopeId.Id.ToString(), key, value);
     }
 
-    internal static void SetLayerItem<TKey, TValue>(
+    internal static void SetLayerItem<TValue>(
         this IUpdater updater,
         IChangeToken expirationToken,
         HandlingStoragesKeys.LayerId layerId,
-        TKey key,
+        string key,
         TValue value)
     {
-        updater.SetCompositeItem(expirationToken, layerId, key, value);
+        updater.SetCompositeItem(expirationToken, layerId.ToString(), key, value);
     }
 
-    internal static void RemoveScopeItem<TKey>(
-        this IUpdater updater, HandlingStoragesKeys.ScopeId scopeId, TKey key)
+    internal static void RemoveScopeItem(
+        this IUpdater updater, HandlingStoragesKeys.ScopeId scopeId, string key)
     {
-        updater.RemoveItem(new CompositeKey<HandlingStoragesKeys.ScopeId, TKey>(scopeId, key));
+        updater.RemoveItem(new CompositeKey(scopeId.Id.ToString(), key));
     }
 
-    internal static void RemoveLayerItem<TKey>(
-        this IUpdater updater, HandlingStoragesKeys.LayerId layerId, TKey key)
+    internal static void RemoveLayerItem(
+        this IUpdater updater, HandlingStoragesKeys.LayerId layerId, string key)
     {
-        updater.RemoveItem(new CompositeKey<HandlingStoragesKeys.LayerId, TKey>(layerId, key));
+        updater.RemoveItem(new CompositeKey(layerId.ToString(), key));
     }
 
-    internal static bool TryGetScopeItem<TKey>(
-        this IUpdater updater, HandlingStoragesKeys.ScopeId scopeId, TKey key, [NotNullWhen(true)] out object? value)
-        => updater.TryGetValue(new CompositeKey<HandlingStoragesKeys.ScopeId, TKey>(scopeId, key), out value);
+    // TODO: use generics
+    internal static bool TryGetScopeItem(
+        this IUpdater updater, HandlingStoragesKeys.ScopeId scopeId, string key, [NotNullWhen(true)] out object? value)
+        => updater.TryGetValue(new CompositeKey(scopeId.Id.ToString(), key), out value);
 
-    internal static bool TryGetLayerItem<TKey>(
-        this IUpdater updater, HandlingStoragesKeys.LayerId layerId, TKey key, [NotNullWhen(true)] out object? value)
-        => updater.TryGetValue(new CompositeKey<HandlingStoragesKeys.LayerId, TKey>(layerId, key), out value);
+    internal static bool TryGetLayerItem(
+        this IUpdater updater, HandlingStoragesKeys.LayerId layerId, string key, [NotNullWhen(true)] out object? value)
+        => updater.TryGetValue(new CompositeKey(layerId.ToString(), key), out value);
+
+    #region Composite key
+    /// <summary>
+    /// Set a composite key item that expires when handling scope for this handler ends.
+    /// </summary>
+    public static void SetCompositeScopeItem<TValue>(
+        this IUpdater updater,
+        IChangeToken expirationToken,
+        HandlingStoragesKeys.ScopeId scopeId,
+        string firstKey,
+        string secondKey,
+        TValue value)
+        => updater.SetScopeItem(expirationToken, scopeId, new CompositeKey(firstKey, secondKey), value);
+
+    /// <summary>
+    /// Remove a composite key item attached with this handler's scope id.
+    /// </summary>
+    public static void RemoveCompositeScopeItem(
+        this IUpdater updater, HandlingStoragesKeys.ScopeId scopeId, string firstKey, string secondKey)
+        => updater.RemoveScopeItem(scopeId, new CompositeKey(firstKey, secondKey));
+
+    /// <summary>
+    /// Get a composite key item that was set in handler's scope id.
+    /// </summary>
+    public static bool TryGetCompositeScopeItem(
+        this IUpdater updater, HandlingStoragesKeys.ScopeId scopeId, string firstKey, string secondKey, [NotNullWhen(true)] out object? value)
+        => updater.TryGetScopeItem(scopeId, new CompositeKey(firstKey, secondKey), out value);
+
+    /// <summary>
+    /// Set a composite key item that expires when handling layer for this handler ends.
+    /// </summary>
+    public static void SetCompositeLayerItem<TValue>(
+        this IUpdater updater,
+        IChangeToken expirationToken,
+        HandlingStoragesKeys.LayerId layerId,
+        string firstKey,
+        string secondKey,
+        TValue value)
+        => updater.SetLayerItem(expirationToken, layerId, new CompositeKey(firstKey, secondKey), value);
+
+    /// <summary>
+    /// Remove a composite key item attached with this handler's layer id.
+    /// </summary>
+    public static void RemoveCompositeLayerItem(
+        this IUpdater updater, HandlingStoragesKeys.LayerId layerId, string firstKey, string secondKey)
+        => updater.RemoveLayerItem(layerId, new CompositeKey(firstKey, secondKey));
+
+    /// <summary>
+    /// Get a composite key item that was set in handler's layer id.
+    /// </summary>
+    public static bool TryGetCompositeLayerItem(
+        this IUpdater updater, HandlingStoragesKeys.LayerId layerId, string firstKey, string secondKey, [NotNullWhen(true)] out object? value)
+        => updater.TryGetLayerItem(layerId, new CompositeKey(firstKey, secondKey), out value);
+    #endregion
 
     internal static HandlingOptions? GetHandlingOptionsFromAttibute(
         this IScopedUpdateHandlerContainer container)

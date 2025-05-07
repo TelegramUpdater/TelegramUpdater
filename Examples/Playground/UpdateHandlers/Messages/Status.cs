@@ -1,9 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Telegram.Bot.Types;
 using TelegramUpdater.FilterAttributes.Attributes;
+using TelegramUpdater.Filters;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
 using TelegramUpdater.UpdateHandlers.Scoped.Attributes;
 using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
+using static TelegramUpdater.UpdaterExtensions;
 
 namespace Playground.UpdateHandlers.Messages;
 
@@ -46,14 +49,13 @@ internal class StatusSeen(ILogger<StatusSeen> logger) : MessageHandler
         if (!container.TryGetLayerItem("layerObject", out var _))
             logger.LogCritical("I MUST have access to 'layerObject' since we are on a same layer.");
 
-        var key = $"seen_{From.Id}";
-
-        container.SetScopeItem(key, true);
+        container.SetCompositeScopeItem(From.Id.ToString(), "seen", true);
         await Response("Hooray! you have been seen");
     }
 }
 
 [Command("status"), Private]
+[UserUpdaterDataExists("seen", Region = DataRegion.Scope, ThenRemove = true, Reverse = true)]
 [ScopedHandler(LayerId = 2)] // layer 2 ensures this runs after StatusSeen which is on layer 1
 internal class StatusNotSeen(ILogger<StatusNotSeen> logger) : MessageHandler
 {
@@ -67,9 +69,6 @@ internal class StatusNotSeen(ILogger<StatusNotSeen> logger) : MessageHandler
         if (container.TryGetLayerItem("layerObject", out var _))
             logger.LogCritical("I MUST NOT have access to 'layerObject' since we are not on a same layer.");
 
-        var key = $"seen_{From.Id}";
-
-        if (!container.TryGetScopeItem(key, out var _))
-            await Response("Oh! i have not seen you yet");
+        await Response("Oh! i have not seen you yet");
     }
 }

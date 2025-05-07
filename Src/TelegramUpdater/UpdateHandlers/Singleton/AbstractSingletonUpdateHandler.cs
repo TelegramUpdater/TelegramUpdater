@@ -97,7 +97,7 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
 
         if (insider == null) return false;
 
-        return ShouldHandle(new UpdaterFilterInputs<T>(inputs.Updater, insider));
+        return ShouldHandle(inputs.Rebase(insider));
     }
 
     internal abstract TContainer ContainerBuilder(HandlerInput input);

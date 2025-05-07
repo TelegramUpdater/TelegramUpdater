@@ -70,6 +70,6 @@ public abstract class AbstractChannel<T> : IGenericUpdateChannel<T>
 
         if (insider == null) return false;
 
-        return ShouldChannel(new UpdaterFilterInputs<T>(inputs.Updater, insider));
+        return ShouldChannel(inputs.Rebase(insider));
     }
 }

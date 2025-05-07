@@ -53,8 +53,8 @@ public static class TempDataHoldersExtensions
     /// <summary>
     /// Set an item that expires when handling scope for this handler ends.
     /// </summary>
-    public static bool SetScopeItem<T, TKey, TValue>(
-        this IContainer<T> container, TKey key, TValue value)
+    public static bool SetScopeItem<T, TValue>(
+        this IContainer<T> container, string key, TValue value)
         where T : class
     {
         if (container.ScopeChangeToken is null) return false;
@@ -68,22 +68,22 @@ public static class TempDataHoldersExtensions
     /// <summary>
     /// Remove an item attached with this handler's scope id.
     /// </summary>
-    public static void RemoveScopeItem<T, TKey>(this IContainer<T> container, TKey key)
+    public static void RemoveScopeItem<T>(this IContainer<T> container, string key)
         where T : class
         => container.Updater.RemoveScopeItem(container.ScopeId(), key);
 
     /// <summary>
     /// Get an item that was set in handler's scope id.
     /// </summary>
-    public static bool TryGetScopeItem<T, TKey>(this IContainer<T> container, TKey key, [NotNullWhen(true)] out object? value)
+    public static bool TryGetScopeItem<T>(this IContainer<T> container, string key, [NotNullWhen(true)] out object? value)
         where T : class
         => container.Updater.TryGetScopeItem(container.ScopeId(), key, out value);
 
     /// <summary>
     /// Set an item that expires when handling layer for this handler ends.
     /// </summary>
-    public static bool SetLayerItem<T, TKey, TValue>(
-        this IContainer<T> container, TKey key, TValue value)
+    public static bool SetLayerItem<T, TValue>(
+        this IContainer<T> container, string key, TValue value)
         where T : class
     {
         if (container.ScopeChangeToken is null) return false;
@@ -97,15 +97,83 @@ public static class TempDataHoldersExtensions
     /// <summary>
     /// Remove an item attached with this handler's layer id.
     /// </summary>
-    public static void RemoveLayerItem<T, TKey>(
-        this IContainer<T> container, TKey key)
+    public static void RemoveLayerItem<T>(
+        this IContainer<T> container, string key)
         where T : class
         => container.Updater.RemoveLayerItem(container.LayerId(), key);
 
     /// <summary>
     /// Get an item that was set in handler's layer id.
     /// </summary>
-    public static bool TryGetLayerItem<T, TKey>(this IContainer<T> container, TKey key, [NotNullWhen(true)] out object? value)
+    public static bool TryGetLayerItem<T>(this IContainer<T> container, string key, [NotNullWhen(true)] out object? value)
         where T : class
         => container.Updater.TryGetLayerItem(container.LayerId(), key, out value);
+
+    #region Composite key
+    /// <summary>
+    /// Set a composite key item that expires when handling scope for this handler ends.
+    /// </summary>
+    public static bool SetCompositeScopeItem<T, TValue>(
+        this IContainer<T> container, string firstKey, string secondKey, TValue value)
+        where T : class
+    {
+        if (container.ScopeChangeToken is null) return false;
+
+        container.Updater.SetCompositeScopeItem(
+            container.ScopeChangeToken, container.ScopeId(), firstKey, secondKey, value);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Remove a composite key item attached with this handler's scope id.
+    /// </summary>
+    public static void RemoveCompositeScopeItem<T>(
+        this IContainer<T> container, string firstKey, string secondKey)
+        where T : class
+        => container.Updater.RemoveCompositeScopeItem(container.ScopeId(), firstKey, secondKey);
+
+    /// <summary>
+    /// Get a composite key item that was set in handler's scope id.
+    /// </summary>
+    public static bool TryGetCompositeScopeItem<T>(
+        this IContainer<T> container, string firstKey, string secondKey, [NotNullWhen(true)] out object? value)
+        where T : class
+        => container.Updater.TryGetCompositeScopeItem(container.ScopeId(), firstKey, secondKey, out value);
+
+    /// <summary>
+    /// Set a composite key item that expires when handling layer for this handler ends.
+    /// </summary>
+    public static bool SetCompositeLayerItem<T, TValue>(
+        this IContainer<T> container, string firstKey, string secondKey, TValue value)
+        where T : class
+    {
+        if (container.LayerChangeToken is null) return false;
+
+        container.Updater.SetCompositeLayerItem(
+            container.LayerChangeToken, container.LayerId(), firstKey, secondKey, value);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Remove a composite key item attached with this handler's layer id.
+    /// </summary>
+    public static void RemoveCompositeLayerItem<T>(
+        this IContainer<T> container, string firstKey, string secondKey)
+        where T : class
+        => container.Updater.RemoveCompositeLayerItem(container.LayerId(), firstKey, secondKey);
+
+    /// <summary>
+    /// Get a composite key item that was set in handler's layer id.
+    /// </summary>
+    public static bool TryGetCompositeLayerItem<T>(
+        this IContainer<T> container, string firstKey, string secondKey, [NotNullWhen(true)] out object? value)
+        where T : class
+        => container.Updater.TryGetCompositeLayerItem(container.LayerId(), firstKey, secondKey, out value);
+    #endregion
+
+    #region User specified
+
+    #endregion
 }

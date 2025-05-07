@@ -248,10 +248,13 @@ public class OrFilter<T>(IFilter<T> filter1, IFilter<T> filter2)
 /// <summary>
 /// Inputs for filters inside <see cref="IUpdater"/>
 /// </summary>
-/// <typeparam name="T"></typeparam>
-/// <param name="updater"></param>
-/// <param name="input"></param>
-public class UpdaterFilterInputs<T>(IUpdater updater, T input)
+public class UpdaterFilterInputs<T>(
+    IUpdater updater,
+    T input,
+    Guid scopeId,
+    int layerId,
+    int group,
+    int index)
 {
     /// <summary>
     /// The updater.
@@ -262,6 +265,32 @@ public class UpdaterFilterInputs<T>(IUpdater updater, T input)
     /// The actual input.
     /// </summary>
     public T Input { get; } = input;
+
+    /// <summary>
+    /// The unique <see cref="Guid"/> of the scope of handling.
+    /// </summary>
+    /// <remarks>
+    /// This scope id is same for handlers being triggered by the same update in handling chain.
+    /// </remarks>
+    public Guid ScopeId { get; } = scopeId;
+
+    /// <summary>
+    /// The <see cref="HandlingOptions.LayerId"/> of current handler.
+    /// </summary>
+    public int LayerId { get; } = layerId;
+
+    /// <summary>
+    /// The <see cref="HandlingOptions.Group"/> of this handler.
+    /// </summary>
+    public int Group { get; } = group;
+
+    /// <summary>
+    /// Index of the handler in it's layer.
+    /// </summary>
+    public int Index { get; } = index;
+
+    internal UpdaterFilterInputs<Q> Rebase<Q>(Q newBase)
+        => new(Updater, newBase, ScopeId, LayerId, Group, Index);
 }
 
 /// <summary>

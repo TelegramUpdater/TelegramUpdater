@@ -13,7 +13,7 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     where TUpdate : class
 {
     /// <summary>
-    /// Create a new instance of <see cref="AbstractScopedUpdateHandler{T}"/>.
+    /// Create a new instance of <see cref="AbstractScopedUpdateHandler{T, TContainer}"/>.
     /// </summary>
     /// <param name="updateType">Type of update.</param>
     /// <param name="filter">The filter.</param>
@@ -73,6 +73,6 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
 
         if (insider == null) return false;
 
-        return ShouldHandle(new UpdaterFilterInputs<TUpdate>(inputs.Updater, insider));
+        return ShouldHandle(inputs.Rebase(insider));
     }
 }

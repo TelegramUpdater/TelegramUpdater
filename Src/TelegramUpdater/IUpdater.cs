@@ -118,7 +118,7 @@ public interface IUpdater
     /// </summary>
     /// <param name="key">The key.</param>
     /// <returns></returns>
-    public object? this[object key] { get; set; }
+    public object? this[string key] { get; set; }
 
     /// <summary>
     /// Adds an item to updater's storage.
@@ -126,20 +126,20 @@ public interface IUpdater
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <param name="options"></param>
-    public void SetItem<T>(object key, T value, MemoryCacheEntryOptions? options = default);
+    public void SetItem<T>(string key, T value, MemoryCacheEntryOptions? options = default);
 
     /// <summary>
     /// Remove item from updater's storage
     /// </summary>
     /// <param name="key"></param>
-    public void RemoveItem(object key);
+    public void RemoveItem(string key);
 
     /// <summary>
     /// Check if an <see cref="string"/> key exists in updater extra data.
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
-    public bool ContainsKey(object key);
+    public bool ContainsKey(string key);
 
     /// <summary>
     /// Tries to take a value out of this.
@@ -147,7 +147,7 @@ public interface IUpdater
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
-    public bool TryGetValue(object key, [NotNullWhen(true)] out object? value);
+    public bool TryGetValue(string key, [NotNullWhen(true)] out object? value);
 
     /// <summary>
     /// The memory cache associated with the <see cref="IUpdater"/>.

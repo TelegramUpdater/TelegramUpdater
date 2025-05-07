@@ -11,7 +11,14 @@ public class HandlingStoragesKeys
     /// Scope id.
     /// </summary>
     /// <param name="Id">The <see cref="Guid"/> of this scope.</param>
-    public readonly record struct ScopeId(Guid Id);
+    public readonly record struct ScopeId(Guid Id)
+    {
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"ScopeId({Id})";
+        }
+    }
 
     /// <summary>
     /// Layer id.
@@ -22,7 +29,14 @@ public class HandlingStoragesKeys
     /// <param name="ScopeId">Scope id.</param>
     /// <param name="Id">Layer id.</param>
     [StructLayout(LayoutKind.Auto)]
-    public readonly record struct LayerId(Guid ScopeId, int Id);
+    public readonly record struct LayerId(Guid ScopeId, int Id)
+    {
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"LayerId({ScopeId},{Id})";
+        }
+    }
 
     /// <summary>
     /// Group id.
@@ -35,7 +49,14 @@ public class HandlingStoragesKeys
     /// <param name="LayerId">Layer Id.</param>
     /// <param name="Id">Group.</param>
     [StructLayout(LayoutKind.Auto)]
-    public readonly record struct GroupId(Guid ScopeId, int LayerId, int Id);
+    public readonly record struct GroupId(Guid ScopeId, int LayerId, int Id)
+    {
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"GroupId({ScopeId},{LayerId},{Id})";
+        }
+    }
 
     /// <summary>
     /// Handler id.
@@ -49,5 +70,12 @@ public class HandlingStoragesKeys
     /// <param name="GroupId">Group.</param>
     /// <param name="Index">Index in group.</param>
     [StructLayout(LayoutKind.Auto)]
-    public readonly record struct HandlerId(Guid ScopeId, int LayerId, int GroupId, int Index);
+    public readonly record struct HandlerId(Guid ScopeId, int LayerId, int GroupId, int Index)
+    {
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"HandlerId({ScopeId},{LayerId},{GroupId},{Index})";
+        }
+    }
 }

@@ -283,28 +283,11 @@ public sealed partial class Updater : IUpdater
     public IEnumerable<HandlingInfo<ISingletonUpdateHandler>> SingletonUpdateHandlers => _updateHandlers;
 
     /// <inheritdoc/>
-    public IMemoryCache MemoryCache => _memoryCache;
-
-    /// <inheritdoc/>
-    public object? this[object key]
-    {
-        get => _memoryCache.Get(key);
-        set => SetItem(key, value, new MemoryCacheEntryOptions
-        {
-            Priority = CacheItemPriority.NeverRemove,
-        });
-    }
-
-    /// <inheritdoc/>
     public void EmergencyCancel()
     {
         _logger.LogWarning("Emergency cancel triggered.");
         _emergencyCancel?.Cancel();
     }
-
-    /// <inheritdoc/>
-    public bool ContainsKey(object key)
-        => _memoryCache.TryGetValue(key, out var _);
 
     /// <inheritdoc/>
     public Updater AddSingletonUpdateHandler(
@@ -596,7 +579,11 @@ public sealed partial class Updater : IUpdater
                         break;
                     }
 
-                    if (!handlingInfo.Filter(new(this, shiningInfo.Value)))
+                    var layerIndex = handlingInfo.Options.LayerId;
+                    var groupIndex = handlingInfo.Options.Group;
+
+                    if (!handlingInfo.Filter(
+                        new(this, shiningInfo.Value, scopeId, layerIndex, groupIndex, indexInLayer)))
                         // Filter didn't pass, ignore
                         continue;
 
@@ -606,8 +593,8 @@ public sealed partial class Updater : IUpdater
                             updater: this,
                             shiningInfo: shiningInfo,
                             scopeId: scopeId,
-                            layerId: handlingInfo.Options.LayerId,
-                            group: handlingInfo.Options.Group,
+                            layerId: layerIndex,
+                            group: groupIndex,
                             index: indexInLayer,
                             scopeChangeToken: scopeEndedToken,
                             layerChangeToken: layerEndedToken),
@@ -692,21 +679,48 @@ public sealed partial class Updater : IUpdater
     }
 
     /// <inheritdoc/>
-    public bool TryGetValue(object key, [NotNullWhen(true)] out object? value)
-        => _memoryCache.TryGetValue(key, out value);
+    public IMemoryCache MemoryCache => _memoryCache;
+
+    /// <inheritdoc/>
+    public object? this[string key]
+    {
+        get => _memoryCache.Get(key);
+        set => SetItem(key, value, new MemoryCacheEntryOptions
+        {
+            Priority = CacheItemPriority.NeverRemove,
+        });
+    }
+
+    /// <inheritdoc/>
+    public bool TryGetValue(string key, [NotNullWhen(true)] out object? value)
+    {
+        var result = _memoryCache.TryGetValue(key, out value);
+
+        if (!result)
+        {
+            Logger.LogDebug("Key: {key} not found", key);
+            Logger.LogDebug("Available keys:\n- {keys}", string.Join("\n- ", _memoryCache.Keys));
+        }
+
+        return result;
+    }
 
     /// <inheritdoc/>
     public void SetItem<T>(
-        object key, T value, MemoryCacheEntryOptions? options = null)
+        string key, T value, MemoryCacheEntryOptions? options = null)
     {
         _memoryCache.Set(key, value, options);
     }
 
     /// <inheritdoc/>
-    public void RemoveItem(object key)
+    public void RemoveItem(string key)
     {
         _memoryCache.Remove(key);
     }
+
+    /// <inheritdoc/>
+    public bool ContainsKey(string key)
+        => _memoryCache.TryGetValue(key, out var _);
 
 #if NET8_0_OR_GREATER
     [GeneratedRegex("^Too Many Requests: retry after (?<tryAfter>[0-9]*)$", RegexOptions.None, matchTimeoutMilliseconds: 5000)]
