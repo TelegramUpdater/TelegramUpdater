@@ -115,7 +115,25 @@ public sealed class GridCollection<T>(int? rowCapacity = default) : ICollection<
     /// <inheritdoc/>
     public void CopyTo(T[] array, int arrayIndex)
     {
-        throw new NotSupportedException("Grid collection doesn't support copy yet!");
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(array);
+#else
+        if (array == null)
+        {
+            throw new ArgumentNullException(nameof(array));
+        }
+#endif
+
+        if (arrayIndex < 0 || arrayIndex > array.Length)
+            throw new ArgumentOutOfRangeException(nameof(arrayIndex));
+
+        if (array.Length - arrayIndex < Count)
+            throw new ArgumentException("The target array is too small to copy the elements.", nameof(array));
+
+        foreach (var item in this)
+        {
+            array[arrayIndex++] = item;
+        }
     }
 
     /// <inheritdoc/>
