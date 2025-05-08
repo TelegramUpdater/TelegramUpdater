@@ -1,5 +1,4 @@
-﻿using TelegramUpdater.RainbowUtilities;
-using TelegramUpdater.UpdateContainer;
+﻿using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateHandlers.Singleton;
 
@@ -33,7 +32,7 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
                 $"There's nothing unknown here! {nameof(updateType)}", nameof(updateType));
 
         Filter = filter;
-        GetActualUpdate = getT ?? throw new ArgumentNullException(nameof(getT));
+        GetActualUpdate = getT;
         UpdateType = updateType;
 #pragma warning disable MA0056 // Do not call overridable members in constructor
         Endpoint = endpoint;

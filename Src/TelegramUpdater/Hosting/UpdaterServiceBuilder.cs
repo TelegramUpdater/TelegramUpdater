@@ -343,7 +343,7 @@ public class UpdaterServiceBuilder
 
             AddScopedUpdateHandler(container.Handler, container.Options);
         }
-
+         
         return this;
     }
 }
