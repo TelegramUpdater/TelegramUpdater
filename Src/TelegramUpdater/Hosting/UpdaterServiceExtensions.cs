@@ -25,6 +25,64 @@ public static class UpdaterServiceExtensions
                 .AddTypedClient<ITelegramBotClient>(httpClient
                     => new TelegramBotClient(botToken, httpClient));
 
+    private static void AddUpdaterWithBotClient(
+        this IServiceCollection serviceDescriptors,
+        Type? preUpdateProcessorType,
+        UpdaterOptions? updaterOptions,
+        UpdaterServiceBuilder updaterBuilder)
+    {
+        serviceDescriptors.AddSingleton<IUpdater>(
+            (services) =>
+            {
+                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
+                var botClient = services.GetRequiredService<ITelegramBotClient>();
+
+                var updater = new Updater(
+                    botClient: botClient,
+                    updaterOptions: UpdaterExtensions.RedesignOptions(
+                        updaterOptions: updaterOptions, serviceProvider: services),
+                    scopeFactory: scopeFactory,
+                    preUpdateProcessorType: preUpdateProcessorType);
+
+                updaterBuilder.ApplyJobs(updater);
+                return updater;
+            });
+
+        if (preUpdateProcessorType is not null)
+        {
+            serviceDescriptors.AddScoped(preUpdateProcessorType);
+        }
+    }
+
+    private static void AddUpdater(
+        this IServiceCollection serviceDescriptors,
+        ITelegramBotClient botClient,
+        UpdaterOptions? updaterOptions,
+        Type? preUpdateProcessorType,
+        UpdaterServiceBuilder updaterBuilder)
+    {
+        serviceDescriptors.AddSingleton<IUpdater>(
+            services =>
+            {
+                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
+
+                var updater = new Updater(
+                    botClient: botClient,
+                    updaterOptions: UpdaterExtensions.RedesignOptions(
+                        updaterOptions: updaterOptions, serviceProvider: services),
+                    scopeFactory: scopeFactory,
+                    preUpdateProcessorType: preUpdateProcessorType);
+
+                updaterBuilder.ApplyJobs(updater);
+                return updater;
+            });
+
+        if (preUpdateProcessorType is not null)
+        {
+            serviceDescriptors.AddScoped(preUpdateProcessorType);
+        }
+    }
+
     /// <summary>
     /// Add telegram updater to the <see cref="IServiceCollection"/>.
     /// Using your custom update writer service.
@@ -83,29 +141,8 @@ public static class UpdaterServiceExtensions
         var updaterBuilder = new UpdaterServiceBuilder();
         builder?.Invoke(updaterBuilder);
 
+        serviceDescriptors.AddUpdaterWithBotClient(preUpdateProcessorType, updaterOptions, updaterBuilder);
         updaterBuilder.AddToServiceCollection(serviceDescriptors);
-
-        serviceDescriptors.AddSingleton<IUpdater>(
-            (services) =>
-            {
-                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
-                var botClient = services.GetRequiredService<ITelegramBotClient>();
-
-                var updater = new Updater(
-                    botClient: botClient,
-                    updaterOptions: UpdaterExtensions.RedesignOptions(
-                        updaterOptions: updaterOptions, serviceProvider: services),
-                    scopeFactory: scopeFactory,
-                    preUpdateProcessorType: preUpdateProcessorType);
-
-                updaterBuilder.AddToUpdater(updater);
-                return updater;
-            });
-
-        if (preUpdateProcessorType is not null)
-        {
-            serviceDescriptors.AddScoped(preUpdateProcessorType);
-        }
 
         serviceDescriptors.AddSingleton<TWriter>();
         serviceDescriptors.AddHostedService<UpdateWriterService<TWriter>>();
@@ -181,29 +218,8 @@ public static class UpdaterServiceExtensions
         var updaterBuilder = new UpdaterServiceBuilder();
         builder?.Invoke(updaterBuilder);
 
+        serviceDescriptors.AddUpdaterWithBotClient(preUpdateProcessorType, updaterOptions, updaterBuilder);
         updaterBuilder.AddToServiceCollection(serviceDescriptors);
-
-        serviceDescriptors.AddSingleton<IUpdater>(
-            (services) =>
-            {
-                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
-                var botClient = services.GetRequiredService<ITelegramBotClient>();
-
-                var updater = new Updater(
-                    botClient: botClient,
-                    updaterOptions: UpdaterExtensions.RedesignOptions(
-                        updaterOptions: updaterOptions, serviceProvider: services),
-                    scopeFactory: scopeFactory,
-                    preUpdateProcessorType: preUpdateProcessorType);
-
-                updaterBuilder.AddToUpdater(updater);
-                return updater;
-            });
-
-        if (preUpdateProcessorType is not null)
-        {
-            serviceDescriptors.AddScoped(preUpdateProcessorType);
-        }
 
         serviceDescriptors.AddSingleton<TWriter>();
         serviceDescriptors.AddHostedService<UpdateWriterService<TWriter>>();
@@ -263,28 +279,8 @@ public static class UpdaterServiceExtensions
         var updaterBuilder = new UpdaterServiceBuilder();
         builder?.Invoke(updaterBuilder);
 
+        serviceDescriptors.AddUpdater(botClient, updaterOptions, preUpdateProcessorType, updaterBuilder);
         updaterBuilder.AddToServiceCollection(serviceDescriptors);
-
-        serviceDescriptors.AddSingleton<IUpdater>(
-            services =>
-            {
-                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
-
-                var updater = new Updater(
-                    botClient: botClient,
-                    updaterOptions: UpdaterExtensions.RedesignOptions(
-                        updaterOptions: updaterOptions, serviceProvider: services),
-                    scopeFactory: scopeFactory,
-                    preUpdateProcessorType: preUpdateProcessorType);
-
-                updaterBuilder.AddToUpdater(updater);
-                return updater;
-            });
-
-        if (preUpdateProcessorType is not null)
-        {
-            serviceDescriptors.AddScoped(preUpdateProcessorType);
-        }
 
         serviceDescriptors.AddSingleton<TWriter>();
         serviceDescriptors.AddHostedService<UpdateWriterService<TWriter>>();
@@ -321,29 +317,8 @@ public static class UpdaterServiceExtensions
         var updaterBuilder = new UpdaterServiceBuilder();
         builder(updaterBuilder);
 
+        serviceDescriptors.AddUpdaterWithBotClient(preUpdateProcessorType, updaterOptions, updaterBuilder);
         updaterBuilder.AddToServiceCollection(serviceDescriptors);
-
-        serviceDescriptors.AddSingleton<IUpdater>(
-            services =>
-            {
-                var botClient = services.GetRequiredService<ITelegramBotClient>();
-                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
-
-                var updater = new Updater(
-                    botClient: botClient,
-                    updaterOptions: UpdaterExtensions.RedesignOptions(
-                        updaterOptions: updaterOptions, serviceProvider: services),
-                    scopeFactory: scopeFactory,
-                    preUpdateProcessorType: preUpdateProcessorType);
-
-                updaterBuilder.AddToUpdater(updater);
-                return updater;
-            });
-
-        if (preUpdateProcessorType is not null)
-        {
-            serviceDescriptors.AddScoped(preUpdateProcessorType);
-        }
 
         serviceDescriptors.AddSingleton<TWriter>();
         serviceDescriptors.AddHostedService<UpdateWriterService<TWriter>>();
@@ -445,28 +420,8 @@ public static class UpdaterServiceExtensions
         var updaterBuilder = new UpdaterServiceBuilder();
         builder?.Invoke(updaterBuilder);
 
+        serviceDescriptors.AddUpdater(botClient, updaterOptions, preUpdateProcessorType, updaterBuilder);
         updaterBuilder.AddToServiceCollection(serviceDescriptors);
-
-        serviceDescriptors.AddSingleton<IUpdater>(
-            services =>
-            {
-                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
-
-                var updater = new Updater(
-                    botClient: botClient,
-                    updaterOptions: UpdaterExtensions.RedesignOptions(
-                        updaterOptions: updaterOptions, serviceProvider: services),
-                    scopeFactory: scopeFactory,
-                    preUpdateProcessorType: preUpdateProcessorType);
-
-                updaterBuilder.AddToUpdater(updater);
-                return updater;
-            });
-
-        if (preUpdateProcessorType is not null)
-        {
-            serviceDescriptors.AddScoped(preUpdateProcessorType);
-        }
 
         return serviceDescriptors;
     }
@@ -498,29 +453,8 @@ public static class UpdaterServiceExtensions
         var updaterBuilder = new UpdaterServiceBuilder();
         builder(updaterBuilder);
 
+        serviceDescriptors.AddUpdaterWithBotClient(preUpdateProcessorType, updaterOptions, updaterBuilder);
         updaterBuilder.AddToServiceCollection(serviceDescriptors);
-
-        serviceDescriptors.AddSingleton<IUpdater>(
-            services =>
-            {
-                var botClient = services.GetRequiredService<ITelegramBotClient>();
-                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
-
-                var updater = new Updater(
-                    botClient: botClient,
-                    updaterOptions: UpdaterExtensions.RedesignOptions(
-                        updaterOptions: updaterOptions, serviceProvider: services),
-                    scopeFactory: scopeFactory,
-                    preUpdateProcessorType: preUpdateProcessorType);
-
-                updaterBuilder.AddToUpdater(updater);
-                return updater;
-            });
-
-        if (preUpdateProcessorType is not null)
-        {
-            serviceDescriptors.AddScoped(preUpdateProcessorType);
-        }
 
         return serviceDescriptors;
     }
@@ -578,29 +512,8 @@ public static class UpdaterServiceExtensions
         var updaterBuilder = new UpdaterServiceBuilder();
         builder?.Invoke(updaterBuilder);
 
+        serviceDescriptors.AddUpdaterWithBotClient(preUpdateProcessorType, updaterOptions!, updaterBuilder);
         updaterBuilder.AddToServiceCollection(serviceDescriptors);
-
-        serviceDescriptors.AddSingleton<IUpdater>(
-            services =>
-            {
-                var botClient = services.GetRequiredService<ITelegramBotClient>();
-                var scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
-
-                var updater = new Updater(
-                    botClient: botClient,
-                    updaterOptions: UpdaterExtensions.RedesignOptions(
-                        updaterOptions: updaterOptions, serviceProvider: services),
-                    scopeFactory: scopeFactory,
-                    preUpdateProcessorType: preUpdateProcessorType);
-
-                updaterBuilder.AddToUpdater(updater);
-                return updater;
-            });
-
-        if (preUpdateProcessorType is not null)
-        {
-            serviceDescriptors.AddScoped(preUpdateProcessorType);
-        }
 
         return serviceDescriptors;
     }

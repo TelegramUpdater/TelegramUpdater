@@ -33,6 +33,15 @@ public static class ScopedUpdateHandlersExtensions
         Func<Update, TUpdate>? getT = default,
         HandlingOptions? options = default) where TUpdate : class
     {
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(typeOfScopedHandler);
+#else
+        if (typeOfScopedHandler is null)
+        {
+            throw new ArgumentNullException(nameof(typeOfScopedHandler));
+        }
+#endif
+
         if (!typeof(IScopedUpdateHandler).IsAssignableFrom(typeOfScopedHandler))
         {
             throw new InvalidCastException(

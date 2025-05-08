@@ -24,6 +24,8 @@ builder.AddTelegramUpdater(
     (builder) => builder
 
         // Modify the actual updater
+        // Don't add scoped handlers here, use the `AddScopedUpdateHandler` method
+        // Since this won't add them to the DI container.
         .Execute(updater => updater
 
             // Add a quick handler
@@ -40,6 +42,9 @@ builder.AddTelegramUpdater(
 
             // State tracker
             .AddUserEnumStateKeeper<RenameState>())
+
+        // Manually add scoped handlers (while registering into di)
+        .AddMessageHandler<MyBadlyPlacedHandler>()
 
         // Collect scoped handlers located for example at UpdateHandlers/Messages for messages.
         .AutoCollectScopedHandlers()

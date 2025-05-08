@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Telegram.Bot.Types.Payments;
 using TelegramUpdater.Filters;
 using TelegramUpdater.Helpers;
@@ -38,7 +37,7 @@ public static class UpdaterExtensions
                 $"Can't resolve Update of Type {update.Type}", nameof(update));
 
         return typeof(Update).GetProperty(update.Type.ToString())?
-            .GetValue(update, index: null)?? throw new InvalidOperationException(
+            .GetValue(update, index: null) ?? throw new InvalidOperationException(
                 $"Inner update is null for {update.Type}");
     }
 
@@ -56,7 +55,7 @@ public static class UpdaterExtensions
                 $"Can't resolve Update of Type {update.Type}", nameof(update));
 
         return (T)(typeof(Update).GetProperty(update.Type.ToString(), typeof(T))?
-            .GetValue(update, index: null)?? throw new InvalidOperationException(
+            .GetValue(update, index: null) ?? throw new InvalidOperationException(
                 $"Inner update is null for {update.Type}"));
     }
 
@@ -299,7 +298,7 @@ public static class UpdaterExtensions
             if (container is null) continue;
 
             updater.Logger.LogInformation(
-                "Scoped handler collected! ( {Name} )", container.Handler.ScopedHandlerType.Name);
+                "Scoped handler collected! ({Name})", container.Handler.ScopedHandlerType.Name);
             updater.AddScopedUpdateHandler(container.Handler);
         }
 
@@ -332,7 +331,7 @@ public static class UpdaterExtensions
             .Where(x => x.Filter is not null)
             .Select(x => x.Filter!.DiscoverNestedFilters())
             .SelectMany(x => x)
-            .Where(x=> x is CommandFilter)
+            .Where(x => x is CommandFilter)
             .Cast<CommandFilter>();
 
         var scopedHandlerFilters = updater.ScopedHandlerContainers
@@ -347,22 +346,22 @@ public static class UpdaterExtensions
         var allCommands = singletonHandlerFilters.Concat(scopedHandlerFilters);
 
         var groupedCommands = allCommands.GroupBy(
-            x => x.Options.BotCommandScope?.Type?? BotCommandScopeType.Default);
+            x => x.Options.BotCommandScope?.Type ?? BotCommandScopeType.Default);
 
         foreach (var scope in groupedCommands)
         {
             var commandScope = scope.First().Options.BotCommandScope;
 
             await updater.BotClient.SetMyCommands(scope
-                    .Where(x=> x.Options.Descriptions is not null)
+                    .Where(x => x.Options.Descriptions is not null)
                     .SelectMany(x => x.ToBotCommand())
-                    .OrderBy(x=> x.priority)
-                    .Select(x=> x.command),
+                    .OrderBy(x => x.priority)
+                    .Select(x => x.command),
                 commandScope, cancellationToken: updater.UpdaterOptions.CancellationToken).ConfigureAwait(false);
 
             updater.Logger.LogInformation(
                 "Set {count} commands to scope {scope}.",
-                scope.Count(), commandScope?.Type?? BotCommandScopeType.Default);
+                scope.Count(), commandScope?.Type ?? BotCommandScopeType.Default);
         }
     }
 
@@ -562,11 +561,11 @@ public static class UpdaterExtensions
             logger?.LogWarning("No updater option passed or can be found from configuration.");
 
         return new UpdaterOptions(
-            botToken: newBotToken?? fetchedOption?.BotToken,
+            botToken: newBotToken ?? fetchedOption?.BotToken,
             maxDegreeOfParallelism: fetchedOption?.MaxDegreeOfParallelism,
             logger: logger,
-            cancellationToken: fetchedOption?.CancellationToken?? default,
-            flushUpdatesQueue: fetchedOption?.FlushUpdatesQueue?? default,
+            cancellationToken: fetchedOption?.CancellationToken ?? default,
+            flushUpdatesQueue: fetchedOption?.FlushUpdatesQueue ?? default,
             allowedUpdates: fetchedOption?.AllowedUpdates
         );
     }
