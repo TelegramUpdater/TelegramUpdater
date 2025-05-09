@@ -366,3 +366,5 @@ FodyWeavers.xsd
 Releases/
 .Releases/
 PrivateContents/
+Examples/ReplaceWith/*
+/ReplaceWith
