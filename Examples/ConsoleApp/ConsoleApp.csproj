@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ReplaceWith\ReplaceWith.csproj" />
     <ProjectReference Include="..\..\Src\TelegramUpdater\TelegramUpdater.csproj" />
   </ItemGroup>
 

@@ -12,7 +12,7 @@ using TelegramUpdater.UpdateHandlers.Singleton.Attributes;
 
 var updater = new Updater(
     new UpdaterOptions(
-        botToken: ReplaceWith.YourOwn.BOT_TOKEN, // Your bot token from @BotFather.
+        botToken: "BOT_TOKEN", // Your bot token from @BotFather.
 
         maxDegreeOfParallelism: 10, // maximum update process tasks count at the same time
                                     // Eg: first 10 updates are answers quickly, but others should wait
