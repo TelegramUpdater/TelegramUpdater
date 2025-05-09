@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿// Ignore Spelling: api
+
+using Microsoft.Extensions.Logging;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers;
@@ -13,7 +15,6 @@ namespace TelegramUpdater;
 public sealed class UpdaterBuilder
 {
     private readonly ITelegramBotClient _botClient;
-    private IUpdater? _updater;
 
     /// <summary>
     /// - <b>Step zero</b>: Create and Add <see cref="ITelegramBotClient"/>.
@@ -64,7 +65,7 @@ public sealed class UpdaterBuilder
     /// <summary>
     /// - <b>Step one</b>: Setup updater options using <see cref="UpdaterOptions"/>
     /// <para>
-    /// There're several options that you can configure for <see cref="Updater"/>.
+    /// There are several options that you can configure for <see cref="Updater"/>.
     /// If you're not sure or you're not in mode just call it with no inputs.
     /// </para>
     /// </summary>
@@ -78,11 +79,11 @@ public sealed class UpdaterBuilder
     /// Or just leave it empty and let us decide.
     /// </param>
     /// <param name="cancellationToken">
-    /// This is a token which you can use later to cancel <see cref="IUpdater.StartAsync(CancellationToken)"/> method
+    /// This is a token which you can use later to cancel <see cref="IUpdater.Start(CancellationToken)"/> method
     /// and shut things down.
     /// </param>
     /// <param name="flushUpdatesQueue">
-    /// By enabling this, old updates that came when the bot was offline will be ignored!
+    /// By enabling this, old updates that came when the bot was off will be ignored!
     /// And updater will start from updates that come since now.
     /// </param>
     /// <param name="allowedUpdates">
@@ -91,25 +92,29 @@ public sealed class UpdaterBuilder
     /// Eg: <code>new[] { UpdateType.Message }</code> causes the updater to receive only <see cref="Message"/>s
     /// </para>
     /// </param>
-    public UpdaterBuilder StepOne(int? maxDegreeOfParallelism = default,
-                                  ILogger<Updater>? logger = default,
-                                  CancellationToken cancellationToken = default,
-                                  bool flushUpdatesQueue = false,
-                                  UpdateType[]? allowedUpdates = default)
+    /// <remarks>
+    /// Call <see cref="UpdaterBuilderStep2.StepTwo(bool)"/> when you're done here.
+    /// </remarks>
+    public UpdaterBuilderStep2 StepOne(
+        int? maxDegreeOfParallelism = default,
+        ILogger<Updater>? logger = default,
+        bool flushUpdatesQueue = false,
+        UpdateType[]? allowedUpdates = default,
+        CancellationToken cancellationToken = default)
     {
-        var updaterOptions = new UpdaterOptions(maxDegreeOfParallelism,
-                                                logger,
-                                                cancellationToken,
-                                                flushUpdatesQueue,
-                                                allowedUpdates);
-        _updater = new Updater(_botClient, updaterOptions);
-        return this;
+        var updaterOptions = new UpdaterOptions(
+            maxDegreeOfParallelism: maxDegreeOfParallelism,
+            logger: logger,                  
+            flushUpdatesQueue: flushUpdatesQueue,
+            allowedUpdates: allowedUpdates,
+            cancellationToken: cancellationToken);
+        return new(new Updater(_botClient, updaterOptions));
     }
 
     /// <summary>
     /// - <b>Step one</b>: Setup updater options using <see cref="UpdaterOptions"/>
     /// <para>
-    /// There're several options that you can configure for <see cref="IUpdater"/>.
+    /// There are several options that you can configure for <see cref="IUpdater"/>.
     /// If you're not sure or you're not in mode just call it with no inputs.
     /// </para>
     /// </summary>
@@ -117,12 +122,23 @@ public sealed class UpdaterBuilder
     /// Create an instance of <see cref="UpdaterOptions"/> and pass here.
     /// </param>
     /// <remarks>
-    /// Call <see cref="StepTwo(bool)"/> when you're done here.
+    /// Call <see cref="UpdaterBuilderStep2.StepTwo(bool)"/> when you're done here.
     /// </remarks>
-    public UpdaterBuilder StepOne(UpdaterOptions updaterOptions)
+    public UpdaterBuilderStep2 StepOne(UpdaterOptions updaterOptions)
+        => new(new Updater(_botClient, updaterOptions));
+}
+
+/// <summary>
+/// This class helps you build and configure <see cref="Updater"/> step by step!
+/// </summary>
+/// <remarks>You're now on step 2.</remarks>
+public sealed class UpdaterBuilderStep2
+{
+    private readonly Updater? _updater;
+
+    internal UpdaterBuilderStep2(Updater? updater)
     {
-        _updater = new Updater(_botClient, updaterOptions);
-        return this;
+        _updater = updater;
     }
 
     /// <summary>
@@ -133,7 +149,7 @@ public sealed class UpdaterBuilder
     /// later using <see cref="IUpdater.AddExceptionHandler(IExceptionHandler)"/>
     /// </para>
     /// <para>
-    /// If you're not sure for now, just leave it empty and i'll add a default
+    /// If you're not sure for now, just leave it empty and I'll add a default
     /// <see cref="ExceptionHandler{T}"/> which handle exceptions in every
     /// update handler you'll add next.
     /// </para>
@@ -146,7 +162,7 @@ public sealed class UpdaterBuilder
     /// An <see cref="string"/> filter on <see cref="Exception.Message"/>.
     /// Use this if you target the Exceptions with an specified message.
     /// <para>
-    /// You can use <see cref="Filters.StringRegex"/> to create your filter.
+    /// You can use <see cref="Filters.UpdaterStringRegex"/> to create your filter.
     /// </para>
     /// </param>
     /// <param name="allowedHandlers">
@@ -156,17 +172,18 @@ public sealed class UpdaterBuilder
     /// </para>
     /// </param>
     /// <remarks>
-    /// Go for <see cref="StepThree(IScopedUpdateHandlerContainer)"/> if you're done here too.
+    /// Go for <see cref="UpdaterBuilderStep3.StepThree(IScopedUpdateHandlerContainer)"/> if you're done here too.
     /// </remarks>
-    public UpdaterBuilder StepTwo<T>(Func<IUpdater, Exception, Task> callback,
-                                     Filter<string>? messageMatch = default,
-                                     Type[]? allowedHandlers = null) where T : Exception
+    public UpdaterBuilderStep3 StepTwo<T>(
+        Func<IUpdater, Exception, Task> callback,
+        Filter<string>? messageMatch = default,
+        Type[]? allowedHandlers = null) where T : Exception
     {
         if (_updater == null)
             throw new InvalidOperationException("Please go step by step, you missed StepOne ?");
 
         _updater.AddExceptionHandler<T>(callback, messageMatch, allowedHandlers);
-        return this;
+        return new(_updater);
     }
 
     /// <summary>
@@ -177,7 +194,7 @@ public sealed class UpdaterBuilder
     /// later using <see cref="IUpdater.AddExceptionHandler(IExceptionHandler)"/>
     /// </para>
     /// <para>
-    /// If you're not sure for now, just leave it empty and i'll add a default
+    /// If you're not sure for now, just leave it empty and I'll add a default
     /// <see cref="ExceptionHandler{T}"/> which handle exceptions in every
     /// update handler you'll add next.
     /// </para>
@@ -191,13 +208,13 @@ public sealed class UpdaterBuilder
     /// An <see cref="string"/> filter on <see cref="Exception.Message"/>.
     /// Use this if you target the Exceptions with an specified message.
     /// <para>
-    /// You can use <see cref="Filters.StringRegex"/> to create your filter.
+    /// You can use <see cref="Filters.UpdaterStringRegex"/> to create your filter.
     /// </para>
     /// </param>
     /// <remarks>
-    /// Go for <see cref="StepThree(IScopedUpdateHandlerContainer)"/> if you're done here too.
+    /// Go for <see cref="UpdaterBuilderStep3.StepThree(IScopedUpdateHandlerContainer)"/> if you're done here too.
     /// </remarks>
-    public UpdaterBuilder StepTwo<TException, THandler>(
+    public UpdaterBuilderStep3 StepTwo<TException, THandler>(
         Func<IUpdater, Exception, Task> callback,
         Filter<string>? messageMatch = default)
         where TException : Exception where THandler : IUpdateHandler
@@ -206,7 +223,7 @@ public sealed class UpdaterBuilder
             throw new InvalidOperationException("Please go step by step, you missed StepOne ?");
 
         _updater.AddExceptionHandler<TException, THandler>(callback, messageMatch);
-        return this;
+        return new(_updater);
     }
 
     /// <summary>
@@ -217,7 +234,7 @@ public sealed class UpdaterBuilder
     /// later using <see cref="IUpdater.AddExceptionHandler(IExceptionHandler)"/>
     /// </para>
     /// <para>
-    /// If you're not sure for now, just leave it empty and i'll add a default
+    /// If you're not sure for now, just leave it empty and I'll add a default
     /// <see cref="ExceptionHandler{T}"/> which handle exceptions in every
     /// update handler you'll add next.
     /// </para>
@@ -230,9 +247,9 @@ public sealed class UpdaterBuilder
     /// </para>
     /// </param>
     /// <remarks>
-    /// Go for <see cref="StepThree(IScopedUpdateHandlerContainer)"/> if you're done here too.
+    /// Go for <see cref="UpdaterBuilderStep3.StepThree(IScopedUpdateHandlerContainer)"/> if you're done here too.
     /// </remarks>
-    public UpdaterBuilder StepTwo(bool inherit = true)
+    public UpdaterBuilderStep3 StepTwo(bool inherit = true)
     {
         if (_updater == null)
             throw new InvalidOperationException("Please go step by step, you missed StepOne ?");
@@ -243,7 +260,7 @@ public sealed class UpdaterBuilder
                 updater.Logger.LogError(exception: ex, message: "Error in handlers!");
                 return Task.CompletedTask;
             }, inherit: inherit);
-        return this;
+        return new(_updater);
     }
 
     /// <summary>
@@ -254,7 +271,7 @@ public sealed class UpdaterBuilder
     /// later using <see cref="IUpdater.AddExceptionHandler(IExceptionHandler)"/>
     /// </para>
     /// <para>
-    /// If you're not sure for now, just leave it empty and i'll add a default
+    /// If you're not sure for now, just leave it empty and I'll add a default
     /// <see cref="ExceptionHandler{T}"/> which handle exceptions in every
     /// update handler you'll add next.
     /// </para>
@@ -263,15 +280,29 @@ public sealed class UpdaterBuilder
     /// Your <see cref="ExceptionHandler{T}"/>.
     /// </param>
     /// <remarks>
-    /// Go for <see cref="StepThree(IScopedUpdateHandlerContainer)"/> if you're done here too.
+    /// Go for <see cref="UpdaterBuilderStep3.StepThree(IScopedUpdateHandlerContainer)"/> if you're done here too.
     /// </remarks>
-    public UpdaterBuilder StepTwo(IExceptionHandler exceptionHandler)
+    public UpdaterBuilderStep3 StepTwo(IExceptionHandler exceptionHandler)
     {
         if (_updater == null)
             throw new InvalidOperationException("Please go step by step, you missed StepOne ?");
 
         _updater.AddExceptionHandler(exceptionHandler);
-        return this;
+        return new(_updater);
+    }
+}
+
+/// <summary>
+/// This class helps you build and configure <see cref="Updater"/> step by step!
+/// </summary>
+/// <remarks>You're now on step 3.</remarks>
+public sealed class UpdaterBuilderStep3
+{
+    private readonly Updater? _updater;
+
+    internal UpdaterBuilderStep3(Updater? updater)
+    {
+        _updater = updater;
     }
 
     /// <summary>
@@ -281,7 +312,7 @@ public sealed class UpdaterBuilder
     /// Like answering user message and etc.
     /// </para>
     /// <para>
-    /// There're two core things you need to create for an <see cref="IUpdateHandler"/>
+    /// There are two core things you need to create for an <see cref="IUpdateHandler"/>
     /// <list type="number">
     /// <item>
     /// <term><see cref="Filter{T}"/>s</term>
@@ -295,7 +326,7 @@ public sealed class UpdaterBuilder
     /// After an update verified and passed the filters, it's time to handle it.
     /// Handling updates are done in callback functions.
     /// <para>
-    /// Callback function gives you an instance of <see cref="UpdateContainerAbs{T}"/>
+    /// Callback function gives you an instance of <see cref="AbstractUpdateContainer{T}"/>
     /// as argument. and this is all you need! with a large set of Extension methods.
     /// </para>
     /// </description>
@@ -303,10 +334,10 @@ public sealed class UpdaterBuilder
     /// </list>
     /// </para>
     /// <para>
-    /// You can use <see cref="FilterCutify"/> class to create your filter.
+    /// You can use <see cref="Filters"/> class to create your filter.
     /// </para>
     /// <para>
-    /// <see cref="FilterCutify.OnCommand(string[])"/> is a good start to handle commands like
+    /// <see cref="ReadyFilters.OnCommand(string[])"/> is a good start to handle commands like
     /// <c>/start</c>.
     /// </para>
     /// <para>
@@ -316,13 +347,14 @@ public sealed class UpdaterBuilder
     /// <param name="callback">Your callback function.</param>
     /// <param name="filter">Your filter.</param>
     /// <remarks>
-    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler)"/>
-    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer)"/>
+    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, HandlingOptions)"/>
+    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions)"/>
     /// later to add more update handler.
+    /// You can finally call <see cref="IUpdater.Start{TWriter}(CancellationToken)"/> to fire up your bot.
     /// </remarks>
     public IUpdater StepThree(
         Func<IContainer<Message>, Task> callback,
-        Filter<Message>? filter)
+        UpdaterFilter<Message>? filter)
     {
         if (_updater == null)
             throw new InvalidOperationException("Please go step by step, you missed StepTwo ?");
@@ -338,7 +370,7 @@ public sealed class UpdaterBuilder
     /// Like answering user message and etc.
     /// </para>
     /// <para>
-    /// There're two core things you need to create for an <see cref="IUpdateHandler"/>
+    /// There are two core things you need to create for an <see cref="IUpdateHandler"/>
     /// <list type="number">
     /// <item>
     /// <term><see cref="Filter{T}"/>s</term>
@@ -352,7 +384,7 @@ public sealed class UpdaterBuilder
     /// After an update verified and passed the filters, it's time to handle it.
     /// Handling updates are done in callback functions.
     /// <para>
-    /// Callback function gives you an instance of <see cref="UpdateContainerAbs{T}"/>
+    /// Callback function gives you an instance of <see cref="AbstractUpdateContainer{T}"/>
     /// as argument. and this is all you need! with a large set of Extension methods.
     /// </para>
     /// </description>
@@ -360,10 +392,10 @@ public sealed class UpdaterBuilder
     /// </list>
     /// </para>
     /// <para>
-    /// You can use <see cref="FilterCutify"/> class to create your filter.
+    /// You can use <see cref="Filters"/> class to create your filter.
     /// </para>
     /// <para>
-    /// <see cref="FilterCutify.OnCommand(string[])"/> is a good start to handle commands like
+    /// <see cref="ReadyFilters.OnCommand(string[])"/> is a good start to handle commands like
     /// <c>/start</c>.
     /// </para>
     /// <para>
@@ -374,9 +406,10 @@ public sealed class UpdaterBuilder
     /// Use classes like <see cref="UpdateHandlers.Singleton.ReadyToUse.MessageHandler"/> to create a message handler and such.
     /// </param>
     /// <remarks>
-    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler)"/>
-    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer)"/>
+    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, HandlingOptions)"/>
+    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions)"/>
     /// later to add more update handler.
+    /// You can finally call <see cref="IUpdater.Start{TWriter}(CancellationToken)"/> to fire up your bot.
     /// </remarks>
     public IUpdater StepThree(ISingletonUpdateHandler singletonUpdateHandler)
     {
@@ -394,7 +427,7 @@ public sealed class UpdaterBuilder
     /// Like answering user message and etc.
     /// </para>
     /// <para>
-    /// There're two core things you need to create for an <see cref="IUpdateHandler"/>
+    /// There are two core things you need to create for an <see cref="IUpdateHandler"/>
     /// <list type="number">
     /// <item>
     /// <term><see cref="Filter{T}"/>s</term>
@@ -408,7 +441,7 @@ public sealed class UpdaterBuilder
     /// After an update verified and passed the filters, it's time to handle it.
     /// Handling updates are done in callback functions.
     /// <para>
-    /// Callback function gives you an instance of <see cref="UpdateContainerAbs{T}"/>
+    /// Callback function gives you an instance of <see cref="AbstractUpdateContainer{T}"/>
     /// as argument. and this is all you need! with a large set of Extension methods.
     /// </para>
     /// </description>
@@ -416,10 +449,10 @@ public sealed class UpdaterBuilder
     /// </list>
     /// </para>
     /// <para>
-    /// You can use <see cref="FilterCutify"/> class to create your filter.
+    /// You can use <see cref="Filters"/> class to create your filter.
     /// </para>
     /// <para>
-    /// <see cref="FilterCutify.OnCommand(string[])"/> is a good start to handle commands like
+    /// <see cref="ReadyFilters.OnCommand(string[])"/> is a good start to handle commands like
     /// <c>/start</c>.
     /// </para>
     /// <para>
@@ -432,9 +465,10 @@ public sealed class UpdaterBuilder
     /// their underlying handler per each request.
     /// </param>
     /// <remarks>
-    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler)"/>
-    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer)"/>
+    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, HandlingOptions)"/>
+    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions)"/>
     /// later to add more update handler.
+    /// You can finally call <see cref="IUpdater.Start{TWriter}(CancellationToken)"/> to fire up your bot.
     /// </remarks>
     public IUpdater StepThree(IScopedUpdateHandlerContainer scopedHandlerContainer)
     {
@@ -452,7 +486,7 @@ public sealed class UpdaterBuilder
     /// Like answering user message and etc.
     /// </para>
     /// <para>
-    /// There're two core things you need to create for an <see cref="IUpdateHandler"/>
+    /// There are two core things you need to create for an <see cref="IUpdateHandler"/>
     /// <list type="number">
     /// <item>
     /// <term><see cref="Filter{T}"/>s</term>
@@ -466,7 +500,7 @@ public sealed class UpdaterBuilder
     /// After an update verified and passed the filters, it's time to handle it.
     /// Handling updates are done in callback functions.
     /// <para>
-    /// Callback function gives you an instance of <see cref="UpdateContainerAbs{T}"/>
+    /// Callback function gives you an instance of <see cref="AbstractUpdateContainer{T}"/>
     /// as argument. and this is all you need! with a large set of Extension methods.
     /// </para>
     /// </description>
@@ -474,22 +508,23 @@ public sealed class UpdaterBuilder
     /// </list>
     /// </para>
     /// <para>
-    /// You can use <see cref="FilterCutify"/> class to create your filter.
+    /// You can use <see cref="Filters"/> class to create your filter.
     /// </para>
     /// <para>
-    /// <see cref="FilterCutify.OnCommand(string[])"/> is a good start to handle commands like
+    /// <see cref="ReadyFilters.OnCommand(string[])"/> is a good start to handle commands like
     /// <c>/start</c>.
     /// </para>
     /// </summary>
     /// <param name="autoCollectScopedHandlers">
     /// Set to <see langword="true"/> so that, <see cref="IUpdater"/> will collect scoped handers
-    /// automatically ( see <see cref="UpdaterExtensions.AutoCollectScopedHandlers(IUpdater, string)"/> for more info about it ).
+    /// automatically ( see <see cref="UpdaterExtensions.CollectScopedHandlers(IUpdater, string)"/> for more info about it ).
     /// otherwise dose nothing to add a handler later.
     /// </param>
     /// <remarks>
-    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler)"/>
-    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer)"/>
+    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, HandlingOptions)"/>
+    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions)"/>
     /// later to add more update handler.
+    /// You can finally call <see cref="IUpdater.Start{TWriter}(CancellationToken)"/> to fire up your bot.
     /// </remarks>
     public IUpdater StepThree(bool autoCollectScopedHandlers = false)
     {
@@ -498,7 +533,7 @@ public sealed class UpdaterBuilder
 
         if (autoCollectScopedHandlers)
         {
-            _updater.AutoCollectScopedHandlers();
+            _updater.CollectScopedHandlers();
         }
         return this._updater;
     }

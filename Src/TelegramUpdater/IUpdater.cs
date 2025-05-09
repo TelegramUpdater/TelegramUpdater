@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.RainbowUtilities;
 using TelegramUpdater.UpdateHandlers.Scoped;
@@ -27,7 +29,7 @@ public interface IUpdater
     UpdaterOptions UpdaterOptions { get; }
 
     /// <summary>
-    /// Rainbow instance. resposeable for parallel queuing.
+    /// Rainbow instance. responsible for parallel queuing.
     /// </summary>
     public Rainbow<long, Update> Rainbow { get; }
 
@@ -35,21 +37,27 @@ public interface IUpdater
     /// A list of allowed updates. updater only receives
     /// and handles this kind of updates.
     /// </summary>
-    public UpdateType[] AllowedUpdates { get; }
+    public UpdateType[]? AllowedUpdates { get; }
+
+    /// <summary>
+    /// Detects allowed updates from handlers.
+    /// </summary>
+    /// <returns></returns>
+    public UpdateType[] DetectAllowedUpdates();
 
     /// <summary>
     /// Enumerate over <see cref="IScopedUpdateHandlerContainer"/>s,
     /// registered to this instance
     /// of <see cref="IUpdater"/>.
     /// </summary>
-    public IEnumerable<IScopedUpdateHandlerContainer> ScopedHandlerContainers { get; }
+    public IEnumerable<HandlingInfo<IScopedUpdateHandlerContainer>> ScopedHandlerContainers { get; }
 
     /// <summary>
     /// Enumerate over <see cref="ISingletonUpdateHandler"/>s,
     /// registered to this instance
     /// of <see cref="IUpdater"/>.
     /// </summary>
-    public IEnumerable<ISingletonUpdateHandler> SingletonUpdateHandlers { get; }
+    public IEnumerable<HandlingInfo<ISingletonUpdateHandler>> SingletonUpdateHandlers { get; }
 
     /// <summary>
     /// Stop reader and writer ( if available ) tasks.
@@ -69,13 +77,15 @@ public interface IUpdater
     /// Use <see cref="ScopedUpdateHandlerContainerBuilder{THandler, TUpdate}"/>
     /// To Create a new <see cref="IScopedUpdateHandlerContainer"/>
     /// </param>
-    Updater AddScopedUpdateHandler(IScopedUpdateHandlerContainer scopedHandlerContainer);
+    /// <param name="options">Information about how a handler should be handled.</param>
+    Updater AddScopedUpdateHandler(IScopedUpdateHandlerContainer scopedHandlerContainer, HandlingOptions? options = default);
 
     /// <summary>
     /// Add your handler to this updater.
     /// </summary>
     /// <param name="updateHandler"></param>
-    Updater AddSingletonUpdateHandler(ISingletonUpdateHandler updateHandler);
+    /// <param name="options">Information about how a handler should be handled.</param>
+    Updater AddSingletonUpdateHandler(ISingletonUpdateHandler updateHandler, HandlingOptions? options = default);
 
     /// <summary>
     /// Get current <see cref="TelegramBotClient"/>'s user information.
@@ -83,24 +93,24 @@ public interface IUpdater
     /// <remarks>
     /// This method will cache! call freely.
     /// </remarks>
-    Task<User> GetMeAsync();
+    Task<User> GetMe();
 
     /// <summary>
     /// Manually write an update to the <see cref="Rainbow"/>
     /// </summary>
-    ValueTask WriteAsync(Update update, CancellationToken cancellationToken = default);
+    ValueTask Write(Update update, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Use this to start writing updates
-    /// ( using your custom writer <typeparamref name="TWriter"/> )
-    /// to the updater. ( Blocking )
+    /// (using your custom writer <typeparamref name="TWriter"/>)
+    /// to the updater.
     /// </summary>
     /// <typeparam name="TWriter">
     /// Your custom update writer. a sub-class of
-    /// <see cref="UpdateWriterAbs"/>.</typeparam>
+    /// <see cref="AbstractUpdateWriter"/>.</typeparam>
     /// <param name="cancellationToken">To cancel the job manually,</param>
-    public Task StartAsync<TWriter>(CancellationToken cancellationToken = default)
-        where TWriter : UpdateWriterAbs, new();
+    public Task Start<TWriter>(CancellationToken cancellationToken = default)
+        where TWriter : AbstractUpdateWriter, new();
 
     /// <summary>
     /// Use this to set or get extra data you may want to access everywhere
@@ -108,7 +118,21 @@ public interface IUpdater
     /// </summary>
     /// <param name="key">The key.</param>
     /// <returns></returns>
-    public object this[string key] { get; set; }
+    public object? this[string key] { get; set; }
+
+    /// <summary>
+    /// Adds an item to updater's storage.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <param name="options"></param>
+    public void SetItem<T>(string key, T value, MemoryCacheEntryOptions? options = default);
+
+    /// <summary>
+    /// Remove item from updater's storage
+    /// </summary>
+    /// <param name="key"></param>
+    public void RemoveItem(string key);
 
     /// <summary>
     /// Check if an <see cref="string"/> key exists in updater extra data.
@@ -116,4 +140,17 @@ public interface IUpdater
     /// <param name="key"></param>
     /// <returns></returns>
     public bool ContainsKey(string key);
+
+    /// <summary>
+    /// Tries to take a value out of this.
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public bool TryGetValue<TValue>(string key, [NotNullWhen(true)] out TValue? value);
+
+    /// <summary>
+    /// The memory cache associated with the <see cref="IUpdater"/>.
+    /// </summary>
+    public IMemoryCache MemoryCache { get; }
 }

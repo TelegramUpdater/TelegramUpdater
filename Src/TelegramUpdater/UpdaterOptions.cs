@@ -1,15 +1,21 @@
-﻿using Microsoft.Extensions.Logging;
+﻿// Ignore Spelling: Webhook
+
+using Microsoft.Extensions.Logging;
+using System.Text.Json.Serialization;
 
 namespace TelegramUpdater;
 
 /// <summary>
 /// Sets options for <see cref="IUpdater"/>.
 /// </summary>
-public readonly struct UpdaterOptions
+public class UpdaterOptions
 {
     /// <summary>
-    /// Sets options for <see cref="IUpdater"/>.
+    /// Options section name.
     /// </summary>
+    public const string Updater = "TelegramUpdater";
+
+    /// <param name="botToken">The bot token. Please include this if you're not going to pass an <see cref="ITelegramBotClient"/>.</param>
     /// <param name="maxDegreeOfParallelism">
     /// Maximum number of allowed concurrent update handling tasks.
     /// </param>
@@ -25,45 +31,47 @@ public readonly struct UpdaterOptions
     /// as queue keys. if there's no user id available.
     /// </param>
     public UpdaterOptions(
+        string? botToken = default,
         int? maxDegreeOfParallelism = default,
         ILogger<IUpdater>? logger = default,
-        CancellationToken cancellationToken = default,
-        bool flushUpdatesQueue = false,
+        bool flushUpdatesQueue = default,
         UpdateType[]? allowedUpdates = default,
-        bool switchChatId = true)
+        bool switchChatId = true,
+        CancellationToken cancellationToken = default)
     {
+        BotToken = botToken;
         MaxDegreeOfParallelism = maxDegreeOfParallelism;
+        FlushUpdatesQueue = flushUpdatesQueue;
+        AllowedUpdates = allowedUpdates;
+        SwitchChatId = switchChatId;
         Logger = logger;
         CancellationToken = cancellationToken;
-        FlushUpdatesQueue = flushUpdatesQueue;
-        AllowedUpdates = allowedUpdates ?? Array.Empty<UpdateType>();
-        SwitchChatId = switchChatId;
     }
+
+    /// <summary>
+    /// Create a new instance of <see cref="UpdaterOptions"/>
+    /// </summary>
+    public UpdaterOptions() { }
+
+    /// <summary>
+    /// Bot token to be used.
+    /// </summary>
+    public string? BotToken { get; init; }
 
     /// <summary>
     /// Maximum number of allowed concurrent update handling tasks.
     /// </summary>
-    public int? MaxDegreeOfParallelism { get; }
-
-    /// <summary>
-    /// If you want to use your own logger.
-    /// </summary>
-    public ILogger<IUpdater>? Logger { get; }
-
-    /// <summary>
-    /// Default token to be used in Start method.
-    /// </summary>
-    public CancellationToken CancellationToken { get; }
+    public int? MaxDegreeOfParallelism { get; init; }
 
     /// <summary>
     /// Old updates will gone.
     /// </summary>
-    public bool FlushUpdatesQueue { get; }
+    public bool FlushUpdatesQueue { get; init; }
 
     /// <summary>
     /// Allowed updates.
     /// </summary>
-    public UpdateType[] AllowedUpdates { get; }
+    public UpdateType[]? AllowedUpdates { get; set; }
 
     /// <summary>
     /// By enabling this option, the updater will try to
@@ -75,5 +83,28 @@ public readonly struct UpdaterOptions
     /// from an update and use it as
     /// queue keys.
     /// </remarks>
-    public bool SwitchChatId { get; } = false;
+    public bool SwitchChatId { get; init; }
+
+    /// <summary>
+    /// Webhook url in case of using webhook.
+    /// </summary>
+    public Uri? BotWebhookUrl { get; init; }
+
+    /// <summary>
+    /// Secret token in case of using webhook.
+    /// </summary>
+    public string? SecretToken { get; init; }
+
+    /// <summary>
+    /// If you want to use your own logger.
+    /// </summary>
+    [JsonIgnore]
+    public ILogger<IUpdater>? Logger { get; }
+
+    // TODO: Remove this
+    /// <summary>
+    /// Default token to be used in Start method.
+    /// </summary>
+    [JsonIgnore]
+    public CancellationToken CancellationToken { get; }
 }

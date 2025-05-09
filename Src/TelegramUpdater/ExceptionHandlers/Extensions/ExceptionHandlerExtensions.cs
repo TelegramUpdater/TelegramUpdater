@@ -14,13 +14,13 @@ public static class ExceptionHandlerExtensions
     /// </summary>
     /// <param name="updater">The updater.</param>
     /// <param name="callback">
-    /// A callback function that will be called when the error catched.
+    /// A callback function that will be called when the error catches.
     /// </param>
     /// <param name="messageMatch">
     /// Handle only when <see cref="Exception.Message"/> matches a text.
     /// </param>
     /// <param name="allowedHandlers">
-    /// Handle only when the <see cref="Exception"/> occured in specified
+    /// Handle only when the <see cref="Exception"/> occurred in specified
     /// <see cref="IUpdateHandler"/>s
     /// <para>Leave null to handle all.</para>
     /// </param>
@@ -41,7 +41,7 @@ public static class ExceptionHandlerExtensions
     /// </summary>
     /// <param name="updater">The updater.</param>
     /// <param name="callback">
-    /// A callback function that will be called when the error catched.
+    /// A callback function that will be called when the error catches.
     /// </param>
     /// <param name="messageMatch">
     /// Handle only when <see cref="Exception.Message"/> matches a text.
@@ -57,12 +57,12 @@ public static class ExceptionHandlerExtensions
         where TException : Exception where THandler : IUpdateHandler
     {
         return updater.AddExceptionHandler<TException>(
-            callback, messageMatch, new[] { typeof(THandler) }, inherit);
+            callback, messageMatch, [typeof(THandler)], inherit);
     }
 
     /// <summary>
     /// Adds a default exception handler that uses <see cref="IUpdater.Logger"/>
-    /// to notify about exceptions occured in update handlers.
+    /// to notify about exceptions occurred in update handlers.
     /// </summary>
     /// <param name="updater">The updater.</param>
     /// <param name="logLevel">Logging level defaults to <see cref="LogLevel.Error"/>.</param>
@@ -75,7 +75,7 @@ public static class ExceptionHandlerExtensions
             u.Logger.Log(
                 logLevel ?? LogLevel.Error,
                 exception: e,
-                message: "Execption occured in update handlers");
+                message: "Exception occurred in update handlers");
             return Task.CompletedTask;
         }, inherit: true);
     }

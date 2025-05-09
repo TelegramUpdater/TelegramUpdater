@@ -1,11 +1,13 @@
-﻿using TelegramUpdater.Filters;
+﻿// Ignore Spelling: Username
+
+using TelegramUpdater.Filters;
 
 namespace TelegramUpdater.FilterAttributes.Attributes;
 
 /// <summary>
 /// An attribute for <see cref="CommandFilter"/>. Works only on <see cref="Message"/> handlers.
 /// </summary>
-public sealed class CommandAttribute : AbstractFilterAttribute
+public sealed class CommandAttribute : AbstractUpdaterFilterAttribute
 {
     /// <summary>
     /// Inner command filter.
@@ -131,7 +133,7 @@ public sealed class CommandAttribute : AbstractFilterAttribute
     {
         Filter = new CommandFilter(
             command, new CommandFilterOptions(
-                argumentsMode, separator, null),
+                argumentsMode, separator, joinArgsFormIndex: null),
             prefix);
     }
 
@@ -201,14 +203,14 @@ public sealed class CommandAttribute : AbstractFilterAttribute
          BotCommandScopeType botCommandScopeType = BotCommandScopeType.Default,
          bool caseSensitive = default)
     {
-        Filter = new CommandFilter(new[] { command }, prefix,
+        Filter = new CommandFilter([command], prefix,
             new CommandFilterOptions(
                 argumentsMode,
                 separator,
                 joinArgs ? joinArgsFormIndex : null,
-                new[] { description },
+                [description],
                 ToBotCommandScope(botCommandScopeType),
-                new[] { setCommandPriority },
+                [setCommandPriority],
                 botUsername,
                 caseSensitive));
     }
@@ -229,7 +231,7 @@ public sealed class CommandAttribute : AbstractFilterAttribute
     /// <param name="caseSensitive">If command filter checks should be Case Sensitive.</param>
     public CommandAttribute(
         string deepLinkArg,
-        bool joinArgs = false,
+        bool joinArgs,
         int joinArgsFormIndex = 0,
         bool caseSensitive = default)
     {
@@ -237,13 +239,17 @@ public sealed class CommandAttribute : AbstractFilterAttribute
     }
 
     /// <inheritdoc/>
-    protected internal override object GetFilterTypeOf(Type requestedType)
+    protected internal override object GetUpdaterFilterTypeOf(Type requestedType)
     {
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(requestedType);
+#else
         if (requestedType == null)
             throw new ArgumentNullException(nameof(requestedType));
+#endif
 
         if (requestedType != typeof(Message))
-            throw new ArgumentException("CommandAttribute are supported only for Messages.");
+            throw new ArgumentException("CommandAttribute are supported only for Messages.", nameof(requestedType));
 
         return Filter;
     }
@@ -259,7 +265,7 @@ public sealed class CommandAttribute : AbstractFilterAttribute
             BotCommandScopeType.Chat => new BotCommandScopeChat(),
             BotCommandScopeType.ChatAdministrators => new BotCommandScopeChatAdministrators(),
             BotCommandScopeType.ChatMember => new BotCommandScopeChatMember(),
-            _ => throw new Exception("Invalid BotCommandScopeType")
+            _ => throw new Exception("Invalid BotCommandScopeType"),
         };
     }
 }

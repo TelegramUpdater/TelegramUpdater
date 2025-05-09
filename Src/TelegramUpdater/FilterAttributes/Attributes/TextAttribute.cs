@@ -1,7 +1,7 @@
 ﻿namespace TelegramUpdater.FilterAttributes.Attributes;
 
 /// <summary>
-/// Filter attibute for <see cref="FilterCutify.Text"/>
+/// Filter attribute for <see cref="ReadyFilters.Text"/>
 /// </summary>
 public sealed class TextAttribute : FilterAttributeBuilder
 {
@@ -9,7 +9,7 @@ public sealed class TextAttribute : FilterAttributeBuilder
     /// Initialize a new instance of <see cref="TextAttribute"/>.
     /// </summary>
     public TextAttribute()
-        : base(x => x.AddFilterForUpdate(FilterCutify.Text()))
+        : base(x => x.AddFilterForUpdate(ReadyFilters.Text()))
     {
     }
 }

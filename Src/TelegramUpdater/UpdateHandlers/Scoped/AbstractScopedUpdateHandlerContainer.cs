@@ -12,23 +12,26 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     where THandler : IScopedUpdateHandler
     where TUpdate : class
 {
-    internal AbstractScopedUpdateHandlerContainer(
-        UpdateType updateType, IFilter<TUpdate>? filter = default)
+    /// <summary>
+    /// Create a new instance of <see cref="AbstractScopedUpdateHandler{T, TContainer}"/>.
+    /// </summary>
+    /// <param name="updateType">Type of update.</param>
+    /// <param name="filter">The filter.</param>
+    /// <exception cref="ArgumentException"></exception>
+    protected AbstractScopedUpdateHandlerContainer(
+        UpdateType updateType, IFilter<UpdaterFilterInputs<TUpdate>>? filter = default)
     {
         if (updateType == UpdateType.Unknown)
             throw new ArgumentException(
-                $"There's nothing unknown here! {nameof(updateType)}");
+                $"There's nothing unknown here! {nameof(updateType)}", nameof(updateType));
 
         UpdateType = updateType;
         ScopedHandlerType = typeof(THandler);
 
         Filter = filter;
 
-        if (Filter == null)
-        {
-            // Check for attributes
-            Filter = ScopedHandlerType.GetFilterAttributes<TUpdate>();
-        }
+        // Check for attributes
+        Filter ??= ScopedHandlerType.GetFilterAttributes<UpdaterFilterInputs<TUpdate>>();
     }
 
     IReadOnlyDictionary<string, object>? IScopedUpdateHandlerContainer.ExtraData
@@ -41,19 +44,17 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     public UpdateType UpdateType { get; }
 
     /// <inheritdoc/>
-    public IFilter<TUpdate>? Filter { get; }
+    public IFilter<UpdaterFilterInputs<TUpdate>>? Filter { get; }
 
     /// <summary>
     /// Checks if an update can be handled in a handler of type <see cref="ScopedHandlerType"/>.
     /// </summary>
-    /// <param name="t">The inner update.</param>
-    /// <param name="updater">The updater instance.</param>
     /// <returns></returns>
-    private bool ShouldHandle(IUpdater updater, TUpdate t)
+    private bool ShouldHandle(UpdaterFilterInputs<TUpdate> inputs)
     {
         if (Filter is null) return true;
 
-        return Filter.TheyShellPass(updater, t);
+        return Filter.TheyShellPass(inputs);
     }
 
     /// <summary>
@@ -61,17 +62,17 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     /// </summary>
     /// <param name="update">The update.</param>
     /// <returns></returns>
-    internal protected abstract TUpdate? GetT(Update update);
+    internal protected abstract TUpdate? ExtractInnerUpdate(Update update);
 
     /// <inheritdoc/>
-    public bool ShouldHandle(IUpdater updater, Update update)
+    public bool ShouldHandle(UpdaterFilterInputs<Update> inputs)
     {
-        if (update.Type != UpdateType) return false;
+        if (inputs.Input.Type != UpdateType) return false;
 
-        var insider = GetT(update);
+        var insider = ExtractInnerUpdate(inputs.Input);
 
         if (insider == null) return false;
 
-        return ShouldHandle(updater, insider);
+        return ShouldHandle(inputs.Rebase(insider));
     }
 }

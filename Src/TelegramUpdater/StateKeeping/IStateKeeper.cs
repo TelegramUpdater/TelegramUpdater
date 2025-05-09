@@ -2,61 +2,81 @@
 
 namespace TelegramUpdater.StateKeeping;
 
-public interface IStateKeeper<TState, TFrom> where TState : IEquatable<TState>
+/// <summary>
+/// Interface for state keepers.
+/// </summary>
+/// <typeparam name="TState">The state itself which must implement <see cref="IEquatable{TState}"/></typeparam>
+/// <typeparam name="TKey">The master object which we extract the state key from</typeparam>
+/// <typeparam name="TStorage">The storage associated with this state keeper.</typeparam>
+public interface IStateKeeper<TKey, TState, TStorage>
+    where TKey: notnull
+    where TStorage : IStateKeeperStorage<TKey, TState>
 {
+    /// <summary>
+    /// The <typeparamref name="TStorage"/> associated with this state keeper.
+    /// </summary>
+    public TStorage Storage { get; }
+
     /// <summary>
     /// Check if <paramref name="stateOf"/> has any <typeparamref name="TState"/>.
     /// </summary>
     /// <param name="stateOf">
-    /// Container object to get a unique <see cref="long"/> key from.
+    /// The key to get state for.
     /// </param>
     /// <returns></returns>
-    public bool HasAnyState(TFrom stateOf);
+    public bool HasAnyState(TKey stateOf);
 
     /// <summary>
     /// Get the state for <paramref name="stateOf"/>.
     /// </summary>
     /// <param name="stateOf">
-    /// Container object to get a unique <see cref="long"/> key from.
+    /// The key to get state for.
     /// </param>
     /// <returns></returns>
-    public TState GetState(TFrom stateOf);
+    public TState? GetState(TKey stateOf);
 
     /// <summary>
     /// Tries to get the state for <paramref name="stateOf"/>.
     /// </summary>
     /// <param name="stateOf">
-    /// Container object to get a unique <see cref="long"/> key from.
+    /// The key to get state for.
     /// </param>
     /// <param name="theState">State of <paramref name="stateOf"/></param>
     /// <returns></returns>
-    public bool TryGetState(TFrom stateOf, [NotNullWhen(true)] out TState? theState);
+    public bool TryGetState(TKey stateOf, [NotNullWhen(true)] out TState? theState);
 
     /// <summary>
     /// Set <paramref name="theState"/> for <paramref name="stateOf"/>.
     /// </summary>
     /// <param name="stateOf">
-    /// Container object to get a unique <see cref="long"/> key from.
+    /// The key to get state for.
     /// </param>
     /// <param name="theState">State of <paramref name="stateOf"/></param>
-    public void SetState(TFrom stateOf, TState theState);
+    public void SetState(TKey stateOf, TState theState);
 
     /// <summary>
     /// Checks if <paramref name="stateOf"/> has state <paramref name="theState"/>.
     /// </summary>
     /// <param name="stateOf">
-    /// Container object to get a unique <see cref="long"/> key from.
+    /// The key to get state for.
     /// </param>
     /// <param name="theState">State of <paramref name="stateOf"/></param>
     /// <returns></returns>
-    public bool HasState(TFrom stateOf, TState theState);
+    public bool HasState(TKey stateOf, TState theState);
 
     /// <summary>
     /// Delete the whole state of <paramref name="stateOf"/>.
     /// </summary>
     /// <param name="stateOf">
-    /// Container object to get a unique <see cref="long"/> key from.
+    /// The key to get state for.
     /// </param>    
     /// <returns></returns>
-    public bool DeleteState(TFrom stateOf);
+    public bool DeleteState(TKey stateOf);
+
+    /// <summary>
+    /// Checks if a new state is valid to be set.
+    /// </summary>
+    /// <param name="newState">The state to check against.</param>
+    /// <returns></returns>
+    public bool CheckStateValidity(TState newState);
 }

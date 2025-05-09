@@ -3,20 +3,19 @@
 /// <summary>
 /// An <see cref="IGenericUpdateChannel{T}"/> for <see cref="UpdateType.CallbackQuery"/>.
 /// </summary>
-public sealed class CallbackQueryChannel : AnyChannel<CallbackQuery>
+/// <remarks>
+/// Initialize a new instance of <see cref="CallbackQueryChannel"/>
+/// to use as <see cref="IGenericUpdateChannel{T}"/>.
+/// </remarks>
+/// <param name="timeOut">Timeout to wait for channel.</param>
+/// <param name="filter">Filter suitable update to channel within <paramref name="timeOut"/>.</param>
+public sealed class CallbackQueryChannel(
+    TimeSpan timeOut,
+    IFilter<UpdaterFilterInputs<CallbackQuery>>? filter = default)
+    : DefaultChannel<CallbackQuery>(
+        UpdateType.CallbackQuery,
+        x => x.CallbackQuery,
+        timeOut,
+        filter)
 {
-    /// <summary>
-    /// Initialize a new instance of <see cref="CallbackQueryChannel"/>
-    /// to use as <see cref="IGenericUpdateChannel{T}"/>.
-    /// </summary>
-    /// <param name="timeOut">Timeout to wait for channel.</param>
-    /// <param name="filter">Filter suitable update to channel within <paramref name="timeOut"/>.</param>
-    public CallbackQueryChannel(TimeSpan timeOut,
-                                IFilter<CallbackQuery>? filter = default)
-        : base(UpdateType.CallbackQuery,
-               x => x.CallbackQuery,
-               timeOut,
-               filter)
-    {
-    }
 }

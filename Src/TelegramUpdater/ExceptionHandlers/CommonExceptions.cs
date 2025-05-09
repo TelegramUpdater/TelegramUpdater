@@ -9,7 +9,7 @@ namespace TelegramUpdater.ExceptionHandlers
     public static class CommonExceptions
     {
         /// <summary>
-        /// Handle parse exception occurs in api requests
+        /// Handle parse exception occurs in API requests
         /// (Bad Request: can't parse entities)
         /// </summary>
         public static ExceptionHandler<ApiRequestException> ParsingException(
@@ -19,7 +19,7 @@ namespace TelegramUpdater.ExceptionHandlers
             return new ExceptionHandler<ApiRequestException>(
                 callback,
                 new StringRegex("^Bad Request: can't parse entities"),
-                allowedHandlers, false);
+                allowedHandlers, inherit: false);
         }
     }
 }

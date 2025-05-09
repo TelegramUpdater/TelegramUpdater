@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace TelegramUpdater.UpdateHandlers.Scoped;
 
@@ -23,10 +24,8 @@ public interface IScopedUpdateHandlerContainer
     /// Checks if an update can be handled in a handler
     /// of type <see cref="ScopedHandlerType"/>.
     /// </summary>
-    /// <param name="update">The update.</param>
-    /// <param name="updater">The updater instance.</param>
     /// <returns></returns>
-    public bool ShouldHandle(IUpdater updater, Update update);
+    public bool ShouldHandle(UpdaterFilterInputs<Update> inputs);
 
     /// <summary>
     /// Initialize an instance of <see cref="ScopedHandlerType"/>.
@@ -35,20 +34,30 @@ public interface IScopedUpdateHandlerContainer
     /// If there is any <see cref="IServiceProvider"/> and
     /// <see cref="IServiceScope"/>
     /// </param>
+    /// <param name="logger"></param>
     /// <returns></returns>
     internal IScopedUpdateHandler? CreateInstance(
-        IServiceScope? scope = default)
+        IServiceScope? scope = default, ILogger? logger = default)
     {
-        IScopedUpdateHandler? scopedHandler;
-        if (scope != null)
+        IScopedUpdateHandler? scopedHandler = null;
+
+        try
         {
-            scopedHandler = (IScopedUpdateHandler?)scope
-                .ServiceProvider.GetRequiredService(ScopedHandlerType);
+            if (scope != null)
+            {
+                scopedHandler = (IScopedUpdateHandler?)scope
+                    .ServiceProvider.GetRequiredService(ScopedHandlerType);
+            }
+            else
+            {
+                scopedHandler = (IScopedUpdateHandler?)Activator
+                    .CreateInstance(ScopedHandlerType);
+            }
         }
-        else
+        catch(Exception ex)
         {
-            scopedHandler = (IScopedUpdateHandler?)Activator
-                .CreateInstance(ScopedHandlerType);
+            // Can't create an instance for any reason
+            logger?.LogWarning(ex, "Can't create an instance of scoped handler: {handler}.", ScopedHandlerType.Name);
         }
 
         scopedHandler?.SetExtraData(ExtraData);

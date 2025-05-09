@@ -3,13 +3,10 @@
 /// <summary>
 /// Abstract scoped update handler for <see cref="UpdateType.ChatMember"/>.
 /// </summary>
-public abstract class ChatMemberHandler : AnyHandler<ChatMemberUpdated>
+/// <remarks>
+/// Set handling priority of this handler.
+/// </remarks>
+public abstract class ChatMemberHandler()
+    : DefaultHandler<ChatMemberUpdated>(x => x.ChatMember)
 {
-    /// <summary>
-    /// Set handling priority of this handler.
-    /// </summary>
-    /// <param name="group">Handling priority group, The lower the sooner to process.</param>
-    protected ChatMemberHandler(int group = default) : base(x => x.ChatMember, group)
-    {
-    }
 }

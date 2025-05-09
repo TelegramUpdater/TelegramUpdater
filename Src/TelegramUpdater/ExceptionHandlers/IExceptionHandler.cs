@@ -7,12 +7,15 @@ namespace TelegramUpdater.ExceptionHandlers
     /// </summary>
     public interface IExceptionHandler
     {
+        // TODO: What dose AllowedHandler do for singleton handler? They share the same type!
+        // This can be used as MessageHandler meaning all message handlers.
+
         /// <summary>
         /// Handle only when the <see cref="Exception"/>
         /// occurred in specified <see cref="IUpdateHandler"/>s.
         /// </summary>
         /// <remarks>If it's null, mean all!</remarks>
-        public IEnumerable<Type>? AllowedHandlers { get; }
+        public IEnumerable<Type>? AllowedHandlers { get; } 
 
         /// <summary>
         /// Your <see cref="Exception"/> type.
@@ -40,22 +43,20 @@ namespace TelegramUpdater.ExceptionHandlers
             {
                 return ExceptionType == typeOfException;
             }
-            else
-            {
-                return ExceptionType.IsAssignableFrom(typeOfException);
-            }
+
+            return ExceptionType.IsAssignableFrom(typeOfException);
         }
 
         /// <summary>
         /// Checks if a message is matched.
         /// </summary>
-        internal bool MessageMatched(IUpdater updater, string message)
+        internal bool MessageMatched(string message)
         {
             if (MessageMatch == null) return true;
 
             if (message == null) return false;
 
-            return MessageMatch.TheyShellPass(updater, message);
+            return MessageMatch.TheyShellPass(message);
         }
 
         /// <summary>
@@ -65,8 +66,12 @@ namespace TelegramUpdater.ExceptionHandlers
         /// <returns></returns>
         internal bool IsAllowedHandler(Type handlerType)
         {
+#if NET8_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(handlerType);
+#else
             if (handlerType == null)
                 throw new ArgumentNullException(nameof(handlerType));
+#endif
 
             if (AllowedHandlers == null) return true;
 
@@ -94,7 +99,6 @@ namespace TelegramUpdater.ExceptionHandlers
             Func<IUpdater, Exception, Task> callback,
             Filter<string>? messageMatch = default)
             where TException : Exception where THandler : IUpdateHandler
-                => new ExceptionHandler<TException>(
-                    callback, messageMatch, new[] { typeof(THandler) });
+                => new(callback, messageMatch, [typeof(THandler)]);
     }
 }

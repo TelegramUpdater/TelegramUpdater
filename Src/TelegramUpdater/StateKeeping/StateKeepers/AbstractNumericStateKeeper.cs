@@ -1,15 +1,33 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Net.NetworkInformation;
 
 namespace TelegramUpdater.StateKeeping.StateKeepers;
 
 /// <summary>
 /// A numeric state keeper that increases and decreases an <see cref="int"/> state.
 /// </summary>
-/// <typeparam name="TFrom">
-/// A container object that is used to extract an unique <see cref="long"/> from.
+/// <typeparam name="TKey">
+/// The key.
 /// </typeparam>
-public abstract class AbstractNumericStateKeeper<TFrom> : AbstractStateKeeper<int, TFrom>
+/// <typeparam name="TFrom">
+/// The master object to extract key from.
+/// </typeparam>
+/// <typeparam name="TStorage"></typeparam>
+public abstract class AbstractNumericStateKeeper<TKey, TFrom, TStorage>(
+    TStorage storage)
+    : AbstractStateKeeper<TKey, int, TFrom, TStorage>(storage)
+    where TKey : notnull
+    where TStorage : IStateKeeperStorage<TKey, int>
 {
+
+    /// <summary>
+    /// Defines the acceptable range of state.
+    /// </summary>
+    /// <remarks>
+    /// Use null to make the range unbound.
+    /// </remarks>
+    public virtual Range? StateRange { get; } = null;
+
     /// <summary>
     /// Tries to increase state by one.
     /// </summary>
@@ -24,8 +42,17 @@ public abstract class AbstractNumericStateKeeper<TFrom> : AbstractStateKeeper<in
         {
             var state = GetState(stateOf);
             newState = state + 1;
-            SetState(stateOf, newState.Value);
-            return true;
+
+            // TODO: CheckStateRangeValidity runs twice: here and inside SetState.
+            var rangeValidity = CheckStateRangeValidity(ref newState);
+
+            if (rangeValidity)
+            {
+                SetState(stateOf, newState!.Value);
+                return true;
+            }
+
+            return false;
         }
 
         newState = default;
@@ -46,11 +73,63 @@ public abstract class AbstractNumericStateKeeper<TFrom> : AbstractStateKeeper<in
         {
             var state = GetState(stateOf);
             newState = state - 1;
-            SetState(stateOf, newState.Value);
-            return true;
+
+            // TODO: CheckStateRangeValidity runs twice: here and inside SetState.
+            var rangeValidity = CheckStateRangeValidity(ref newState);
+
+            if (rangeValidity)
+            {
+                SetState(stateOf, newState!.Value);
+                return true;
+            }
+
+            return false;
         }
 
         newState = default;
         return false;
+    }
+
+    private bool CheckStateRangeValidity([NotNullWhen(true)] ref int? newState)
+    {
+        if (newState is int state)
+        {
+            if (StateRange is Range range)
+            {
+                if (state < range.Start.Value || state > range.End.Value)
+                {
+                    // Invalid state range
+                    newState = default;
+                    return false;
+                }
+
+                // valid state range
+                return true;
+            }
+
+            // unbound state range
+            return true;
+        }
+
+        // null state is not allowed
+        return false;
+    }
+
+    /// <inheritdoc />
+    public override bool CheckStateValidity(int newState)
+    {
+        var value = new int?(newState);
+        return CheckStateRangeValidity(ref value);
+    }
+
+    /// <summary>
+    /// Set default state for <paramref name="stateOf"/>.
+    /// </summary>
+    /// <param name="stateOf">
+    /// Container object to get a unique <see cref="long"/> key from.
+    /// </param>
+    public void InitializeState(TFrom stateOf)
+    {
+        SetState(stateOf, default);
     }
 }

@@ -7,41 +7,19 @@ namespace TelegramUpdater.UpdateHandlers.Scoped;
 /// Abstract base for <see cref="IScopedUpdateHandler"/>s.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public abstract class AbstractScopedUpdateHandler<T> : IScopedUpdateHandler
+/// <remarks>
+/// Create a new instance of <see cref="AbstractScopedUpdateHandler{T, TContainer}"/>.
+/// </remarks>
+/// <param name="getT">Extract actual update from <see cref="Update"/>.</param>
+/// <typeparam name="TContainer">Type of the container.</typeparam>
+/// <exception cref="ArgumentNullException"></exception>
+public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?> getT)
+    : AbstractHandlerProvider<T>, IScopedUpdateHandler
     where T : class
+    where TContainer : IContainer<T>
 {
-    private readonly Func<Update, T?> _getT;
+    private readonly Func<Update, T?> _getT = getT ?? throw new ArgumentNullException(nameof(getT));
     private IReadOnlyDictionary<string, object>? _extraData;
-    private IContainer<T> _container = default!;
-
-    internal AbstractScopedUpdateHandler(Func<Update, T?> getT, int group)
-    {
-        Group = group;
-        _getT = getT ?? throw new ArgumentNullException(nameof(getT));
-    }
-
-    /// <inheritdoc/>
-    public int Group { get; }
-
-    /// <summary>
-    /// Bot client instance.
-    /// </summary>
-    public ITelegramBotClient BotClient => _container.BotClient;
-
-    /// <summary>
-    /// The updater instance.
-    /// </summary>
-    public IUpdater Updater => _container.Updater;
-
-    /// <summary>
-    /// The actual update. one of <see cref="Update"/> properties.
-    /// </summary>
-    public T ActualUpdate => _container.Update;
-
-    /// <summary>
-    /// Container itself. same as container in <see cref="HandleAsync(IContainer{T})"/>.
-    /// </summary>
-    public IContainer<T> Container => _container;
 
     IReadOnlyDictionary<string, object>? IScopedUpdateHandler.ExtraData
         => _extraData;
@@ -50,18 +28,17 @@ public abstract class AbstractScopedUpdateHandler<T> : IScopedUpdateHandler
         => _extraData;
 
     /// <summary>
-    /// Here you may handle the incoming update here.
+    /// Here you may handle the incoming update.
     /// </summary>
-    /// <param name="cntr">
+    /// <param name="container">
     /// Provides everything you need and everything you want!
     /// </param>
     /// <returns></returns>
-    protected abstract Task HandleAsync(IContainer<T> cntr);
+    protected abstract Task HandleAsync(TContainer container);
 
     /// <inheritdoc/>
-    async Task IUpdateHandler.HandleAsync(
-        IUpdater updater, ShiningInfo<long, Update> shiningInfo)
-        => await HandleAsync(ContainerBuilderWrapper(updater, shiningInfo));
+    async Task IUpdateHandler.HandleAsync(HandlerInput input)
+        => await HandleAsync(ContainerBuilderWrapper(input)).ConfigureAwait(false);
 
     void IScopedUpdateHandler.SetExtraData(
         IReadOnlyDictionary<string, object>? extraData)
@@ -77,13 +54,18 @@ public abstract class AbstractScopedUpdateHandler<T> : IScopedUpdateHandler
     /// <summary>
     /// Create update container for this handler.
     /// </summary>
-    internal protected abstract IContainer<T> ContainerBuilder(
-        IUpdater updater, ShiningInfo<long, Update> shiningInfo);
+    internal protected abstract TContainer ContainerBuilder(HandlerInput input);
 
-    private IContainer<T> ContainerBuilderWrapper(
-        IUpdater updater, ShiningInfo<long, Update> shiningInfo)
+    private TContainer ContainerBuilderWrapper(HandlerInput input)
     {
-        _container = ContainerBuilder(updater, shiningInfo);
-        return _container;
+        var container = ContainerBuilder(input);
+        Container = container;
+        return container;
     }
+
+    /// <inheritdoc/>
+    public override IContainer<T> Container { get; protected set; } = default!;
+
+    /// <inheritdoc/>
+    public virtual bool Endpoint { get; protected set; } = true;
 }

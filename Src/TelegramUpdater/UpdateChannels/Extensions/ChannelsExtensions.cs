@@ -14,7 +14,7 @@ public static class ChannelsExtensions
     /// <summary>
     /// Open a channel an wait for an specified update from user.
     /// </summary>
-    /// <typeparam name="TExp">Update type you're excpecting.</typeparam>
+    /// <typeparam name="TExp">Update type you're expecting.</typeparam>
     /// <typeparam name="TCur">Current container update type.</typeparam>
     /// <param name="container">The container itself.</param>
     /// <param name="updateChannel">
@@ -23,9 +23,9 @@ public static class ChannelsExtensions
     /// <param name="onUnrelatedUpdate">
     /// A callback function to be called if an unrelated update from comes.
     /// </param>
-    /// <param name="cancellationToken">To cancell the job.</param>
+    /// <param name="cancellationToken">To cancel the job.</param>
     /// <returns></returns>
-    public static async ValueTask<IContainer<TExp>?> OpenChannelAsync<TExp, TCur>(
+    public static async ValueTask<IContainer<TExp>?> OpenChannel<TExp, TCur>(
         this IContainer<TCur> container,
         IGenericUpdateChannel<TExp> updateChannel,
         Func<
@@ -34,8 +34,12 @@ public static class ChannelsExtensions
         CancellationToken cancellationToken = default)
         where TExp : class where TCur : class
     {
-        if (container == null)
+#if NET8_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(container);
+#else
+        if (container is null)
             throw new ArgumentNullException(nameof(container));
+#endif
 
         if (updateChannel == null)
         {
@@ -43,7 +47,7 @@ public static class ChannelsExtensions
                 "abstractChannel and updateResolver both can't be null");
         }
 
-        // A secondary timeOut, cuz ReadNextAsync'timeout will reset on unrelated update.
+        // A secondary timeOut, because ReadNextAsync'timeout will reset on unrelated update.
         var timeOutCts = new CancellationTokenSource();
         timeOutCts.CancelAfter(updateChannel.TimeOut);
 
@@ -55,24 +59,24 @@ public static class ChannelsExtensions
             try
             {
                 var update = await container.ShiningInfo.ReadNextAsync(
-                    updateChannel.TimeOut, linkedCts.Token);
+                    updateChannel.TimeOut, linkedCts.Token).ConfigureAwait(false);
 
                 if (update == null)
                     return null;
 
-                if (updateChannel.ShouldChannel(container.Updater, update.Value))
+                if (updateChannel.ShouldChannel(
+                    new(container.Updater, update.Value, default, default, default, default)))
                 {
-                    return new AnyContainer<TExp>(
+                    return new DefaultContainer<TExp>(
                         updateChannel.GetActualUpdate,
-                        container.Updater,
-                        update,
+                        new(container.Updater, update, default, 0, 0, 0),
                         updateChannel.ExtraData
                     );
                 }
 
                 if (onUnrelatedUpdate != null)
                 {
-                    await onUnrelatedUpdate(container.Updater, update);
+                    await onUnrelatedUpdate(container.Updater, update).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException)
@@ -93,20 +97,20 @@ public static class ChannelsExtensions
     /// <param name="onUnrelatedUpdate">
     /// A callback function to be called if an unrelated update from comes.
     /// </param>
-    /// <param name="cancellationToken">To cancell the job.</param>
-    public static async Task<IContainer<Message>?> ChannelMessageAsync<K>(
+    /// <param name="cancellationToken">To cancel the job.</param>
+    public static async Task<IContainer<Message>?> ChannelMessage<K>(
         this IContainer<K> updateContainer,
-        Filter<Message>? filter,
+        Filter<UpdaterFilterInputs<Message>>? filter,
         TimeSpan? timeOut,
         Func<
             IUpdater,
             ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
         CancellationToken cancellationToken = default) where K : class
     {
-        return await updateContainer.OpenChannelAsync(
+        return await updateContainer.OpenChannel(
             new MessageChannel(timeOut ?? TimeSpan.FromSeconds(30), filter),
             onUnrelatedUpdate,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
 
@@ -121,7 +125,7 @@ public static class ChannelsExtensions
     /// <param name="onUnrelatedUpdate">
     /// A callback function to be called if an unrelated update from comes.
     /// </param>
-    /// <param name="cancellationToken">To cancell the job.</param>
+    /// <param name="cancellationToken">To cancel the job.</param>
     [Obsolete("Use ChannelMessageAsync.")]
     public static async Task<IContainer<Message>?> ChannelUserResponse(
         this IContainer<Message> updateContainer,
@@ -129,18 +133,18 @@ public static class ChannelsExtensions
         Func<
             IUpdater,
             ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
-        Filter<Message>? filter = default,
+        Filter<UpdaterFilterInputs<Message>>? filter = default,
         CancellationToken cancellationToken = default)
     {
-        return await updateContainer.ChannelMessageAsync(
-            filter, timeOut, onUnrelatedUpdate, cancellationToken);
+        return await updateContainer.ChannelMessage(
+            filter, timeOut, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
     /// Waits for the user to click on an inline button.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public static async Task<IContainer<CallbackQuery>?> ChannelButtonClickAsync<T>(
+    public static async Task<IContainer<CallbackQuery>?> ChannelButtonClick<T>(
         this IContainer<T> updateContainer,
         TimeSpan timeOut,
         CallbackQueryRegex callbackQueryRegex,
@@ -149,11 +153,11 @@ public static class ChannelsExtensions
             ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
         CancellationToken cancellationToken = default) where T : class
     {
-        return await updateContainer.OpenChannelAsync(
+        return await updateContainer.OpenChannel(
             new CallbackQueryChannel(
                 timeOut,
                 callbackQueryRegex),
             onUnrelatedUpdate,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 }

@@ -3,14 +3,10 @@
 /// <summary>
 /// Abstract scoped update handler for <see cref="UpdateType.PollAnswer"/>.
 /// </summary>
-public abstract class PollAnswerHandler : AnyHandler<PollAnswer>
+/// <remarks>
+/// Set handling priority of this handler.
+/// </remarks>
+public abstract class PollAnswerHandler()
+    : DefaultHandler<PollAnswer>(x => x.PollAnswer)
 {
-    /// <summary>
-    /// Set handling priority of this handler.
-    /// </summary>
-    /// <param name="group">Handling priority group, The lower the sooner to process.</param>
-    protected PollAnswerHandler(int group = default)
-        : base(x => x.PollAnswer, group)
-    {
-    }
 }

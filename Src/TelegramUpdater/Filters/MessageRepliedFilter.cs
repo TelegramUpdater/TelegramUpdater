@@ -1,16 +1,15 @@
-﻿namespace TelegramUpdater.Filters
+﻿namespace TelegramUpdater.Filters;
+
+/// <summary>
+/// A filter that checks if the message is a reply to another message.
+/// </summary>
+public class MessageRepliedFilter : UpdaterFilter<Message>
 {
     /// <summary>
-    /// A filter that checks if the message is a reply to another message.
+    /// Initializes a new instance of the <see cref="MessageRepliedFilter"/> class.
     /// </summary>
-    public class MessageRepliedFilter : Filter<Message>
+    public MessageRepliedFilter()
+        : base((x) => x.ReplyToMessage != null)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessageRepliedFilter"/> class.
-        /// </summary>
-        public MessageRepliedFilter()
-            : base((_, x) => x.ReplyToMessage != null)
-        {
-        }
     }
 }
