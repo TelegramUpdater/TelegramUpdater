@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Reflection;
 using TelegramUpdater.RainbowUtilities;
 
@@ -78,6 +79,11 @@ public class DefaultLiteContainer<T> : IContainer<T> where T : class
         => CreateLiteContainer(x => x.CallbackQuery, update, updater);
 
     bool IContainer.ContainsKey(string key)
+    {
+        throw new InvalidOperationException("Lite container doesn't have any extra data.");
+    }
+
+    bool IContainer.TryGetExtraData<T1>(string key, [NotNullWhen(true)] out T1 value)
     {
         throw new InvalidOperationException("Lite container doesn't have any extra data.");
     }

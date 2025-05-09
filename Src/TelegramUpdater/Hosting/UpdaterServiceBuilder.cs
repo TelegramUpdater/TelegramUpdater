@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types.Payments;
+using Telegram.Bot.Types.ReplyMarkups;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
@@ -146,8 +147,8 @@ public class UpdaterServiceBuilder
     public UpdaterServiceBuilder AddDefaultExceptionHandler(LogLevel? logLevel = default)
         => Execute(updater => updater.AddDefaultExceptionHandler(logLevel));
 
-    /// <inheritdoc cref="UpdaterExtensions.AutoCollectScopedHandlers(IUpdater, string)"/>
-    public UpdaterServiceBuilder AutoCollectScopedHandlers(
+    /// <inheritdoc cref="UpdaterExtensions.CollectScopedHandlers(IUpdater, string)"/>
+    public UpdaterServiceBuilder CollectScopedHandlers(
         string handlersParentNamespace = "UpdateHandlers")
     {
         foreach (var (_, _, handlerType) in UpdaterExtensions
@@ -158,7 +159,7 @@ public class UpdaterServiceBuilder
             scopedHandlerTypes.Add(handlerType);
         }
 
-        return Execute(updater => updater.AutoCollectScopedHandlers(handlersParentNamespace));
+        return Execute(updater => updater.CollectScopedHandlers(handlersParentNamespace));
     }
 
     /// <summary>
@@ -644,4 +645,35 @@ public class UpdaterServiceBuilder
            x => x.PurchasedPaidMedia,
            options);
 
+    /// <inheritdoc cref="UpdaterExtensions.QuickStartCommandReply(IUpdater, string, bool, ParseMode, IEnumerable{MessageEntity}?, bool?, int?, bool, ReplyMarkup?, bool, string?, string?, bool, bool)"/>
+    public UpdaterServiceBuilder QuickStartCommandReply(
+        string text,
+        bool sendAsReply = true,
+        ParseMode parseMode = default,
+        IEnumerable<MessageEntity>? messageEntities = default,
+        bool? disableWebpagePreview = default,
+        int? messageThreadId = default,
+        bool disableNotification = default,
+        ReplyMarkup? replyMarkup = default,
+        bool protectContent = default,
+        string? messageEffectId = default,
+        string? businessConnectionId = default,
+        bool allowPaidBroadcast = default,
+        bool allowSendingWithoutReply = true)
+    {
+        return Execute(updater => updater.QuickStartCommandReply(
+                text: text,
+                sendAsReply: sendAsReply,
+                parseMode: parseMode,
+                messageEntities: messageEntities,
+                disableWebpagePreview: disableWebpagePreview,
+                messageThreadId: messageThreadId,
+                disableNotification: disableNotification,
+                replyMarkup: replyMarkup,
+                protectContent: protectContent,
+                messageEffectId: messageEffectId,
+                businessConnectionId: businessConnectionId,
+                allowPaidBroadcast: allowPaidBroadcast,
+                allowSendingWithoutReply: allowSendingWithoutReply));
+    }
 }

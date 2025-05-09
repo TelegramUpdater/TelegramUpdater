@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: Iter
+﻿// Ignore Spelling: Iter Webpage Webhook ip
 
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -7,9 +7,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Telegram.Bot;
 using Telegram.Bot.Types.Payments;
+using Telegram.Bot.Types.ReplyMarkups;
 using TelegramUpdater.Filters;
 using TelegramUpdater.Helpers;
+using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers.Scoped;
 using TelegramUpdater.UpdateHandlers.Scoped.Attributes;
 using TelegramUpdater.UpdateHandlers.Singleton;
@@ -289,7 +292,7 @@ public static class UpdaterExtensions
     /// /Messages/MyScopedMessageHandler
     /// </remarks>
     /// <returns></returns>
-    public static IUpdater AutoCollectScopedHandlers(
+    public static IUpdater CollectScopedHandlers(
         this IUpdater updater,
         string handlersParentNamespace = "UpdateHandlers")
     {
@@ -303,6 +306,74 @@ public static class UpdaterExtensions
         }
 
         return updater;
+    }
+
+    /// <summary>
+    /// Use this to quickly add a message handler that responds /start command.
+    /// </summary>
+    /// <remarks>
+    /// If you need a more advanced handler use <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions?)"/>
+    /// or <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, HandlingOptions?)"/>
+    /// </remarks>
+    /// <returns></returns>
+    public static IUpdater QuickStartCommandReply(
+        this IUpdater updater,
+        string text,
+        bool sendAsReply = true,
+        ParseMode parseMode = default,
+        IEnumerable<MessageEntity>? messageEntities = default,
+        bool? disableWebpagePreview = default,
+        int? messageThreadId = default,
+        bool disableNotification = default,
+        ReplyMarkup? replyMarkup = default,
+        bool protectContent = default,
+        string? messageEffectId = default,
+        string? businessConnectionId = default,
+        bool allowPaidBroadcast = default,
+        bool allowSendingWithoutReply = true)
+    {
+        return updater.AddMessageHandler(
+            container => container.Response(
+                text: text,
+                sendAsReply: sendAsReply,
+                parseMode: parseMode,
+                messageEntities: messageEntities,
+                disableWebpagePreview: disableWebpagePreview,
+                messageThreadId: messageThreadId,
+                disableNotification: disableNotification,
+                replyMarkup: replyMarkup,
+                protectContent: protectContent,
+                messageEffectId: messageEffectId,
+                businessConnectionId: businessConnectionId,
+                allowPaidBroadcast: allowPaidBroadcast,
+                allowSendingWithoutReply: allowSendingWithoutReply),
+            ReadyFilters.OnCommand("start"));
+    }
+
+    /// <summary>
+    /// Calls <see cref="TelegramBotClientExtensions.SetWebhook(ITelegramBotClient, string, InputFileStream?, string?, int?, IEnumerable{UpdateType}?, bool, string?, CancellationToken)"/>
+    /// with provided arguments or via <see cref="UpdaterOptions"/> available inside <see cref="IUpdater.UpdaterOptions"/>.
+    /// </summary>
+    /// <returns></returns>
+    public static Task SetWebhook(
+        this IUpdater updater,
+        string? url = default,
+        InputFileStream? certificate = default,
+        string? ipAddress = default,
+        int? maxConnections = default,
+        IEnumerable<UpdateType>? allowedUpdates = default,
+        bool? dropPendingUpdates = default,
+        CancellationToken cancellationToken = default)
+    {
+        return updater.BotClient.SetWebhook(
+            url: (url ?? updater.UpdaterOptions.BotWebhookUrl?.AbsoluteUri)
+                ?? throw new ArgumentNullException(nameof(url), "A url can't be fetched from neither parameters nor updater options."),
+            certificate: certificate,
+            ipAddress: ipAddress,
+            maxConnections: maxConnections,
+            allowedUpdates: allowedUpdates?? updater.UpdaterOptions.AllowedUpdates,
+            dropPendingUpdates: dropPendingUpdates?? updater.UpdaterOptions.FlushUpdatesQueue,
+            cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -567,6 +638,10 @@ public static class UpdaterExtensions
             cancellationToken: fetchedOption?.CancellationToken ?? default,
             flushUpdatesQueue: fetchedOption?.FlushUpdatesQueue ?? default,
             allowedUpdates: fetchedOption?.AllowedUpdates
-        );
+        )
+        {
+            BotWebhookUrl = fetchedOption?.BotWebhookUrl,
+            SecretToken = fetchedOption?.SecretToken,
+        };
     }
 }

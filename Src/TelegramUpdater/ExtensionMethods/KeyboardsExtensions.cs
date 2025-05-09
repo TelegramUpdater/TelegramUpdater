@@ -19,7 +19,7 @@ public static class MarkupExtensions
     {
         var grid = new GridCollection<InlineKeyboardButton>(rowCapacity);
         buildButtonsGrid(grid);
-        return new(grid);
+        return new(grid.Items);
     }
 
     /// <summary>
@@ -33,6 +33,28 @@ public static class MarkupExtensions
     {
         var grid = new GridCollection<KeyboardButton>(rowCapacity);
         buildButtonsGrid(grid);
-        return new(grid);
+        return new(grid.Items);
     }
+
+    #region InlineKeyboardButtons
+    /// <inheritdoc cref="InlineKeyboardButton.WithCallbackData(string, string)"/>
+    public static GridCollection<InlineKeyboardButton> AddCallbackQuery(
+        this GridCollection<InlineKeyboardButton> buttonsGrid,
+        string text,
+        string? callbackData = default)
+    {
+        return buttonsGrid.AddItem(callbackData is null ?
+            InlineKeyboardButton.WithCallbackData(text) :
+            InlineKeyboardButton.WithCallbackData(text, callbackData));
+    }
+
+    /// <inheritdoc cref="InlineKeyboardButton.WithUrl(string, string)"/>
+    public static GridCollection<InlineKeyboardButton> AddUrl(
+        this GridCollection<InlineKeyboardButton> buttonsGrid,
+        string text,
+        string url)
+    {
+        return buttonsGrid.AddItem(InlineKeyboardButton.WithUrl(text, url));
+    }
+    #endregion
 }

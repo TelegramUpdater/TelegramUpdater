@@ -11,21 +11,21 @@ namespace TelegramUpdater;
 /// </summary>
 public static class SingletonAttributesExtensions
 {
-    internal static Type? GetContainerType(this Type container)
+    internal static Type? GetContainerType(this Type containerType)
     {
 #if NET8_0_OR_GREATER
-        ArgumentNullException.ThrowIfNull(container);
+        ArgumentNullException.ThrowIfNull(containerType);
 #else
-        if (container == null)
-            throw new ArgumentNullException(nameof(container));
+        if (containerType == null)
+            throw new ArgumentNullException(nameof(containerType));
 #endif
 
-        if (container.IsInterface && container.IsGenericType)
+        if (containerType.IsInterface && containerType.IsGenericType)
         {
-            var genericDef = container.GetGenericTypeDefinition();
+            var genericDef = containerType.GetGenericTypeDefinition();
             if (genericDef == typeof(IContainer<>))
             {
-                return container.GetGenericArguments()[0];
+                return containerType.GetGenericArguments()[0];
             }
         }
 
@@ -101,9 +101,10 @@ public static class SingletonAttributesExtensions
                 var containerType = parameters[0].ParameterType.GetContainerType();
                 if (containerType is not null)
                 {
-                    if (!Enum.TryParse(containerType.Name, out UpdateType ut)) continue;
+                    // TODO: can we figure out update type from type of update only? No. A message can be Message, EditedMessage and ...
+                    //if (!Enum.TryParse(containerType.Name, out UpdateType ut)) continue;
 
-                    if (ut != singletonAttr.UpdateType) continue;
+                    //if (ut != singletonAttr.UpdateType) continue;
 
                     var handler = GetSingletonUpdateHandler(method, singletonAttr.UpdateType);
 
@@ -124,7 +125,7 @@ public static class SingletonAttributesExtensions
     /// <param name="updater">The updater.</param>
     /// <returns></returns>
     /// <exception cref="ApplicationException"></exception>
-    public static IUpdater CollectSingletonUpdateHandlerCallbacks(
+    public static IUpdater CollectSingletonHandlers(
         this IUpdater updater)
     {
         foreach (var handler in IterSingletonUpdateHandlerCallbacks())

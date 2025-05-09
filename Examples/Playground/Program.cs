@@ -38,7 +38,7 @@ builder.AddTelegramUpdater(
                 ReadyFilters.OnCommand("help"))
 
             // Collects static methods marked with `SingletonHandlerCallback` attribute.
-            .CollectSingletonUpdateHandlerCallbacks()
+            .CollectSingletonHandlers()
 
             // State tracker
             .AddUserEnumStateKeeper<RenameState>())
@@ -47,7 +47,7 @@ builder.AddTelegramUpdater(
         .AddMessageHandler<MyBadlyPlacedHandler>()
 
         // Collect scoped handlers located for example at UpdateHandlers/Messages for messages.
-        .AutoCollectScopedHandlers()
+        .CollectScopedHandlers()
         .AddDefaultExceptionHandler());
 
 var host = builder.Build();
@@ -58,7 +58,7 @@ partial class Program
 {
     /// <summary>
     /// This method is automatically collected and considered as an singleton update handler.
-    /// You just need to call <see cref="SingletonAttributesExtensions.CollectSingletonUpdateHandlerCallbacks(IUpdater)"/>
+    /// You just need to call <see cref="SingletonAttributesExtensions.CollectSingletonHandlers(IUpdater)"/>
     /// </summary>
     /// <param name="container"></param>
     /// <returns></returns>

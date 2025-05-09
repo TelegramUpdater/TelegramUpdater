@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Primitives;
+using System.Diagnostics.CodeAnalysis;
 using TelegramUpdater.RainbowUtilities;
 
 namespace TelegramUpdater.UpdateContainer;
@@ -43,7 +44,7 @@ public interface IContainer
     /// You can find that data here.
     /// </summary>
     /// <remarks>
-    /// Eg: a <see cref="Filters.OnCommand(string[])"/> may insert an string array with key <c>args</c>.
+    /// Eg: a <see cref="ReadyFilters.OnCommand(string[])"/> may insert an string array with key <c>args</c>.
     /// </remarks>
     /// <param name="key">Data key, based on applied filter.</param>
     /// <returns>
@@ -58,6 +59,9 @@ public interface IContainer
     /// <param name="key">The key.</param>
     /// <returns><see langword="true"/> if the key is available.</returns>
     public bool ContainsKey(string key);
+
+    /// <inheritdoc cref="IReadOnlyDictionary{TKey, TValue}.TryGetValue(TKey, out TValue)"/>
+    public bool TryGetExtraData<T>(string key, [NotNullWhen(true)] out T? value);
 }
 
 /// <summary>

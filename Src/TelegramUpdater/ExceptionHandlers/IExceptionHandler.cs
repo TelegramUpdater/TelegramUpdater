@@ -7,12 +7,15 @@ namespace TelegramUpdater.ExceptionHandlers
     /// </summary>
     public interface IExceptionHandler
     {
+        // TODO: What dose AllowedHandler do for singleton handler? They share the same type!
+        // This can be used as MessageHandler meaning all message handlers.
+
         /// <summary>
         /// Handle only when the <see cref="Exception"/>
         /// occurred in specified <see cref="IUpdateHandler"/>s.
         /// </summary>
         /// <remarks>If it's null, mean all!</remarks>
-        public IEnumerable<Type>? AllowedHandlers { get; }
+        public IEnumerable<Type>? AllowedHandlers { get; } 
 
         /// <summary>
         /// Your <see cref="Exception"/> type.

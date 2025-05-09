@@ -337,7 +337,7 @@ public sealed class UpdaterBuilderStep3
     /// You can use <see cref="Filters"/> class to create your filter.
     /// </para>
     /// <para>
-    /// <see cref="Filters.OnCommand(string[])"/> is a good start to handle commands like
+    /// <see cref="ReadyFilters.OnCommand(string[])"/> is a good start to handle commands like
     /// <c>/start</c>.
     /// </para>
     /// <para>
@@ -347,8 +347,8 @@ public sealed class UpdaterBuilderStep3
     /// <param name="callback">Your callback function.</param>
     /// <param name="filter">Your filter.</param>
     /// <remarks>
-    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, int)"/>
-    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, int)"/>
+    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, HandlingOptions)"/>
+    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions)"/>
     /// later to add more update handler.
     /// You can finally call <see cref="IUpdater.Start{TWriter}(CancellationToken)"/> to fire up your bot.
     /// </remarks>
@@ -395,7 +395,7 @@ public sealed class UpdaterBuilderStep3
     /// You can use <see cref="Filters"/> class to create your filter.
     /// </para>
     /// <para>
-    /// <see cref="Filters.OnCommand(string[])"/> is a good start to handle commands like
+    /// <see cref="ReadyFilters.OnCommand(string[])"/> is a good start to handle commands like
     /// <c>/start</c>.
     /// </para>
     /// <para>
@@ -406,8 +406,8 @@ public sealed class UpdaterBuilderStep3
     /// Use classes like <see cref="UpdateHandlers.Singleton.ReadyToUse.MessageHandler"/> to create a message handler and such.
     /// </param>
     /// <remarks>
-    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, int)"/>
-    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, int)"/>
+    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, HandlingOptions)"/>
+    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions)"/>
     /// later to add more update handler.
     /// You can finally call <see cref="IUpdater.Start{TWriter}(CancellationToken)"/> to fire up your bot.
     /// </remarks>
@@ -452,7 +452,7 @@ public sealed class UpdaterBuilderStep3
     /// You can use <see cref="Filters"/> class to create your filter.
     /// </para>
     /// <para>
-    /// <see cref="Filters.OnCommand(string[])"/> is a good start to handle commands like
+    /// <see cref="ReadyFilters.OnCommand(string[])"/> is a good start to handle commands like
     /// <c>/start</c>.
     /// </para>
     /// <para>
@@ -465,8 +465,8 @@ public sealed class UpdaterBuilderStep3
     /// their underlying handler per each request.
     /// </param>
     /// <remarks>
-    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, int)"/>
-    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, int)"/>
+    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, HandlingOptions)"/>
+    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions)"/>
     /// later to add more update handler.
     /// You can finally call <see cref="IUpdater.Start{TWriter}(CancellationToken)"/> to fire up your bot.
     /// </remarks>
@@ -511,18 +511,18 @@ public sealed class UpdaterBuilderStep3
     /// You can use <see cref="Filters"/> class to create your filter.
     /// </para>
     /// <para>
-    /// <see cref="Filters.OnCommand(string[])"/> is a good start to handle commands like
+    /// <see cref="ReadyFilters.OnCommand(string[])"/> is a good start to handle commands like
     /// <c>/start</c>.
     /// </para>
     /// </summary>
     /// <param name="autoCollectScopedHandlers">
     /// Set to <see langword="true"/> so that, <see cref="IUpdater"/> will collect scoped handers
-    /// automatically ( see <see cref="UpdaterExtensions.AutoCollectScopedHandlers(IUpdater, string)"/> for more info about it ).
+    /// automatically ( see <see cref="UpdaterExtensions.CollectScopedHandlers(IUpdater, string)"/> for more info about it ).
     /// otherwise dose nothing to add a handler later.
     /// </param>
     /// <remarks>
-    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, int)"/>
-    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, int)"/>
+    /// You can use <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, HandlingOptions)"/>
+    /// or <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions)"/>
     /// later to add more update handler.
     /// You can finally call <see cref="IUpdater.Start{TWriter}(CancellationToken)"/> to fire up your bot.
     /// </remarks>
@@ -533,7 +533,7 @@ public sealed class UpdaterBuilderStep3
 
         if (autoCollectScopedHandlers)
         {
-            _updater.AutoCollectScopedHandlers();
+            _updater.CollectScopedHandlers();
         }
         return this._updater;
     }

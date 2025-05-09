@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Primitives;
+using System.Diagnostics.CodeAnalysis;
 using TelegramUpdater.RainbowUtilities;
 
 namespace TelegramUpdater.UpdateContainer;
@@ -62,4 +63,26 @@ public abstract class AbstractUpdateContainer<T>(
 
     /// <inheritdoc/>
     public bool ContainsKey(string key) => _extraObjects.ContainsKey(key);
+
+    /// <inheritdoc/>
+    public bool TryGetExtraData<T1>(
+        string key, [NotNullWhen(true)] out T1? value)
+    {
+        value = default;
+
+        if (_extraObjects.TryGetValue(key, out var val))
+        {
+            try
+            {
+                value = (T1)val;
+                return true;
+            }
+            catch(InvalidCastException)
+            {
+                return false;
+            }
+        }
+
+        return false;
+    }
 }
