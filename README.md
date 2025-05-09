@@ -206,8 +206,15 @@ public static async Task AboutCommand(IContainer<Message> container)
 
 Extension methods return containerized results.
 
+## Examples
+
+Examples inside [/Examples](./Examples) folder are up to date with latest package changes and are good start points to begin.
+
+- [ConsoleApp](./Examples/ConsoleApp): Usage of updater inside a console app.
+- [WorkerService](./Examples/WorkerService): Usage of the updater inside a worker service where `IServiceCollection`, `IConfiguration`s can be used by the updater (This's prefrred to console app as you can use scoped handlers)
+- [Webhook](./Examples/Webhook): Setting up a telegram bot using webhooks and updater. (Most of this are as same as WorkerSerivce)
+- [Playground](./Examples/Playground): This is a good worker service example that uses many of TelegramUpdater's features (not all!).
+
 ## What's Next ?!
 
-The [Examples/Playground](https://github.com/TelegramUpdater/TelegramUpdater/tree/dev/Examples/Playground) is a good worker service example that uses many of TelegramUpdater's features.
-
-There are plenty of various examples available at [Examples](https://github.com/TelegramUpdater/TelegramUpdater.Examples)
+Stay tuned!
