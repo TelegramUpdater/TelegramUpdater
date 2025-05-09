@@ -68,7 +68,7 @@ Updater can automatically collect your handlers as statics methods like example 
 ```csharp
 var updater = new Updater("YOUR_BOT_TOKEN")
     .AddDefaultExceptionHandler()
-    .CollectSingletonUpdateHandlerCallbacks();
+    .CollectSingletonHandlers();
 
 await updater.Start();
 
@@ -76,7 +76,7 @@ partial class Program
 {
     [Command("start"), Private]
     [SingletonHandlerCallback(UpdateType.Message)]
-    public static async Task Start(MessageContainer container)
+    public static async Task Start(IContainer<Message> container)
     {
         await container.Response("Hello World");
     }
@@ -104,9 +104,9 @@ builder.AddTelegramUpdater(
         // Modify the actual updater
         .Execute(updater => updater
             // Collects static methods marked with `SingletonHandlerCallback` attribute.
-            .CollectSingletonUpdateHandlerCallbacks())
+            .CollectSingletonHandlers())
         // Collect scoped handlers located for example at UpdateHandlers/Messages for messages.
-        .AutoCollectScopedHandlers()
+        .CollectScopedHandlers()
         .AddDefaultExceptionHandler());
 
 var host = builder.Build();
