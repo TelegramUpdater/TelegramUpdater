@@ -62,14 +62,14 @@ Updater can automatically collect your handlers as statics methods like example 
 ```csharp
 var updater = new Updater("YOUR_BOT_TOKEN")
     .AddDefaultExceptionHandler()
-    .CollectSingletonHandlers();
+    .CollectHandlingCallbacks();
 
 await updater.Start();
 
 partial class Program
 {
     [Command("start"), Private]
-    [SingletonHandlerCallback(UpdateType.Message)]
+    [HandlerCallback(UpdateType.Message)]
     public static async Task Start(IContainer<Message> container)
     {
         await container.Response("Hello World");
@@ -97,10 +97,10 @@ builder.AddTelegramUpdater(
     (builder) => builder
         // Modify the actual updater
         .Execute(updater => updater
-            // Collects static methods marked with `SingletonHandlerCallback` attribute.
-            .CollectSingletonHandlers())
+            // Collects static methods marked with `HandlerCallback` attribute.
+            .CollectHandlingCallbacks())
         // Collect scoped handlers located for example at UpdateHandlers/Messages for messages.
-        .CollectScopedHandlers()
+        .CollectHandlers()
         .AddDefaultExceptionHandler());
 
 var host = builder.Build();
@@ -156,14 +156,49 @@ Watch out for name space where the `MessageHandler` came from, it must be `...Sc
 
 And the filters are now applied on class.
 
-The handler will be automatically collected by the updater if you call `AutoCollectScopedHandlers`.
+The handler will be automatically collected by the updater if you call `CollectHandlers`.
 An now you can use your `IFancyService` which is available in DI right into `Start`'s constructor.
+
+Instead of using `HandleAsync(MessageContainer container)`, you use a more contextual overload like this:
+
+``` csharp
+HandleAsync(
+    MessageContainer input,
+    IServiceScope? scope,
+    CancellationToken cancellationToken)
+```
+
+But remember not to override both! (The one with less parameters will be ignored).
+
+### Minimals
+
+Instead using scoped handlers as classes you can also create your handlers Minimally!
+
+```csharp
+
+// This is a minimal handler
+updater.Handle(
+    UpdateType.Message,
+    async (IContainer<Message> container, IFancyService service) =>
+    {
+        // Do something with the container and service
+    },
+    ReadyFilters.OnCommand("command"))
+
+```
+
+### Note
+
+Typically Methods like `updater.Handle(...)` refers to a singleton handlers
+and `updater.AddHandler(...)` or  `updater.Add...Handler` refers to a scoped handler.
+
+Minimal handlers are actually singleton handlers but you can use DI inside them.
 
 ### Something cool?!
 
 ```csharp
 [Command("about"), Private]
-[SingletonHandlerCallback(UpdateType.Message)]
+[HandlerCallback(UpdateType.Message)]
 public static async Task AboutCommand(IContainer<Message> container)
 {
     var message = await container.Response("Wanna know more about me?! Answer right now!",
@@ -199,6 +234,10 @@ public static async Task AboutCommand(IContainer<Message> container)
 ```
 
 Extension methods return containerized results.
+
+> [!DANGER]
+> The package is still in preview and the API may change in the future *(for sure)*.
+> It's actually changing right now, so be careful when using it.
 
 ## Examples
 
