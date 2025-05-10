@@ -551,7 +551,8 @@ public sealed partial class Updater : IUpdater
             var scopeEndedToken = new CancellationChangeToken(scopeCts.Token);
 
             // Group handler by layer id
-            var layerd = handlers.GroupBy(x => x.Options.LayerInfo.Key);
+            var layerd = handlers
+                .GroupBy(x => x.Options.LayerInfo.Key);
 
             // The otter loop is over separate layers, so breaking inner loop won't effect this
             foreach (var layer in layerd.OrderBy(x=> x.Key))

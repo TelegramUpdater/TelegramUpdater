@@ -1,4 +1,5 @@
-﻿using TelegramUpdater.UpdateContainer;
+﻿using Telegram.Bot.Types;
+using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateHandlers.Singleton;
 
@@ -8,7 +9,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton;
 /// <typeparam name="T">Update type.</typeparam>
 /// <typeparam name="TContainer">Type of the container.</typeparam>
 public abstract class AbstractSingletonUpdateHandler<T, TContainer>
-    : AbstractHandlerProvider<T>, IGenericSingletonUpdateHandler<T>
+    : AbstractHandlerFiltering<T>, IGenericSingletonUpdateHandler<T>
     where T : class
     where TContainer : IContainer<T>
 {
@@ -48,15 +49,12 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
     /// <inheritdoc/>
     public Func<Update, T?>? GetActualUpdate { get; }
 
-    /// <summary>
-    /// Resolve inner update from <see cref="Update"/> using <see cref="GetActualUpdate"/> if not null or
-    /// using <see cref="UpdaterExtensions.GetInnerUpdate{T}(Update)"/>
-    /// </summary>
-    internal protected Func<Update, T?> ExtractInnerUpdater
+    /// <inheritdoc/>
+    protected override Func<Update, T?> InnerUpdateExtractor
         => GetActualUpdate ?? ((update) => update.GetInnerUpdate<T>());
 
     /// <inheritdoc />
-    public UpdateType UpdateType { get; }
+    public override UpdateType UpdateType { get; }
 
     /// <summary>
     /// Here you may handle the incoming update.
@@ -72,7 +70,7 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
     /// To apply a custom filter.
     /// </summary>
     /// <returns></returns>
-    protected virtual bool ShouldHandle(UpdaterFilterInputs<T> inputs)
+    protected override bool ShouldHandle(UpdaterFilterInputs<T> inputs)
     {
         if (Filter is null) return true;
 
@@ -83,26 +81,10 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
     async Task IUpdateHandler.HandleAsync(HandlerInput input)
     {
         var container = ContainerBuilder(input);
-        Container = container;
         await HandleAsync(container).ConfigureAwait(false);
     }
 
-    /// <inheritdoc/>
-    public bool ShouldHandle(UpdaterFilterInputs<Update> inputs)
-    {
-        if (inputs.Input.Type != UpdateType) return false;
-
-        var insider = ExtractInnerUpdater(inputs.Input);
-
-        if (insider == null) return false;
-
-        return ShouldHandle(inputs.Rebase(insider));
-    }
-
     internal abstract TContainer ContainerBuilder(HandlerInput input);
-
-    /// <inheritdoc/>
-    public override IContainer<T> Container { get; protected set; } = default!;
 
     /// <inheritdoc/>
     public virtual bool Endpoint { get; protected set; }

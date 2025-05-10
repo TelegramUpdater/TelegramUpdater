@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using TelegramUpdater.Helpers;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
 
@@ -6,6 +7,7 @@ namespace TelegramUpdater.UpdateHandlers.Actions;
 
 internal abstract class ActionHandler<T, TContainer, Inputs>(
     IServiceProvider serviceProvider,
+    UpdateTypeFlags allowedUpdateTypes,
     Func<IContainer<T>, Inputs, Task> callback,
     IFilter<UpdaterFilterInputs<T>>? filters = default,
     bool endpoint = true): IUpdateHandler where TContainer: IContainer<T> where T : class where Inputs: notnull
@@ -15,6 +17,8 @@ internal abstract class ActionHandler<T, TContainer, Inputs>(
     public IFilter<UpdaterFilterInputs<T>>? Filters { get; } = filters;
 
     public bool Endpoint { get; } = endpoint;
+
+    public UpdateTypeFlags AllowedUpdateTypes => allowedUpdateTypes;
 
     public Task Handle(IContainer<T> container, Inputs inputs) => callback(container, inputs);
 
@@ -34,10 +38,12 @@ internal abstract class ActionHandler<T, TContainer, Inputs>(
 
 internal abstract class ActionHandler<T, TContainer, In1, In2>(
     IServiceProvider serviceProvider,
+    UpdateTypeFlags allowedUpdateTypes,
     Func<IContainer<T>, In1, In2, Task> callback,
     IFilter<UpdaterFilterInputs<T>>? filters = default,
     bool endpoint = true) : ActionHandler<T, TContainer, Tuple<In1, In2>>(
         serviceProvider,
+        allowedUpdateTypes,
         (c, i) => callback(c, i.Item1, i.Item2),
         filters,
         endpoint),
