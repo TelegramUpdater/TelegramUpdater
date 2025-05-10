@@ -1,4 +1,6 @@
-﻿namespace TelegramUpdater.UpdateHandlers;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace TelegramUpdater.UpdateHandlers;
 
 /// <summary>
 /// Base interface for all update handlers.
@@ -13,5 +15,8 @@ public interface IUpdateHandler
     /// <summary>
     /// Handle the update.
     /// </summary>
-    public Task HandleAsync(HandlerInput input);
+    public Task HandleAsync(
+        HandlerInput input,
+        IServiceScope? scope = default,
+        CancellationToken cancellationToken = default);
 }

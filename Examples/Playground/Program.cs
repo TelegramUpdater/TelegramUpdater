@@ -9,6 +9,7 @@ using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.Hosting;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
+using TelegramUpdater.UpdateHandlers.Actions;
 using TelegramUpdater.UpdateHandlers.Singleton.Attributes;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -37,6 +38,15 @@ builder.AddTelegramUpdater(
                 },
                 ReadyFilters.OnCommand("help"))
 
+            .AddMinimalHandler(
+                UpdateType.Message,
+                async (IContainer<Message> container, PlaygroundMemory memory) =>
+                {
+                    var records = await memory.SeenUsers.CountAsync();
+                    await container.Response($"I've seen {records} people so far.");
+                },
+                ReadyFilters.OnCommand("records") & ReadyFilters.PM())
+
             // Collects static methods marked with `SingletonHandlerCallback` attribute.
             .CollectSingletonHandlers()
 
@@ -52,7 +62,6 @@ builder.AddTelegramUpdater(
 
 var host = builder.Build();
 await host.RunAsync();
-
 
 partial class Program
 {

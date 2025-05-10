@@ -1,4 +1,5 @@
-﻿using Telegram.Bot.Types;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Telegram.Bot.Types;
 using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateHandlers.Singleton;
@@ -59,11 +60,44 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
     /// <summary>
     /// Here you may handle the incoming update.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Override <b>ONLY ONE</b> of HandleAsync methods.
+    /// </para>
+    /// </remarks>
     /// <param name="container">
     /// Provides everything you need and everything you want!
     /// </param>
     /// <returns></returns>
-    protected abstract Task HandleAsync(TContainer container);
+    protected virtual Task HandleAsync(TContainer container)
+    {
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Here you may handle the incoming update.
+    /// </summary>
+    /// <remarks>
+    /// This method has all initial arguments.
+    /// <para>
+    /// Override <b>ONLY ONE</b> of HandleAsync methods.
+    /// </para>
+    /// </remarks>
+    /// <param name="container">
+    /// Provides everything you need and everything you want!
+    /// </param>
+    /// <param name="scope">
+    /// The service scope associated with this handler if any exists.
+    /// </param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    protected virtual Task HandleAsync(
+        TContainer container,
+        IServiceScope? scope = default,
+        CancellationToken cancellationToken = default)
+    {
+        return HandleAsync(container);
+    }
 
     /// <summary>
     /// You can override this method instead of using filters.
@@ -78,7 +112,10 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
     }
 
     /// <inheritdoc/>
-    async Task IUpdateHandler.HandleAsync(HandlerInput input)
+    async Task IUpdateHandler.HandleAsync(
+        HandlerInput input,
+        IServiceScope? scope,
+        CancellationToken cancellationToken)
     {
         var container = ContainerBuilder(input);
         await HandleAsync(container).ConfigureAwait(false);

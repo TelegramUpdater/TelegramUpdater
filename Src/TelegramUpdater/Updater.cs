@@ -466,6 +466,7 @@ public sealed partial class Updater : IUpdater
                 if (!await HandleHandler(
                     handler: handler,
                     input: input,
+                    scope: scope,
                     cancellationToken: cancellationToken).ConfigureAwait(false))
                 {
                     // Means stop propagation
@@ -482,11 +483,12 @@ public sealed partial class Updater : IUpdater
     Func<IServiceScope?, HandlerInput, CancellationToken, Task<bool>> GetHandlingJob(
         ISingletonUpdateHandler handler)
     {
-        return async (_, input, cancellationToken) =>
+        return async (scope, input, cancellationToken) =>
         {
             if (!await HandleHandler(
                 handler: handler,
                 input: input,
+                scope: scope,
                 cancellationToken: cancellationToken).ConfigureAwait(false))
             {
                 // Means stop propagation
@@ -636,7 +638,8 @@ public sealed partial class Updater : IUpdater
     private async Task<bool> HandleHandler(
         IUpdateHandler handler,
         HandlerInput input,
-        CancellationToken cancellationToken)
+        IServiceScope? scope,
+        CancellationToken cancellationToken = default)
     {
         if (cancellationToken.IsCancellationRequested)
         {
@@ -646,7 +649,8 @@ public sealed partial class Updater : IUpdater
         // Handle the shit.
         try
         {
-            await handler.HandleAsync(input).ConfigureAwait(false);
+            await handler.HandleAsync(
+                input, scope: scope, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
         // Cut handlers chain.
         catch (StopPropagationException)
