@@ -112,13 +112,12 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
     }
 
     /// <inheritdoc/>
-    async Task IUpdateHandler.HandleAsync(
+    Task IUpdateHandler.HandleAsync(
         HandlerInput input,
         IServiceScope? scope,
         CancellationToken cancellationToken)
     {
-        var container = ContainerBuilder(input);
-        await HandleAsync(container).ConfigureAwait(false);
+        return HandleAsync(ContainerBuilder(input), scope, cancellationToken);
     }
 
     internal abstract TContainer ContainerBuilder(HandlerInput input);

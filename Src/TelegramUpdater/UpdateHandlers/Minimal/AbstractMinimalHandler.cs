@@ -16,21 +16,24 @@ internal abstract class AbstractMinimalHandler<T, TContainer, Inputs>(
     public Task Handle(
         TContainer container,
         Inputs inputs,
-        CancellationToken cancellationToken = default) => callback(container, inputs, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        return callback(container, inputs, cancellationToken);
+    }
 
     protected virtual Inputs ResolveInputs(IServiceProvider serviceProvider)
     {
         return serviceProvider.GetRequiredService<Inputs>();
     }
 
-    public Task HandleAsync(
-        HandlerInput input,
+    protected override Task HandleAsync(
+        TContainer container,
         IServiceScope? scope = null,
         CancellationToken cancellationToken = default)
     {
         if (scope?.ServiceProvider is null)
             throw new ArgumentNullException(nameof(scope), "ActionHandlers require a service provider.");
 
-        return Handle(ContainerBuilder(input), ResolveInputs(scope.ServiceProvider), cancellationToken);
+        return Handle(container, ResolveInputs(scope.ServiceProvider), cancellationToken);
     }
 }

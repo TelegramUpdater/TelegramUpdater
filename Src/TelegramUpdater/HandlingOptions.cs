@@ -3,17 +3,12 @@
 /// <summary>
 /// Handling information for layers.
 /// </summary>
-public class LayerInfo(object key, int group = default)
+public class LayerInfo(int group = default)
 {
     /// <summary>
     /// Handing priority of the layer.
     /// </summary>
     public int Group { get; } = group;
-
-    /// <summary>
-    /// Layer key.
-    /// </summary>
-    public object Key { get; } = key;
 }
 
 /// <summary>
@@ -50,7 +45,7 @@ public class HandlingOptions(
     /// only effects handlers in the same layer.
     /// </para>
     /// </remarks>
-    public LayerInfo LayerInfo { get; } = layerInfo ?? new LayerInfo(DefaultLayerKey);
+    public LayerInfo LayerInfo { get; } = layerInfo ?? new LayerInfo();
 
     /// <summary>
     /// Get input handling options or default.

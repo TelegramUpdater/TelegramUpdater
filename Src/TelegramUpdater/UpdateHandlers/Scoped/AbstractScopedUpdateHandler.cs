@@ -71,12 +71,13 @@ public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?
     }
 
     /// <inheritdoc/>
-    async Task IUpdateHandler.HandleAsync(
+    Task IUpdateHandler.HandleAsync(
         HandlerInput input,
         IServiceScope? scope,
         CancellationToken cancellationToken)
-        => await HandleAsync(ContainerBuilderWrapper(input), scope, cancellationToken)
-        .ConfigureAwait(false);
+    {
+        return HandleAsync(ContainerBuilderWrapper(input), scope, cancellationToken);
+    }
 
     void IScopedUpdateHandler.SetExtraData(
         IReadOnlyDictionary<string, object>? extraData)

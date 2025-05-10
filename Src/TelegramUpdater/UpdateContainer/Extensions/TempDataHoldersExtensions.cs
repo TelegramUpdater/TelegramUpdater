@@ -24,7 +24,7 @@ public static class TempDataHoldersExtensions
     /// <param name="container"></param>
     /// <returns></returns>
     public static HandlingStoragesKeys.LayerId LayerId(this IContainer container)
-        => new(container.Input.ScopeId, container.Input.LayerInfo.Key);
+        => new(container.Input.ScopeId, container.Input.LayerInfo.Group);
 
     /// <summary>
     /// Get group id for this handler.
@@ -32,7 +32,7 @@ public static class TempDataHoldersExtensions
     /// <param name="container"></param>
     /// <returns></returns>
     public static HandlingStoragesKeys.GroupId GroupId(this IContainer container)
-        => new(container.Input.ScopeId, container.Input.LayerInfo.Key, container.Input.Group);
+        => new(container.Input.ScopeId, container.Input.LayerInfo.Group, container.Input.Group);
 
     /// <summary>
     /// Get handler id for this handler.
@@ -40,7 +40,7 @@ public static class TempDataHoldersExtensions
     /// <param name="container"></param>
     /// <returns></returns>
     public static HandlingStoragesKeys.HandlerId HandlerId(this IContainer container)
-        => new(container.Input.ScopeId, container.Input.LayerInfo.Key, container.Input.Group, container.Input.Index);
+        => new(container.Input.ScopeId, container.Input.LayerInfo.Group, container.Input.Group, container.Input.Index);
 
     /// <summary>
     /// Set an item that expires when handling scope for this handler ends.

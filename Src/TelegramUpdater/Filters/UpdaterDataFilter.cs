@@ -113,7 +113,7 @@ public class UpdaterDataFilter<T> : UpdaterFilter<T>
         {
             DataRegion.Any => input.Updater.TryGetValue(key, out value),
             DataRegion.Scope => input.Updater.TryGetScopeItem(new HandlingStoragesKeys.ScopeId(input.ScopeId), key, out value),
-            DataRegion.Layer => input.Updater.TryGetLayerItem(new HandlingStoragesKeys.LayerId(input.ScopeId, input.LayerInfo.Key), key, out value),
+            DataRegion.Layer => input.Updater.TryGetLayerItem(new HandlingStoragesKeys.LayerId(input.ScopeId, input.LayerInfo.Group), key, out value),
             _ => throw new InvalidOperationException("Invalid region."),
         };
 
@@ -134,7 +134,7 @@ public class UpdaterDataFilter<T> : UpdaterFilter<T>
                 input.Updater.RemoveScopeItem(new HandlingStoragesKeys.ScopeId(input.ScopeId), key);
                 break;
             case DataRegion.Layer:
-                input.Updater.RemoveLayerItem(new HandlingStoragesKeys.LayerId(input.ScopeId, input.LayerInfo.Key), key);
+                input.Updater.RemoveLayerItem(new HandlingStoragesKeys.LayerId(input.ScopeId, input.LayerInfo.Group), key);
                 break;
         }
     }

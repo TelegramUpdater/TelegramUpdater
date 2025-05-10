@@ -10,7 +10,7 @@ using static TelegramUpdater.UpdaterExtensions;
 namespace Playground.UpdateHandlers.Messages;
 
 [Command("status"), Private]
-[Handler(Group = 0, LayerKey = 1)]
+[Handler(Group = 0, LayerGroup = 1)]
 internal class StatusFilter(PlaygroundMemory memory) : MessageHandler
 {
     // This is not the end
@@ -35,7 +35,7 @@ internal class StatusFilter(PlaygroundMemory memory) : MessageHandler
 }
 
 [Command("status"), Private]
-[Handler(Group = 1, LayerKey = 1)]
+[Handler(Group = 1, LayerGroup = 1)]
 internal class StatusSeen(ILogger<StatusSeen> logger) : MessageHandler
 {
     protected override async Task HandleAsync(MessageContainer container)
