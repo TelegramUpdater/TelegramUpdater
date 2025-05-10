@@ -8,7 +8,7 @@
 /// </typeparam>
 /// <typeparam name="TUpdate">Update type.</typeparam>
 public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
-    : IGenericScopedUpdateHandlerContainer<TUpdate>
+    : AbstractHandlerFiltering<TUpdate>, IGenericScopedUpdateHandlerContainer<TUpdate>
     where THandler : IScopedUpdateHandler
     where TUpdate : class
 {
@@ -41,7 +41,7 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     public Type ScopedHandlerType { get; }
 
     /// <inheritdoc/>
-    public UpdateType UpdateType { get; }
+    public override UpdateType UpdateType { get; }
 
     /// <inheritdoc/>
     public IFilter<UpdaterFilterInputs<TUpdate>>? Filter { get; }
@@ -50,7 +50,7 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     /// Checks if an update can be handled in a handler of type <see cref="ScopedHandlerType"/>.
     /// </summary>
     /// <returns></returns>
-    private bool ShouldHandle(UpdaterFilterInputs<TUpdate> inputs)
+    protected override bool ShouldHandle(UpdaterFilterInputs<TUpdate> inputs)
     {
         if (Filter is null) return true;
 
@@ -65,14 +65,5 @@ public abstract class AbstractScopedUpdateHandlerContainer<THandler, TUpdate>
     internal protected abstract TUpdate? ExtractInnerUpdate(Update update);
 
     /// <inheritdoc/>
-    public bool ShouldHandle(UpdaterFilterInputs<Update> inputs)
-    {
-        if (inputs.Input.Type != UpdateType) return false;
-
-        var insider = ExtractInnerUpdate(inputs.Input);
-
-        if (insider == null) return false;
-
-        return ShouldHandle(inputs.Rebase(insider));
-    }
+    protected override Func<Update, TUpdate?> InnerUpdateExtractor => ExtractInnerUpdate;
 }

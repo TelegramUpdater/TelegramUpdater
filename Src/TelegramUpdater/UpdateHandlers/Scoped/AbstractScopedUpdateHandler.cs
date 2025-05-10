@@ -1,4 +1,5 @@
-﻿using TelegramUpdater.RainbowUtilities;
+﻿using Microsoft.Extensions.DependencyInjection;
+using TelegramUpdater.RainbowUtilities;
 using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateHandlers.Scoped;
@@ -30,15 +31,53 @@ public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?
     /// <summary>
     /// Here you may handle the incoming update.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Override <b>ONLY ONE</b> of HandleAsync methods.
+    /// </para>
+    /// </remarks>
     /// <param name="container">
     /// Provides everything you need and everything you want!
     /// </param>
     /// <returns></returns>
-    protected abstract Task HandleAsync(TContainer container);
+    protected virtual Task HandleAsync(TContainer container)
+    {
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Here you may handle the incoming update.
+    /// </summary>
+    /// <remarks>
+    /// This method has all initial arguments.
+    /// <para>
+    /// Override <b>ONLY ONE</b> of HandleAsync methods.
+    /// </para>
+    /// </remarks>
+    /// <param name="container">
+    /// Provides everything you need and everything you want!
+    /// </param>
+    /// <param name="scope">
+    /// The service scope associated with this handler if any exists.
+    /// </param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    protected virtual Task HandleAsync(
+        TContainer container,
+        IServiceScope? scope = default,
+        CancellationToken cancellationToken = default)
+    {
+        return HandleAsync(container);
+    }
 
     /// <inheritdoc/>
-    async Task IUpdateHandler.HandleAsync(HandlerInput input)
-        => await HandleAsync(ContainerBuilderWrapper(input)).ConfigureAwait(false);
+    Task IUpdateHandler.HandleAsync(
+        HandlerInput input,
+        IServiceScope? scope,
+        CancellationToken cancellationToken)
+    {
+        return HandleAsync(ContainerBuilderWrapper(input), scope, cancellationToken);
+    }
 
     void IScopedUpdateHandler.SetExtraData(
         IReadOnlyDictionary<string, object>? extraData)

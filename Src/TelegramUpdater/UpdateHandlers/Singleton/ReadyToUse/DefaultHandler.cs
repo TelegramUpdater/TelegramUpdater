@@ -36,7 +36,7 @@ public class DefaultHandler<T>
             throw new ArgumentNullException(nameof(callback));
 
     internal override DefaultContainer<T> ContainerBuilder(HandlerInput input)
-        => new(ExtractInnerUpdater, input, ExtraData);
+        => new(InnerUpdateExtractor, input, ExtraData);
 
     /// <inheritdoc/>
     protected override async Task HandleAsync(

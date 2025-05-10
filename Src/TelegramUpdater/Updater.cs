@@ -312,7 +312,7 @@ public sealed partial class Updater : IUpdater
     }
 
     /// <inheritdoc/>
-    public Updater AddScopedUpdateHandler(
+    public Updater AddHandler(
         IScopedUpdateHandlerContainer scopedHandlerContainer,
         HandlingOptions? options = default)
     {
@@ -466,6 +466,7 @@ public sealed partial class Updater : IUpdater
                 if (!await HandleHandler(
                     handler: handler,
                     input: input,
+                    scope: scope,
                     cancellationToken: cancellationToken).ConfigureAwait(false))
                 {
                     // Means stop propagation
@@ -482,11 +483,12 @@ public sealed partial class Updater : IUpdater
     Func<IServiceScope?, HandlerInput, CancellationToken, Task<bool>> GetHandlingJob(
         ISingletonUpdateHandler handler)
     {
-        return async (_, input, cancellationToken) =>
+        return async (scope, input, cancellationToken) =>
         {
             if (!await HandleHandler(
                 handler: handler,
                 input: input,
+                scope: scope,
                 cancellationToken: cancellationToken).ConfigureAwait(false))
             {
                 // Means stop propagation
@@ -550,11 +552,13 @@ public sealed partial class Updater : IUpdater
             var scopeCts = new CancellationTokenSource();
             var scopeEndedToken = new CancellationChangeToken(scopeCts.Token);
 
-            // Group handler by layer id
-            var layerd = handlers.GroupBy(x => x.Options.LayerId);
+            // Group handlers by layer key and then sort groups by layer group
+            var groupedAndSortedHandlers = handlers
+               .GroupBy(x => x.Options.LayerInfo.Group)
+               .OrderBy(group => group.Key);
 
             // The otter loop is over separate layers, so breaking inner loop won't effect this
-            foreach (var layer in layerd.OrderBy(x=> x.Key))
+            foreach (var layer in groupedAndSortedHandlers)
             {
                 var layerId = new HandlingStoragesKeys.LayerId(scopeId, layer.Key);
                 var layerCts = new CancellationTokenSource();
@@ -579,11 +583,11 @@ public sealed partial class Updater : IUpdater
                         break;
                     }
 
-                    var layerIndex = handlingInfo.Options.LayerId;
+                    var layerInfo = handlingInfo.Options.LayerInfo;
                     var groupIndex = handlingInfo.Options.Group;
 
                     if (!handlingInfo.Filter(
-                        new(this, shiningInfo.Value, scopeId, layerIndex, groupIndex, indexInLayer)))
+                        new UpdaterFilterInputs<Update>(this, shiningInfo.Value, scopeId, layerInfo, groupIndex, indexInLayer)))
                         // Filter didn't pass, ignore
                         continue;
 
@@ -593,7 +597,7 @@ public sealed partial class Updater : IUpdater
                             updater: this,
                             shiningInfo: shiningInfo,
                             scopeId: scopeId,
-                            layerId: layerIndex,
+                            layerInfo: layerInfo,
                             group: groupIndex,
                             index: indexInLayer,
                             scopeChangeToken: scopeEndedToken,
@@ -635,7 +639,8 @@ public sealed partial class Updater : IUpdater
     private async Task<bool> HandleHandler(
         IUpdateHandler handler,
         HandlerInput input,
-        CancellationToken cancellationToken)
+        IServiceScope? scope,
+        CancellationToken cancellationToken = default)
     {
         if (cancellationToken.IsCancellationRequested)
         {
@@ -645,7 +650,8 @@ public sealed partial class Updater : IUpdater
         // Handle the shit.
         try
         {
-            await handler.HandleAsync(input).ConfigureAwait(false);
+            await handler.HandleAsync(
+                input, scope: scope, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
         // Cut handlers chain.
         catch (StopPropagationException)

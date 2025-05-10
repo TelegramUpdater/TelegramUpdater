@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using Telegram.Bot;
 using Telegram.Bot.Types.Payments;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramUpdater.Filters;
@@ -292,7 +291,7 @@ public static class UpdaterExtensions
     /// /Messages/MyScopedMessageHandler
     /// </remarks>
     /// <returns></returns>
-    public static IUpdater CollectScopedHandlers(
+    public static IUpdater CollectHandlers(
         this IUpdater updater,
         string handlersParentNamespace = "UpdateHandlers")
     {
@@ -302,7 +301,7 @@ public static class UpdaterExtensions
 
             updater.Logger.LogInformation(
                 "Scoped handler collected! ({Name})", container.Handler.ScopedHandlerType.Name);
-            updater.AddScopedUpdateHandler(container.Handler);
+            updater.AddHandler(container.Handler);
         }
 
         return updater;
@@ -312,7 +311,7 @@ public static class UpdaterExtensions
     /// Use this to quickly add a message handler that responds /start command.
     /// </summary>
     /// <remarks>
-    /// If you need a more advanced handler use <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions?)"/>
+    /// If you need a more advanced handler use <see cref="IUpdater.AddHandler(IScopedUpdateHandlerContainer, HandlingOptions?)"/>
     /// or <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, HandlingOptions?)"/>
     /// </remarks>
     /// <returns></returns>
@@ -330,11 +329,11 @@ public static class UpdaterExtensions
         string? messageEffectId = default,
         string? businessConnectionId = default,
         bool allowPaidBroadcast = default,
-        bool allowSendingWithoutReply = true)
+        bool allowSendingWithoutReply = true,
+        CancellationToken cancellationToken = default)
     {
-        return updater.AddMessageHandler(
-            container => container.Response(
-                text: text,
+        return updater.HandleMessage(
+            container => container.Response(text: text,
                 sendAsReply: sendAsReply,
                 parseMode: parseMode,
                 messageEntities: messageEntities,
@@ -346,8 +345,9 @@ public static class UpdaterExtensions
                 messageEffectId: messageEffectId,
                 businessConnectionId: businessConnectionId,
                 allowPaidBroadcast: allowPaidBroadcast,
-                allowSendingWithoutReply: allowSendingWithoutReply),
-            ReadyFilters.OnCommand("start"));
+                allowSendingWithoutReply: allowSendingWithoutReply,
+                cancellationToken: cancellationToken),
+            ReadyFilters.OnCommand("start") & ReadyFilters.PM());
     }
 
     /// <summary>
@@ -435,6 +435,32 @@ public static class UpdaterExtensions
                 scope.Count(), commandScope?.Type ?? BotCommandScopeType.Default);
         }
     }
+
+    /// <summary>
+    /// Get the bot profile url.
+    /// </summary>
+    /// <remarks>
+    /// Don't be afraid of the async <see cref="IUpdater.GetMe"/> will cache.
+    /// </remarks>
+    /// <param name="updater"></param>
+    /// <returns></returns>
+    public static async Task<string> BotProfileUrl(this IUpdater updater)
+        => $"https://t.me/{(await updater.GetMe().ConfigureAwait(false)).Username}";
+
+    /// <summary>
+    /// Create a deeplink to your bot.
+    /// </summary>
+    /// <remarks>
+    /// like https://t.me/your_bot?start=param
+    /// <para>
+    /// Don't be afraid of the async <see cref="IUpdater.GetMe"/> will cache.
+    /// </para>
+    /// </remarks>
+    /// <param name="updater"></param>
+    /// <param name="param"></param>
+    /// <returns></returns>
+    public static async Task<string> CreateDeeplink(this IUpdater updater, string param)
+        => $"{(await updater.BotProfileUrl().ConfigureAwait(false))}?start={param}";
 
     /// <summary>
     /// Create a composite key with two values.
@@ -605,7 +631,7 @@ public static class UpdaterExtensions
         this IScopedUpdateHandlerContainer container)
     {
         return container.ScopedHandlerType
-            .GetCustomAttribute<ScopedHandlerAttribute>()?
+            .GetCustomAttribute<HandlerAttribute>()?
             .GetHandlingOptions();
     }
 
@@ -614,7 +640,7 @@ public static class UpdaterExtensions
     {
         return container
             .GetType()
-            .GetCustomAttribute<SingletonHandlerCallbackAttribute>()?
+            .GetCustomAttribute<HandlerCallbackAttribute>()?
             .GetHandlingOptions();
     }
 

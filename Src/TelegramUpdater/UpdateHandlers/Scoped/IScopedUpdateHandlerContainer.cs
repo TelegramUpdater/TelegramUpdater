@@ -6,7 +6,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped;
 /// <summary>
 /// Base interface for scoped update handlers container.
 /// </summary>
-public interface IScopedUpdateHandlerContainer
+public interface IScopedUpdateHandlerContainer: IHandlerFiltering
 {
     internal IReadOnlyDictionary<string, object>? ExtraData { get; }
 
@@ -14,18 +14,6 @@ public interface IScopedUpdateHandlerContainer
     /// Type of <see cref="IScopedUpdateHandlerContainer"/>
     /// </summary>
     public Type ScopedHandlerType { get; }
-
-    /// <summary>
-    /// Your handler's update type.
-    /// </summary>
-    public UpdateType UpdateType { get; }
-
-    /// <summary>
-    /// Checks if an update can be handled in a handler
-    /// of type <see cref="ScopedHandlerType"/>.
-    /// </summary>
-    /// <returns></returns>
-    public bool ShouldHandle(UpdaterFilterInputs<Update> inputs);
 
     /// <summary>
     /// Initialize an instance of <see cref="ScopedHandlerType"/>.
@@ -45,8 +33,8 @@ public interface IScopedUpdateHandlerContainer
         {
             if (scope != null)
             {
-                scopedHandler = (IScopedUpdateHandler?)scope
-                    .ServiceProvider.GetRequiredService(ScopedHandlerType);
+                scopedHandler = (IScopedUpdateHandler?)ActivatorUtilities.GetServiceOrCreateInstance(
+                    scope.ServiceProvider, ScopedHandlerType);
             }
             else
             {

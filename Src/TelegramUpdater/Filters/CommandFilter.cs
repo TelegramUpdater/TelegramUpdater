@@ -49,12 +49,12 @@ public class CommandFilter : UpdaterFilter<Message>
     /// <summary>
     /// Command prefix ( mainly '/' )
     /// </summary>
-    public char Prefix { get; } = '/';
+    public char Prefix { get; }
 
     /// <summary>
     /// Command filter options.
     /// </summary>
-    public CommandFilterOptions Options { get; } = default;
+    public CommandFilterOptions Options { get; }
 
     /// <summary>
     /// Filters messages with specified command
@@ -67,6 +67,8 @@ public class CommandFilter : UpdaterFilter<Message>
     public CommandFilter(params string[] commands) : base()
     {
         Commands = commands;
+        Options = new CommandFilterOptions(argumentsMode: ArgumentsMode.Idc, separator: ' ');
+        Prefix = '/';
     }
 
     /// <summary>
@@ -82,6 +84,7 @@ public class CommandFilter : UpdaterFilter<Message>
     {
         Prefix = prefix;
         Commands = commands;
+        Options = new CommandFilterOptions(argumentsMode: ArgumentsMode.Idc, separator: ' ');
     }
 
     /// <summary>

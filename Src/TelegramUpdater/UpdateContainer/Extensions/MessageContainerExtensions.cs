@@ -18,7 +18,7 @@ public static class MessageContainerExtensions
         => simpleContext.Update.From;
 
     /// <inheritdoc cref="TelegramBotClientExtensions.DeleteMessage(ITelegramBotClient, ChatId, int, CancellationToken)"/>
-    public static async Task Delete(this IContainer<Message> simpleContext, CancellationToken cancellationToken = default)
+    public static async Task Delete(this IBaseContainer<Message> simpleContext, CancellationToken cancellationToken = default)
         => await simpleContext.BotClient.DeleteMessage(
             chatId: simpleContext.Update.Chat.Id,
             messageId: simpleContext.Update.MessageId,
@@ -27,8 +27,8 @@ public static class MessageContainerExtensions
     /// <summary>
     /// Updates a <see cref="Message"/> of your own with removing it and sending a new message.
     /// </summary>
-    public static async Task<IContainer<Message>> ForceUpdate(
-        this IContainer<Message> simpleContext,
+    public static async Task<IBaseContainer<Message>> ForceUpdate(
+        this IBaseContainer<Message> simpleContext,
         string text,
         ParseMode parseMode = default,
         IEnumerable<MessageEntity>? messageEntities = default,
@@ -65,8 +65,8 @@ public static class MessageContainerExtensions
     }
 
     /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)"/>
-    public static async Task<IContainer<Message>> Response(
-        this IContainer<Message> simpleContext,
+    public static async Task<IBaseContainer<Message>> Response(
+        this IBaseContainer<Message> simpleContext,
         string text,
         bool sendAsReply = true,
         ParseMode parseMode = default,
@@ -103,8 +103,8 @@ public static class MessageContainerExtensions
         .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageText(ITelegramBotClient, ChatId, int, string, ParseMode, IEnumerable{MessageEntity}?, LinkPreviewOptions?, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public static async Task<IContainer<Message>?> Edit(
-        this IContainer<Message> simpleContext,
+    public static async Task<IBaseContainer<Message>?> Edit(
+        this IBaseContainer<Message> simpleContext,
         string text,
         ParseMode parseMode = default,
         IEnumerable<MessageEntity>? messageEntities = default,
@@ -127,8 +127,8 @@ public static class MessageContainerExtensions
     }
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageLiveLocation(ITelegramBotClient, ChatId, int, double, double, int?, double?, int?, int?, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public static async Task<IContainer<Message>?> Edit(
-        this IContainer<Message> simpleContext,
+    public static async Task<IBaseContainer<Message>?> Edit(
+        this IBaseContainer<Message> simpleContext,
         double latitude,
         double longitude,
         int? livePeriod = default,
@@ -155,8 +155,8 @@ public static class MessageContainerExtensions
     }
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageMedia(ITelegramBotClient, ChatId, int, InputMedia, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public static async Task<IContainer<Message>?> Edit(
-        this IContainer<Message> simpleContext,
+    public static async Task<IBaseContainer<Message>?> Edit(
+        this IBaseContainer<Message> simpleContext,
         InputMedia inputMedia,
         InlineKeyboardMarkup? inlineKeyboardMarkup = default,
         string? businessConnectionId = default,
@@ -173,8 +173,8 @@ public static class MessageContainerExtensions
     }
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageCaption(ITelegramBotClient, string, string?, ParseMode, IEnumerable{MessageEntity}?, bool, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public static async Task<IContainer<Message>?> EditCaption(
-        this IContainer<Message> simpleContext,
+    public static async Task<IBaseContainer<Message>?> EditCaption(
+        this IBaseContainer<Message> simpleContext,
         string caption,
         ParseMode parseMode = default,
         IEnumerable<MessageEntity>? captionEntities = default,
@@ -195,8 +195,8 @@ public static class MessageContainerExtensions
     }
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageReplyMarkup(ITelegramBotClient, string, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public static async Task<IContainer<Message>?> Edit(
-        this IContainer<Message> simpleContext,
+    public static async Task<IBaseContainer<Message>?> Edit(
+        this IBaseContainer<Message> simpleContext,
         InlineKeyboardMarkup? inlineKeyboardMarkup = default,
         string? businessConnectionId = default,
         CancellationToken cancellationToken = default)
@@ -211,13 +211,13 @@ public static class MessageContainerExtensions
     }
 
     /// <inheritdoc cref="ChatType.Private"/>
-    public static bool IsPrivate(this IContainer<Message> simpleContext)
+    public static bool IsPrivate(this IBaseContainer<Message> simpleContext)
         => simpleContext.Update.Chat.Type == ChatType.Private;
 
     /// <summary>
     /// Message is sent to group chat.
     /// </summary>
-    public static bool IsGroup(this IContainer<Message> simpleContext)
+    public static bool IsGroup(this IBaseContainer<Message> simpleContext)
         => simpleContext.Update.Chat.Type == ChatType.Supergroup ||
             simpleContext.Update.Chat.Type == ChatType.Group;
 }

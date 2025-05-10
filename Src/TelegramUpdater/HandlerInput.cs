@@ -28,9 +28,9 @@ public class HandlerInput
     public Guid ScopeId { get; }
 
     /// <summary>
-    /// The <see cref="HandlingOptions.LayerId"/> of current handler.
+    /// The <see cref="HandlingOptions.LayerInfo"/> of current handler.
     /// </summary>
-    public int LayerId { get; }
+    public LayerInfo LayerInfo { get; }
 
     /// <summary>
     /// The <see cref="HandlingOptions.Group"/> of this handler.
@@ -52,21 +52,21 @@ public class HandlerInput
     /// <param name="updater"></param>
     /// <param name="shiningInfo"></param>
     /// <param name="scopeId"></param>
-    /// <param name="layerId"></param>
+    /// <param name="layerInfo"></param>
     /// <param name="group"></param>
     /// <param name="index"></param>
     public HandlerInput(
         IUpdater updater,
         ShiningInfo<long, Update> shiningInfo,
         Guid scopeId,
-        int layerId,
+        LayerInfo layerInfo,
         int group,
         int index)
     {
         Updater = updater;
         ShiningInfo = shiningInfo;
         ScopeId = scopeId;
-        LayerId = layerId;
+        LayerInfo = layerInfo;
         Group = group;
         Index = index;
     }
@@ -75,7 +75,7 @@ public class HandlerInput
         IUpdater updater,
         ShiningInfo<long, Update> shiningInfo,
         Guid scopeId,
-        int layerId,
+        LayerInfo layerInfo,
         int group, 
         int index,
         IChangeToken? scopeChangeToken = default,
@@ -84,7 +84,7 @@ public class HandlerInput
         Updater = updater;
         ShiningInfo = shiningInfo;
         ScopeId = scopeId;
-        LayerId = layerId;
+        LayerInfo = layerInfo;
         Group = group;
         Index = index;
         ScopeChangeToken = scopeChangeToken;

@@ -13,7 +13,7 @@ namespace TelegramUpdaterTests
 {
     public class SingletonUpdateHandlerAttributeTests
     {
-        [SingletonHandlerCallback(UpdateType.Message)]
+        [HandlerCallback(UpdateType.Message)]
         public static Task MyHandlerCallback(IContainer<Message> container)
         {
             throw new NotImplementedException();

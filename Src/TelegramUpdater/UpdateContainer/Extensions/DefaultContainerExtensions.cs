@@ -11,18 +11,18 @@ public static class DefaultContainerExtensions
 {
     #region Enum State
     /// <inheritdoc cref="Extensions.GetUserEnumStateKeeper{TEnum}(IUpdater, string)"/>
-    public static MemoryUserEnumStateKeeper<TEnum> GetUserEnumStateKeeper<TEnum, T>(this IContainer container, string name)
+    public static MemoryUserEnumStateKeeper<TEnum> GetUserEnumStateKeeper<TEnum, T>(this IBaseContainer container, string name)
         where TEnum : struct, Enum
         => container.Updater.GetUserEnumStateKeeper<TEnum>(name);
 
     /// <inheritdoc cref="Extensions.GetUserEnumStateKeeper{TEnum}(IUpdater)"/>
-    public static MemoryUserEnumStateKeeper<TEnum> GetUserEnumStateKeeper<TEnum>(this IContainer container)
+    public static MemoryUserEnumStateKeeper<TEnum> GetUserEnumStateKeeper<TEnum>(this IBaseContainer container)
         where TEnum : struct, Enum
         => container.Updater.GetUserEnumStateKeeper<TEnum>();
 
     /// <inheritdoc cref="Extensions.TryGetUserEnumStateKeeper{TEnum}(IUpdater, string, out MemoryUserEnumStateKeeper{TEnum}?)"/>
     public static bool TryGetUserEnumStateKeeper<TEnum>(
-        this IContainer container,
+        this IBaseContainer container,
         string name,
         [NotNullWhen(true)] out MemoryUserEnumStateKeeper<TEnum>? stateKeeper)
         where TEnum : struct, Enum
@@ -30,7 +30,7 @@ public static class DefaultContainerExtensions
 
     /// <inheritdoc cref="Extensions.TryGetUserEnumStateKeeper{TEnum}(IUpdater, out MemoryUserEnumStateKeeper{TEnum}?)"/>
     public static bool TryGetUserEnumStateKeeper<TEnum>(
-        this IContainer container,
+        this IBaseContainer container,
         [NotNullWhen(true)] out MemoryUserEnumStateKeeper<TEnum>? stateKeeper)
         where TEnum : struct, Enum
         => container.Updater.TryGetUserEnumStateKeeper(out stateKeeper);
@@ -42,7 +42,7 @@ public static class DefaultContainerExtensions
     /// <param name="container"></param>
     /// <param name="user"></param>
     /// <returns></returns>
-    public static bool InitiateState<TEnum>(this IContainer container, User user) where TEnum : struct, Enum
+    public static bool InitiateState<TEnum>(this IBaseContainer container, User user) where TEnum : struct, Enum
     {
         if (container.TryGetUserEnumStateKeeper<TEnum>(out var stateKeeper))
         {
@@ -60,7 +60,7 @@ public static class DefaultContainerExtensions
     /// <param name="container"></param>
     /// <param name="user"></param>
     /// <returns></returns>
-    public static bool ForwardState<TEnum>(this IContainer container, User user) where TEnum : struct, Enum
+    public static bool ForwardState<TEnum>(this IBaseContainer container, User user) where TEnum : struct, Enum
     {
         if (container.TryGetUserEnumStateKeeper<TEnum>(out var stateKeeper))
         {
@@ -77,7 +77,7 @@ public static class DefaultContainerExtensions
     /// <param name="container"></param>
     /// <param name="user"></param>
     /// <returns></returns>
-    public static bool BackwardState<TEnum>(this IContainer container, User user) where TEnum : struct, Enum
+    public static bool BackwardState<TEnum>(this IBaseContainer container, User user) where TEnum : struct, Enum
     {
         if (container.TryGetUserEnumStateKeeper<TEnum>(out var stateKeeper))
         {
@@ -95,7 +95,7 @@ public static class DefaultContainerExtensions
     /// <param name="user"></param>
     /// <param name="state"></param>
     /// <returns></returns>
-    public static bool SetState<TEnum>(this IContainer container, User user, TEnum state) where TEnum : struct, Enum
+    public static bool SetState<TEnum>(this IBaseContainer container, User user, TEnum state) where TEnum : struct, Enum
     {
         if (container.TryGetUserEnumStateKeeper<TEnum>(out var stateKeeper))
         {
@@ -113,7 +113,7 @@ public static class DefaultContainerExtensions
     /// <param name="container"></param>
     /// <param name="user"></param>
     /// <returns></returns>
-    public static bool DeleteState<TEnum>(this IContainer container, User user) where TEnum : struct, Enum
+    public static bool DeleteState<TEnum>(this IBaseContainer container, User user) where TEnum : struct, Enum
     {
         if (container.TryGetUserEnumStateKeeper<TEnum>(out var stateKeeper))
         {
@@ -126,7 +126,7 @@ public static class DefaultContainerExtensions
     #endregion
 
     /// <inheritdoc cref="Extensions.GetUserNumericStateKeeper(IUpdater, string)"/>
-    public static MemoryUserNumericStateKeeper GetUserNumericStateKeeper(this IContainer container, string name)
+    public static MemoryUserNumericStateKeeper GetUserNumericStateKeeper(this IBaseContainer container, string name)
         => container.Updater.GetUserNumericStateKeeper(name);
 
 }

@@ -4,7 +4,7 @@ using TelegramUpdater.StateKeeping.StateKeepers.NumericStateKeepers;
 namespace TelegramUpdater.UpdateContainer;
 
 /// <summary>
-/// Extensions for <see cref="UserNumericStateKeeper"/>
+/// Extensions for <see cref="UserNumericStateKeeper{TStorage}"/>
 /// </summary>
 public static class NumericStateKeeperExtensions
 {
@@ -17,7 +17,7 @@ public static class NumericStateKeeperExtensions
     /// <param name="state">The state.</param>
     /// <returns></returns>
     public static bool SetNumericState<T>(
-        this IContainer<T> container,
+        this IBaseContainer container,
         string stateKeeperName,
         User user, int state = 0) where T : class
     {
@@ -40,7 +40,7 @@ public static class NumericStateKeeperExtensions
     /// <param name="state">The state.</param>
     /// <returns></returns>
     public static bool TryForwardNumericState<T>(
-        this IContainer<T> container,
+        this IBaseContainer container,
         string stateKeeperName, User user,
         [NotNullWhen(true)] out int? state) where T : class
     {
@@ -63,7 +63,7 @@ public static class NumericStateKeeperExtensions
     /// <param name="state">The state.</param>
     /// <returns></returns>
     public static bool TryBackwardNumericState<T>(
-        this IContainer<T> container,
+        this IBaseContainer container,
         string stateKeeperName, User user,
         [NotNullWhen(true)] out int? state) where T : class
     {
@@ -85,7 +85,7 @@ public static class NumericStateKeeperExtensions
     /// <param name="user">The user to set state for.</param>
     /// <returns></returns>
     public static bool DeleteNumericState<T>(
-        this IContainer<T> container,
+        this IBaseContainer container,
         string stateKeeperName, User user) where T : class
     {
         if (container.Updater.TryGetUserNumericStateKeeper(

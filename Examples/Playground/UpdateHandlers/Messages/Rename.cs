@@ -28,7 +28,7 @@ internal class Rename : MessageHandler
     }
 }
 
-[ScopedHandler(Group = 1)]
+[Handler(Group = 1)]
 [Text, Renameing(RenameState.AskingName), Private]
 internal class RenameAskName : MessageHandler
 {
@@ -61,7 +61,7 @@ internal class RenameAskName : MessageHandler
     }
 }
 
-[ScopedHandler(Group = 2)]
+[Handler(Group = 2)]
 [
     Private,
     Text, 
@@ -119,7 +119,7 @@ internal class RenameAskLastName(PlaygroundMemory memory) : MessageHandler
 // This handler is processed after RenameAskLastName because of its group.
 // Which is when UserUpdaterDataExists("name") filter don't pass.
 // Remove cntr.SetUserItem("name", ...) in RenameAskName to trigger this.
-[ScopedHandler(Group = 3)]
+[Handler(Group = 3)]
 [
     Private,
     Text,

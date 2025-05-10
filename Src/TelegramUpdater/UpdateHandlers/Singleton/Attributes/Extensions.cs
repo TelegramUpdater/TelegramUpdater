@@ -74,7 +74,7 @@ public static class SingletonAttributesExtensions
 
     /// <summary>
     /// Use this method to iter over all methods that are marked with
-    /// <see cref="SingletonHandlerCallbackAttribute"/>.
+    /// <see cref="HandlerCallbackAttribute"/>.
     /// </summary>
     /// <returns></returns>
     /// <exception cref="ApplicationException"></exception>
@@ -91,7 +91,7 @@ public static class SingletonAttributesExtensions
 
         foreach (var method in methods)
         {
-            var singletonAttr = method.GetCustomAttribute<SingletonHandlerCallbackAttribute>();
+            var singletonAttr = method.GetCustomAttribute<HandlerCallbackAttribute>();
 
             if (singletonAttr is null) continue;
 
@@ -119,13 +119,13 @@ public static class SingletonAttributesExtensions
 
     /// <summary>
     /// Use this method to collect all methods that are marked with
-    /// <see cref="SingletonHandlerCallbackAttribute"/>. And add them
+    /// <see cref="HandlerCallbackAttribute"/>. And add them
     /// to the <paramref name="updater"/>.
     /// </summary>
     /// <param name="updater">The updater.</param>
     /// <returns></returns>
     /// <exception cref="ApplicationException"></exception>
-    public static IUpdater CollectSingletonHandlers(
+    public static IUpdater CollectHandlingCallbacks(
         this IUpdater updater)
     {
         foreach (var handler in IterSingletonUpdateHandlerCallbacks())

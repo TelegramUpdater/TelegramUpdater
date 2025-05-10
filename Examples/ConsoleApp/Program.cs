@@ -25,7 +25,7 @@ var updater = new Updater(
 updater
     .AddDefaultExceptionHandler() // A console logger
     .QuickStartCommandReply("Hello there!")
-    .CollectSingletonHandlers(); // Collect methods marked by SingletonHandlerCallback.
+    .CollectHandlingCallbacks(); // Collect methods marked by SingletonHandlerCallback.
 
 // ---------- Start! ----------
 
@@ -38,7 +38,7 @@ partial class Program
 {
     // Message handler with command filter
     [Command("rate"), ChatType(ChatTypeFlags.Private)]
-    [SingletonHandlerCallback(UpdateType.Message)]
+    [HandlerCallback(UpdateType.Message)]
     public static async Task RateHandler(IContainer<Message> container)
     {
         var markup = MarkupExtensions.BuildInlineKeyboards(builder => builder
@@ -55,7 +55,7 @@ partial class Program
 
     // Callback query handler with regex filter on CallbackQuery.Data.
     [Regex(@"^rating_(?<rate>\d{1})$")]
-    [SingletonHandlerCallback(UpdateType.CallbackQuery)]
+    [HandlerCallback(UpdateType.CallbackQuery)]
     public static async Task RateAnswerHandler(IContainer<CallbackQuery> container)
     {
         if (container.TryGetMatchCollection(out var matches))

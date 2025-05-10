@@ -45,7 +45,7 @@ public abstract class CallbackQueryHandler()
             cancellationToken: cancellationToken);
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageText(ITelegramBotClient, ChatId, int, string, ParseMode, IEnumerable{MessageEntity}?, LinkPreviewOptions?, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public Task<IContainer<Message>?> Edit(
+    public Task<IBaseContainer<Message>?> Edit(
         string text,
         ParseMode parseMode = default,
         IEnumerable<MessageEntity>? messageEntities = default,
@@ -63,7 +63,7 @@ public abstract class CallbackQueryHandler()
             cancellationToken: cancellationToken);
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageLiveLocation(ITelegramBotClient, ChatId, int, double, double, int?, double?, int?, int?, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public Task<IContainer<Message>?> Edit(
+    public Task<IBaseContainer<Message>?> Edit(
         double latitude,
         double longitude,
         int? livePeriod = default,
@@ -85,7 +85,7 @@ public abstract class CallbackQueryHandler()
             cancellationToken: cancellationToken);
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageMedia(ITelegramBotClient, ChatId, int, InputMedia, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public Task<IContainer<Message>?> Edit(
+    public Task<IBaseContainer<Message>?> Edit(
         InputMedia inputMedia,
         InlineKeyboardMarkup? inlineKeyboardMarkup = default,
         string? businessConnectionId = default,
@@ -97,7 +97,7 @@ public abstract class CallbackQueryHandler()
             cancellationToken: cancellationToken);
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageCaption(ITelegramBotClient, string, string?, ParseMode, IEnumerable{MessageEntity}?, bool, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public Task<IContainer<Message>?> EditCaption(
+    public Task<IBaseContainer<Message>?> EditCaption(
         string caption,
         ParseMode parseMode = default,
         IEnumerable<MessageEntity>? captionEntities = default,
@@ -113,7 +113,7 @@ public abstract class CallbackQueryHandler()
             cancellationToken: cancellationToken);
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageReplyMarkup(ITelegramBotClient, string, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public Task<IContainer<Message>?> Edit(
+    public Task<IBaseContainer<Message>?> Edit(
         InlineKeyboardMarkup? inlineKeyboardMarkup = default,
         string? businessConnectionId = default,
         CancellationToken cancellationToken = default)

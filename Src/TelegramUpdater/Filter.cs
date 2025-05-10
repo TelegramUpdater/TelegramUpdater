@@ -252,7 +252,7 @@ public class UpdaterFilterInputs<T>(
     IUpdater updater,
     T input,
     Guid scopeId,
-    int layerId,
+    LayerInfo layerInfo,
     int group,
     int index)
 {
@@ -275,9 +275,9 @@ public class UpdaterFilterInputs<T>(
     public Guid ScopeId { get; } = scopeId;
 
     /// <summary>
-    /// The <see cref="HandlingOptions.LayerId"/> of current handler.
+    /// The <see cref="HandlingOptions.LayerInfo"/> of current handler.
     /// </summary>
-    public int LayerId { get; } = layerId;
+    public LayerInfo LayerInfo { get; } = layerInfo;
 
     /// <summary>
     /// The <see cref="HandlingOptions.Group"/> of this handler.
@@ -290,7 +290,7 @@ public class UpdaterFilterInputs<T>(
     public int Index { get; } = index;
 
     internal UpdaterFilterInputs<Q> Rebase<Q>(Q newBase)
-        => new(Updater, newBase, ScopeId, LayerId, Group, Index);
+        => new(Updater, newBase, ScopeId, LayerInfo, Group, Index);
 }
 
 /// <summary>
