@@ -45,8 +45,8 @@ public interface IScopedUpdateHandlerContainer
         {
             if (scope != null)
             {
-                scopedHandler = (IScopedUpdateHandler?)scope
-                    .ServiceProvider.GetRequiredService(ScopedHandlerType);
+                scopedHandler = (IScopedUpdateHandler?)ActivatorUtilities.GetServiceOrCreateInstance(
+                    scope.ServiceProvider, ScopedHandlerType);
             }
             else
             {
