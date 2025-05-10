@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using Telegram.Bot;
 using Telegram.Bot.Types.Payments;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramUpdater.Filters;
@@ -330,11 +329,11 @@ public static class UpdaterExtensions
         string? messageEffectId = default,
         string? businessConnectionId = default,
         bool allowPaidBroadcast = default,
-        bool allowSendingWithoutReply = true)
+        bool allowSendingWithoutReply = true,
+        CancellationToken cancellationToken = default)
     {
         return updater.AddMessageHandler(
-            container => container.Response(
-                text: text,
+            container => container.Response(text: text,
                 sendAsReply: sendAsReply,
                 parseMode: parseMode,
                 messageEntities: messageEntities,
@@ -346,8 +345,9 @@ public static class UpdaterExtensions
                 messageEffectId: messageEffectId,
                 businessConnectionId: businessConnectionId,
                 allowPaidBroadcast: allowPaidBroadcast,
-                allowSendingWithoutReply: allowSendingWithoutReply),
-            ReadyFilters.OnCommand("start"));
+                allowSendingWithoutReply: allowSendingWithoutReply,
+                cancellationToken: cancellationToken),
+            ReadyFilters.OnCommand("start") & ReadyFilters.PM());
     }
 
     /// <summary>
