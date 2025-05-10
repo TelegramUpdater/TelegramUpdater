@@ -6,8 +6,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.Attributes;
 /// <summary>
 /// Place this attribute on any method to create an
 /// <see cref="ISingletonUpdateHandler"/> using that method
-/// as <see cref="IUpdateHandler.HandleAsync(
-/// IUpdater, RainbowUtilities.ShiningInfo{long, Update})"/>.
+/// as <see cref="IUpdateHandler.HandleAsync(HandlerInput)"/>.
 /// <para>You can apply filter attributes on the method.</para>
 /// </summary>
 /// <remarks>
@@ -40,8 +39,11 @@ public sealed class SingletonHandlerCallbackAttribute : Attribute, IGetHandlingO
     /// <inheritdoc cref="HandlingOptions.Group"/>
     public int Group { get; set; } = default;
 
-    /// <inheritdoc cref="HandlingOptions.LayerId"/>
-    public int LayerId { get; set; } = default;
+    /// <inheritdoc cref="LayerInfo.Key"/>
+    public object? LayerKey { get; set; } = default;
+
+    /// <inheritdoc cref="LayerInfo.Group"/>
+    public int LayerGroup { get; set; } = default;
 
     /// <summary>
     /// Type of update.
@@ -50,5 +52,7 @@ public sealed class SingletonHandlerCallbackAttribute : Attribute, IGetHandlingO
 
     /// <inheritdoc/>
     public HandlingOptions GetHandlingOptions()
-        => new(group: Group, layerId: LayerId);
+        => new(
+            group: Group,
+            layerInfo: new LayerInfo(LayerKey?? HandlingOptions.DefaultLayerKey, LayerGroup));
 }

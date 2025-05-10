@@ -1,20 +1,36 @@
 ﻿namespace TelegramUpdater;
 
 /// <summary>
+/// Handling information for layers.
+/// </summary>
+public class LayerInfo(object key, int group = default)
+{
+    /// <summary>
+    /// Handing priority of the layer.
+    /// </summary>
+    public int Group { get; } = group;
+
+    /// <summary>
+    /// Layer key.
+    /// </summary>
+    public object Key { get; } = key;
+}
+
+/// <summary>
 /// Some more info about how a handler should be handled.
 /// </summary>
 /// <param name="group">Handling priority.</param>
-/// <param name="layerId">
-/// Handling layer.
+/// <param name="layerInfo">
+/// Handling layer info.
 /// </param>
 public class HandlingOptions(
     int group = default,
-    int layerId = default)
+    LayerInfo? layerInfo = default)
 {
     /// <summary>
     /// The default layer.
     /// </summary>
-    public static readonly object DefaultLayer = new();
+    public static readonly object DefaultLayerKey = new();
 
     /// <summary>
     /// Handling priority.
@@ -34,7 +50,7 @@ public class HandlingOptions(
     /// only effects handlers in the same layer.
     /// </para>
     /// </remarks>
-    public int LayerId { get; } = layerId;
+    public LayerInfo LayerInfo { get; } = layerInfo ?? new LayerInfo(DefaultLayerKey);
 
     /// <summary>
     /// Get input handling options or default.

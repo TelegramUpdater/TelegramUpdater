@@ -551,7 +551,7 @@ public sealed partial class Updater : IUpdater
             var scopeEndedToken = new CancellationChangeToken(scopeCts.Token);
 
             // Group handler by layer id
-            var layerd = handlers.GroupBy(x => x.Options.LayerId);
+            var layerd = handlers.GroupBy(x => x.Options.LayerInfo.Key);
 
             // The otter loop is over separate layers, so breaking inner loop won't effect this
             foreach (var layer in layerd.OrderBy(x=> x.Key))
@@ -579,11 +579,11 @@ public sealed partial class Updater : IUpdater
                         break;
                     }
 
-                    var layerIndex = handlingInfo.Options.LayerId;
+                    var layerInfo = handlingInfo.Options.LayerInfo;
                     var groupIndex = handlingInfo.Options.Group;
 
                     if (!handlingInfo.Filter(
-                        new(this, shiningInfo.Value, scopeId, layerIndex, groupIndex, indexInLayer)))
+                        new UpdaterFilterInputs<Update>(this, shiningInfo.Value, scopeId, layerInfo, groupIndex, indexInLayer)))
                         // Filter didn't pass, ignore
                         continue;
 
@@ -593,7 +593,7 @@ public sealed partial class Updater : IUpdater
                             updater: this,
                             shiningInfo: shiningInfo,
                             scopeId: scopeId,
-                            layerId: layerIndex,
+                            layerInfo: layerInfo,
                             group: groupIndex,
                             index: indexInLayer,
                             scopeChangeToken: scopeEndedToken,

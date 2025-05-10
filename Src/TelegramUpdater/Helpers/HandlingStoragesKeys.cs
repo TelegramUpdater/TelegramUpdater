@@ -29,7 +29,7 @@ public class HandlingStoragesKeys
     /// <param name="ScopeId">Scope id.</param>
     /// <param name="Id">Layer id.</param>
     [StructLayout(LayoutKind.Auto)]
-    public readonly record struct LayerId(Guid ScopeId, int Id)
+    public readonly record struct LayerId(Guid ScopeId, object Id)
     {
         /// <inheritdoc/>
         public override string ToString()
@@ -49,7 +49,7 @@ public class HandlingStoragesKeys
     /// <param name="LayerId">Layer Id.</param>
     /// <param name="Id">Group.</param>
     [StructLayout(LayoutKind.Auto)]
-    public readonly record struct GroupId(Guid ScopeId, int LayerId, int Id)
+    public readonly record struct GroupId(Guid ScopeId, object LayerId, int Id)
     {
         /// <inheritdoc/>
         public override string ToString()
@@ -70,7 +70,7 @@ public class HandlingStoragesKeys
     /// <param name="GroupId">Group.</param>
     /// <param name="Index">Index in group.</param>
     [StructLayout(LayoutKind.Auto)]
-    public readonly record struct HandlerId(Guid ScopeId, int LayerId, int GroupId, int Index)
+    public readonly record struct HandlerId(Guid ScopeId, object LayerId, int GroupId, int Index)
     {
         /// <inheritdoc/>
         public override string ToString()
