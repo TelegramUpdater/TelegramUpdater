@@ -44,8 +44,8 @@ namespace TelegramUpdaterTests
         {
             var testUpdater = new Updater(new TelegramBotClient(Extensions.FakeBotToken));
 
-            testUpdater.AddScopedUpdateHandler<MyMessageHandler>(UpdateType.Message);
-            testUpdater.AddScopedUpdateHandler<MyMessageHandler>(UpdateType.EditedMessage);
+            testUpdater.AddHandler<MyMessageHandler>(UpdateType.Message);
+            testUpdater.AddHandler<MyMessageHandler>(UpdateType.EditedMessage);
             testUpdater.AddHandler<MyCallbackQueryHandler>();
 
             testUpdater.AddSingletonUpdateHandler(

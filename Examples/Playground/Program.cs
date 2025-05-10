@@ -9,7 +9,7 @@ using TelegramUpdater.FilterAttributes.Attributes;
 using TelegramUpdater.Hosting;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
-using TelegramUpdater.UpdateHandlers.Actions;
+using TelegramUpdater.UpdateHandlers.Minimal;
 using TelegramUpdater.UpdateHandlers.Singleton.Attributes;
 
 var builder = Host.CreateApplicationBuilder(args);

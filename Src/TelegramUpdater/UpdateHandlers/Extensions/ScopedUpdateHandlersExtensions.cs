@@ -144,7 +144,7 @@ public static class ScopedUpdateHandlersExtensions
             }, options);
 
     /// <inheritdoc cref="AddHandler{THandler, TContainer}(IUpdater, UpdateType, Filter{UpdaterFilterInputs{Message}}?, HandlingOptions?)"/>
-    public static IUpdater AddScopedUpdateHandler<THandler>(
+    public static IUpdater AddHandler<THandler>(
         this IUpdater updater,
         UpdateType updateType,
         Filter<UpdaterFilterInputs<Message>>? filter = default,
@@ -373,7 +373,7 @@ public static class ScopedUpdateHandlersExtensions
             UpdateType.PollAnswer, filter, x => x.PollAnswer, options);
 
     /// <inheritdoc cref="AddHandler{THandler, TContainer}(IUpdater, UpdaterFilter{PollAnswer}?, HandlingOptions?)"/>
-    public static IUpdater AddScopedUpdateHandler<THandler>(
+    public static IUpdater AddHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<PollAnswer>? filter = default,
         HandlingOptions? options = default)
@@ -403,7 +403,7 @@ public static class ScopedUpdateHandlersExtensions
             UpdateType.PreCheckoutQuery, filter, x => x.PreCheckoutQuery, options);
 
     /// <inheritdoc cref="AddHandler{THandler, TContainer}(IUpdater, UpdaterFilter{PreCheckoutQuery}?, HandlingOptions?)"/>
-    public static IUpdater AddScopedUpdateHandler<THandler>(
+    public static IUpdater AddHandler<THandler>(
         this IUpdater updater,
         UpdaterFilter<PreCheckoutQuery>? filter = default,
         HandlingOptions? options = default)
