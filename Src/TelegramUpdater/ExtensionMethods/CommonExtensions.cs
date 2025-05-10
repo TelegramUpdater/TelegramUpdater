@@ -13,20 +13,20 @@ public static class CommonExtensions
         this IContainer<T> container, ShiningInfo<long, Update> shiningInfo) where T : class
         => new(new(container.Updater, shiningInfo, default, default, default, default));
 
-    internal static async Task<IContainer<T>> WrapAsync<T>(
+    internal static async Task<IBaseContainer<T>> WrapAsync<T>(
         this Task<T> t, Expression<Func<Update, T?>> insiderResovler, IUpdater updater) where T : class
     {
         var result = await t.ConfigureAwait(false);
         return DefaultLiteContainer<T>.CreateLiteContainer(insiderResovler, result, updater);
     }
 
-    internal static IContainer<T> Wrap<T>(
+    internal static IBaseContainer<T> Wrap<T>(
         this T t, Expression<Func<Update, T?>> insiderResovler, IUpdater updater) where T : class
     {
         return DefaultLiteContainer<T>.CreateLiteContainer(insiderResovler, t, updater);
     }
 
-    internal static async Task<IContainer<Message>> WrapMessageAsync(
+    internal static async Task<IBaseContainer<Message>> WrapMessageAsync(
         this Task<Message> t, IUpdater updater)
     {
         return await t.WrapAsync(x => x.Message, updater).ConfigureAwait(false);

@@ -38,7 +38,7 @@ public abstract class AbstractMessageHandler(Func<Update, Message?> resolver)
 
     /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)"/>.
     /// <remarks>This methods sends a message to the <see cref="Message.Chat"/></remarks>
-    protected async Task<IContainer<Message>> Response(
+    protected async Task<IBaseContainer<Message>> Response(
         string text,
         bool sendAsReply = false,
         ParseMode parseMode = default,
@@ -68,7 +68,7 @@ public abstract class AbstractMessageHandler(Func<Update, Message?> resolver)
             cancellationToken: cancellationToken).ConfigureAwait(false));
 
     /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)"/>.
-    protected async Task<IContainer<Message>> SendMessage(
+    protected async Task<IBaseContainer<Message>> SendMessage(
         ChatId chatId,
         string text,
         ParseMode parseMode = default,

@@ -7,7 +7,7 @@ namespace TelegramUpdater.UpdateContainer;
 /// <summary>
 /// Base class for update containers. ( Used while handling updates )
 /// </summary>
-public interface IContainer
+public interface IContainer: IBaseContainer
 {
     /// <summary>
     /// Raw inputs of the handler.
@@ -15,25 +15,9 @@ public interface IContainer
     public HandlerInput Input { get; }
 
     /// <summary>
-    /// <see cref="TelegramUpdater.Updater"/> instance which is responsible.
-    /// for this container.
-    /// </summary>
-    public IUpdater Updater => Input.Updater;
-
-    /// <summary>
-    /// The received update.
-    /// </summary>
-    public Update Container => ShiningInfo.Value;
-
-    /// <summary>
     /// Processing info for this update.
     /// </summary>
     public ShiningInfo<long, Update> ShiningInfo => Input.ShiningInfo;
-
-    /// <summary>
-    /// <see cref="ITelegramBotClient"/> which is responsible for this container.
-    /// </summary>
-    public ITelegramBotClient BotClient => Updater.BotClient;
 
     internal IChangeToken? ScopeChangeToken => Input.ScopeChangeToken;
 
@@ -68,10 +52,7 @@ public interface IContainer
 /// A sub interface of <see cref="IContainer"/>, made for simplicity.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public interface IContainer<T> : IContainer where T : class
+public interface IContainer<T> : IContainer, IBaseContainer<T> where T : class
 {
-    /// <summary>
-    /// The actual update.
-    /// </summary>
-    public T Update { get; }
+
 }

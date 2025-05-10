@@ -1,7 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
-using TelegramUpdater.RainbowUtilities;
 
 namespace TelegramUpdater.UpdateContainer.UpdateContainers;
 
@@ -10,7 +8,7 @@ namespace TelegramUpdater.UpdateContainer.UpdateContainers;
 /// outside of updater. Eg: the result of requests.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class DefaultLiteContainer<T> : IContainer<T> where T : class
+public class DefaultLiteContainer<T> : IBaseContainer<T> where T : class
 {
     /// <summary>
     /// Create a lite container.
@@ -25,37 +23,22 @@ public class DefaultLiteContainer<T> : IContainer<T> where T : class
         IUpdater updater,
         Update update)
     {
-        var input = new HandlerInput(
-            updater,
-            new ShiningInfo<long, Update>(update, default!, default),
-            default, default, default, default);
-
-        Input = input;
-        Update = insiderResolver(update) 
+        Updater = updater;
+        Container = update;
+        Update = insiderResolver(update)
             ?? throw new InvalidOperationException("Inner update can't be null.");
     }
-
-    /// <inheritdoc/>
-    public ShiningInfo<long, Update> ShiningInfo
-        => throw new InvalidOperationException(
-            "Lite containers have no ShiningInfo, since they're not received from updater.");
 
     /// <inheritdoc />
     public T Update { get; }
 
-    HandlerInput IContainer.Input => Input;
-
-    ShiningInfo<long, Update> IContainer.ShiningInfo
-        => throw new InvalidOperationException(
-            "Lite containers have no ShiningInfo, since they're not received from updater.");
-
-    object IContainer.this[string key]
-        => throw new InvalidOperationException("Lite container doesn't have any extra data.");
+    /// <inheritdoc />
+    public IUpdater Updater { get; }
 
     /// <inheritdoc />
-    public HandlerInput Input { get; }
+    public Update Container { get; }
 
-    internal static IContainer<U> CreateLiteContainer<U>(
+    internal static IBaseContainer<U> CreateLiteContainer<U>(
         Expression<Func<Update, U?>> insiderResolver,
         U update,
         IUpdater updater) where U : class
@@ -70,21 +53,11 @@ public class DefaultLiteContainer<T> : IContainer<T> where T : class
             insiderResolver.Compile(), updater, u);
     }
 
-    internal static IContainer<Message> MessageLiteContainer(
+    internal static IBaseContainer<Message> MessageLiteContainer(
         Message update, IUpdater updater)
         => CreateLiteContainer(x => x.Message, update, updater);
 
-    internal static IContainer<CallbackQuery> CallbackQueryLiteContainer(
+    internal static IBaseContainer<CallbackQuery> CallbackQueryLiteContainer(
         CallbackQuery update, IUpdater updater)
         => CreateLiteContainer(x => x.CallbackQuery, update, updater);
-
-    bool IContainer.ContainsKey(string key)
-    {
-        throw new InvalidOperationException("Lite container doesn't have any extra data.");
-    }
-
-    bool IContainer.TryGetExtraData<T1>(string key, [NotNullWhen(true)] out T1 value)
-    {
-        throw new InvalidOperationException("Lite container doesn't have any extra data.");
-    }
 }

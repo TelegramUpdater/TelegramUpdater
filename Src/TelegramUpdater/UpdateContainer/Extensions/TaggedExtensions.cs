@@ -16,7 +16,7 @@ public static class TaggedExtensions
     /// </summary>
     public static bool SetUserItem<C, TValue>(
         this C container, string key, TValue value, MemoryCacheEntryOptions? options = default)
-        where C : IContainer, ISenderIdExtractable
+        where C : IBaseContainer, ISenderIdExtractable
     {
         var senderId = container.GetSenderId();
 
@@ -35,7 +35,7 @@ public static class TaggedExtensions
     /// Set a user item.
     /// </summary>
     public static void RemoveUserItem<C>(this C container, string key)
-        where C : IContainer, ISenderIdExtractable
+        where C : IBaseContainer, ISenderIdExtractable
     {
         var senderId = container.GetSenderId();
 
@@ -52,7 +52,7 @@ public static class TaggedExtensions
         this C container,
         string key,
         [NotNullWhen(true)] out TValue? value)
-        where C : IContainer, ISenderIdExtractable
+        where C : IBaseContainer, ISenderIdExtractable
     {
         var senderId = container.GetSenderId();
 

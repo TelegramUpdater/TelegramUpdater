@@ -19,8 +19,8 @@ public static class CallbackQueryContainerExtensions
         => simpleContext.Update.From;
 
     /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)" />
-    public static async Task<IContainer<Message>> SendMessage(
-        this IContainer<CallbackQuery> simpleContext,
+    public static async Task<IBaseContainer<Message>> SendMessage(
+        this IBaseContainer<CallbackQuery> simpleContext,
         string text,
         bool sendAsReply = true,
         ParseMode parseMode = default,
@@ -78,8 +78,8 @@ public static class CallbackQueryContainerExtensions
             cancellationToken: cancellationToken).ConfigureAwait(false);
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageText(ITelegramBotClient, ChatId, int, string, ParseMode, IEnumerable{MessageEntity}?, LinkPreviewOptions?, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public static async Task<IContainer<Message>?> Edit(
-        this IContainer<CallbackQuery> simpleContext,
+    public static async Task<IBaseContainer<Message>?> Edit(
+        this IBaseContainer<CallbackQuery> simpleContext,
         string text,
         ParseMode parseMode = default,
         IEnumerable<MessageEntity>? messageEntities = default,
@@ -121,8 +121,8 @@ public static class CallbackQueryContainerExtensions
     }
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageLiveLocation(ITelegramBotClient, ChatId, int, double, double, int?, double?, int?, int?, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public static async Task<IContainer<Message>?> Edit(
-        this IContainer<CallbackQuery> simpleContext,
+    public static async Task<IBaseContainer<Message>?> Edit(
+        this IBaseContainer<CallbackQuery> simpleContext,
         double latitude,
         double longitude,
         int? livePeriod = default,
@@ -170,8 +170,8 @@ public static class CallbackQueryContainerExtensions
     }
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageMedia(ITelegramBotClient, ChatId, int, InputMedia, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public static async Task<IContainer<Message>?> Edit(
-        this IContainer<CallbackQuery> simpleContext,
+    public static async Task<IBaseContainer<Message>?> Edit(
+        this IBaseContainer<CallbackQuery> simpleContext,
         InputMedia inputMedia,
         InlineKeyboardMarkup? inlineKeyboardMarkup = default,
         string? businessConnectionId = default,
@@ -204,8 +204,8 @@ public static class CallbackQueryContainerExtensions
     }
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageCaption(ITelegramBotClient, string, string?, ParseMode, IEnumerable{MessageEntity}?, bool, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public static async Task<IContainer<Message>?> EditCaption(
-        this IContainer<CallbackQuery> simpleContext,
+    public static async Task<IBaseContainer<Message>?> EditCaption(
+        this IBaseContainer<CallbackQuery> simpleContext,
         string caption,
         ParseMode parseMode = default,
         IEnumerable<MessageEntity>? captionEntities = default,
@@ -244,8 +244,8 @@ public static class CallbackQueryContainerExtensions
     }
 
     /// <inheritdoc cref="TelegramBotClientExtensions.EditMessageReplyMarkup(ITelegramBotClient, string, InlineKeyboardMarkup?, string?, CancellationToken)"/>
-    public static async Task<IContainer<Message>?> Edit(
-        this IContainer<CallbackQuery> simpleContext,
+    public static async Task<IBaseContainer<Message>?> Edit(
+        this IBaseContainer<CallbackQuery> simpleContext,
         InlineKeyboardMarkup? inlineKeyboardMarkup = default,
         string? businessConnectionId = default,
         CancellationToken cancellationToken = default)
