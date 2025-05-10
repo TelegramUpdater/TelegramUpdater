@@ -291,7 +291,7 @@ public static class UpdaterExtensions
     /// /Messages/MyScopedMessageHandler
     /// </remarks>
     /// <returns></returns>
-    public static IUpdater CollectScopedHandlers(
+    public static IUpdater CollectHandlers(
         this IUpdater updater,
         string handlersParentNamespace = "UpdateHandlers")
     {
@@ -301,7 +301,7 @@ public static class UpdaterExtensions
 
             updater.Logger.LogInformation(
                 "Scoped handler collected! ({Name})", container.Handler.ScopedHandlerType.Name);
-            updater.AddScopedUpdateHandler(container.Handler);
+            updater.AddHandler(container.Handler);
         }
 
         return updater;
@@ -311,7 +311,7 @@ public static class UpdaterExtensions
     /// Use this to quickly add a message handler that responds /start command.
     /// </summary>
     /// <remarks>
-    /// If you need a more advanced handler use <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions?)"/>
+    /// If you need a more advanced handler use <see cref="IUpdater.AddHandler(IScopedUpdateHandlerContainer, HandlingOptions?)"/>
     /// or <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, HandlingOptions?)"/>
     /// </remarks>
     /// <returns></returns>
@@ -332,7 +332,7 @@ public static class UpdaterExtensions
         bool allowSendingWithoutReply = true,
         CancellationToken cancellationToken = default)
     {
-        return updater.AddMessageHandler(
+        return updater.HandleMessage(
             container => container.Response(text: text,
                 sendAsReply: sendAsReply,
                 parseMode: parseMode,
@@ -605,7 +605,7 @@ public static class UpdaterExtensions
         this IScopedUpdateHandlerContainer container)
     {
         return container.ScopedHandlerType
-            .GetCustomAttribute<ScopedHandlerAttribute>()?
+            .GetCustomAttribute<HandlerAttribute>()?
             .GetHandlingOptions();
     }
 
@@ -614,7 +614,7 @@ public static class UpdaterExtensions
     {
         return container
             .GetType()
-            .GetCustomAttribute<SingletonHandlerCallbackAttribute>()?
+            .GetCustomAttribute<HandlerCallbackAttribute>()?
             .GetHandlingOptions();
     }
 

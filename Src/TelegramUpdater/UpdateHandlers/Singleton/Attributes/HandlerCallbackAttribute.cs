@@ -6,7 +6,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.Attributes;
 /// <summary>
 /// Place this attribute on any method to create an
 /// <see cref="ISingletonUpdateHandler"/> using that method
-/// as <see cref="IUpdateHandler.HandleAsync(HandlerInput)"/>.
+/// as <see cref="IUpdateHandler.HandleAsync(HandlerInput, Microsoft.Extensions.DependencyInjection.IServiceScope?, CancellationToken)"/>.
 /// <para>You can apply filter attributes on the method.</para>
 /// </summary>
 /// <remarks>
@@ -22,13 +22,13 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.Attributes;
 /// </list>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-public sealed class SingletonHandlerCallbackAttribute : Attribute, IGetHandlingOptions
+public sealed class HandlerCallbackAttribute : Attribute, IGetHandlingOptions
 {
     /// <summary>
-    /// Initialize a new instance of <see cref="SingletonHandlerCallbackAttribute"/>.
+    /// Initialize a new instance of <see cref="HandlerCallbackAttribute"/>.
     /// </summary>
     /// <param name="updateType">Type of the update for the handler.</param>
-    public SingletonHandlerCallbackAttribute(UpdateType updateType)
+    public HandlerCallbackAttribute(UpdateType updateType)
     {
         if (updateType == UpdateType.Unknown)
             throw new ArgumentException("Unknown? Really???", nameof(updateType));

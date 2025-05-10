@@ -312,7 +312,7 @@ public sealed partial class Updater : IUpdater
     }
 
     /// <inheritdoc/>
-    public Updater AddScopedUpdateHandler(
+    public Updater AddHandler(
         IScopedUpdateHandlerContainer scopedHandlerContainer,
         HandlingOptions? options = default)
     {

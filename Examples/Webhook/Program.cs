@@ -11,7 +11,7 @@ builder.Services.AddControllers();
 builder.AddTelegramManualUpdater(builder => builder
     .QuickStartCommandReply("Hello there!")
     // Collect scoped handlers located for example at UpdateHandlers/Messages for messages.
-    .CollectScopedHandlers()
+    .CollectHandlers()
     .AddDefaultExceptionHandler());
 
 var app = builder.Build();

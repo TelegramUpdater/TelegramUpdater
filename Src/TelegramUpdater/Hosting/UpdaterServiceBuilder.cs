@@ -62,7 +62,7 @@ public class UpdaterServiceBuilder
         return this;
     }
 
-    /// <inheritdoc cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions?)"/>
+    /// <inheritdoc cref="IUpdater.AddHandler(IScopedUpdateHandlerContainer, HandlingOptions?)"/>
     public UpdaterServiceBuilder AddScopedUpdateHandler(
         IScopedUpdateHandlerContainer scopedHandlerContainer, HandlingOptions? options)
     {
@@ -76,11 +76,11 @@ public class UpdaterServiceBuilder
 #endif
 
         scopedHandlerTypes.Add(scopedHandlerContainer.ScopedHandlerType);
-        return Execute(updater => updater.AddScopedUpdateHandler(scopedHandlerContainer, options));
+        return Execute(updater => updater.AddHandler(scopedHandlerContainer, options));
     }
 
     /// <inheritdoc cref="ScopedUpdateHandlersExtensions.AddScopedUpdateHandler{THandler, TUpdate, TContainer}(IUpdater, UpdateType, Filter{UpdaterFilterInputs{TUpdate}}?, Func{Update, TUpdate?}?, HandlingOptions?)"/>
-    public UpdaterServiceBuilder AddScopedUpdateHandler<THandler, TUpdate, TContainer>(
+    public UpdaterServiceBuilder AddHandler<THandler, TUpdate, TContainer>(
         UpdateType updateType,
         UpdaterFilter<TUpdate>? filter = default,
         Func<Update, TUpdate?>? getT = default,
@@ -90,12 +90,12 @@ public class UpdaterServiceBuilder
         where TContainer : IContainer<TUpdate>
     {
         scopedHandlerTypes.Add(typeof(THandler));
-        return Execute(updater => updater.AddScopedUpdateHandler<THandler, TUpdate, TContainer>(updateType, filter, getT, options));
+        return Execute(updater => updater.AddHandler<THandler, TUpdate, TContainer>(updateType, filter, getT, options));
     }
 
 
-    /// <inheritdoc cref="ScopedUpdateHandlersExtensions.AddScopedUpdateHandler{TUpdate}(IUpdater, Type, UpdateType, UpdaterFilter{TUpdate}?, Func{Update, TUpdate}?, HandlingOptions?)"/>
-    public UpdaterServiceBuilder AddScopedUpdateHandler<TUpdate>(
+    /// <inheritdoc cref="ScopedUpdateHandlersExtensions.AddHandler{TUpdate}(IUpdater, Type, UpdateType, UpdaterFilter{TUpdate}?, Func{Update, TUpdate}?, HandlingOptions?)"/>
+    public UpdaterServiceBuilder AddHandler<TUpdate>(
         Type typeOfScopedHandler,
         UpdateType updateType,
         UpdaterFilter<TUpdate>? filter = default,
@@ -118,7 +118,7 @@ public class UpdaterServiceBuilder
         }
 
         scopedHandlerTypes.Add(typeOfScopedHandler);
-        return Execute(updater => updater.AddScopedUpdateHandler(typeOfScopedHandler, updateType, filter, getT, options));
+        return Execute(updater => updater.AddHandler(typeOfScopedHandler, updateType, filter, getT, options));
     }
 
     /// <inheritdoc cref="IUpdater.AddExceptionHandler(IExceptionHandler)"/>
@@ -147,8 +147,8 @@ public class UpdaterServiceBuilder
     public UpdaterServiceBuilder AddDefaultExceptionHandler(LogLevel? logLevel = default)
         => Execute(updater => updater.AddDefaultExceptionHandler(logLevel));
 
-    /// <inheritdoc cref="UpdaterExtensions.CollectScopedHandlers(IUpdater, string)"/>
-    public UpdaterServiceBuilder CollectScopedHandlers(
+    /// <inheritdoc cref="UpdaterExtensions.CollectHandlers(IUpdater, string)"/>
+    public UpdaterServiceBuilder CollectHandlers(
         string handlersParentNamespace = "UpdateHandlers")
     {
         foreach (var (_, _, handlerType) in UpdaterExtensions
@@ -159,7 +159,7 @@ public class UpdaterServiceBuilder
             scopedHandlerTypes.Add(handlerType);
         }
 
-        return Execute(updater => updater.CollectScopedHandlers(handlersParentNamespace));
+        return Execute(updater => updater.CollectHandlers(handlersParentNamespace));
     }
 
     /// <summary>
@@ -177,7 +177,7 @@ public class UpdaterServiceBuilder
         UpdaterFilter<Message>? filter = default,
         HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<Message, MessageContainer>
-        => AddScopedUpdateHandler<THandler, Message, MessageContainer>(
+        => AddHandler<THandler, Message, MessageContainer>(
             UpdateType.Message,
             filter,
             x => x.Message,
@@ -198,7 +198,7 @@ public class UpdaterServiceBuilder
         UpdaterFilter<CallbackQuery>? filter = default,
         HandlingOptions? options = default)
         where THandler : AbstractScopedUpdateHandler<CallbackQuery, CallbackQueryContainer>
-        => AddScopedUpdateHandler<THandler, CallbackQuery, CallbackQueryContainer>(
+        => AddHandler<THandler, CallbackQuery, CallbackQueryContainer>(
             UpdateType.CallbackQuery,
             filter,
             x => x.CallbackQuery,
@@ -219,7 +219,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<Message>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<Message, MessageContainer>
-       => AddScopedUpdateHandler<THandler, Message, MessageContainer>(
+       => AddHandler<THandler, Message, MessageContainer>(
            UpdateType.EditedMessage,
            filter,
            x => x.EditedMessage,
@@ -240,7 +240,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<Message>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<Message, MessageContainer>
-       => AddScopedUpdateHandler<THandler, Message, MessageContainer>(
+       => AddHandler<THandler, Message, MessageContainer>(
            UpdateType.ChannelPost,
            filter,
            x => x.ChannelPost,
@@ -261,7 +261,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<Message>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<Message, MessageContainer>
-       => AddScopedUpdateHandler<THandler, Message, MessageContainer>(
+       => AddHandler<THandler, Message, MessageContainer>(
            UpdateType.EditedChannelPost,
            filter,
            x => x.EditedChannelPost,
@@ -282,7 +282,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<InlineQuery>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<InlineQuery, DefaultContainer<InlineQuery>>
-       => AddScopedUpdateHandler<THandler, InlineQuery, DefaultContainer<InlineQuery>>(
+       => AddHandler<THandler, InlineQuery, DefaultContainer<InlineQuery>>(
            UpdateType.InlineQuery,
            filter,
            x => x.InlineQuery,
@@ -303,7 +303,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<ChosenInlineResult>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<ChosenInlineResult, DefaultContainer<ChosenInlineResult>>
-       => AddScopedUpdateHandler<THandler, ChosenInlineResult, DefaultContainer<ChosenInlineResult>>(
+       => AddHandler<THandler, ChosenInlineResult, DefaultContainer<ChosenInlineResult>>(
            UpdateType.ChosenInlineResult,
            filter,
            x => x.ChosenInlineResult,
@@ -324,7 +324,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<ShippingQuery>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<ShippingQuery, DefaultContainer<ShippingQuery>>
-       => AddScopedUpdateHandler<THandler, ShippingQuery, DefaultContainer<ShippingQuery>>(
+       => AddHandler<THandler, ShippingQuery, DefaultContainer<ShippingQuery>>(
            UpdateType.ShippingQuery,
            filter,
            x => x.ShippingQuery,
@@ -345,7 +345,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<PreCheckoutQuery>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<PreCheckoutQuery, DefaultContainer<PreCheckoutQuery>>
-       => AddScopedUpdateHandler<THandler, PreCheckoutQuery, DefaultContainer<PreCheckoutQuery>>(
+       => AddHandler<THandler, PreCheckoutQuery, DefaultContainer<PreCheckoutQuery>>(
            UpdateType.PreCheckoutQuery,
            filter,
            x => x.PreCheckoutQuery,
@@ -366,7 +366,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<Poll>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<Poll, DefaultContainer<Poll>>
-       => AddScopedUpdateHandler<THandler, Poll, DefaultContainer<Poll>>(
+       => AddHandler<THandler, Poll, DefaultContainer<Poll>>(
            UpdateType.Poll,
            filter,
            x => x.Poll,
@@ -387,7 +387,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<PollAnswer>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<PollAnswer, DefaultContainer<PollAnswer>>
-       => AddScopedUpdateHandler<THandler, PollAnswer, DefaultContainer<PollAnswer>>(
+       => AddHandler<THandler, PollAnswer, DefaultContainer<PollAnswer>>(
            UpdateType.PollAnswer,
            filter,
            x => x.PollAnswer,
@@ -408,7 +408,7 @@ public class UpdaterServiceBuilder
       UpdaterFilter<ChatMemberUpdated>? filter = default,
       HandlingOptions? options = default)
       where THandler : AbstractScopedUpdateHandler<ChatMemberUpdated, DefaultContainer<ChatMemberUpdated>>
-      => AddScopedUpdateHandler<THandler, ChatMemberUpdated, DefaultContainer<ChatMemberUpdated>>(
+      => AddHandler<THandler, ChatMemberUpdated, DefaultContainer<ChatMemberUpdated>>(
           UpdateType.MyChatMember,
           filter,
           x => x.MyChatMember,
@@ -429,7 +429,7 @@ public class UpdaterServiceBuilder
       UpdaterFilter<ChatMemberUpdated>? filter = default,
       HandlingOptions? options = default)
       where THandler : AbstractScopedUpdateHandler<ChatMemberUpdated, DefaultContainer<ChatMemberUpdated>>
-      => AddScopedUpdateHandler<THandler, ChatMemberUpdated, DefaultContainer<ChatMemberUpdated>>(
+      => AddHandler<THandler, ChatMemberUpdated, DefaultContainer<ChatMemberUpdated>>(
           UpdateType.ChatMember,
           filter,
           x => x.ChatMember,
@@ -450,7 +450,7 @@ public class UpdaterServiceBuilder
       UpdaterFilter<ChatJoinRequest>? filter = default,
       HandlingOptions? options = default)
       where THandler : AbstractScopedUpdateHandler<ChatJoinRequest, DefaultContainer<ChatJoinRequest>>
-      => AddScopedUpdateHandler<THandler, ChatJoinRequest, DefaultContainer<ChatJoinRequest>>(
+      => AddHandler<THandler, ChatJoinRequest, DefaultContainer<ChatJoinRequest>>(
           UpdateType.ChatJoinRequest,
           filter,
           x => x.ChatJoinRequest,
@@ -471,7 +471,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<MessageReactionUpdated>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<MessageReactionUpdated, DefaultContainer<MessageReactionUpdated>>
-       => AddScopedUpdateHandler<THandler, MessageReactionUpdated, DefaultContainer<MessageReactionUpdated>>(
+       => AddHandler<THandler, MessageReactionUpdated, DefaultContainer<MessageReactionUpdated>>(
            UpdateType.MessageReaction,
            filter,
            x => x.MessageReaction,
@@ -492,7 +492,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<MessageReactionCountUpdated>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<MessageReactionCountUpdated, DefaultContainer<MessageReactionCountUpdated>>
-       => AddScopedUpdateHandler<THandler, MessageReactionCountUpdated, DefaultContainer<MessageReactionCountUpdated>>(
+       => AddHandler<THandler, MessageReactionCountUpdated, DefaultContainer<MessageReactionCountUpdated>>(
            UpdateType.MessageReactionCount,
            filter,
            x => x.MessageReactionCount,
@@ -513,7 +513,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<ChatBoostUpdated>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<ChatBoostUpdated, DefaultContainer<ChatBoostUpdated>>
-       => AddScopedUpdateHandler<THandler, ChatBoostUpdated, DefaultContainer<ChatBoostUpdated>>(
+       => AddHandler<THandler, ChatBoostUpdated, DefaultContainer<ChatBoostUpdated>>(
            UpdateType.ChatBoost,
            filter,
            x => x.ChatBoost,
@@ -534,7 +534,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<ChatBoostRemoved>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<ChatBoostRemoved, DefaultContainer<ChatBoostRemoved>>
-       => AddScopedUpdateHandler<THandler, ChatBoostRemoved, DefaultContainer<ChatBoostRemoved>>(
+       => AddHandler<THandler, ChatBoostRemoved, DefaultContainer<ChatBoostRemoved>>(
            UpdateType.RemovedChatBoost,
            filter,
            x => x.RemovedChatBoost,
@@ -555,7 +555,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<BusinessConnection>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<BusinessConnection, DefaultContainer<BusinessConnection>>
-       => AddScopedUpdateHandler<THandler, BusinessConnection, DefaultContainer<BusinessConnection>>(
+       => AddHandler<THandler, BusinessConnection, DefaultContainer<BusinessConnection>>(
            UpdateType.BusinessConnection,
            filter,
            x => x.BusinessConnection,
@@ -576,7 +576,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<Message>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<Message, MessageContainer>
-       => AddScopedUpdateHandler<THandler, Message, MessageContainer>(
+       => AddHandler<THandler, Message, MessageContainer>(
            UpdateType.BusinessMessage,
            filter,
            x => x.BusinessMessage,
@@ -597,7 +597,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<Message>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<Message, MessageContainer>
-       => AddScopedUpdateHandler<THandler, Message, MessageContainer>(
+       => AddHandler<THandler, Message, MessageContainer>(
            UpdateType.EditedBusinessMessage,
            filter,
            x => x.EditedBusinessMessage,
@@ -618,7 +618,7 @@ public class UpdaterServiceBuilder
        UpdaterFilter<BusinessMessagesDeleted>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<BusinessMessagesDeleted, DefaultContainer<BusinessMessagesDeleted>>
-       => AddScopedUpdateHandler<THandler, BusinessMessagesDeleted, DefaultContainer<BusinessMessagesDeleted>>(
+       => AddHandler<THandler, BusinessMessagesDeleted, DefaultContainer<BusinessMessagesDeleted>>(
            UpdateType.DeletedBusinessMessages,
            filter,
            x => x.DeletedBusinessMessages,
@@ -639,13 +639,13 @@ public class UpdaterServiceBuilder
        UpdaterFilter<PaidMediaPurchased>? filter = default,
        HandlingOptions? options = default)
        where THandler : AbstractScopedUpdateHandler<PaidMediaPurchased, DefaultContainer<PaidMediaPurchased>>
-       => AddScopedUpdateHandler<THandler, PaidMediaPurchased, DefaultContainer<PaidMediaPurchased>>(
+       => AddHandler<THandler, PaidMediaPurchased, DefaultContainer<PaidMediaPurchased>>(
            UpdateType.PurchasedPaidMedia,
            filter,
            x => x.PurchasedPaidMedia,
            options);
 
-    /// <inheritdoc cref="UpdaterExtensions.QuickStartCommandReply(IUpdater, string, bool, ParseMode, IEnumerable{MessageEntity}?, bool?, int?, bool, ReplyMarkup?, bool, string?, string?, bool, bool)"/>
+    /// <inheritdoc cref="UpdaterExtensions.QuickStartCommandReply(IUpdater, string, bool, ParseMode, IEnumerable{MessageEntity}?, bool?, int?, bool, ReplyMarkup?, bool, string?, string?, bool, bool, CancellationToken)"/>
     public UpdaterServiceBuilder QuickStartCommandReply(
         string text,
         bool sendAsReply = true,
@@ -661,8 +661,7 @@ public class UpdaterServiceBuilder
         bool allowPaidBroadcast = default,
         bool allowSendingWithoutReply = true)
     {
-        return Execute(updater => updater.QuickStartCommandReply(
-                text: text,
+        return Execute(updater => updater.QuickStartCommandReply(text: text,
                 sendAsReply: sendAsReply,
                 parseMode: parseMode,
                 messageEntities: messageEntities,
@@ -674,6 +673,6 @@ public class UpdaterServiceBuilder
                 messageEffectId: messageEffectId,
                 businessConnectionId: businessConnectionId,
                 allowPaidBroadcast: allowPaidBroadcast,
-                allowSendingWithoutReply: allowSendingWithoutReply));
+                allowSendingWithoutReply: allowSendingWithoutReply, cancellationToken: updater.UpdaterOptions.CancellationToken));
     }
 }

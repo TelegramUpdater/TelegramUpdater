@@ -30,7 +30,7 @@ builder.AddTelegramUpdater(
         .Execute(updater => updater
 
             // Add a quick handler
-            .AddSingletonUpdateHandler(
+            .Handle(
                 UpdateType.Message,
                 async (MessageContainer container) =>
                 {
@@ -38,7 +38,7 @@ builder.AddTelegramUpdater(
                 },
                 ReadyFilters.OnCommand("help"))
 
-            .AddMinimalHandler(
+            .Handle(
                 UpdateType.Message,
                 async (IContainer<Message> container, PlaygroundMemory memory) =>
                 {
@@ -48,7 +48,7 @@ builder.AddTelegramUpdater(
                 ReadyFilters.OnCommand("records") & ReadyFilters.PM())
 
             // Collects static methods marked with `SingletonHandlerCallback` attribute.
-            .CollectSingletonHandlers()
+            .CollectHandlingCallbacks()
 
             // State tracker
             .AddUserEnumStateKeeper<RenameState>())
@@ -57,7 +57,7 @@ builder.AddTelegramUpdater(
         .AddMessageHandler<MyBadlyPlacedHandler>()
 
         // Collect scoped handlers located for example at UpdateHandlers/Messages for messages.
-        .CollectScopedHandlers()
+        .CollectHandlers()
         .AddDefaultExceptionHandler());
 
 var host = builder.Build();
@@ -67,12 +67,12 @@ partial class Program
 {
     /// <summary>
     /// This method is automatically collected and considered as an singleton update handler.
-    /// You just need to call <see cref="SingletonAttributesExtensions.CollectSingletonHandlers(IUpdater)"/>
+    /// You just need to call <see cref="SingletonAttributesExtensions.CollectHandlingCallbacks(IUpdater)"/>
     /// </summary>
     /// <param name="container"></param>
     /// <returns></returns>
     [Command("about"), Private]
-    [SingletonHandlerCallback(UpdateType.Message)]
+    [HandlerCallback(UpdateType.Message)]
     public static async Task AboutCommand(IContainer<Message> container)
     {
         var message = await container.Response("Wanna know more about me?! Answer right now!",

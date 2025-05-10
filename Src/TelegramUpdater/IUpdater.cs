@@ -78,7 +78,7 @@ public interface IUpdater
     /// To Create a new <see cref="IScopedUpdateHandlerContainer"/>
     /// </param>
     /// <param name="options">Information about how a handler should be handled.</param>
-    Updater AddScopedUpdateHandler(IScopedUpdateHandlerContainer scopedHandlerContainer, HandlingOptions? options = default);
+    Updater AddHandler(IScopedUpdateHandlerContainer scopedHandlerContainer, HandlingOptions? options = default);
 
     /// <summary>
     /// Add your handler to this updater.

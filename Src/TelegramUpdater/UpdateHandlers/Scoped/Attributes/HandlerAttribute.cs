@@ -4,7 +4,7 @@
 /// Extra info about an <see cref="IScopedUpdateHandler"/>.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class ScopedHandlerAttribute : Attribute, IGetHandlingOptions
+public class HandlerAttribute : Attribute, IGetHandlingOptions
 {
     /// <inheritdoc cref="HandlingOptions.Group"/>
     public int Group { get; set; } = default;

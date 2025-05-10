@@ -92,7 +92,7 @@ public static class MinimalHandlersExtensions
     /// </remarks>
     /// <typeparam name="T">Type of the update you want to handle.</typeparam>
     /// <typeparam name="In1">First argument to be resolved by <see cref="IServiceProvider"/>.</typeparam>
-    public static IUpdater AddMinimalHandler<T, In1>(
+    public static IUpdater Handle<T, In1>(
         this IUpdater updater,
         UpdateType updateType,
         Func<IContainer<T>, In1, Task> callback,
@@ -129,7 +129,7 @@ public static class MinimalHandlersExtensions
     /// <typeparam name="T">Type of the update you want to handle.</typeparam>
     /// <typeparam name="In1">First argument to be resolved by <see cref="IServiceProvider"/>.</typeparam>
     /// <typeparam name="In2">Second argument to be resolved by <see cref="IServiceProvider"/>.</typeparam>
-    public static IUpdater AddMinimalHandler<T, In1, In2>(
+    public static IUpdater Handle<T, In1, In2>(
         this IUpdater updater,
         UpdateType updateType,
         Func<IContainer<T>, In1, In2, Task> callback,

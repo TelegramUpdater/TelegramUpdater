@@ -46,7 +46,7 @@ namespace TelegramUpdaterTests
 
             testUpdater.AddScopedUpdateHandler<MyMessageHandler>(UpdateType.Message);
             testUpdater.AddScopedUpdateHandler<MyMessageHandler>(UpdateType.EditedMessage);
-            testUpdater.AddScopedUpdateHandler<MyCallbackQueryHandler>();
+            testUpdater.AddHandler<MyCallbackQueryHandler>();
 
             testUpdater.AddSingletonUpdateHandler(
                 new TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse.MessageHandler(_T));

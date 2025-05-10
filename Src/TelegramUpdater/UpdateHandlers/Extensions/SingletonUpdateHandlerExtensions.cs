@@ -26,7 +26,7 @@ public static class SingletonUpdateHandlerExtensions
     /// </param>
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
-    public static IUpdater AddSingletonUpdateHandler<T>(
+    public static IUpdater Handle<T>(
         this IUpdater updater,
         UpdateType updateType,
         Func<Update, T?> updateSelector,
@@ -54,7 +54,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddSingletonUpdateHandler<TUpdate>(
+    public static IUpdater Handle<TUpdate>(
         this IUpdater updater,
         UpdateType updateType,
         Func<IContainer<TUpdate>, Task> callback,
@@ -80,7 +80,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         UpdateType updateType,
         Func<MessageContainer, Task> callback,
@@ -120,7 +120,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddMessageHandler(
+    public static IUpdater HandleMessage(
         this IUpdater updater,
         Func<MessageContainer, Task> callback,
         IFilter<UpdaterFilterInputs<Message>>? filter = default,
@@ -140,7 +140,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddEditedMessageHandler(
+    public static IUpdater HandleEditedMessage(
         this IUpdater updater,
         Func<MessageContainer, Task> callback,
         IFilter<UpdaterFilterInputs<Message>>? filter = default,
@@ -160,7 +160,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddChannelPostHandler(
+    public static IUpdater HandleChannelPost(
         this IUpdater updater,
         Func<MessageContainer, Task> callback,
         IFilter<UpdaterFilterInputs<Message>>? filter = default,
@@ -180,7 +180,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddEditedChannelPostHandler(
+    public static IUpdater HandleEditedChannelPost(
         this IUpdater updater,
         Func<MessageContainer, Task> callback,
         IFilter<UpdaterFilterInputs<Message>>? filter = default,
@@ -200,7 +200,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddBusinessMessageHandler(
+    public static IUpdater HandleBusinessMessage(
         this IUpdater updater,
         Func<MessageContainer, Task> callback,
         IFilter<UpdaterFilterInputs<Message>>? filter = default,
@@ -220,7 +220,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddEditedBusinessMessageHandler(
+    public static IUpdater HandleEditedBusinessMessage(
         this IUpdater updater,
         Func<MessageContainer, Task> callback,
         IFilter<UpdaterFilterInputs<Message>>? filter = default,
@@ -243,7 +243,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         UpdateType updateType,
         Func<IContainer<ChatMemberUpdated>, Task> callback,
@@ -274,7 +274,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddChatMemberHandler(
+    public static IUpdater HandleChatMember(
         this IUpdater updater,
         Func<IContainer<ChatMemberUpdated>, Task> callback,
         IFilter<UpdaterFilterInputs<ChatMemberUpdated>>? filter = default,
@@ -294,7 +294,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddMyChatMemberHandler(
+    public static IUpdater HandleMyChatMember(
         this IUpdater updater,
         Func<IContainer<ChatMemberUpdated>, Task> callback,
         IFilter<UpdaterFilterInputs<ChatMemberUpdated>>? filter = default,
@@ -313,7 +313,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<CallbackQueryContainer, Task> callback,
         IFilter<UpdaterFilterInputs<CallbackQuery>>? filter = default,
@@ -333,7 +333,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddCallbackQueryHandler(
+    public static IUpdater HandleCallbackQuery(
         this IUpdater updater,
         Func<CallbackQueryContainer, Task> callback,
         IFilter<UpdaterFilterInputs<CallbackQuery>>? filter = default,
@@ -352,7 +352,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<InlineQuery>, Task> callback,
         IFilter<UpdaterFilterInputs<InlineQuery>>? filter = default,
@@ -372,7 +372,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddInlineQueryHandler(
+    public static IUpdater HandleInlineQuery(
         this IUpdater updater,
         Func<IContainer<InlineQuery>, Task> callback,
         IFilter<UpdaterFilterInputs<InlineQuery>>? filter = default,
@@ -391,7 +391,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<ChosenInlineResult>, Task> callback,
         IFilter<UpdaterFilterInputs<ChosenInlineResult>>? filter = default,
@@ -411,7 +411,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddChosenInlineResultHandler(
+    public static IUpdater HandleChosenInlineResult(
         this IUpdater updater,
         Func<IContainer<ChosenInlineResult>, Task> callback,
         IFilter<UpdaterFilterInputs<ChosenInlineResult>>? filter = default,
@@ -430,7 +430,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<ChatJoinRequest>, Task> callback,
         IFilter<UpdaterFilterInputs<ChatJoinRequest>>? filter = default,
@@ -450,7 +450,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddChatJoinRequestHandler(
+    public static IUpdater HandleChatJoinRequest(
         this IUpdater updater,
         Func<IContainer<ChatJoinRequest>, Task> callback,
         IFilter<UpdaterFilterInputs<ChatJoinRequest>>? filter = default,
@@ -469,7 +469,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<Poll>, Task> callback,
         IFilter<UpdaterFilterInputs<Poll>>? filter = default,
@@ -489,7 +489,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddPollHandler(
+    public static IUpdater HandlePoll(
         this IUpdater updater,
         Func<IContainer<Poll>, Task> callback,
         IFilter<UpdaterFilterInputs<Poll>>? filter = default,
@@ -508,7 +508,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<PollAnswer>, Task> callback,
         IFilter<UpdaterFilterInputs<PollAnswer>>? filter = default,
@@ -528,7 +528,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddPollAnswerHandler(
+    public static IUpdater HandlePollAnswer(
         this IUpdater updater,
         Func<IContainer<PollAnswer>, Task> callback,
         IFilter<UpdaterFilterInputs<PollAnswer>>? filter = default,
@@ -547,7 +547,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<PreCheckoutQuery>, Task> callback,
         IFilter<UpdaterFilterInputs<PreCheckoutQuery>>? filter = default,
@@ -567,7 +567,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddPreCheckoutQueryHandler(
+    public static IUpdater HandlePreCheckoutQuery(
         this IUpdater updater,
         Func<IContainer<PreCheckoutQuery>, Task> callback,
         IFilter<UpdaterFilterInputs<PreCheckoutQuery>>? filter = default,
@@ -586,7 +586,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<ShippingQuery>, Task> callback,
         IFilter<UpdaterFilterInputs<ShippingQuery>>? filter = default,
@@ -606,7 +606,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddShippingQueryHandler(
+    public static IUpdater HandleShippingQuery(
         this IUpdater updater,
         Func<IContainer<ShippingQuery>, Task> callback,
         IFilter<UpdaterFilterInputs<ShippingQuery>>? filter = default,
@@ -626,7 +626,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<MessageReactionUpdated>, Task> callback,
         IFilter<UpdaterFilterInputs<MessageReactionUpdated>>? filter = default,
@@ -646,7 +646,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddMessageReactionHandler(
+    public static IUpdater HandleMessageReaction(
         this IUpdater updater,
         Func<IContainer<MessageReactionUpdated>, Task> callback,
         IFilter<UpdaterFilterInputs<MessageReactionUpdated>>? filter = default,
@@ -666,7 +666,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<MessageReactionCountUpdated>, Task> callback,
         IFilter<UpdaterFilterInputs<MessageReactionCountUpdated>>? filter = default,
@@ -686,7 +686,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddMessageReactionCountHandler(
+    public static IUpdater HandleMessageReactionCount(
         this IUpdater updater,
         Func<IContainer<MessageReactionCountUpdated>, Task> callback,
         IFilter<UpdaterFilterInputs<MessageReactionCountUpdated>>? filter = default,
@@ -706,7 +706,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<ChatBoostUpdated>, Task> callback,
         IFilter<UpdaterFilterInputs<ChatBoostUpdated>>? filter = default,
@@ -726,7 +726,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddChatBoostHandler(
+    public static IUpdater HandleChatBoost(
         this IUpdater updater,
         Func<IContainer<ChatBoostUpdated>, Task> callback,
         IFilter<UpdaterFilterInputs<ChatBoostUpdated>>? filter = default,
@@ -746,7 +746,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<ChatBoostRemoved>, Task> callback,
         IFilter<UpdaterFilterInputs<ChatBoostRemoved>>? filter = default,
@@ -766,7 +766,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddRemovedChatBoostHandler(
+    public static IUpdater HandleRemovedChatBoost(
         this IUpdater updater,
         Func<IContainer<ChatBoostRemoved>, Task> callback,
         IFilter<UpdaterFilterInputs<ChatBoostRemoved>>? filter = default,
@@ -786,7 +786,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<BusinessConnection>, Task> callback,
         IFilter<UpdaterFilterInputs<BusinessConnection>>? filter = default,
@@ -806,7 +806,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddBusinessConnectionHandler(
+    public static IUpdater HandleBusinessConnection(
         this IUpdater updater,
         Func<IContainer<BusinessConnection>, Task> callback,
         IFilter<UpdaterFilterInputs<BusinessConnection>>? filter = default,
@@ -826,7 +826,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<BusinessMessagesDeleted>, Task> callback,
         IFilter<UpdaterFilterInputs<BusinessMessagesDeleted>>? filter = default,
@@ -846,7 +846,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddDeletedBusinessMessagesHandler(
+    public static IUpdater PurchasedPaidMediaDeletedBusinessMessages(
         this IUpdater updater,
         Func<IContainer<BusinessMessagesDeleted>, Task> callback,
         IFilter<UpdaterFilterInputs<BusinessMessagesDeleted>>? filter = default,
@@ -866,7 +866,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="filter">Filters.</param>
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
-    public static IUpdater AddSingletonUpdateHandler(
+    public static IUpdater Handle(
         this IUpdater updater,
         Func<IContainer<PaidMediaPurchased>, Task> callback,
         IFilter<UpdaterFilterInputs<PaidMediaPurchased>>? filter = default,
@@ -886,7 +886,7 @@ public static class SingletonUpdateHandlerExtensions
     /// <param name="options">Options about how a handler should be handled.</param>
     /// <param name="endpoint">Determines if this an endpoint handler.</param>
     /// <returns></returns>
-    public static IUpdater AddInlineQueryHandler(
+    public static IUpdater HandlePurchasedPaidMedia(
         this IUpdater updater,
         Func<IContainer<PaidMediaPurchased>, Task> callback,
         IFilter<UpdaterFilterInputs<PaidMediaPurchased>>? filter = default,
