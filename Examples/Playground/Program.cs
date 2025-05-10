@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Playground;
+using Playground.Models;
 using Playground.UpdateHandlers.Messages;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -46,6 +47,29 @@ builder.AddTelegramUpdater(
                     await container.Response($"I've seen {records} people so far.");
                 },
                 ReadyFilters.OnCommand("records") & ReadyFilters.PM())
+
+            .Handle(
+                UpdateType.Message,
+                async (IContainer<Message> container, PlaygroundMemory memory) =>
+                {
+                    if (container.TryParseCommandArgs(out long? id))
+                    {
+                        if (await memory.SeenUsers
+                            .SingleOrDefaultAsync(x => x.TelegramId == id) is SeenUser seen)
+                        {
+                            await container.Response($"User {seen.Name} [{seen.Id}] is seen.");
+                        }
+                        else
+                        {
+                            await container.Response($"User {id} is not seen.");
+                        }
+                    }
+                    else
+                    {
+                        await container.Response("I need an integer user id to check.");
+                    }
+                },
+                ReadyFilters.OnCommand("check"))
 
             // Collects static methods marked with `SingletonHandlerCallback` attribute.
             .CollectHandlingCallbacks()

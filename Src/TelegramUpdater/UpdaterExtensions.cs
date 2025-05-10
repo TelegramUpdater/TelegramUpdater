@@ -437,6 +437,32 @@ public static class UpdaterExtensions
     }
 
     /// <summary>
+    /// Get the bot profile url.
+    /// </summary>
+    /// <remarks>
+    /// Don't be afraid of the async <see cref="IUpdater.GetMe"/> will cache.
+    /// </remarks>
+    /// <param name="updater"></param>
+    /// <returns></returns>
+    public static async Task<string> BotProfileUrl(this IUpdater updater)
+        => $"https://t.me/{(await updater.GetMe().ConfigureAwait(false)).Username}";
+
+    /// <summary>
+    /// Create a deeplink to your bot.
+    /// </summary>
+    /// <remarks>
+    /// like https://t.me/your_bot?start=param
+    /// <para>
+    /// Don't be afraid of the async <see cref="IUpdater.GetMe"/> will cache.
+    /// </para>
+    /// </remarks>
+    /// <param name="updater"></param>
+    /// <param name="param"></param>
+    /// <returns></returns>
+    public static async Task<string> CreateDeeplink(this IUpdater updater, string param)
+        => $"{(await updater.BotProfileUrl().ConfigureAwait(false))}?start={param}";
+
+    /// <summary>
     /// Create a composite key with two values.
     /// </summary>
     /// <param name="First"></param>
