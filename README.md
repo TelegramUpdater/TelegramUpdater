@@ -187,12 +187,10 @@ updater.Handle(
 
 ```
 
-### Note
-
-Typically Methods like `updater.Handle(...)` refers to a singleton handlers
-and `updater.AddHandler(...)` or  `updater.Add...Handler` refers to a scoped handler.
-
-Minimal handlers are actually singleton handlers but you can use DI inside them.
+> [!NOTE]
+> Typically Methods like `updater.Handle(...)` refers to a singleton handlers
+> and `updater.AddHandler(...)` or  `updater.Add...Handler` refers to a scoped handler.
+> Minimal handlers are actually singleton handlers but you can use DI inside them.
 
 ### Something cool?!
 
@@ -235,7 +233,7 @@ public static async Task AboutCommand(IContainer<Message> container)
 
 Extension methods return containerized results.
 
-> [!DANGER]
+> [!CAUTION]
 > The package is still in preview and the API may change in the future *(for sure)*.
 > It's actually changing right now, so be careful when using it.
 
@@ -254,3 +252,7 @@ The package has also some extension packages:
 
 - [TelegramUpdater.FillMyForm](https://github.com/TelegramUpdater/TelegramUpdater.FillMyForm): which magically fills your forms for you.
 - [TelegramUpdater.Menu](https://github.com/TelegramUpdater/TelegramUpdater.Menu): Work with static menus (InlineKeyboards and more).
+
+## Help is always needed!
+
+If you think this package worths it, then help and contribute. It will be always appreciated!
