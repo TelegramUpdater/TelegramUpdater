@@ -148,7 +148,7 @@ public abstract class AbstractMessageControllerHandler<TContainer>(Func<Update, 
 }
 
 /// <inheritdoc/>
-public class AbstractMessageHandler(Func<Update, Message?>? getT)
+public class AbstractMessageControllerHandler(Func<Update, Message?>? getT)
     : AbstractMessageControllerHandler<MessageContainer>(getT)
 {
     /// <inheritdoc/>
