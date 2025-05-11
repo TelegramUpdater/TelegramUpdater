@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 		global.json = global.json
+		index.md = index.md
 		LICENSE = LICENSE
 		.github\workflows\publish-nuget.yml = .github\workflows\publish-nuget.yml
 		README.md = README.md
@@ -32,6 +33,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkerService", "Examples\WorkerService\WorkerService.csproj", "{ED5C2A39-ECD6-4750-A2AF-08819B61A8FD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webhook", "Examples\Webhook\Webhook.csproj", "{0BDCCDFE-C5F8-4A96-AF61-B3B45D2D9596}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{9E1BA049-7D90-4825-8616-446556C2C87E}"
+	ProjectSection(SolutionItems) = preProject
+		docs\getting-started.md = docs\getting-started.md
+		docs\introduction.md = docs\introduction.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -74,6 +81,7 @@ Global
 		{71446C64-28E9-4E99-9CF9-72E1AF64E33F} = {3C284987-3AE9-426A-829E-8842D30AE69D}
 		{ED5C2A39-ECD6-4750-A2AF-08819B61A8FD} = {3C284987-3AE9-426A-829E-8842D30AE69D}
 		{0BDCCDFE-C5F8-4A96-AF61-B3B45D2D9596} = {3C284987-3AE9-426A-829E-8842D30AE69D}
+		{9E1BA049-7D90-4825-8616-446556C2C87E} = {6800D424-9ED3-4118-9B88-DFD846FE30F3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CA1ADBDA-027E-4C1E-B164-4534E085CEF1}
