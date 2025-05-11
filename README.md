@@ -188,8 +188,8 @@ updater.Handle(
 ```
 
 > [!NOTE]
-> Typically Methods like `updater.Handle(...)` refers to a singleton handlers
-> and `updater.AddHandler(...)` or  `updater.Add...Handler` refers to a scoped handler.
+> Typically Methods like `updater.Handle(...)` refers to a singleton handler
+> and `updater.AddHandler(...)` or  `updater.Add...Handler` refer to an scoped handler.
 > Minimal handlers are actually singleton handlers but you can use DI inside them.
 
 ### Something cool?!
