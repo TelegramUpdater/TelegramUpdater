@@ -1,20 +1,18 @@
-﻿// Ignore Spelling: Webpage
-
-using Telegram.Bot.Types.ReplyMarkups;
-using TelegramUpdater.UpdateContainer;
+﻿using Telegram.Bot.Types.ReplyMarkups;
 using TelegramUpdater.RainbowUtilities;
+using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
 
-namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse.Abstraction;
+namespace TelegramUpdater.UpdateHandlers.Controller.ReadyToUse.Abstraction;
 
 /// <summary>
-/// Abstract scoped update handler for all handlers with <see cref="Message"/> input.
+/// Abstract base for controller update handlers for type of <see cref="Message"/>.
 /// </summary>
-/// <param name="resolver"></param>
-public abstract class AbstractMessageHandler<TContainer>(Func<Update, Message?> resolver)
-    : AbstractScopedUpdateHandler<Message, TContainer>(resolver) where TContainer: IContainer<Message>
+/// <param name="getT"></param>
+public abstract class AbstractMessageControllerHandler<TContainer>(Func<Update, Message?>? getT)
+    : AbstractControllerUpdateHandler<Message, TContainer>(getT) where TContainer : IContainer<Message>
 {
-    // Extension methods being added here should also be added to Controllers
+    // Extension methods being added here should also be added to Scoped
     #region Extension Methods
     /// <inheritdoc cref="Message.From"/>.
     protected User? From => ActualUpdate.From;
@@ -149,14 +147,10 @@ public abstract class AbstractMessageHandler<TContainer>(Func<Update, Message?> 
     #endregion
 }
 
-/// <summary>
-/// Abstract scoped update handler for all handlers with <see cref="Message"/> input.
-/// </summary>
-/// <param name="resolver"></param>
-public abstract class AbstractMessageHandler(Func<Update, Message?> resolver)
-    : AbstractMessageHandler<MessageContainer>(resolver)
+/// <inheritdoc/>
+public class AbstractMessageHandler(Func<Update, Message?>? getT)
+    : AbstractMessageControllerHandler<MessageContainer>(getT)
 {
     /// <inheritdoc/>
-    protected internal override MessageContainer ContainerBuilder(HandlerInput input)
-        => new(input, ExtraData);
+    protected internal override MessageContainer ContainerBuilder(HandlerInput input) => new(input, ExtraData);
 }

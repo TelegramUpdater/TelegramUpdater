@@ -12,7 +12,7 @@ namespace TelegramUpdater.UpdateHandlers.Minimal;
 /// Minimal handler are actually <see cref="ISingletonUpdateHandler"/>s that have access to the DI
 /// so you should add them as singleton.
 /// <para>
-/// Use <see cref="MinimalHandler{T, In1}"/> and other overloads to instantiate one.
+/// Use <see cref="MinimalUpdateHandler{T, In1}"/> and other overloads to instantiate one.
 /// </para>
 /// </remarks>
 /// <typeparam name="T">Type of the input update.</typeparam>
@@ -23,7 +23,7 @@ namespace TelegramUpdater.UpdateHandlers.Minimal;
 /// <param name="filters">Filters.</param>
 /// <param name="innerUpdateResolver">Optionally pass a function that resolves <typeparamref name="T"/> from <see cref="Update"/></param>
 /// <param name="endpoint">Determines if this an endpoint handler.</param>
-public abstract class AbstractMinimalHandler<T, TContainer, Inputs>(
+public abstract class AbstractMinimalUpdateHandler<T, TContainer, Inputs>(
     UpdateType updateType,
     Func<TContainer, Inputs, CancellationToken, Task> callback,
     IFilter<UpdaterFilterInputs<T>>? filters = default,

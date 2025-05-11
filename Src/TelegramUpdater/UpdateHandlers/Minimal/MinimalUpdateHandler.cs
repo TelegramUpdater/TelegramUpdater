@@ -24,12 +24,12 @@ namespace TelegramUpdater.UpdateHandlers.Minimal;
 /// <param name="filters">Filters.</param>
 /// <param name="innerUpdateResolver">Optionally pass a function that resolves <typeparamref name="T"/> from <see cref="Update"/></param>
 /// <param name="endpoint">Determines if this an endpoint handler.</param>
-public class MinimalHandler<T, In1>(
+public class MinimalUpdateHandler<T, In1>(
     UpdateType updateType,
     Func<IContainer<T>, In1, CancellationToken, Task> callback,
     IFilter<UpdaterFilterInputs<T>>? filters = default,
     Func<Update, T?>? innerUpdateResolver = default,
-    bool endpoint = true) : AbstractMinimalHandler<T, DefaultContainer<T>, In1>(
+    bool endpoint = true) : AbstractMinimalUpdateHandler<T, DefaultContainer<T>, In1>(
         updateType, callback, filters, innerUpdateResolver, endpoint)
     where T : class where In1 : notnull
 {
@@ -56,12 +56,12 @@ public class MinimalHandler<T, In1>(
 /// <param name="filters">Filters.</param>
 /// <param name="innerUpdateResolver">Optionally pass a function that resolves <typeparamref name="T"/> from <see cref="Update"/></param>
 /// <param name="endpoint">Determines if this an endpoint handler.</param>
-public class MinimalHandler<T, In1, In2>(
+public class MinimalUpdateHandler<T, In1, In2>(
     UpdateType updateType,
     Func<IContainer<T>, In1, In2, CancellationToken, Task> callback,
     IFilter<UpdaterFilterInputs<T>>? filters = default,
     Func<Update, T?>? innerUpdateResolver = default,
-    bool endpoint = true) : MinimalHandler<T, Tuple<In1, In2>>(
+    bool endpoint = true) : MinimalUpdateHandler<T, Tuple<In1, In2>>(
         updateType,
         (c, i, ct) => callback(c, i.Item1, i.Item2, ct),
         filters,
@@ -98,12 +98,12 @@ public class MinimalHandler<T, In1, In2>(
 /// <param name="filters">Filters.</param>
 /// <param name="innerUpdateResolver">Optionally pass a function that resolves <typeparamref name="T"/> from <see cref="Update"/></param>
 /// <param name="endpoint">Determines if this an endpoint handler.</param>
-public class MinimalHandler<T, In1, In2, In3>(
+public class MinimalUpdateHandler<T, In1, In2, In3>(
     UpdateType updateType,
     Func<IContainer<T>, In1, In2, In3, CancellationToken, Task> callback,
     IFilter<UpdaterFilterInputs<T>>? filters = default,
     Func<Update, T?>? innerUpdateResolver = default,
-    bool endpoint = true) : MinimalHandler<T, Tuple<In1, In2, In3>>(
+    bool endpoint = true) : MinimalUpdateHandler<T, Tuple<In1, In2, In3>>(
         updateType,
         (c, i, ct) => callback(c, i.Item1, i.Item2, i.Item3, ct),
         filters,
@@ -143,12 +143,12 @@ public class MinimalHandler<T, In1, In2, In3>(
 /// <param name="filters">Filters.</param>
 /// <param name="innerUpdateResolver">Optionally pass a function that resolves <typeparamref name="T"/> from <see cref="Update"/></param>
 /// <param name="endpoint">Determines if this an endpoint handler.</param>
-public class MinimalHandler<T, In1, In2, In3, In4>(
+public class MinimalUpdateHandler<T, In1, In2, In3, In4>(
     UpdateType updateType,
     Func<IContainer<T>, In1, In2, In3, In4, CancellationToken, Task> callback,
     IFilter<UpdaterFilterInputs<T>>? filters = default,
     Func<Update, T?>? innerUpdateResolver = default,
-    bool endpoint = true) : MinimalHandler<T, Tuple<In1, In2, In3, In4>>(
+    bool endpoint = true) : MinimalUpdateHandler<T, Tuple<In1, In2, In3, In4>>(
         updateType,
         (c, i, ct) => callback(c, i.Item1, i.Item2, i.Item3, i.Item4, ct),
         filters,

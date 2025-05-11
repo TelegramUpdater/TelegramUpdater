@@ -460,7 +460,7 @@ public sealed class UpdaterBuilderStep3
     /// </para>
     /// </summary>
     /// <param name="scopedHandlerContainer">
-    /// Use classes like <see cref="UpdateHandlers.Scoped.ReadyToUse.MessageHandler"/> to create an
+    /// Use classes like <see cref="UpdateHandlers.Controller.ReadyToUse.MessageControllerHandler"/> to create an
     /// scoped message handler and such. Scoped handlers create a new instance of
     /// their underlying handler per each request.
     /// </param>

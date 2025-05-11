@@ -3,7 +3,7 @@
 using StateKeeping.StateKeepers.NumericStateKeepers;
 
 /// <summary>
-/// An abstract class to create filter on <see cref="UserNumericStateKeeper"/>.
+/// An abstract class to create filter on <see cref="UserNumericStateKeeper{TStorage}"/>.
 /// </summary>
 /// <typeparam name="T">Type of update.</typeparam>
 /// <remarks>

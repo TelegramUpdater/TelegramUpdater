@@ -65,13 +65,27 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
     /// Override <b>ONLY ONE</b> of HandleAsync methods.
     /// </para>
     /// </remarks>
+    /// <returns></returns>
+    protected virtual Task HandleAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Here you may handle the incoming update.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Override <b>ONLY ONE</b> of HandleAsync methods.
+    /// </para>
+    /// </remarks>
     /// <param name="container">
     /// Provides everything you need and everything you want!
     /// </param>
     /// <returns></returns>
     protected virtual Task HandleAsync(TContainer container)
     {
-        return Task.CompletedTask;
+        return HandleAsync();
     }
 
     /// <summary>

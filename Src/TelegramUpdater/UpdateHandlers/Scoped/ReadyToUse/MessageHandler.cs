@@ -1,9 +1,5 @@
 ﻿// Ignore Spelling: Webpage
 
-using Telegram.Bot.Types.ReplyMarkups;
-using TelegramUpdater.RainbowUtilities;
-using TelegramUpdater.UpdateContainer;
-using TelegramUpdater.UpdateContainer.UpdateContainers;
 using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse.Abstraction;
 
 namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
