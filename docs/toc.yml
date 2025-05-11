@@ -2,3 +2,7 @@
   href: introduction.md
 - name: Getting Started
   href: getting-started.md
+- name: Update Handlers
+  href: update-handlers.md
+- name: Filters
+  href: filters.md
