@@ -7,12 +7,12 @@ namespace TelegramUpdater.UpdateHandlers.Minimal;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
 /// <summary>
-/// A set of static extension methods for <see cref="AbstractMinimalHandler{T, TContainer, Inputs}"/>s.
+/// A set of static extension methods for <see cref="AbstractMinimalUpdateHandler{T, TContainer, Inputs}"/>s.
 /// </summary>
-public static class MinimalHandlersExtensions
+public static class MinimalUpdateHandlersExtensions
 {
     /// <summary>
-    /// Adds an <see cref="MinimalHandler{T, In1}"/> to the updater.
+    /// Adds an <see cref="MinimalUpdateHandler{T, In1}"/> to the updater.
     /// </summary>
     /// <remarks>
     /// This type of handlers are actually <see cref="ISingletonUpdateHandler"/>s, but they use
@@ -37,7 +37,7 @@ public static class MinimalHandlersExtensions
         bool endpoint = true,
         HandlingOptions? options = default) where T : class where In1 : notnull
     {
-        var action = new MinimalHandler<T, In1>(
+        var action = new MinimalUpdateHandler<T, In1>(
             updateType,
             (c, in1, _) => callback(c, in1),
             filters,
@@ -48,7 +48,7 @@ public static class MinimalHandlersExtensions
     }
 
     /// <summary>
-    /// Adds an <see cref="MinimalHandler{T, In1, In2}"/> to the updater.
+    /// Adds an <see cref="MinimalUpdateHandler{T, In1, In2}"/> to the updater.
     /// </summary>
     /// <remarks>
     /// This type of handlers are actually <see cref="ISingletonUpdateHandler"/>s, but they use
@@ -74,7 +74,7 @@ public static class MinimalHandlersExtensions
         bool endpoint = true,
         HandlingOptions? options = default) where T : class where In1 : notnull where In2 : notnull
     {
-        var action = new MinimalHandler<T, In1, In2>(
+        var action = new MinimalUpdateHandler<T, In1, In2>(
             updateType,
             (c, in1, in2, _) => callback(c, in1, in2),
             filters,
@@ -85,7 +85,7 @@ public static class MinimalHandlersExtensions
     }
 
     /// <summary>
-    /// Adds an <see cref="MinimalHandler{T, In1, In2, In3}"/> to the updater.
+    /// Adds an <see cref="MinimalUpdateHandler{T, In1, In2, In3}"/> to the updater.
     /// </summary>
     /// <remarks>
     /// This type of handlers are actually <see cref="ISingletonUpdateHandler"/>s, but they use
@@ -112,7 +112,7 @@ public static class MinimalHandlersExtensions
         bool endpoint = true,
         HandlingOptions? options = default) where T : class where In1 : notnull where In2 : notnull where In3 : notnull
     {
-        var action = new MinimalHandler<T, In1, In2, In3>(
+        var action = new MinimalUpdateHandler<T, In1, In2, In3>(
             updateType,
             (c, in1, in2, in3, _) => callback(c, in1, in2, in3),
             filters,
@@ -123,7 +123,7 @@ public static class MinimalHandlersExtensions
     }
 
     /// <summary>
-    /// Adds an <see cref="MinimalHandler{T, In1, In2, In3, In4}"/> to the updater.
+    /// Adds an <see cref="MinimalUpdateHandler{T, In1, In2, In3, In4}"/> to the updater.
     /// </summary>
     /// <remarks>
     /// This type of handlers are actually <see cref="ISingletonUpdateHandler"/>s, but they use
@@ -155,7 +155,7 @@ public static class MinimalHandlersExtensions
         bool endpoint = true,
         HandlingOptions? options = default) where T : class where In1 : notnull where In2 : notnull where In3 : notnull where In4 : notnull
     {
-        var action = new MinimalHandler<T, In1, In2, In3, In4>(
+        var action = new MinimalUpdateHandler<T, In1, In2, In3, In4>(
             updateType,
             (c, in1, in2, in3, in4, _) => callback(c, in1, in2, in3, in4),
             filters,

@@ -3,7 +3,7 @@
 /// <summary>
 /// Extra info about an <see cref="IScopedUpdateHandler"/>.
 /// </summary>
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public class HandlerAttribute : Attribute, IGetHandlingOptions
 {
     /// <inheritdoc cref="HandlingOptions.Group"/>

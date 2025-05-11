@@ -38,6 +38,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{9E1BA049-7
 	ProjectSection(SolutionItems) = preProject
 		docs\getting-started.md = docs\getting-started.md
 		docs\introduction.md = docs\introduction.md
+		docs\update-handlers.md = docs\update-handlers.md
 	EndProjectSection
 EndProject
 Global

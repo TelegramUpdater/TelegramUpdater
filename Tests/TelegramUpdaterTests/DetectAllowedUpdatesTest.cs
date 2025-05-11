@@ -8,8 +8,11 @@ using Telegram.Bot.Types.Enums;
 using TelegramUpdater;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
+using TelegramUpdater.UpdateHandlers.Controller.ReadyToUse;
 using TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse;
 using Xunit;
+
+using MessageHandler = TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse.MessageHandler;
 
 namespace TelegramUpdaterTests
 {

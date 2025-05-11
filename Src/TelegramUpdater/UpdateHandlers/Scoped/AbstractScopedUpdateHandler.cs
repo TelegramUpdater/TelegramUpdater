@@ -14,12 +14,12 @@ namespace TelegramUpdater.UpdateHandlers.Scoped;
 /// <param name="getT">Extract actual update from <see cref="Update"/>.</param>
 /// <typeparam name="TContainer">Type of the container.</typeparam>
 /// <exception cref="ArgumentNullException"></exception>
-public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?> getT)
+public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?>? getT)
     : AbstractHandlerProvider<T>, IScopedUpdateHandler
     where T : class
     where TContainer : IContainer<T>
 {
-    private readonly Func<Update, T?> _getT = getT ?? throw new ArgumentNullException(nameof(getT));
+    private readonly Func<Update, T?> _getT = getT ?? ((updater) => updater.GetInnerUpdate<T>());
     private IReadOnlyDictionary<string, object>? _extraData;
 
     IReadOnlyDictionary<string, object>? IScopedUpdateHandler.ExtraData
@@ -36,13 +36,27 @@ public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?
     /// Override <b>ONLY ONE</b> of HandleAsync methods.
     /// </para>
     /// </remarks>
+    /// <returns></returns>
+    protected virtual Task HandleAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Here you may handle the incoming update.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Override <b>ONLY ONE</b> of HandleAsync methods.
+    /// </para>
+    /// </remarks>
     /// <param name="container">
     /// Provides everything you need and everything you want!
     /// </param>
     /// <returns></returns>
     protected virtual Task HandleAsync(TContainer container)
     {
-        return Task.CompletedTask;
+        return HandleAsync();
     }
 
     /// <summary>

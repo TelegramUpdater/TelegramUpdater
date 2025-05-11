@@ -243,12 +243,12 @@ Extension methods return containerized results.
 
 ## Examples
 
-Examples inside [/Examples](./Examples) folder are up to date with latest package changes and are good start points to begin.
+Examples inside [/Examples](https://github.com/TelegramUpdater/TelegramUpdater/tree/master/Examples) folder are up to date with latest package changes and are good start points to begin.
 
-- [ConsoleApp](./Examples/ConsoleApp): Usage of updater inside a console app.
-- [WorkerService](./Examples/WorkerService): Usage of the updater inside a worker service where `IServiceCollection`, `IConfiguration`s can be used by the updater (This's preferred to the console app as you can use scoped handlers)
-- [Webhook](./Examples/Webhook): Setting up a telegram bot using webhooks and updater. (Most of this are as same as WorkerSerivce)
-- [Playground](./Examples/Playground): This is a good worker service example that uses many of TelegramUpdater's features (not all!).
+- [ConsoleApp](https://github.com/TelegramUpdater/TelegramUpdater/tree/master/Examples/Examples/ConsoleApp): Usage of updater inside a console app.
+- [WorkerService](https://github.com/TelegramUpdater/TelegramUpdater/tree/master/Examples/Examples/WorkerService): Usage of the updater inside a worker service where `IServiceCollection`, `IConfiguration`s can be used by the updater (This's preferred to the console app as you can use scoped handlers)
+- [Webhook](https://github.com/TelegramUpdater/TelegramUpdater/tree/master/Examples/Examples/Webhook): Setting up a telegram bot using webhooks and updater. (Most of this are as same as WorkerSerivce)
+- [Playground](https://github.com/TelegramUpdater/TelegramUpdater/tree/master/Examples/Examples/Playground): This is a good worker service example that uses many of TelegramUpdater's features (not all!).
 
 ## What's Next ?!
 

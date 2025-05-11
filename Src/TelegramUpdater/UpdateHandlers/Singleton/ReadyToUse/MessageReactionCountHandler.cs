@@ -5,7 +5,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// <summary>
 /// Singleton update handler for <see cref="UpdateType.MessageReactionCount"/>.
 /// </summary>
-public sealed class MessageReactionCountHandler(
+public class MessageReactionCountHandler(
     Func<IContainer<MessageReactionCountUpdated>, Task> callback,
     IFilter<UpdaterFilterInputs<MessageReactionCountUpdated>>? filter = default,
     bool endpoint = true)

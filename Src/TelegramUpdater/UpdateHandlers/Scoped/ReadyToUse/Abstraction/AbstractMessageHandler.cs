@@ -11,13 +11,10 @@ namespace TelegramUpdater.UpdateHandlers.Scoped.ReadyToUse.Abstraction;
 /// Abstract scoped update handler for all handlers with <see cref="Message"/> input.
 /// </summary>
 /// <param name="resolver"></param>
-public abstract class AbstractMessageHandler(Func<Update, Message?> resolver)
-    : AbstractScopedUpdateHandler<Message, MessageContainer>(resolver)
+public abstract class AbstractMessageHandler<TContainer>(Func<Update, Message?> resolver)
+    : AbstractScopedUpdateHandler<Message, TContainer>(resolver) where TContainer: IContainer<Message>
 {
-    /// <inheritdoc/>
-    protected internal override MessageContainer ContainerBuilder(HandlerInput input)
-        => new(input, ExtraData);
-
+    // Extension methods being added here should also be added to Controllers
     #region Extension Methods
     /// <inheritdoc cref="Message.From"/>.
     protected User? From => ActualUpdate.From;
@@ -150,4 +147,16 @@ public abstract class AbstractMessageHandler(Func<Update, Message?> resolver)
         return update.Update.Text;
     }
     #endregion
+}
+
+/// <summary>
+/// Abstract scoped update handler for all handlers with <see cref="Message"/> input.
+/// </summary>
+/// <param name="resolver"></param>
+public abstract class AbstractMessageHandler(Func<Update, Message?> resolver)
+    : AbstractMessageHandler<MessageContainer>(resolver)
+{
+    /// <inheritdoc/>
+    protected internal override MessageContainer ContainerBuilder(HandlerInput input)
+        => new(input, ExtraData);
 }

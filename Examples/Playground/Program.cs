@@ -95,7 +95,7 @@ partial class Program
     /// </summary>
     /// <param name="container"></param>
     /// <returns></returns>
-    [Command("about"), Private]
+    [Command("ask"), Private]
     [HandlerCallback(UpdateType.Message)]
     public static async Task AboutCommand(IContainer<Message> container)
     {

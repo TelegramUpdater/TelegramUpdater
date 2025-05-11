@@ -18,7 +18,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// <paramref name="callback"/>.
 /// </param>
 /// <param name="endpoint"></param>
-public sealed class ChatJoinRequestHandler(
+public class ChatJoinRequestHandler(
     Func<IContainer<ChatJoinRequest>, Task> callback,
     IFilter<UpdaterFilterInputs<ChatJoinRequest>>? filter,
     bool endpoint = true)

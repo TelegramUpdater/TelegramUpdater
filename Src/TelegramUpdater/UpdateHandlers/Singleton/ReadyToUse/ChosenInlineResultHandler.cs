@@ -20,7 +20,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// <paramref name="callback"/>.
 /// </param>
 /// <param name="endpoint"></param>
-public sealed class ChosenInlineResultHandler(
+public class ChosenInlineResultHandler(
     Func<IContainer<ChosenInlineResult>, Task> callback,
     IFilter<UpdaterFilterInputs<ChosenInlineResult>>? filter = default,
     bool endpoint = true) : DefaultHandler<ChosenInlineResult>(UpdateType.ChosenInlineResult,
