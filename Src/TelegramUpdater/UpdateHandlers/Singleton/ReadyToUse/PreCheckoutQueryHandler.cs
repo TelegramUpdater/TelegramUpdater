@@ -19,7 +19,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// <paramref name="callback"/>.
 /// </param>
 /// <param name="endpoint">Determines if this is and endpoint handler.</param>
-public sealed class PreCheckoutQueryHandler(
+public class PreCheckoutQueryHandler(
     Func<IContainer<PreCheckoutQuery>, Task> callback,
     IFilter<UpdaterFilterInputs<PreCheckoutQuery>>? filter,
     bool endpoint = true)

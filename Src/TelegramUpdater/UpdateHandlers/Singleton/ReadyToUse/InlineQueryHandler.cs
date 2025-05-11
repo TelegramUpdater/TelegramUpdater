@@ -20,7 +20,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// <paramref name="callback"/>.
 /// </param>
 /// <param name="endpoint">Determines if this is and endpoint handler.</param>
-public sealed class InlineQueryHandler(
+public class InlineQueryHandler(
     Func<IContainer<InlineQuery>, Task> callback,
     IFilter<UpdaterFilterInputs<InlineQuery>>? filter = default,
     bool endpoint = true) 

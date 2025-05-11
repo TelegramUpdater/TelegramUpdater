@@ -19,7 +19,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// <paramref name="callback"/>.
 /// </param>
 /// <param name="endpoint">Determines if this is and endpoint handler.</param>
-public sealed class ShippingQueryHandler(
+public class ShippingQueryHandler(
     Func<IContainer<ShippingQuery>, Task> callback,
     IFilter<UpdaterFilterInputs<ShippingQuery>>? filter,
     bool endpoint = true)

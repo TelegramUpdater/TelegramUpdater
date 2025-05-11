@@ -6,7 +6,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// <summary>
 /// Singleton update handler for <see cref="UpdateType.BusinessMessage"/>.
 /// </summary>
-public sealed class BusinessMessageHandler(
+public class BusinessMessageHandler(
     Func<MessageContainer, Task> callback,
     IFilter<UpdaterFilterInputs<Message>>? filter = default,
     bool endpoint = true)

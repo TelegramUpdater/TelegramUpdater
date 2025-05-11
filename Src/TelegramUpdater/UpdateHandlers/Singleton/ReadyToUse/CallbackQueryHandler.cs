@@ -19,7 +19,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// <paramref name="callback"/>.
 /// </param>
 /// <param name="endpoint"></param>
-public sealed class CallbackQueryHandler(
+public class CallbackQueryHandler(
     Func<CallbackQueryContainer, Task> callback,
     IFilter<UpdaterFilterInputs<CallbackQuery>>? filter = default,
     bool endpoint = true)

@@ -6,7 +6,7 @@ namespace TelegramUpdater.UpdateHandlers.Singleton.ReadyToUse;
 /// <summary>
 /// Singleton update handler for <see cref="UpdateType.PurchasedPaidMedia"/>.
 /// </summary>
-public sealed class PurchasedPaidMediaHandler(
+public class PurchasedPaidMediaHandler(
     Func<IContainer<PaidMediaPurchased>, Task> callback,
     IFilter<UpdaterFilterInputs<PaidMediaPurchased>>? filter = default,
     bool endpoint = true)
