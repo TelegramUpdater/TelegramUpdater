@@ -172,3 +172,51 @@ internal class About : MessageControllerHandler
 ```
 
 They can be added to the updater exactly like scoped handlers (as they are).
+And just like scoped handlers you can have access to services from class
+constructor to be available inside all actions.
+
+## Other things to know
+
+There are some other concepts about handlers that worth knowing.
+
+1. Group (`integer`)
+
+    Handler group defines its order of handling. A group with lower group will be handled sooner.
+
+    This can be set using attribute `[ScopedHandler]` (for scoped handlers), or by setting `HandlingOptions` when adding a handler in `Handle` method.
+
+2. Endpoint (`bool`)
+
+    This indicates if this is the end of handling pipeline for an incoming update or not. By default all handlers are endpoint, meaning if their got passed, no other handler (in the layer) will be checked for this update.
+
+    If you set `Endpoint = false`, the updater will continue handling pipeline and proceed to a higher `Group` handler.
+
+    This can be set by overriding it (for scoped handlers), or when adding a handler in `Handle` method.
+
+3. Layer (LayerGroup `integer`)
+
+    Handlers can effect handling process by for example breaking it or continuing.
+    For example `Endpoint = true` handlers break the handling process.
+
+    But this breaking, only effects handler in a same layer.
+
+    The handlers will first group by their layer and then order by `LayerGroup`. In each layer, the handlers are ordered by their own `Group`.
+
+    Beside `Endpoint` property, there are two special exceptions that effect handling pipeline.
+
+    - `ContinuePropagation`: Stops the handler an proceed to the next handler (For now its just like early returning).
+
+    - `BreakPropagation`: This will break handling pipeline for a layer and proceeds to the next layer.
+
+4. Scope (ScopeId `Guid`)
+
+    Handling scope refers to "from when and update comes to where all handling process finishes for it".
+
+    Each scope will have a `Guid` as scope id that is available in container to check.
+
+    When you see an extension method like `container.AddScopedItem(...)` mean the item is only available
+    in this handling update for this update. When the scoped finishes, the items will expire.
+
+    The above statement is also correct for layers. A Layer item is only valid a handlers in a layer with an specific scope id.
+
+Using `ScopeId` or `LayerId`, helps you and the updater to get raid of temporary data added to the updater as soon as possible and reduce data collisions. When you add a scope data, you're ensured that the data is only valid for handlers after this handler and for the same incoming update. (See [Seen.cs](https://github.com/TelegramUpdater/TelegramUpdater/blob/master/Examples/Playground/UpdateHandlers/Messages/Status.cs) from Playground)
