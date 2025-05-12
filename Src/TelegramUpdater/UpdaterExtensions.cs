@@ -301,7 +301,7 @@ public static class UpdaterExtensions
 
             updater.Logger.LogInformation(
                 "Scoped handler collected! ({Name})", container.Handler.ScopedHandlerType.Name);
-            updater.AddHandler(container.Handler);
+            updater.AddScopedUpdateHandler(container.Handler);
         }
 
         return updater;
@@ -311,7 +311,7 @@ public static class UpdaterExtensions
     /// Use this to quickly add a message handler that responds /start command.
     /// </summary>
     /// <remarks>
-    /// If you need a more advanced handler use <see cref="IUpdater.AddHandler(IScopedUpdateHandlerContainer, HandlingOptions?)"/>
+    /// If you need a more advanced handler use <see cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions?)"/>
     /// or <see cref="IUpdater.AddSingletonUpdateHandler(ISingletonUpdateHandler, HandlingOptions?)"/>
     /// </remarks>
     /// <returns></returns>

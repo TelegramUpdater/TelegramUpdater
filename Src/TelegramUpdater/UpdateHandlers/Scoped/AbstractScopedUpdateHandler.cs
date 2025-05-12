@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using TelegramUpdater.RainbowUtilities;
 using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateHandlers.Scoped;
@@ -15,7 +14,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped;
 /// <typeparam name="TContainer">Type of the container.</typeparam>
 /// <exception cref="ArgumentNullException"></exception>
 public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?>? getT)
-    : AbstractHandlerProvider<T>, IScopedUpdateHandler
+    : AbstractHandlerProvider<T>, IScopedUpdateHandler, IUpdateHandler<T>
     where T : class
     where TContainer : IContainer<T>
 {
@@ -121,4 +120,7 @@ public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?
 
     /// <inheritdoc/>
     public virtual bool Endpoint { get; protected set; } = true;
+
+    /// <inheritdoc/>
+    public IContainer RawContainer => Container;
 }

@@ -62,7 +62,7 @@ public class UpdaterServiceBuilder
         return this;
     }
 
-    /// <inheritdoc cref="IUpdater.AddHandler(IScopedUpdateHandlerContainer, HandlingOptions?)"/>
+    /// <inheritdoc cref="IUpdater.AddScopedUpdateHandler(IScopedUpdateHandlerContainer, HandlingOptions?)"/>
     public UpdaterServiceBuilder AddScopedUpdateHandler(
         IScopedUpdateHandlerContainer scopedHandlerContainer, HandlingOptions? options)
     {
@@ -76,7 +76,7 @@ public class UpdaterServiceBuilder
 #endif
 
         scopedHandlerTypes.Add(scopedHandlerContainer.ScopedHandlerType);
-        return Execute(updater => updater.AddHandler(scopedHandlerContainer, options));
+        return Execute(updater => updater.AddScopedUpdateHandler(scopedHandlerContainer, options));
     }
 
     /// <inheritdoc cref="ScopedUpdateHandlersExtensions.AddScopedUpdateHandler{THandler, TUpdate, TContainer}(IUpdater, UpdateType, Filter{UpdaterFilterInputs{TUpdate}}?, Func{Update, TUpdate?}?, HandlingOptions?)"/>

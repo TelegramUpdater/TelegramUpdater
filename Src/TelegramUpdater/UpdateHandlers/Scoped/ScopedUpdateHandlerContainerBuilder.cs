@@ -25,7 +25,7 @@ public sealed class ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
     IFilter<UpdaterFilterInputs<TUpdate>>? filter = default,
     Func<Update, TUpdate?>? getT = default)
     : AbstractScopedUpdateHandlerContainer<THandler, TUpdate>(updateType, filter)
-    where THandler : IScopedUpdateHandler
+    where THandler : IScopedUpdateHandler, IUpdateHandler<TUpdate>
     where TUpdate : class
 {
     private readonly Func<Update, TUpdate?>? _getT = getT;

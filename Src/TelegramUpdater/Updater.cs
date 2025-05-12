@@ -3,11 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Net;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using Telegram.Bot.Args;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.Helpers;
 using TelegramUpdater.RainbowUtilities;
@@ -18,8 +13,72 @@ using TelegramUpdater.UpdateHandlers.Singleton;
 namespace TelegramUpdater;
 
 /// <summary>
-/// Fetch updates from telegram and handle them.
+/// <para>
+/// <b>Updater</b> is the main class responsible for fetching updates from Telegram and handling them using registered handlers.
+/// </para>
+/// <para>
+/// It manages update queuing, parallelism, handler invocation, exception handling, and provides integration with dependency injection (DI) for scoped handlers.
+/// </para>
+/// <para>
+/// <b>Key Features:</b>
+/// <list type="bullet">
+/// <item>Queues updates and processes them in parallel, ensuring per-user sequential handling when possible.</item>
+/// <item>Supports both singleton and scoped update handlers.</item>
+/// <item>Allows custom filtering and exception handling for updates.</item>
+/// <item>Integrates with DI for scoped handlers and pre-update processors.</item>
+/// <item>Provides memory cache for storing state or data between updates.</item>
+/// </list>
+/// </para>
 /// </summary>
+/// <example>
+/// <code>
+/// // Minimal usage in a console app
+/// using TelegramUpdater;
+/// using TelegramUpdater.UpdateContainer;
+/// using TelegramUpdater.UpdateContainer.UpdateContainers;
+///
+/// var updater = new Updater("YOUR_BOT_TOKEN")
+///     .AddDefaultExceptionHandler()
+///     .QuickStartCommandReply("Hello there!");
+///
+/// await updater.Start();
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// // Registering a custom singleton handler
+/// updater.AddSingletonUpdateHandler(new MyMessageHandler());
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// // Using DI and scoped handlers in a worker service
+/// var builder = Host.CreateApplicationBuilder(args);
+/// builder.AddTelegramUpdater(
+///     (builder) => builder
+///         .CollectHandlers()
+///         .AddDefaultExceptionHandler());
+/// var host = builder.Build();
+/// await host.RunAsync();
+/// </code>
+/// </example>
+/// <remarks>
+/// <para>
+/// <b>Handler Registration:</b>
+/// <list type="number">
+/// <item>Use <see cref="AddSingletonUpdateHandler"/> for singleton handlers.</item>
+/// <item>Use <see cref="AddScopedUpdateHandler"/> for scoped handlers (with DI support).</item>
+/// </list>
+/// </para>
+/// <para>
+/// <b>Exception Handling:</b>
+/// Register custom exception handlers using <see cref="AddExceptionHandler"/>.
+/// </para>
+/// <para>
+/// <b>Memory Cache:</b>
+/// Use <see cref="MemoryCache"/> or indexer <c>this[string key]</c> to store and retrieve data.
+/// </para>
+/// </remarks>
 public sealed partial class Updater : IUpdater
 {
     private readonly ITelegramBotClient _botClient;
@@ -70,25 +129,18 @@ public sealed partial class Updater : IUpdater
     /// <see cref="Update"/> 
     /// ( as queue keys ), you can pass your own. <b>Use with care!</b>
     /// </param>
-    /// <param name="outgoingRateControl">
-    /// <b>[BETA]</b> - Applies a wait if you cross the telegram limits border.
-    /// <c>"Too Many Requests: retry after xxx"</c> Error.
-    /// </param>
     public Updater(
         ITelegramBotClient botClient,
         UpdaterOptions? updaterOptions = default,
         IServiceScopeFactory? scopeFactory = default,
         Type? preUpdateProcessorType = default,
-        Func<Update, long>? customKeyResolver = default,
-        bool outgoingRateControl = false)
+        Func<Update, long>? customKeyResolver = default)
     {
         _botClient = botClient ??
             throw new ArgumentNullException(nameof(botClient));
         _memoryCache = new MemoryCache(new MemoryCacheOptions());
 
-        if (outgoingRateControl)
-            _botClient.OnApiResponseReceived += OnApiResponseReceived;
-        _updaterOptions = updaterOptions?? new UpdaterOptions();
+        _updaterOptions = updaterOptions ?? new UpdaterOptions();
         _preUpdateProcessorType = preUpdateProcessorType;
 
         if (_preUpdateProcessorType is not null)
@@ -142,49 +194,6 @@ public sealed partial class Updater : IUpdater
         _logger.LogInformation("Logger initialized.");
     }
 
-    private async ValueTask OnApiResponseReceived(
-        ITelegramBotClient botClient,
-        ApiResponseEventArgs args,
-        CancellationToken cancellationToken = default)
-    {
-        if (args.ResponseMessage.StatusCode == HttpStatusCode.TooManyRequests)
-        {
-#if NET8_0_OR_GREATER
-            var failedApiResponseMessage = await args.ResponseMessage.Content
-                .ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-#else
-            var failedApiResponseMessage = await args.ResponseMessage.Content
-                .ReadAsStreamAsync().ConfigureAwait(false);
-#endif
-            var jsonObject = await JsonDocument.ParseAsync(
-                failedApiResponseMessage, cancellationToken: cancellationToken).ConfigureAwait(false);
-
-            var description = jsonObject.RootElement.GetProperty("description")
-                .GetString();
-
-            if (description is null) return;
-
-#if NET8_0_OR_GREATER
-            var regex = ToManyRequestsRegex();
-#else
-            var regex = new Regex(
-                "^Too Many Requests: retry after (?<tryAfter>[0-9]*)$",
-                RegexOptions.None,
-                TimeSpan.FromSeconds(5));
-#endif
-            Match match = regex.Match(description);
-            if (match.Success)
-            {
-                var tryAfterSeconds = int.Parse(
-                    match.Groups["tryAfter"].Value, CultureInfo.InvariantCulture);
-
-                Logger.LogWarning("A wait of {seconds} is required! caused by {method}",
-                    tryAfterSeconds, args.ApiRequestEventArgs.Request.MethodName);
-                await Task.Delay(tryAfterSeconds * 1000, cancellationToken).ConfigureAwait(false);
-            }
-        }
-    }
-
     /// <summary>
     /// Creates an instance of updater to fetch updates from
     /// telegram and handle them.
@@ -205,22 +214,17 @@ public sealed partial class Updater : IUpdater
     /// from <see cref="Update"/> 
     /// ( as queue keys ), you can pass your own. <b>Use with care!</b>
     /// </param>
-    /// <param name="outgoingRateControl">
-    /// <b>[BETA]</b> - Applies a wait if you cross the telegram limits border.
-    /// <c>"Too Many Requests: retry after xxx"</c> Error.
-    /// </param>
     public Updater(
         UpdaterOptions? updaterOptions = default,
         Type? preUpdateProcessorType = default,
-        Func<Update, long>? customKeyResolver = default,
-        bool outgoingRateControl = default): this(
+        Func<Update, long>? customKeyResolver = default)
+        : this(
             botClient: new TelegramBotClient(
-                updaterOptions?.BotToken?? throw new ArgumentNullException(
+                updaterOptions?.BotToken ?? throw new ArgumentNullException(
                     nameof(updaterOptions), "Bot token in updater options is null.")),
             updaterOptions: updaterOptions,
             preUpdateProcessorType: preUpdateProcessorType,
-            customKeyResolver: customKeyResolver,
-            outgoingRateControl: outgoingRateControl)
+            customKeyResolver: customKeyResolver)
     { }
 
     /// <summary>
@@ -244,21 +248,15 @@ public sealed partial class Updater : IUpdater
     /// from <see cref="Update"/> 
     /// ( as queue keys ), you can pass your own. <b>Use with care!</b>
     /// </param>
-    /// <param name="outgoingRateControl">
-    /// <b>[BETA]</b> - Applies a wait if you cross the telegram limits border.
-    /// <c>"Too Many Requests: retry after xxx"</c> Error.
-    /// </param>
     public Updater(
         string botToken,
         UpdaterOptions? updaterOptions = default,
         Type? preUpdateProcessorType = default,
-        Func<Update, long>? customKeyResolver = default,
-        bool outgoingRateControl = default): this(
+        Func<Update, long>? customKeyResolver = default) : this(
             updaterOptions: UpdaterExtensions.RedesignOptions(
                 updaterOptions: updaterOptions, newBotToken: botToken),
             preUpdateProcessorType: preUpdateProcessorType,
-            customKeyResolver: customKeyResolver,
-            outgoingRateControl: outgoingRateControl)
+            customKeyResolver: customKeyResolver)
     { }
 
     /// <inheritdoc/>
@@ -312,7 +310,7 @@ public sealed partial class Updater : IUpdater
     }
 
     /// <inheritdoc/>
-    public Updater AddHandler(
+    public Updater AddScopedUpdateHandler(
         IScopedUpdateHandlerContainer scopedHandlerContainer,
         HandlingOptions? options = default)
     {
@@ -727,10 +725,5 @@ public sealed partial class Updater : IUpdater
     /// <inheritdoc/>
     public bool ContainsKey(string key)
         => _memoryCache.TryGetValue(key, out var _);
-
-#if NET8_0_OR_GREATER
-    [GeneratedRegex("^Too Many Requests: retry after (?<tryAfter>[0-9]*)$", RegexOptions.None, matchTimeoutMilliseconds: 5000)]
-    private static partial Regex ToManyRequestsRegex();
-#endif
 }
 

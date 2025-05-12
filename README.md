@@ -196,6 +196,49 @@ updater.Handle(
 
 ```
 
+### Controllers
+
+Controller handlers are scoped handlers where you're not restricted to a single `HandleAsync` method.
+This enables you to reuse filters and injected services for different but related handling logics.
+
+If you want a method to recognize as a controller's action, you need to add the `HandlerAction` attribute to it.
+You can apply filters to the action methods as well as the controller it self to further filter the action methods.
+
+If you need an extra service inside your action method, you need to mark them with
+`[ResolveService]` attribute (Not to mess with big boy's `[FromServices]`). This will resolve the service from DI and inject it into your action method.
+
+You can have access to the `IContainer<T>` inside your actions if needed.
+
+```csharp
+
+[Command("about")]
+internal class About(IFancyOverallService overallService) : MessageControllerHandler
+{
+    [HandlerAction]
+    [ChatType(ChatTypeFlags.Private)]
+    public async Task Private([ResolveService] IFancyService service)
+    {
+        // Do something with your service or overallService.
+        await Response($"This's what you need to know about me: ");
+    }
+
+    [HandlerAction]
+    [ChatType(ChatTypeFlags.Group | ChatTypeFlags.SuperGroup)]
+    public async Task Group(IContainer<Message> container)
+    {
+        // Do something with your overallService.
+        await container.Response(
+            "Theses are private talks!",
+            replyMarkup: new InlineKeyboardMarkup(aboutButton));
+    }
+}
+
+```
+
+> [!TIP]
+> There are other attributes like `[ExtraData]`, `[CommandArg]` or `[RegexMatchingGroup]` that can be used
+> on actions parameter to have access to extra data based on filters (See PlayGround About, Update or InsertSeen handlers).
+
 > [!NOTE]
 > Typically Methods like `updater.Handle(...)` refers to a singleton handler
 > and `updater.AddHandler(...)` or  `updater.Add...Handler` refer to an scoped handler.

@@ -36,8 +36,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Webhook", "Examples\Webhook
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{9E1BA049-7D90-4825-8616-446556C2C87E}"
 	ProjectSection(SolutionItems) = preProject
+		docs\filters.md = docs\filters.md
 		docs\getting-started.md = docs\getting-started.md
 		docs\introduction.md = docs\introduction.md
+		docs\toc.yml = docs\toc.yml
 		docs\update-handlers.md = docs\update-handlers.md
 	EndProjectSection
 EndProject
