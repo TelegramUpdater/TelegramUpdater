@@ -13,8 +13,72 @@ using TelegramUpdater.UpdateHandlers.Singleton;
 namespace TelegramUpdater;
 
 /// <summary>
-/// Fetch updates from telegram and handle them.
+/// <para>
+/// <b>Updater</b> is the main class responsible for fetching updates from Telegram and handling them using registered handlers.
+/// </para>
+/// <para>
+/// It manages update queuing, parallelism, handler invocation, exception handling, and provides integration with dependency injection (DI) for scoped handlers.
+/// </para>
+/// <para>
+/// <b>Key Features:</b>
+/// <list type="bullet">
+/// <item>Queues updates and processes them in parallel, ensuring per-user sequential handling when possible.</item>
+/// <item>Supports both singleton and scoped update handlers.</item>
+/// <item>Allows custom filtering and exception handling for updates.</item>
+/// <item>Integrates with DI for scoped handlers and pre-update processors.</item>
+/// <item>Provides memory cache for storing state or data between updates.</item>
+/// </list>
+/// </para>
 /// </summary>
+/// <example>
+/// <code>
+/// // Minimal usage in a console app
+/// using TelegramUpdater;
+/// using TelegramUpdater.UpdateContainer;
+/// using TelegramUpdater.UpdateContainer.UpdateContainers;
+///
+/// var updater = new Updater("YOUR_BOT_TOKEN")
+///     .AddDefaultExceptionHandler()
+///     .QuickStartCommandReply("Hello there!");
+///
+/// await updater.Start();
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// // Registering a custom singleton handler
+/// updater.AddSingletonUpdateHandler(new MyMessageHandler());
+/// </code>
+/// </example>
+/// <example>
+/// <code>
+/// // Using DI and scoped handlers in a worker service
+/// var builder = Host.CreateApplicationBuilder(args);
+/// builder.AddTelegramUpdater(
+///     (builder) => builder
+///         .CollectHandlers()
+///         .AddDefaultExceptionHandler());
+/// var host = builder.Build();
+/// await host.RunAsync();
+/// </code>
+/// </example>
+/// <remarks>
+/// <para>
+/// <b>Handler Registration:</b>
+/// <list type="number">
+/// <item>Use <see cref="AddSingletonUpdateHandler"/> for singleton handlers.</item>
+/// <item>Use <see cref="AddScopedUpdateHandler"/> for scoped handlers (with DI support).</item>
+/// </list>
+/// </para>
+/// <para>
+/// <b>Exception Handling:</b>
+/// Register custom exception handlers using <see cref="AddExceptionHandler"/>.
+/// </para>
+/// <para>
+/// <b>Memory Cache:</b>
+/// Use <see cref="MemoryCache"/> or indexer <c>this[string key]</c> to store and retrieve data.
+/// </para>
+/// </remarks>
 public sealed partial class Updater : IUpdater
 {
     private readonly ITelegramBotClient _botClient;
@@ -246,7 +310,7 @@ public sealed partial class Updater : IUpdater
     }
 
     /// <inheritdoc/>
-    public Updater AddHandler(
+    public Updater AddScopedUpdateHandler(
         IScopedUpdateHandlerContainer scopedHandlerContainer,
         HandlingOptions? options = default)
     {
@@ -661,10 +725,5 @@ public sealed partial class Updater : IUpdater
     /// <inheritdoc/>
     public bool ContainsKey(string key)
         => _memoryCache.TryGetValue(key, out var _);
-
-#if NET8_0_OR_GREATER
-    [GeneratedRegex("^Too Many Requests: retry after (?<tryAfter>[0-9]*)$", RegexOptions.None, matchTimeoutMilliseconds: 5000)]
-    private static partial Regex ToManyRequestsRegex();
-#endif
 }
 

@@ -71,20 +71,82 @@ public interface IUpdater
     Updater AddExceptionHandler(IExceptionHandler exceptionHandler);
 
     /// <summary>
-    /// Adds an scoped handler to the updater.
+    /// Registers a scoped update handler with the updater. Scoped handlers are instantiated per update and can use dependency injection.
     /// </summary>
-    /// <param name="scopedHandlerContainer">
-    /// Use <see cref="ScopedUpdateHandlerContainerBuilder{THandler, TUpdate}"/>
-    /// To Create a new <see cref="IScopedUpdateHandlerContainer"/>
+    /// <param name="updateHandler">
+    /// The container describing the scoped handler. Use <see cref="ScopedUpdateHandlerContainerBuilder{THandler, TUpdate}"/> or extension methods like <see cref="ScopedUpdateHandlersExtensions.AddHandler"/> to create it.
     /// </param>
-    /// <param name="options">Information about how a handler should be handled.</param>
-    Updater AddHandler(IScopedUpdateHandlerContainer scopedHandlerContainer, HandlingOptions? options = default);
+    /// <param name="options">
+    /// Optional handling options such as group or layer. Controls handler priority and propagation.
+    /// </param>
+    /// <returns>The <see cref="Updater"/> instance for chaining.</returns>
+    /// <example>
+    /// <code>
+    /// // Register a scoped handler using the extension method (recommended)
+    /// updater.AddHandler&lt;MyMessageHandler&gt;(
+    ///     UpdateType.Message,
+    ///     filter: ReadyFilters.OnCommand("hello"),
+    ///     options: new HandlingOptions(group: 1));
+    /// </code>
+    /// <code>
+    /// // Register a scoped handler manually
+    /// var container = new ScopedUpdateHandlerContainerBuilder&lt;MyMessageHandler, Message&gt;(
+    ///     UpdateType.Message,
+    ///     filter: ReadyFilters.OnCommand("hello"));
+    /// updater.AddScopedUpdateHandler(container);
+    /// </code>
+    /// </example>
+    /// <remarks>
+    /// <para>
+    /// Prefer using the <c>AddHandler</c> extension methods for most scenarios:
+    /// </para>
+    /// <code>
+    /// updater.AddHandler&lt;MyHandler&gt;(UpdateType.Message, filter: ReadyFilters.PM());
+    /// </code>
+    /// <para>
+    /// This enables DI and filter support for your handler class.
+    /// </para>
+    /// </remarks>
+    Updater AddScopedUpdateHandler(IScopedUpdateHandlerContainer updateHandler, HandlingOptions? options = default);
 
     /// <summary>
-    /// Add your handler to this updater.
+    /// Registers a singleton update handler with the updater. Singleton handlers are instantiated once and reused for all updates.
     /// </summary>
-    /// <param name="updateHandler"></param>
-    /// <param name="options">Information about how a handler should be handled.</param>
+    /// <param name="updateHandler">
+    /// The singleton handler instance implementing <see cref="ISingletonUpdateHandler"/>. You can use ready-to-use handlers or implement your own.
+    /// </param>
+    /// <param name="options">
+    /// Optional handling options such as group or layer. Controls handler priority and propagation.
+    /// </param>
+    /// <returns>The <see cref="Updater"/> instance for chaining.</returns>
+    /// <example>
+    /// <code>
+    /// // Register a custom singleton handler instance
+    /// updater.AddSingletonUpdateHandler(new MyMessageHandler());
+    /// </code>
+    /// <code>
+    /// // Register a ready-to-use handler with a filter
+    /// updater.AddSingletonUpdateHandler(
+    ///     new DefaultHandler&lt;Message&gt;(
+    ///         updateType: UpdateType.Message,
+    ///         callback: async container =&gt; await container.Response("Hello!"),
+    ///         filter: ReadyFilters.OnCommand("hello")));
+    /// </code>
+    /// </example>
+    /// <remarks>
+    /// <para>
+    /// Singleton handlers are best for stateless or lightweight logic. For handlers that require dependency injection or per-update state, use scoped handlers via <see cref="AddHandler"/> or <see cref="AddScopedUpdateHandler"/>.
+    /// </para>
+    /// <para>
+    /// You can also use extension methods like <c>Handle</c> for minimal singleton handler registration:
+    /// </para>
+    /// <code>
+    /// updater.Handle(
+    ///     UpdateType.Message,
+    ///     async (MessageContainer container) =&gt; await container.Response("Hi!"),
+    ///     ReadyFilters.OnCommand("hi"));
+    /// </code>
+    /// </remarks>
     Updater AddSingletonUpdateHandler(ISingletonUpdateHandler updateHandler, HandlingOptions? options = default);
 
     /// <summary>

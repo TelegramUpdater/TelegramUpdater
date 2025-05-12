@@ -58,7 +58,7 @@ public static class ScopedUpdateHandlersExtensions
 
         if (container != null)
         {
-            return updater.AddHandler(container, options);
+            return updater.AddScopedUpdateHandler(container, options);
         }
 
         updater.Logger.LogWarning(
@@ -95,7 +95,7 @@ public static class ScopedUpdateHandlersExtensions
     {
         var _h = typeof(THandler);
 
-        return updater.AddHandler(
+        return updater.AddScopedUpdateHandler(
             new ScopedUpdateHandlerContainerBuilder<THandler, TUpdate>(
                 updateType, filter, getT), options);
     }
