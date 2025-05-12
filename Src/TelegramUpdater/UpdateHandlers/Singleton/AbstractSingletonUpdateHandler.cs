@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Telegram.Bot.Types;
 using TelegramUpdater.UpdateContainer;
 
 namespace TelegramUpdater.UpdateHandlers.Singleton;
@@ -131,11 +130,19 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
         IServiceScope? scope,
         CancellationToken cancellationToken)
     {
-        return HandleAsync(ContainerBuilder(input), scope, cancellationToken);
+        var container = ContainerBuilder(input);
+        Container = container;
+        return HandleAsync(container, scope, cancellationToken);
     }
 
     internal abstract TContainer ContainerBuilder(HandlerInput input);
 
     /// <inheritdoc/>
     public virtual bool Endpoint { get; protected set; }
+
+    /// <inheritdoc/>
+    public IContainer<T> Container { get; private set; } = default!;
+
+    /// <inheritdoc/>
+    public IContainer RawContainer => Container;
 }
