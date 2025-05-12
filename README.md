@@ -1,6 +1,11 @@
 # TelegramUpdater (Preview)
 
-TelegramUpdater is feature-rich framework library for building telegram bots in c#.
+[![Nuget Version](https://img.shields.io/nuget/v/TelegramUpdater?logo=#00485B)](https://www.nuget.org/packages/TelegramUpdater/)
+[![Nuget Downloads](https://img.shields.io/nuget/dt/TelegramUpdater)](https://www.nuget.org/packages/TelegramUpdater/)
+[![Docs](https://img.shields.io/badge/Docs-Docfx-purple)](https://telegramupdater.github.io/TelegramUpdater)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/TelegramUpdater/TelegramUpdater)
+
+TelegramUpdater is feature-rich super customizable framework library for building telegram bots in c#.
 
 ## Features
 
