@@ -3,11 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Net;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using Telegram.Bot.Args;
 using TelegramUpdater.ExceptionHandlers;
 using TelegramUpdater.Helpers;
 using TelegramUpdater.RainbowUtilities;
@@ -70,25 +65,18 @@ public sealed partial class Updater : IUpdater
     /// <see cref="Update"/> 
     /// ( as queue keys ), you can pass your own. <b>Use with care!</b>
     /// </param>
-    /// <param name="outgoingRateControl">
-    /// <b>[BETA]</b> - Applies a wait if you cross the telegram limits border.
-    /// <c>"Too Many Requests: retry after xxx"</c> Error.
-    /// </param>
     public Updater(
         ITelegramBotClient botClient,
         UpdaterOptions? updaterOptions = default,
         IServiceScopeFactory? scopeFactory = default,
         Type? preUpdateProcessorType = default,
-        Func<Update, long>? customKeyResolver = default,
-        bool outgoingRateControl = false)
+        Func<Update, long>? customKeyResolver = default)
     {
         _botClient = botClient ??
             throw new ArgumentNullException(nameof(botClient));
         _memoryCache = new MemoryCache(new MemoryCacheOptions());
 
-        if (outgoingRateControl)
-            _botClient.OnApiResponseReceived += OnApiResponseReceived;
-        _updaterOptions = updaterOptions?? new UpdaterOptions();
+        _updaterOptions = updaterOptions ?? new UpdaterOptions();
         _preUpdateProcessorType = preUpdateProcessorType;
 
         if (_preUpdateProcessorType is not null)
@@ -142,49 +130,6 @@ public sealed partial class Updater : IUpdater
         _logger.LogInformation("Logger initialized.");
     }
 
-    private async ValueTask OnApiResponseReceived(
-        ITelegramBotClient botClient,
-        ApiResponseEventArgs args,
-        CancellationToken cancellationToken = default)
-    {
-        if (args.ResponseMessage.StatusCode == HttpStatusCode.TooManyRequests)
-        {
-#if NET8_0_OR_GREATER
-            var failedApiResponseMessage = await args.ResponseMessage.Content
-                .ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-#else
-            var failedApiResponseMessage = await args.ResponseMessage.Content
-                .ReadAsStreamAsync().ConfigureAwait(false);
-#endif
-            var jsonObject = await JsonDocument.ParseAsync(
-                failedApiResponseMessage, cancellationToken: cancellationToken).ConfigureAwait(false);
-
-            var description = jsonObject.RootElement.GetProperty("description")
-                .GetString();
-
-            if (description is null) return;
-
-#if NET8_0_OR_GREATER
-            var regex = ToManyRequestsRegex();
-#else
-            var regex = new Regex(
-                "^Too Many Requests: retry after (?<tryAfter>[0-9]*)$",
-                RegexOptions.None,
-                TimeSpan.FromSeconds(5));
-#endif
-            Match match = regex.Match(description);
-            if (match.Success)
-            {
-                var tryAfterSeconds = int.Parse(
-                    match.Groups["tryAfter"].Value, CultureInfo.InvariantCulture);
-
-                Logger.LogWarning("A wait of {seconds} is required! caused by {method}",
-                    tryAfterSeconds, args.ApiRequestEventArgs.Request.MethodName);
-                await Task.Delay(tryAfterSeconds * 1000, cancellationToken).ConfigureAwait(false);
-            }
-        }
-    }
-
     /// <summary>
     /// Creates an instance of updater to fetch updates from
     /// telegram and handle them.
@@ -205,22 +150,17 @@ public sealed partial class Updater : IUpdater
     /// from <see cref="Update"/> 
     /// ( as queue keys ), you can pass your own. <b>Use with care!</b>
     /// </param>
-    /// <param name="outgoingRateControl">
-    /// <b>[BETA]</b> - Applies a wait if you cross the telegram limits border.
-    /// <c>"Too Many Requests: retry after xxx"</c> Error.
-    /// </param>
     public Updater(
         UpdaterOptions? updaterOptions = default,
         Type? preUpdateProcessorType = default,
-        Func<Update, long>? customKeyResolver = default,
-        bool outgoingRateControl = default): this(
+        Func<Update, long>? customKeyResolver = default)
+        : this(
             botClient: new TelegramBotClient(
-                updaterOptions?.BotToken?? throw new ArgumentNullException(
+                updaterOptions?.BotToken ?? throw new ArgumentNullException(
                     nameof(updaterOptions), "Bot token in updater options is null.")),
             updaterOptions: updaterOptions,
             preUpdateProcessorType: preUpdateProcessorType,
-            customKeyResolver: customKeyResolver,
-            outgoingRateControl: outgoingRateControl)
+            customKeyResolver: customKeyResolver)
     { }
 
     /// <summary>
@@ -244,21 +184,15 @@ public sealed partial class Updater : IUpdater
     /// from <see cref="Update"/> 
     /// ( as queue keys ), you can pass your own. <b>Use with care!</b>
     /// </param>
-    /// <param name="outgoingRateControl">
-    /// <b>[BETA]</b> - Applies a wait if you cross the telegram limits border.
-    /// <c>"Too Many Requests: retry after xxx"</c> Error.
-    /// </param>
     public Updater(
         string botToken,
         UpdaterOptions? updaterOptions = default,
         Type? preUpdateProcessorType = default,
-        Func<Update, long>? customKeyResolver = default,
-        bool outgoingRateControl = default): this(
+        Func<Update, long>? customKeyResolver = default) : this(
             updaterOptions: UpdaterExtensions.RedesignOptions(
                 updaterOptions: updaterOptions, newBotToken: botToken),
             preUpdateProcessorType: preUpdateProcessorType,
-            customKeyResolver: customKeyResolver,
-            outgoingRateControl: outgoingRateControl)
+            customKeyResolver: customKeyResolver)
     { }
 
     /// <inheritdoc/>
