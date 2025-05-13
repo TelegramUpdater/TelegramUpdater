@@ -113,33 +113,6 @@ public static class ChannelsExtensions
             cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
-
-    /// <summary>
-    /// Opens a channel that dispatches a <see cref="Message"/>
-    /// of this user from updater.
-    /// </summary>
-    /// <param name="updateContainer">The update container</param>
-    /// <param name="timeOut">Maximum allowed time to wait for the update.
-    /// </param>
-    /// <param name="filter">Filter updates to get the right one.</param>
-    /// <param name="onUnrelatedUpdate">
-    /// A callback function to be called if an unrelated update from comes.
-    /// </param>
-    /// <param name="cancellationToken">To cancel the job.</param>
-    [Obsolete("Use ChannelMessageAsync.")]
-    public static async Task<IContainer<Message>?> ChannelUserResponse(
-        this IContainer<Message> updateContainer,
-        TimeSpan timeOut,
-        Func<
-            IUpdater,
-            ShiningInfo<long, Update>, Task>? onUnrelatedUpdate = default,
-        Filter<UpdaterFilterInputs<Message>>? filter = default,
-        CancellationToken cancellationToken = default)
-    {
-        return await updateContainer.ChannelMessage(
-            filter, timeOut, onUnrelatedUpdate, cancellationToken).ConfigureAwait(false);
-    }
-
     /// <summary>
     /// Waits for the user to click on an inline button.
     /// </summary>
