@@ -9,7 +9,7 @@
 /// </remarks>
 /// <param name="timeOut">Timeout to wait for channel.</param>
 /// <param name="filter">Filter suitable update to channel within <paramref name="timeOut"/>.</param>
-public sealed class EditedChannelPostChannel(TimeSpan timeOut, IFilter<UpdaterFilterInputs<Message>>? filter)
+public class EditedChannelPostChannel(TimeSpan timeOut, IFilter<UpdaterFilterInputs<Message>>? filter)
     : DefaultChannel<Message>(UpdateType.EditedChannelPost, timeOut, x => x.EditedChannelPost, filter)
 {
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using TelegramUpdater.Filters.Extensions;
 using TelegramUpdater.UpdateContainer;
 using TelegramUpdater.UpdateHandlers.Controller.Attributes;
 using TelegramUpdater.UpdateHandlers.Scoped;
@@ -49,14 +50,7 @@ public abstract class AbstractControllerUpdateHandler<T, TContainer>(Func<Update
             // Check if the method has any filters and evaluate them
             var filters = method.GetFilterAttributes<UpdaterFilterInputs<T>>();
 
-            if (filters is not null && !filters.TheyShellPass(
-                new UpdaterFilterInputs<T>(
-                    container.Updater,
-                    container.Update,
-                    container.Input.ScopeId,
-                    container.Input.LayerInfo,
-                    container.Input.Group,
-                    container.Input.Index)))
+            if (filters is not null && !filters.TheyShellPass(container.GetFilterInputs()))
             {
                 continue; // Skip this method if any filter fails
             }

@@ -8,7 +8,7 @@
 /// <param name="getT">Optionally resolve inner update.</param>
 /// <param name="timeOut">Time out that channel should wait for update.</param>
 /// <param name="filter">Filter the incoming <typeparamref name="T"/>.</param>
-public abstract class DefaultChannel<T>(
+public class DefaultChannel<T>(
     UpdateType updateType, TimeSpan timeOut, Func<Update, T?>? getT = default, IFilter<UpdaterFilterInputs<T>>? filter = default)
     : AbstractUpdateChannel<T>(
         updateType: updateType,

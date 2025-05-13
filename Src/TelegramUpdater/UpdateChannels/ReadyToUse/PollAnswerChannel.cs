@@ -9,7 +9,7 @@
 /// </remarks>
 /// <param name="timeOut">Timeout to wait for channel.</param>
 /// <param name="filter">Filter suitable update to channel within <paramref name="timeOut"/>.</param>
-public sealed class PollAnswerChannel(TimeSpan timeOut, IFilter<UpdaterFilterInputs<PollAnswer>>? filter)
+public class PollAnswerChannel(TimeSpan timeOut, IFilter<UpdaterFilterInputs<PollAnswer>>? filter)
     : DefaultChannel<PollAnswer>(UpdateType.PollAnswer, timeOut, x => x.PollAnswer, filter)
 {
 }

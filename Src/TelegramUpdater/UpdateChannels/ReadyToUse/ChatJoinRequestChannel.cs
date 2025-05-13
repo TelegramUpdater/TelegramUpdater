@@ -9,7 +9,7 @@
 /// </remarks>
 /// <param name="timeOut">Timeout to wait for channel.</param>
 /// <param name="filter">Filter suitable update to channel within <paramref name="timeOut"/>.</param>
-public sealed class ChatJoinRequestChannel(TimeSpan timeOut, IFilter<UpdaterFilterInputs<ChatJoinRequest>>? filter)
+public class ChatJoinRequestChannel(TimeSpan timeOut, IFilter<UpdaterFilterInputs<ChatJoinRequest>>? filter)
     : DefaultChannel<ChatJoinRequest>(UpdateType.ChatJoinRequest, timeOut, x => x.ChatJoinRequest, filter)
 {
 }
