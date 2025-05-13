@@ -35,5 +35,5 @@ public interface IUpdateHandler<T>: IUpdateHandler where T: class
     /// <summary>
     /// The container available inside the handler.
     /// </summary>
-    IContainer<T> Container { get; }
+    IContainer<T> TypedRawContainer { get; }
 }

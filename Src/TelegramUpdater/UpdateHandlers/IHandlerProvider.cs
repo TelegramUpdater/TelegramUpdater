@@ -8,10 +8,12 @@ namespace TelegramUpdater.UpdateHandlers;
 /// <typeparam name="TUpdate">
 /// The type of inner actual update. One of <see cref="Update"/> properties.
 /// </typeparam>
-public interface IHandlerProvider<TUpdate> where TUpdate: class
+/// <typeparam name="TContainer"></typeparam>
+public interface IHandlerProvider<TUpdate, TContainer>
+    where TUpdate: class where TContainer : IContainer<TUpdate>
 {
     /// <summary>
     /// The container.
     /// </summary>
-    public IContainer<TUpdate> Container { get; }
+    public TContainer Container { get; }
 }

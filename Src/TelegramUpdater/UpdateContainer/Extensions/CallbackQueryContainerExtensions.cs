@@ -83,7 +83,7 @@ public static class CallbackQueryContainerExtensions
         bool allowSendingWithoutReply = true,
         CancellationToken cancellationToken = default)
     {
-        return await simpleContext(
+        return await simpleContext.BotClient.SendMessage(
             chatId: simpleContext.Update.From.Id,
             text: text,
             parseMode: parseMode,

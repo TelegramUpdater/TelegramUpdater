@@ -14,7 +14,7 @@ namespace TelegramUpdater.UpdateHandlers.Scoped;
 /// <typeparam name="TContainer">Type of the container.</typeparam>
 /// <exception cref="ArgumentNullException"></exception>
 public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?>? getT)
-    : AbstractHandlerProvider<T>, IScopedUpdateHandler, IUpdateHandler<T>
+    : AbstractHandlerProvider<T, TContainer>, IScopedUpdateHandler, IUpdateHandler<T>
     where T : class
     where TContainer : IContainer<T>
 {
@@ -116,11 +116,14 @@ public abstract class AbstractScopedUpdateHandler<T, TContainer>(Func<Update, T?
     }
 
     /// <inheritdoc/>
-    public override IContainer<T> Container { get; protected set; } = default!;
+    public override TContainer Container { get; protected set; } = default!;
 
     /// <inheritdoc/>
     public virtual bool Endpoint { get; protected set; } = true;
 
     /// <inheritdoc/>
     public IContainer RawContainer => Container;
+
+    /// <inheritdoc/>
+    public IContainer<T> TypedRawContainer => Container;
 }
