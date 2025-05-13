@@ -1,6 +1,8 @@
 ﻿using TelegramUpdater.Helpers;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Telegram.Bot.Types.ReplyMarkups;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 /// <summary>
 /// Extension methods for telegram bot keyboards.

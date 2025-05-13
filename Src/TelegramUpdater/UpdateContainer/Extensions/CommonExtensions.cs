@@ -2,7 +2,9 @@
 using TelegramUpdater.RainbowUtilities;
 using TelegramUpdater.UpdateContainer.UpdateContainers;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace TelegramUpdater.UpdateContainer;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 /// <summary>
 /// A set of common extension.
@@ -11,7 +13,7 @@ public static class CommonExtensions
 {
     internal static RawContainer RebaseAsRaw<T>(
         this IContainer<T> container, ShiningInfo<long, Update> shiningInfo) where T : class
-        => new(new(container.Updater, shiningInfo, default, default, default, default));
+        => new(new(container.Updater, shiningInfo, default, default!, default, default));
 
     internal static async Task<IBaseContainer<T>> WrapAsync<T>(
         this Task<T> t, Expression<Func<Update, T?>> insiderResovler, IUpdater updater) where T : class

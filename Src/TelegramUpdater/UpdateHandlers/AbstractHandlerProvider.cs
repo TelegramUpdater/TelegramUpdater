@@ -138,7 +138,7 @@ public abstract class AbstractHandlerProvider<TUpdate>
     }
 
     #region Channels
-    /// <inheritdoc cref="ChannelsExtensions.OpenChannel{TExp, TCur}(IContainer{TCur}, IGenericUpdateChannel{TExp}, Func{IUpdater, ShiningInfo{long, Update}, Task}?, CancellationToken)"/>
+    /// <inheritdoc cref="ChannelsExtensions.OpenChannel{TUpdate}(IContainer, IGenericUpdateChannel{TUpdate}, Func{IUpdater, ShiningInfo{long, Update}, Task}?, CancellationToken)"/>
     public async ValueTask<IContainer<TExp>?> OpenChannel<TExp>(
         IGenericUpdateChannel<TExp> updateChannel,
         Func<

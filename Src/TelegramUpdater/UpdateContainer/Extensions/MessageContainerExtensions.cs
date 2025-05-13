@@ -2,7 +2,9 @@
 
 using Telegram.Bot.Types.ReplyMarkups;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace TelegramUpdater.UpdateContainer;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 /// <summary>
 /// A set of extension methods for message <see cref="IContainer{T}"/>.

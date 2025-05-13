@@ -3,7 +3,9 @@
 using Telegram.Bot.Types.ReplyMarkups;
 
 // NS not matching the folder structure is intended.
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace TelegramUpdater.UpdateContainer;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 /// <summary>
 /// A set of extension methods for <see cref="CallbackQuery"/> containers.
@@ -19,7 +21,7 @@ public static class CallbackQueryContainerExtensions
         => simpleContext.Update.From;
 
     /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)" />
-    public static async Task<IBaseContainer<Message>> SendMessage(
+    public static async Task<IBaseContainer<Message>> SendChatMessage(
         this IBaseContainer<CallbackQuery> simpleContext,
         string text,
         bool sendAsReply = true,
@@ -61,6 +63,46 @@ public static class CallbackQueryContainerExtensions
         }
 
         throw new InvalidOperationException("Can't send message for inline message calls.");
+    }
+
+    /// <inheritdoc cref="TelegramBotClientExtensions.SendMessage(ITelegramBotClient, ChatId, string, ParseMode, ReplyParameters?, ReplyMarkup?, LinkPreviewOptions?, int?, IEnumerable{MessageEntity}?, bool, bool, string?, string?, bool, CancellationToken)" />
+    public static async Task<IBaseContainer<Message>> SendMessage(
+        this IBaseContainer<CallbackQuery> simpleContext,
+        string text,
+        bool sendAsReply = true,
+        ParseMode parseMode = default,
+        IEnumerable<MessageEntity>? messageEntities = default,
+        bool? disableWebpagePreview = default,
+        int? messageThreadId = default,
+        bool disableNotification = default,
+        ReplyMarkup? replyMarkup = default,
+        bool protectContent = default,
+        string? messageEffectId = default,
+        string? businessConnectionId = default,
+        bool allowPaidBroadcast = default,
+        bool allowSendingWithoutReply = true,
+        CancellationToken cancellationToken = default)
+    {
+        return await simpleContext(
+            chatId: simpleContext.Update.From.Id,
+            text: text,
+            parseMode: parseMode,
+            replyParameters: new ReplyParameters()
+            {
+                AllowSendingWithoutReply = allowSendingWithoutReply,
+                MessageId = sendAsReply ? (simpleContext.Update.Message?.MessageId?? 0) : 0,
+            },
+            replyMarkup: replyMarkup,
+            linkPreviewOptions: disableWebpagePreview,
+            messageThreadId: messageThreadId,
+            entities: messageEntities,
+            disableNotification: disableNotification,
+            protectContent: protectContent,
+            messageEffectId: messageEffectId,
+            businessConnectionId: businessConnectionId,
+            allowPaidBroadcast: allowPaidBroadcast,
+            cancellationToken: cancellationToken)
+        .WrapMessageAsync(simpleContext.Updater).ConfigureAwait(false);
     }
 
     /// <inheritdoc cref="TelegramBotClientExtensions.AnswerCallbackQuery(ITelegramBotClient, string, string?, bool, string?, int?, CancellationToken)"/>
