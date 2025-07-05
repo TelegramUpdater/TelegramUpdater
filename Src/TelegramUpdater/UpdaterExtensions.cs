@@ -397,7 +397,8 @@ public static class UpdaterExtensions
     public static async Task SetCommands(this IUpdater updater)
     {
         var singletonHandlerFilters = updater.SingletonUpdateHandlers
-            .Where(x => x is IGenericSingletonUpdateHandler<Message>)
+            .Where(x => x.Handler is IGenericSingletonUpdateHandler<Message>)
+            .Select(x=> x.Handler)
             .Cast<IGenericSingletonUpdateHandler<Message>>()
             .Where(x => x.Filter is not null)
             .Select(x => x.Filter!.DiscoverNestedFilters())
@@ -406,7 +407,8 @@ public static class UpdaterExtensions
             .Cast<CommandFilter>();
 
         var scopedHandlerFilters = updater.ScopedHandlerContainers
-            .Where(x => x is IGenericScopedUpdateHandlerContainer<Message>)
+            .Where(x => x.Handler is IGenericScopedUpdateHandlerContainer<Message>)
+            .Select(x=> x.Handler)
             .Cast<IGenericScopedUpdateHandlerContainer<Message>>()
             .Where(x => x.Filter is not null)
             .Select(x => x.Filter!.DiscoverNestedFilters())

@@ -1,19 +1,36 @@
-﻿namespace TelegramUpdater.UpdateContainer;
+﻿#pragma warning disable IDE0130 // Namespace does not match folder structure
+namespace TelegramUpdater;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 /// <summary>
-/// Extensions to manage propagation inside handlers.
+/// Handler propagation extensions.
 /// </summary>
 public static class PropagationExtensions
 {
     /// <summary>
-    /// All pending handlers for this update will be ignored after throwing this.
+    /// Returns the value if not null, or throws <see cref="ContinuePropagationException"/>
+    /// to stop handling this handler.
     /// </summary>
-    internal static void StopPropagation<T>(this IContainer<T> _)
-        where T : class => throw new StopPropagationException();
+    /// <typeparam name="T"></typeparam>
+    /// <param name="anything"></param>
+    /// <returns></returns>
+    /// <exception cref="ContinuePropagationException"></exception>
+    public static T ContinueIfNull<T>(this T? anything)
+    {
+        return anything ?? throw new ContinuePropagationException();
+    }
 
     /// <summary>
-    /// Continue to the next pending handler for this update and ignore the rest of this handler.
+    /// Returns the value if not null, or throws <see cref="ContinuePropagationException"/>
+    /// to stop handling this handler.
     /// </summary>
-    internal static void ContinuePropagation<T>(this IContainer<T> _)
-        where T : class => throw new ContinuePropagationException();
+    /// <typeparam name="T"></typeparam>
+    /// <param name="anything"></param>
+    /// <returns></returns>
+    /// <exception cref="ContinuePropagationException"></exception>
+    public static T ContinueIfNull<T>(this Nullable<T> anything)
+        where T: struct
+    {
+        return anything ?? throw new ContinuePropagationException();
+    }
 }

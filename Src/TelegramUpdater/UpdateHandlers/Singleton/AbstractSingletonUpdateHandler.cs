@@ -141,7 +141,10 @@ public abstract class AbstractSingletonUpdateHandler<T, TContainer>
     public virtual bool Endpoint { get; protected set; }
 
     /// <inheritdoc/>
-    public IContainer<T> Container { get; private set; } = default!;
+    public TContainer Container { get; private set; } = default!;
+
+    /// <inheritdoc/>
+    public IContainer<T> TypedRawContainer => Container;
 
     /// <inheritdoc/>
     public IContainer RawContainer => Container;

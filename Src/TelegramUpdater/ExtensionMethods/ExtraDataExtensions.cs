@@ -3,7 +3,9 @@ using System.Text.RegularExpressions;
 using TelegramUpdater.Filters;
 using TelegramUpdater.Helpers;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace TelegramUpdater.UpdateContainer;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 /// <summary>
 /// Extension method related to extra data.

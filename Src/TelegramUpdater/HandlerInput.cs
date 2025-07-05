@@ -5,7 +5,7 @@ using TelegramUpdater.UpdateHandlers;
 namespace TelegramUpdater;
 
 /// <summary>
-/// Raw inputs being passed to <see cref="IUpdateHandler.HandleAsync(HandlerInput)"/>.
+/// Raw inputs being passed to <see cref="IUpdateHandler.HandleAsync(TelegramUpdater.HandlerInput, Microsoft.Extensions.DependencyInjection.IServiceScope?, CancellationToken)"/>.
 /// </summary>
 public class HandlerInput
 {
@@ -90,4 +90,7 @@ public class HandlerInput
         ScopeChangeToken = scopeChangeToken;
         LayerChangeToken = layerChangeToken;
     }
+
+    internal HandlerInput WithNewShiningInfo(ShiningInfo<long, Update> shiningInfo)
+        => new(Updater, shiningInfo, ScopeId, LayerInfo, Group, Index);
 }

@@ -1,13 +1,13 @@
 ﻿namespace TelegramUpdater.UpdateChannels;
 
 /// <summary>
-/// An abstract class for channel updates.
+/// An abstract class for update channel, that channels updates of type <typeparamref name="T"/>.
 /// </summary>
-/// <typeparam name="T">Type of update to channel</typeparam>
-public abstract class AbstractChannel<T> : IGenericUpdateChannel<T>
+/// <typeparam name="T">Type of update to channel.</typeparam>
+public abstract class AbstractUpdateChannel<T> : IGenericUpdateChannel<T>
     where T : class
 {
-    private readonly Func<Update, T?> _getT;
+    private readonly Func<Update, T?>? _getT;
     private readonly IFilter<UpdaterFilterInputs<T>>? _filter;
 
     /// <summary>
@@ -20,10 +20,10 @@ public abstract class AbstractChannel<T> : IGenericUpdateChannel<T>
     /// <param name="filter">Filter.</param>
     /// <param name="timeOut">Time out to wait for the channel.</param>
     /// <exception cref="ArgumentNullException"></exception>
-    protected AbstractChannel(
+    protected AbstractUpdateChannel(
         UpdateType updateType,
-        Func<Update, T?> getT,
         TimeSpan timeOut,
+        Func<Update, T?>? getT,
         IFilter<UpdaterFilterInputs<T>>? filter)
     {
         if (timeOut == default)
@@ -49,7 +49,8 @@ public abstract class AbstractChannel<T> : IGenericUpdateChannel<T>
         => _filter?.ExtraData;
 
     /// <inheritdoc/>
-    public T? GetActualUpdate(Update update) => _getT(update);
+    public T? GetActualUpdate(Update update)
+        => _getT?.Invoke(update)?? (update.GetInnerUpdate<T>());
 
     /// <inheritdoc/>
     private bool ShouldChannel(UpdaterFilterInputs<T> inputs)

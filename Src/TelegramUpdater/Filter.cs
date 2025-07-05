@@ -328,6 +328,27 @@ public class UpdaterFilter<T> : Filter<UpdaterFilterInputs<T>>
         : base((input) => filter(input.Updater, input.Input))
     {
     }
+
+    /// <summary>
+    /// Converts a <paramref name="filter"/> to <see cref="Filter{T}"/>
+    /// </summary>
+    /// <param name="filter"></param>
+    public static implicit operator UpdaterFilter<T>(Func<T, bool> filter)
+        => new(filter);
+
+    /// <summary>
+    /// Converts a <paramref name="filter"/> to <see cref="Filter{T}"/>
+    /// </summary>
+    /// <param name="filter"></param>
+    public static implicit operator UpdaterFilter<T>(Func<IUpdater, T, bool> filter)
+        => new(filter);
+
+    /// <summary>
+    /// Converts a <paramref name="filter"/> to <see cref="Filter{T}"/>
+    /// </summary>
+    /// <param name="filter"></param>
+    public static implicit operator UpdaterFilter<T>(Func<UpdaterFilterInputs<T>, bool> filter)
+        => new(filter);
 }
 
 /// <summary>

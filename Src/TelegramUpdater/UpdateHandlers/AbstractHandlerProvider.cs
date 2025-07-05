@@ -14,11 +14,12 @@ namespace TelegramUpdater.UpdateHandlers;
 /// <typeparam name="TUpdate">
 /// The type of inner actual update. One of <see cref="Update"/> properties.
 /// </typeparam>
-public abstract class AbstractHandlerProvider<TUpdate>
-    : IHandlerProvider<TUpdate> where TUpdate : class
+/// <typeparam name="TContainer"></typeparam>
+public abstract class AbstractHandlerProvider<TUpdate, TContainer>
+    : IHandlerProvider<TUpdate, TContainer> where TUpdate : class where TContainer : IContainer<TUpdate>
 {
     /// <inheritdoc />
-    public abstract IContainer<TUpdate> Container { get; protected set; }
+    public abstract TContainer Container { get; protected set; }
 
     /// <summary>
     /// The updater instance.
@@ -138,7 +139,7 @@ public abstract class AbstractHandlerProvider<TUpdate>
     }
 
     #region Channels
-    /// <inheritdoc cref="ChannelsExtensions.OpenChannel{TExp, TCur}(IContainer{TCur}, IGenericUpdateChannel{TExp}, Func{IUpdater, ShiningInfo{long, Update}, Task}?, CancellationToken)"/>
+    /// <inheritdoc cref="ChannelsExtensions.OpenChannel{TUpdate}(IContainer, IGenericUpdateChannel{TUpdate}, Func{IUpdater, ShiningInfo{long, Update}, Task}?, CancellationToken)"/>
     public async ValueTask<IContainer<TExp>?> OpenChannel<TExp>(
         IGenericUpdateChannel<TExp> updateChannel,
         Func<

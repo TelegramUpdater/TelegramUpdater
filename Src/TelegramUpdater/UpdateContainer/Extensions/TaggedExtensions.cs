@@ -3,7 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using TelegramUpdater.UpdateContainer.Tags;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace TelegramUpdater.UpdateContainer;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 /// <summary>
 /// A set of extension methods for containers that are tagged with something like
